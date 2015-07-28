@@ -149,12 +149,7 @@ public class Bib2Lod {
         // conversion to ld4l ontology, entity resolution, etc.
         options.addOption("a", "action", true, "processing actions");
         
-        // TODO This might change later: read from and write to triplestore;
-        // read in and write out a graph
-        options.addOption("i", "inputdir", true, 
-                "directory to read input files from");
-        options.addOption("o", "outputdir", true, 
-                "directory to write output to");
+        options.addOption("i", "inputdir", true, "location of input files");
         
         options.addOption("n", "namespace", true, "namespace for minting URIs"); 
         
