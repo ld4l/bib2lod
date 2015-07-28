@@ -1,51 +1,43 @@
 package org.ld4l.bib2lod;
 
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.InputStream;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.text.DateFormat;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.MissingOptionException;
+import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
+import org.apache.commons.cli.UnrecognizedOptionException;
 
 public class Bib2Lod {
 
     /** 
-     * Read in program arguments and call appropriate processing classes.
+     * Read in program options and call appropriate processing functionality.
      * @param args
      */
     public static void main(String[] args) {
-        /*
-         * STUB method. For now we are implementing each functionality 
-         * (deduping, post-processing, etc.) as a separate package with its own
-         * main() method to call from the commandline. Later these can be 
-         * combined into a single pipeline that will funnel input from one
-         * stage to the next. Retrieving MARCXML records from the catalog,
-         * pre-processing, and  alling the Bibframe converter can be 
-         * incorporated as earlier steps
-         */    
-        
-        // Define program arguments
+
+        // Define program options
         Options options = defineOptions();
         
-        CommandLine cmd = getCommandLine(options, args);
-        
-        HashMap<String, String> cmdErrors = getCommandErrors(cmd);
-        if (cmdErrors != null) {
-            // log errors to logfile and stderr
-            // exit
+        // Get commandline options
+        CommandLine cmd;
+        try {
+            cmd = getCommandLine(options, args);
+        } catch (MissingOptionException e) {
+            System.out.println(e.getMessage());
+            printHelp(options);
+            return;
+        } catch (UnrecognizedOptionException e) {
+            System.out.println(e.getMessage());
+            printHelp(options);
+            return;
+        } catch (ParseException e) {
+            e.printStackTrace();
+            return;
         }
+
         
         // Debug output. TODO use log4j instead.
 //        Iterator<Option> i = cmd.iterator();
@@ -54,9 +46,10 @@ public class Bib2Lod {
 //            String longopt = option.getLongOpt();
 //            String opt = option.getOpt();
 //            String value = option.getValue();
-//            System.out.println(longopt + " " + opt + " " + value);
-//            
+//            System.out.println(longopt + " " + opt + " " + value);           
 //        }
+        
+        createWorkspace(cmd.getOptionValue("inputdir"));
         
 //         
 //        List<InputStream> records = readFiles(readdir);
@@ -87,28 +80,23 @@ public class Bib2Lod {
                   + "components of the post-processor as separate commandline\n"
                   + "processes.");
     }
-    
-    private static HashMap<String, String> getCommandErrors(CommandLine cmd) {
-        // Maps option name to an error message
-        HashMap<String, String> errors = new HashMap<String, String>();
-        // Test for: 
-        // all required options present
-        // one valid action present
-        return errors;
+
+
+    private static void printHelp(Options options) {
+        HelpFormatter formatter = new HelpFormatter();
+        formatter.printHelp("bib2lod", options, true);
     }
 
-    private static CommandLine getCommandLine(Options options, String[] args) {
+
+    private static CommandLine getCommandLine(Options options, String[] args) throws ParseException {
         
         // Parse program arguments
         CommandLineParser parser = new DefaultParser();
+        return parser.parse(options, args);
+    }
+    
+    private static void createWorkspace(String string) {
         
-        try {
-            return parser.parse(options, args);
-        } catch (ParseException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-        return null;
     }
 
     /**
@@ -117,26 +105,26 @@ public class Bib2Lod {
      * @param directory - the directory
      * @return List<InputStream>
      */
-    private static List<InputStream> readFiles(File directory) {
-        // Convert the directory of RDF files into a list of input streams
-        // for processing.
-
-        // Despite the name, lists both files and directories.
-        File[] items = directory.listFiles();
-        List<InputStream> records = new ArrayList<InputStream>();
-    
-        for (File file : items) {
-            if (file.isFile()) {
-                try {
-                    records.add(new FileInputStream(file));
-                } catch (FileNotFoundException e) {
-                    // TODO Auto-generated catch block
-                    e.printStackTrace();
-                }
-            }
-        }  
-        return records;
-    }
+//    private static List<InputStream> readFiles(File directory) {
+//        // Convert the directory of RDF files into a list of input streams
+//        // for processing.
+//
+//        // Despite the name, lists both files and directories.
+//        File[] items = directory.listFiles();
+//        List<InputStream> records = new ArrayList<InputStream>();
+//    
+//        for (File file : items) {
+//            if (file.isFile()) {
+//                try {
+//                    records.add(new FileInputStream(file));
+//                } catch (FileNotFoundException e) {
+//                    // TODO Auto-generated catch block
+//                    e.printStackTrace();
+//                }
+//            }
+//        }  
+//        return records;
+//    }
     
     /**
      * Define the commandline arguments accepted by the programs.
@@ -145,41 +133,59 @@ public class Bib2Lod {
     private static Options defineOptions() {
         Options options = new Options();
         
-        // For now the only option is "dedupe". Will add others later:
+        // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
-        options.addOption("a", "action", true, "processing actions");
+        Option dedupeOption = Option.builder("d")
+                .longOpt("dedupe")
+                .required(false)
+                .hasArg(false)
+                .desc("dedupe URIs")
+                .build();
+        options.addOption(dedupeOption);
         
-        options.addOption("i", "inputdir", true, "location of input files");
+        Option inputOption = Option.builder("i")
+                .longOpt("inputdir")
+                .required()
+                .hasArg()
+                .desc("location of input files")
+                .build();
+        options.addOption(inputOption);
         
-        options.addOption("n", "namespace", true, "namespace for minting URIs"); 
+        Option namespaceOption = Option.builder("n")
+                .longOpt("namespace")
+                .required()
+                .hasArg()
+                .desc("namespace for minting and deduping URIs")
+                .build();
+        options.addOption(namespaceOption);
         
         return options;
     }
-    
+
     /**
      * Convert a directory of RDF files into a list of input streams for
      * processing.
      * @param readdir - path to the directory
      * @return List<InputStream>
      */
-    private static List<InputStream> readFiles(String readdir) {
-        File directory = new File(readdir);
-        return readFiles(directory);
-    }
+//    private static List<InputStream> readFiles(String readdir) {
+//        File directory = new File(readdir);
+//        return readFiles(directory);
+//    }
     
-    private static String getOutputFilename(String outdir) {
-        
-        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-        Date date = new Date();
-        String now = dateFormat.format(date);
-        // Currently allowing only RDF/XML output. Later may offer 
-        // serialization as a program argument. This will affect extension
-        // as well as second parameter to allRecords.write(out, null) above.
-        String ext = "rdf";
-        String filename = "out." + now.toString() + "." + ext;
-        Path path = Paths.get(outdir, filename);   
-        return path.toString();
-    }
+//    private static String getOutputFilename(String outdir) {
+//        
+//        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
+//        Date date = new Date();
+//        String now = dateFormat.format(date);
+//        // Currently allowing only RDF/XML output. Later may offer 
+//        // serialization as a program argument. This will affect extension
+//        // as well as second parameter to allRecords.write(out, null) above.
+//        String ext = "rdf";
+//        String filename = "out." + now.toString() + "." + ext;
+//        Path path = Paths.get(outdir, filename);   
+//        return path.toString();
+//    }
         
 }
 
