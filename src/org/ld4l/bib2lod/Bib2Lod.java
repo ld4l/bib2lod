@@ -2,6 +2,9 @@ package org.ld4l.bib2lod;
 
 import java.io.File;
 import java.io.IOException;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -13,10 +16,15 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.apache.jena.atlas.logging.Log;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.processor.Processor;
 
 
 public class Bib2Lod {
+    
+    private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
 
     /** 
      * Read in program options and call appropriate processing functionality.
@@ -81,7 +89,7 @@ public class Bib2Lod {
 //            e.printStackTrace();
 //        }    
 //        
-          System.out.println("Done!");
+          logger.info("Done!");
     }
 
 
@@ -92,7 +100,7 @@ public class Bib2Lod {
      * @return the input directory if it exists, otherwise null
      */
     private static File getInputDirectory(String path) {
- 
+
         File inDir = new File(path);
         if (!inDir.isDirectory()) {
             try {
@@ -112,20 +120,20 @@ public class Bib2Lod {
      * Make output directory and any intermediate directories. Return the 
      * output directory if it was successfully created, otherwise log an error
      * and return null.
-     * @param path - absolute or relative path to output directory 
+     * @param path - absolute or relative path to output directory. A child
+     * directory named with current datetime will be created under it.
      * @return the output directory if it was successfully created, otherwise 
      * null
      */
     private static File createOutputDirectory(String path) {
-        File outDir = new File(path);
+        DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
+        Date date = new Date();
+        String now = dateFormat.format(date);
+        File outDir = new File(path, now);
         if (! outDir.mkdirs()) {
             try {
                 String outPath = outDir.getCanonicalPath();
-                if (outDir.isDirectory()) {
-                    System.err.println("Error: output directory " + outPath + " exists."); 
-                } else {
-                    System.err.println("Error: cannot create output directory " + outPath + ".");
-                }
+                logger.error("Error: cannot create output directory " + outPath + ".");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
