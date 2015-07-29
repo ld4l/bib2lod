@@ -1,5 +1,7 @@
 package org.ld4l.bib2lod;
 
+import java.io.File;
+
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
@@ -9,6 +11,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.validator.routines.UrlValidator;
+
 
 public class Bib2Lod {
 
@@ -22,34 +26,50 @@ public class Bib2Lod {
         Options options = defineOptions();
         
         // Get commandline options
-        CommandLine cmd;
+        CommandLine cmd = null;
         try {
             cmd = getCommandLine(options, args);
         } catch (MissingOptionException e) {
             System.out.println(e.getMessage());
             printHelp(options);
-            return;
+            System.exit(0);
         } catch (UnrecognizedOptionException e) {
             System.out.println(e.getMessage());
             printHelp(options);
-            return;
+            System.exit(0);
         } catch (ParseException e) {
             e.printStackTrace();
-            return;
+            System.exit(0);
         }
-
         
-        // Debug output. TODO use log4j instead.
-//        Iterator<Option> i = cmd.iterator();
-//        while (i.hasNext()) {
-//            Option option = i.next();
-//            String longopt = option.getLongOpt();
-//            String opt = option.getOpt();
-//            String value = option.getValue();
-//            System.out.println(longopt + " " + opt + " " + value);           
-//        }
+        File outDir = new File(cmd.getOptionValue("outdir"));
+        if (! outDir.mkdirs()) {
+            if (outDir.isDirectory()) {
+                System.out.println("Error: output directory exists.");
+            } else {
+                System.out.println("Error: cannot create output directory.");
+            }
+            System.exit(0);
+        }
         
-        createWorkspace(cmd.getOptionValue("inputdir"));
+        File inDir = new File(cmd.getOptionValue("indir"));
+        if (!inDir.isDirectory()) {
+            System.out.println("Error: input directory does not exist or is "
+                    + "not a directory.");
+            System.exit(0);
+        }
+        
+        String namespace = cmd.getOptionValue("namespace");
+        String[] schemes = {"http"};
+        UrlValidator urlValidator = new UrlValidator(schemes);
+        if (!urlValidator.isValid(namespace)) {
+            System.out.println("Error: Valid HTTP namespace required.");
+            System.exit(0);
+        }
+        
+        // TODO - make sure there's at least one action - but leave complexity
+        // for later - if two actions defined, must do those in between also
+        // - can't skip actions in the middle - for now just run one at a time
         
 //         
 //        List<InputStream> records = readFiles(readdir);
@@ -72,32 +92,35 @@ public class Bib2Lod {
 //            e.printStackTrace();
 //        }    
 //        
-          System.out.println("This doesn't do anything except show that it\n"
-                  + "runs. It contains a lot of code that is untested,\n"
-                  + "unfinished, or left over from the demo thesis post-\n"
-                  + "processor, largely for reference purposes. We will not\n"
-                  + "use this class for now, but rather will call individual\n"
-                  + "components of the post-processor as separate commandline\n"
-                  + "processes.");
+          System.out.println("Done!");
     }
 
 
+    /**
+     * Print help text.
+     * @param options
+     */
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
         formatter.printHelp("bib2lod", options, true);
     }
 
 
-    private static CommandLine getCommandLine(Options options, String[] args) throws ParseException {
+    /**
+     * Parse commandline options.
+     * @param options
+     * @param args
+     * @return
+     * @throws ParseException
+     */
+    private static CommandLine getCommandLine(Options options, String[] args) 
+            throws ParseException {
         
         // Parse program arguments
         CommandLineParser parser = new DefaultParser();
         return parser.parse(options, args);
     }
     
-    private static void createWorkspace(String string) {
-        
-    }
 
     /**
      * Convert a directory of RDF files into a list of input streams for
@@ -127,37 +150,45 @@ public class Bib2Lod {
 //    }
     
     /**
-     * Define the commandline arguments accepted by the programs.
+     * Define the commandline options accepted by the program.
      * @return
      */
     private static Options defineOptions() {
         Options options = new Options();
-        
-        // For now the only defined action is "dedupe". Will add others later:
-        // conversion to ld4l ontology, entity resolution, etc.
-        Option dedupeOption = Option.builder("d")
-                .longOpt("dedupe")
-                .required(false)
-                .hasArg(false)
-                .desc("dedupe URIs")
-                .build();
-        options.addOption(dedupeOption);
-        
+
         Option inputOption = Option.builder("i")
-                .longOpt("inputdir")
+                .longOpt("indir")
                 .required()
                 .hasArg()
-                .desc("location of input files")
+                .desc("absolute or relative path to input files")
                 .build();
         options.addOption(inputOption);
+        
+        Option outputOption = Option.builder("o")
+                .longOpt("outdir")
+                .required()
+                .hasArg()
+                .desc("absolute or relative path to output directory")
+                .build();
+        options.addOption(outputOption);
         
         Option namespaceOption = Option.builder("n")
                 .longOpt("namespace")
                 .required()
                 .hasArg()
-                .desc("namespace for minting and deduping URIs")
+                .desc("http namespace for minting and deduping URIs")
                 .build();
         options.addOption(namespaceOption);
+
+        // For now the only defined action is "dedupe". Will add others later:
+        // conversion to ld4l ontology, entity resolution, etc.
+        Option dedupeAction = Option.builder("d")
+                .longOpt("dedupe")
+                .required(false)
+                .hasArg(false)
+                .desc("dedupe")
+                .build();
+        options.addOption(dedupeAction);
         
         return options;
     }
