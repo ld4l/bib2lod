@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod;
 
 import java.io.File;
+import java.io.IOException;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -26,47 +27,33 @@ public class Bib2Lod {
         Options options = defineOptions();
         
         // Get commandline options
-        CommandLine cmd = null;
-        try {
-            cmd = getCommandLine(options, args);
-        } catch (MissingOptionException e) {
-            System.out.println(e.getMessage());
-            printHelp(options);
-            System.exit(0);
-        } catch (UnrecognizedOptionException e) {
-            System.out.println(e.getMessage());
-            printHelp(options);
-            System.exit(0);
-        } catch (ParseException e) {
-            e.printStackTrace();
-            System.exit(0);
+        CommandLine cmd = getCommandLine(options, args);
+        if (cmd == null) {
+            return;
         }
         
-        File outDir = new File(cmd.getOptionValue("outdir"));
-        if (! outDir.mkdirs()) {
-            if (outDir.isDirectory()) {
-                System.out.println("Error: output directory exists.");
-            } else {
-                System.out.println("Error: cannot create output directory.");
-            }
-            System.exit(0);
+        // Process commandline arguments and exit if any are invalid.
+        String namespace = getValidNamespace(cmd.getOptionValue("namespace"));
+        if (namespace == null) {
+            return;
         }
         
-        File inDir = new File(cmd.getOptionValue("indir"));
-        if (!inDir.isDirectory()) {
-            System.out.println("Error: input directory does not exist or is "
-                    + "not a directory.");
-            System.exit(0);
+        File inDir = getInputDirectory(cmd.getOptionValue("indir"));
+        if (inDir == null) {
+            return;
         }
         
-        String namespace = cmd.getOptionValue("namespace");
-        String[] schemes = {"http"};
-        UrlValidator urlValidator = new UrlValidator(schemes);
-        if (!urlValidator.isValid(namespace)) {
-            System.out.println("Error: Valid HTTP namespace required.");
-            System.exit(0);
+        File outDir = createOutputDirectory(cmd.getOptionValue("outdir"));
+        if (outDir == null) {
+            return;
         }
         
+        File logDir = createLogDirectory(outDir);
+        if (logDir == null) {
+            return;
+        }
+
+
         // TODO - make sure there's at least one action - but leave complexity
         // for later - if two actions defined, must do those in between also
         // - can't skip actions in the middle - for now just run one at a time
@@ -96,6 +83,88 @@ public class Bib2Lod {
     }
 
 
+    private static File createLogDirectory(File outDir) {
+        
+        File logDir = new File(outDir, "log");
+        if (! logDir.mkdir()) {
+            System.err.println("Error: can't create log directory.");
+            return null;
+        }
+        return logDir;
+    }
+
+
+    /**
+     * Check for valid input directory. Return the input directory if it exists,
+     * otherwise log an error and return null. 
+     * @param path - absolute or relative path to input directory
+     * @return the input directory if it exists, otherwise null
+     */
+    private static File getInputDirectory(String path) {
+ 
+        File inDir = new File(path);
+        if (!inDir.isDirectory()) {
+            try {
+                System.err.println("Error: input directory " + inDir.getCanonicalPath() 
+                        + " does not exist or is not a directory.");
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
+        }
+        
+        return inDir;
+    }
+    
+    /**
+     * Make output directory and any intermediate directories. Return the 
+     * output directory if it was successfully created, otherwise log an error
+     * and return null.
+     * @param path - absolute or relative path to output directory 
+     * @return the output directory if it was successfully created, otherwise 
+     * null
+     */
+    private static File createOutputDirectory(String path) {
+        File outDir = new File(path);
+        if (! outDir.mkdirs()) {
+            try {
+                String outPath = outDir.getCanonicalPath();
+                if (outDir.isDirectory()) {
+                    System.err.println("Error: output directory " + outPath + " exists."); 
+                } else {
+                    System.err.println("Error: cannot create output directory " + outPath + ".");
+                }
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
+            return null;
+        } 
+        
+        return outDir;
+    }
+
+        
+    /**
+     * Check for valid namespace within http scheme. Return the namespace if
+     * valid, otherwise log an error and return null. 
+     * @param namespace
+     * @return valid namespace or null
+     */
+    private static String getValidNamespace(String namespace) {
+
+        String[] schemes = {"http"};
+        UrlValidator urlValidator = new UrlValidator(schemes);
+        if (!urlValidator.isValid(namespace)) {
+            System.err.println("Error: Valid HTTP namespace required.");
+            return null;
+        }
+        
+        return namespace;
+    }
+
+
     /**
      * Print help text.
      * @param options
@@ -111,14 +180,24 @@ public class Bib2Lod {
      * @param options
      * @param args
      * @return
-     * @throws ParseException
      */
-    private static CommandLine getCommandLine(Options options, String[] args) 
-            throws ParseException {
+    private static CommandLine getCommandLine(Options options, String[] args) {
         
         // Parse program arguments
         CommandLineParser parser = new DefaultParser();
-        return parser.parse(options, args);
+        try {
+            return parser.parse(options, args);
+        } catch (MissingOptionException e) {
+            System.err.println(e.getMessage());
+            printHelp(options);
+        } catch (UnrecognizedOptionException e) {
+            System.err.println(e.getMessage());
+            printHelp(options);
+        } catch (ParseException e) {
+            // TODO Auto-generated catch block
+            System.err.println(e.getStackTrace().toString());
+        }
+        return null;
     }
     
 
@@ -192,6 +271,7 @@ public class Bib2Lod {
         
         return options;
     }
+
 
     /**
      * Convert a directory of RDF files into a list of input streams for
