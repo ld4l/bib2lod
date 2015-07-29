@@ -9,16 +9,14 @@ public class Processor {
     
     protected File inputDir;
     protected File outputDir;
-    protected File logDir;
     
     public Processor(String localNamespace, String rdfFormat, File inputDir, 
-            File outputDir, File logDir) {
+            File outputDir) {
         
         this.localNamespace = localNamespace;
         this.rdfFormat = rdfFormat;
         
         this.inputDir = inputDir;
-        this.logDir = logDir;
         this.outputDir = outputDir;
     }
     

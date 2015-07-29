@@ -48,19 +48,14 @@ public class Bib2Lod {
         if (outDir == null) {
             return;
         }
-        
-        File logDir = createLogDirectory(outDir);
-        if (logDir == null) {
-            return;
-        }
-        
+
         String format = cmd.getOptionValue("format", "rdfxml");
         
         // TODO For now we skip validation steps, such as ensuring a coherent
         // set of actions have been specified.
         String[] actions = cmd.getOptionValues("actions");
         
-        Processor processor = new Processor(namespace, format, inDir, outDir, logDir);
+        Processor processor = new Processor(namespace, format, inDir, outDir);
         
         processor.process(actions);
         
@@ -87,17 +82,6 @@ public class Bib2Lod {
 //        }    
 //        
           System.out.println("Done!");
-    }
-
-
-    private static File createLogDirectory(File outDir) {
-        
-        File logDir = new File(outDir, "log");
-        if (! logDir.mkdir()) {
-            System.err.println("Error: can't create log directory.");
-            return null;
-        }
-        return logDir;
     }
 
 
