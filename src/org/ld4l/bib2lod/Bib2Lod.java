@@ -13,6 +13,7 @@ import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
 import org.apache.commons.validator.routines.UrlValidator;
+import org.ld4l.bib2lod.processor.Processor;
 
 
 public class Bib2Lod {
@@ -38,8 +39,6 @@ public class Bib2Lod {
             return;
         }
         
-        String rdfFormat = cmd.getOptionValue("format", "rdfxml");
-        
         File inDir = getInputDirectory(cmd.getOptionValue("indir"));
         if (inDir == null) {
             return;
@@ -55,17 +54,16 @@ public class Bib2Lod {
             return;
         }
         
+        String format = cmd.getOptionValue("format", "rdfxml");
         
+        // TODO For now we skip validation steps, such as ensuring a coherent
+        // set of actions have been specified.
+        String[] actions = cmd.getOptionValues("actions");
         
-        // Process the input
-        if (cmd.hasOption("dedupe")) {
-            
-        }
-
-
-        // TODO - make sure there's at least one action - but leave complexity
-        // for later - if two actions defined, must do those in between also
-        // - can't skip actions in the middle - for now just run one at a time
+        Processor processor = new Processor(namespace, format, inDir, outDir, logDir);
+        
+        processor.process(actions);
+        
         
 //         
 //        List<InputStream> records = readFiles(readdir);
@@ -90,7 +88,7 @@ public class Bib2Lod {
 //        
           System.out.println("Done!");
     }
-    
+
 
     private static File createLogDirectory(File outDir) {
         
@@ -277,16 +275,17 @@ public class Bib2Lod {
                         + "options: nt, rdfxml. Defaults to rdfxml.")
                 .build();
         options.addOption(formatOption);
+        
 
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
-        Option dedupeAction = Option.builder("d")
-                .longOpt("dedupe")
-                .required(false)
-                .hasArg(false)
-                .desc("dedupe URIS")
+        Option actions = Option.builder("a")
+                .longOpt("actions")
+                .required()
+                .hasArg()
+                .desc("Processing actions. Valid values: dedupe.")
                 .build();
-        options.addOption(dedupeAction);
+        options.addOption(actions);
         
         return options;
     }
