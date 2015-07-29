@@ -24,7 +24,7 @@ public class Bib2Lod {
     public static void main(String[] args) {
 
         // Define program options
-        Options options = defineOptions();
+        Options options = getOptions();
         
         // Get commandline options
         CommandLine cmd = getCommandLine(options, args);
@@ -37,6 +37,8 @@ public class Bib2Lod {
         if (namespace == null) {
             return;
         }
+        
+        String rdfFormat = cmd.getOptionValue("format", "rdfxml");
         
         File inDir = getInputDirectory(cmd.getOptionValue("indir"));
         if (inDir == null) {
@@ -51,6 +53,13 @@ public class Bib2Lod {
         File logDir = createLogDirectory(outDir);
         if (logDir == null) {
             return;
+        }
+        
+        
+        
+        // Process the input
+        if (cmd.hasOption("dedupe")) {
+            
         }
 
 
@@ -81,7 +90,7 @@ public class Bib2Lod {
 //        
           System.out.println("Done!");
     }
-
+    
 
     private static File createLogDirectory(File outDir) {
         
@@ -230,9 +239,10 @@ public class Bib2Lod {
     
     /**
      * Define the commandline options accepted by the program.
-     * @return
+     * @return an Options object
      */
-    private static Options defineOptions() {
+    private static Options getOptions() {
+        
         Options options = new Options();
 
         Option inputOption = Option.builder("i")
@@ -255,9 +265,18 @@ public class Bib2Lod {
                 .longOpt("namespace")
                 .required()
                 .hasArg()
-                .desc("http namespace for minting and deduping URIs")
+                .desc("Local HTTP namespace for minting and deduping URIs")
                 .build();
         options.addOption(namespaceOption);
+        
+        Option formatOption = Option.builder("f")
+                .longOpt("format")
+                .required(false)
+                .hasArg()
+                .desc("RDF serialization format of input and output. Valid "
+                        + "options: nt, rdfxml. Defaults to rdfxml.")
+                .build();
+        options.addOption(formatOption);
 
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
@@ -265,7 +284,7 @@ public class Bib2Lod {
                 .longOpt("dedupe")
                 .required(false)
                 .hasArg(false)
-                .desc("dedupe")
+                .desc("dedupe URIS")
                 .build();
         options.addOption(dedupeAction);
         
