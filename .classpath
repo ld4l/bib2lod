@@ -16,5 +16,10 @@
 			<attribute name="javadoc_location" value="jar:platform:/resource/bib2lod/lib-doc/commons-lang3-3.4/commons-lang3-3.4-javadoc.jar!/"/>
 		</attributes>
 	</classpathentry>
+	<classpathentry kind="lib" path="lib/commons-validator-1.4.1/commons-validator-1.4.1.jar">
+		<attributes>
+			<attribute name="javadoc_location" value="jar:platform:/resource/bib2lod/lib-doc/commons-validator-1.4.1/commons-validator-1.4.1-javadoc.jar!/"/>
+		</attributes>
+	</classpathentry>
 	<classpathentry kind="output" path="bin"/>
 </classpath>
