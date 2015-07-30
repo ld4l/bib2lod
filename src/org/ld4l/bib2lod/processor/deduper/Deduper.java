@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.processor.deduper;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,7 +24,7 @@ public class Deduper extends Processor {
     }
 
     @Override
-    public void process(String[] actions) {
+    public void process(List<String> actions) {
         logger.info("Done!");
     }
     

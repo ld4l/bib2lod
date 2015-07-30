@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.processor;
 
 import java.io.File;
+import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -27,8 +28,8 @@ public class Processor {
         configureLogger();
     }
     
-    public void process(String[] actions) {
-        logger.info("Done!");
+    public void process(List<String> actions) {
+        logger.debug("Done!");
     }
     
     /** 

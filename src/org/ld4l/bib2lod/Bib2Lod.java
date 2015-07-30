@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 import org.apache.commons.cli.CommandLine;
 import org.apache.commons.cli.CommandLineParser;
@@ -15,8 +18,8 @@ import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 import org.apache.commons.cli.ParseException;
 import org.apache.commons.cli.UnrecognizedOptionException;
+import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
-import org.apache.jena.atlas.logging.Log;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.processor.Processor;
@@ -25,6 +28,9 @@ import org.ld4l.bib2lod.processor.Processor;
 public class Bib2Lod {
     
     private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
+    private static final List<String> validActions = 
+            new ArrayList<String>(Arrays.asList("dedupe"));
+    
 
     /** 
      * Read in program options and call appropriate processing functionality.
@@ -46,6 +52,11 @@ public class Bib2Lod {
         if (namespace == null) {
             return;
         }
+
+        List<String> actions = getValidActions(cmd.getOptionValues("actions"));
+        if (actions == null) {
+            return;
+        }
         
         File inDir = getInputDirectory(cmd.getOptionValue("indir"));
         if (inDir == null) {
@@ -58,11 +69,7 @@ public class Bib2Lod {
         }
 
         String format = cmd.getOptionValue("format", "rdfxml");
-        
-        // TODO For now we skip validation steps, such as ensuring a coherent
-        // set of actions have been specified.
-        String[] actions = cmd.getOptionValues("actions");
-        
+               
         Processor processor = new Processor(namespace, format, inDir, outDir);
         
         processor.process(actions);
@@ -92,6 +99,26 @@ public class Bib2Lod {
           logger.info("Done!");
     }
 
+    /**
+     * Validate actions.
+     * Rudimentary validation - checks only for invalid actions. Doesn't check
+     * for invalid combinations, etc.
+     * @param actions
+     * @return
+     */
+    private static List<String> getValidActions(String[] selectedActions) {
+        List<String> actions = new ArrayList<String>(Arrays.asList(selectedActions));
+        if (actions.retainAll(validActions)) {
+            if (actions.size() == 0) {
+                logger.fatal("No valid actions specified.");
+                return null;
+            } else {
+                logger.error("Invalid actions removed.");
+            }
+        }
+        return actions;
+    }
+
 
     /**
      * Check for valid input directory. Return the input directory if it exists,
@@ -104,7 +131,7 @@ public class Bib2Lod {
         File inDir = new File(path);
         if (!inDir.isDirectory()) {
             try {
-                System.err.println("Error: input directory " + inDir.getCanonicalPath() 
+                logger.fatal("Input directory " + inDir.getCanonicalPath() 
                         + " does not exist or is not a directory.");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
@@ -133,7 +160,7 @@ public class Bib2Lod {
         if (! outDir.mkdirs()) {
             try {
                 String outPath = outDir.getCanonicalPath();
-                logger.error("Error: cannot create output directory " + outPath + ".");
+                logger.error("Cannot create output directory " + outPath + ".");
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
@@ -156,7 +183,7 @@ public class Bib2Lod {
         String[] schemes = {"http"};
         UrlValidator urlValidator = new UrlValidator(schemes);
         if (!urlValidator.isValid(namespace)) {
-            System.err.println("Error: Valid HTTP namespace required.");
+            logger.fatal("Valid HTTP namespace required.");
             return null;
         }
         
@@ -170,6 +197,7 @@ public class Bib2Lod {
      */
     private static void printHelp(Options options) {
         HelpFormatter formatter = new HelpFormatter();
+        formatter.setWidth(80);
         formatter.printHelp("bib2lod", options, true);
     }
 
@@ -187,14 +215,14 @@ public class Bib2Lod {
         try {
             return parser.parse(options, args);
         } catch (MissingOptionException e) {
-            System.err.println(e.getMessage());
+            logger.fatal(e.getMessage());
             printHelp(options);
         } catch (UnrecognizedOptionException e) {
-            System.err.println(e.getMessage());
+            logger.fatal(e.getMessage());
             printHelp(options);
         } catch (ParseException e) {
             // TODO Auto-generated catch block
-            System.err.println(e.getStackTrace().toString());
+            logger.fatal(e.getStackTrace().toString());
         }
         return null;
     }
@@ -266,8 +294,7 @@ public class Bib2Lod {
                 .desc("RDF serialization format of input and output. Valid "
                         + "options: nt, rdfxml. Defaults to rdfxml.")
                 .build();
-        options.addOption(formatOption);
-        
+        options.addOption(formatOption);      
 
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
@@ -275,7 +302,8 @@ public class Bib2Lod {
                 .longOpt("actions")
                 .required()
                 .hasArg()
-                .desc("Processing actions. Valid values: dedupe.")
+                .desc("Processing actions. Valid values: " + StringUtils.join(validActions, ", ") + ".")
+                .argName("dedupe")
                 .build();
         options.addOption(actions);
         
