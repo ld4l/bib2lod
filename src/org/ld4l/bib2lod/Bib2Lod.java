@@ -22,7 +22,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.processor.Processor;
+import org.ld4l.bib2lod.processor.ProcessController;
 
 
 public class Bib2Lod {
@@ -70,9 +70,8 @@ public class Bib2Lod {
 
         String format = cmd.getOptionValue("format", "rdfxml");
                
-        Processor processor = new Processor(namespace, format, inDir, outDir);
-        
-        processor.process(actions);
+        ProcessController processController = new ProcessController(namespace, format, inDir, outDir);        
+        processController.process(actions);
         
         
 //         

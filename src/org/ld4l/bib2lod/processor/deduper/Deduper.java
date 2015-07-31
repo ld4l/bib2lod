@@ -12,20 +12,5 @@ public class Deduper extends Processor {
     
     private static final Logger logger = LogManager.getLogger(Deduper.class);
 
-    public Deduper(String localNamespace, String rdfFormat, File inputDir, 
-            File outputDir) {
-        super(localNamespace, rdfFormat, inputDir, outputDir);
-        // TODO Auto-generated constructor stub
-    }
-    
-    @Override
-    protected void configureLogger() {
-        
-    }
-
-    @Override
-    public void process(List<String> actions) {
-        logger.info("Done!");
-    }
     
 }

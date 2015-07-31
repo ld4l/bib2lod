@@ -1,12 +1,11 @@
 package org.ld4l.bib2lod.processor;
 
 import java.io.File;
-import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class Processor {
+public abstract class Processor {
 
     private static final Logger logger = LogManager.getLogger(Processor.class);
     
@@ -15,28 +14,5 @@ public class Processor {
     
     protected File inputDir;
     protected File outputDir;
-    
-    public Processor(String localNamespace, String rdfFormat, File inputDir, 
-            File outputDir) {
-        
-        this.localNamespace = localNamespace;
-        this.rdfFormat = rdfFormat;
-        
-        this.inputDir = inputDir;
-        this.outputDir = outputDir;
-        
-        configureLogger();
-    }
-    
-    public void process(List<String> actions) {
-        logger.debug("Done!");
-    }
-    
-    /** 
-     * Configure the logger for this processor.
-     */
-    protected void configureLogger() {
-        
-    }
-    
+  
 }
