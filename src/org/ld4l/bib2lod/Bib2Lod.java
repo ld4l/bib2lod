@@ -30,7 +30,9 @@ public class Bib2Lod {
     private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
     private static final List<String> validActions = 
             new ArrayList<String>(Arrays.asList("dedupe"));
-    
+    private static final List<String> validFormats = 
+            new ArrayList<String>(Arrays.asList("ntriples", "rdfxml"));
+    private static final String defaultFormat = "rdfxml";
 
     /** 
      * Read in program options and call appropriate processing functionality.
@@ -68,7 +70,7 @@ public class Bib2Lod {
             return;
         }
 
-        String format = cmd.getOptionValue("format", "rdfxml");
+        String format = getValidFormat(cmd.getOptionValue("format"));
                
         ProcessController processController = new ProcessController(namespace, format, inDir, outDir);        
         processController.process(actions);
@@ -96,6 +98,19 @@ public class Bib2Lod {
 //        }    
 //        
           logger.info("Done!");
+    }
+
+    private static String getValidFormat(String selectedFormat) {
+
+        if (selectedFormat == null) {
+            return defaultFormat;
+        } else if (validFormats.contains(selectedFormat)) {
+            return selectedFormat;
+        } else {            
+            logger.error("Invalid format. Using default format " 
+                    + defaultFormat + ".");                    
+            return defaultFormat;            
+        }
     }
 
     /**
@@ -266,7 +281,7 @@ public class Bib2Lod {
                 .longOpt("indir")
                 .required()
                 .hasArg()
-                .desc("absolute or relative path to input files")
+                .desc("Absolute or relative path to input files.")
                 .build();
         options.addOption(inputOption);
         
@@ -274,7 +289,7 @@ public class Bib2Lod {
                 .longOpt("outdir")
                 .required()
                 .hasArg()
-                .desc("absolute or relative path to output directory")
+                .desc("Absolute or relative path to output directory.")
                 .build();
         options.addOption(outputOption);
         
@@ -282,7 +297,7 @@ public class Bib2Lod {
                 .longOpt("namespace")
                 .required()
                 .hasArg()
-                .desc("Local HTTP namespace for minting and deduping URIs")
+                .desc("Local HTTP namespace for minting and deduping URIs.")
                 .build();
         options.addOption(namespaceOption);
         
@@ -290,8 +305,9 @@ public class Bib2Lod {
                 .longOpt("format")
                 .required(false)
                 .hasArg()
-                .desc("RDF serialization format of input and output. Valid "
-                        + "options: nt, rdfxml. Defaults to rdfxml.")
+                .desc("RDF serialization format of input and output. Valid"
+                        + " formats: " + StringUtils.join(validFormats, ", ") 
+                        + ". Defaults to " + defaultFormat + ".")
                 .build();
         options.addOption(formatOption);      
 
@@ -301,7 +317,8 @@ public class Bib2Lod {
                 .longOpt("actions")
                 .required()
                 .hasArg()
-                .desc("Processing actions. Valid values: " + StringUtils.join(validActions, ", ") + ".")
+                .desc("Processing actions. Valid actions: " 
+                        + StringUtils.join(validActions, ", ") + ".")
                 .argName("dedupe")
                 .build();
         options.addOption(actions);
