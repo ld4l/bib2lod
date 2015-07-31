@@ -50,8 +50,8 @@ public class Bib2Lod {
         }
         
         // Process commandline arguments and exit if any are invalid.
-        String namespace = getValidNamespace(cmd.getOptionValue("namespace"));
-        if (namespace == null) {
+        String namespace = cmd.getOptionValue("namespace");
+        if (!isValidNamespace(namespace)) {
             return;
         }
 
@@ -59,7 +59,9 @@ public class Bib2Lod {
         if (actions == null) {
             return;
         }
-        
+
+        String format = getValidFormat(cmd.getOptionValue("format"));
+
         File inDir = getInputDirectory(cmd.getOptionValue("indir"));
         if (inDir == null) {
             return;
@@ -69,9 +71,7 @@ public class Bib2Lod {
         if (outDir == null) {
             return;
         }
-
-        String format = getValidFormat(cmd.getOptionValue("format"));
-               
+        
         ProcessController processController = new ProcessController(namespace, format, inDir, outDir);        
         processController.process(actions);
         
@@ -192,16 +192,16 @@ public class Bib2Lod {
      * @param namespace
      * @return valid namespace or null
      */
-    private static String getValidNamespace(String namespace) {
+    private static boolean isValidNamespace(String namespace) {
 
         String[] schemes = {"http"};
         UrlValidator urlValidator = new UrlValidator(schemes);
         if (!urlValidator.isValid(namespace)) {
             logger.fatal("Valid HTTP namespace required.");
-            return null;
+            return false;
         }
         
-        return namespace;
+        return true;
     }
 
 
