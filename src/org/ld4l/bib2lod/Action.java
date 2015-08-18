@@ -37,7 +37,7 @@ public enum Action {
         return lookup.get(action); 
     }
     
-    public static List<String> validFormats() {
+    public static List<String> validActions() {
         return validActions;
     }
     
