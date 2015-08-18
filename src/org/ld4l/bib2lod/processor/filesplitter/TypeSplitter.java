@@ -1,38 +1,41 @@
 package org.ld4l.bib2lod.processor.filesplitter;
 
-import java.io.File;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
-    @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputDirName = "statementsBySubjectType";
+    private static final String outputSubdir = "statementsBySubjectType";
     
-    public TypeSplitter(String localNamespace, String rdfFormat, String inputPath,
-            String outputPath) {
-        super(localNamespace, rdfFormat, inputPath, outputPath);
+    public TypeSplitter(String localNamespace, String rdfFormat, String inputDir,
+            String mainOutputDir) {
+        
+        super(localNamespace, rdfFormat, inputDir, mainOutputDir);
 
     }
     
-    @Override
-    protected String getOutputDirName() {
-        return outputDirName;
-    }
+
 
     @Override
     public String process() {
 
-        String outputAbsoluteDirName = createOutputDir();
-        if (outputAbsoluteDirName == null) {
+        logger.debug("input directory = " + inputDir);
+        
+        String outputDir = createOutputDir(outputSubdir);
+        if (outputDir == null) {
             return null;
         }
         
-        
-        return outputAbsoluteDirName;
+        // Iterate through files in input dir
+        // Create a set of models - one per type
+        // Read file into a model
+        // for each triple, get its type and add the triple to the appropriate
+        // model
+        // at the end, write each model out to a file
+
+        return outputDir;
 
     }
 

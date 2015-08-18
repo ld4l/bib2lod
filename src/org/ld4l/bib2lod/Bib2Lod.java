@@ -62,25 +62,25 @@ public class Bib2Lod {
 
         String format = getValidFormat(cmd.getOptionValue("format"));
 
-        String inPath = cmd.getOptionValue("indir");
-        if (! isValidInputDirectory(inPath)) {
+        String absInputDir = getAbsoluteInputDir(
+                cmd.getOptionValue("indir"));
+        if (absInputDir == null) {
             return;
         }
         
-        String outDir = 
+        String absTopLevelOutputDir = 
                 createTopLevelOutputDir(cmd.getOptionValue("outdir"));
-        if (outDir == null) {
+        if (absTopLevelOutputDir == null) {
             return;
         }
                
-        ProcessController processController = 
-                new ProcessController(
-                        namespace, format, inPath, outDir); 
-        String resultsDir = processController.processAll(actions);
-        if (resultsDir == null) {
+        ProcessController processController = new ProcessController(namespace, 
+                format, absInputDir, absTopLevelOutputDir); 
+        String absFinalOutpuDir = processController.processAll(actions);
+        if (absFinalOutpuDir == null) {
             logger.trace("Processing failed.");
         } else {
-            logger.trace("Done! Results in " + resultsDir);
+            logger.trace("Done! Results in " + absFinalOutpuDir);
         }
 
     }
@@ -120,21 +120,28 @@ public class Bib2Lod {
 
 
     /**
-     * Check for valid input directory. Return the input directory if it exists,
-     * otherwise log an error and return null. 
+     * Check for valid input directory. Return the absolute path to the input 
+     * directory if it exists, otherwise log an error and return null. 
      * @param path - absolute or relative path to input directory
-     * @return the input directory if it exists, otherwise null
+     * @return absolute path to the input directory if it exists, otherwise null
      */
-    private static boolean isValidInputDirectory(String path) {
+    private static String getAbsoluteInputDir(String inDirName) {
 
-        File inDir = new File(path);
+        String absInputPath = null;
+        
+        File inDir = new File(inDirName);
         if (!inDir.isDirectory()) {
-            logger.fatal("Input directory " + path
+            logger.fatal("Input directory " + inDirName
                     + " does not exist or is not a directory.");
-            return false;
+        } else {
+            try {
+                absInputPath = inDir.getCanonicalPath();
+            } catch (IOException e) {
+                e.printStackTrace();
+            }
         }
         
-        return true;
+        return absInputPath;
     }
     
     /**

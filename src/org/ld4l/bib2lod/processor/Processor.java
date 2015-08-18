@@ -15,59 +15,45 @@ public abstract class Processor {
     protected String localNamespace;
     protected String rdfFormat;
     
-    protected String inputPath;
-    private String mainOutputPath;
+    protected String inputDir;
+    private String mainOutputDir;
     
     
-    public Processor(String localNamespace, String rdfFormat, String inputPath, 
-            String outputPath) {
+    public Processor(String localNamespace, String rdfFormat, String inputDir, 
+            String mainOutputDir) {
         
         this.localNamespace = localNamespace;
         this.rdfFormat = rdfFormat;
         
-        this.inputPath = inputPath;
-        this.mainOutputPath = outputPath;
+        this.inputDir = inputDir;
+        this.mainOutputDir = mainOutputDir;
 
     }
 
-
-    // TODO Not sure whether getters should be public or protected
-    public String getLocalNamespace() {
-        return localNamespace;
-    }
-
-    // TODO Not sure whether getters should be public or protected
-    public String getRdfFormat() {
-        return rdfFormat;
-    }
-
-    // TODO Not sure whether getters should be public or protected
-    public String getInputPath() {
-        return inputPath;
-    }
-
-    public String getMainOutputPath() {
-        return mainOutputPath;
-    }
-
+    
     public abstract String process();
     
     
-    protected String createOutputDir() {
+    /**
+     * Create a subdirectory of main output directory for the output of this
+     * process.
+     * @param subDirName - the output subdirectory name for this process
+     * @return - the full output directory path
+     */
+    protected String createOutputDir(String subdir) {
         
-        String outputDirName = null;
+        String outputDir = null;
         
         try {
-            outputDirName = Files.createDirectory(Paths.get(mainOutputPath, 
-                    getOutputDirName())).toString();
+            outputDir = Files.createDirectory(Paths.get(mainOutputDir, 
+                    subdir)).toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
         
-        return outputDirName;
+        return outputDir;
     }
     
-    protected abstract String getOutputDirName();
 
   
 }
