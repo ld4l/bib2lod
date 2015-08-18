@@ -4,6 +4,7 @@ import java.util.List;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.Action;
 import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
@@ -28,7 +29,7 @@ public class ProcessController {
 
     }
     
-    public String processAll(List<String> actions) {
+    public String processAll(List<Action> actions) {
         
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
@@ -38,9 +39,12 @@ public class ProcessController {
         
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.
+        // Use Action rank to order the actions
 
         // NB If there are earlier actions, the TypeSplitter constructor gets
         // passed in the resultsDir of the previous process, not this.inputPath.
+        
+        // Fix to use Action
         if (actions.contains("dedupe")) {
             TypeSplitter splitter = new TypeSplitter(localNamespace, rdfFormat, 
                     currentInputDir, mainOutputDir);

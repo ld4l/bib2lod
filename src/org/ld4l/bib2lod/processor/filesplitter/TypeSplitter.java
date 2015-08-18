@@ -27,12 +27,6 @@ public class TypeSplitter extends Processor {
             return null;
         }
 
-        // TODO - we need an enum of rdf formats to file extensions - 
-        // so we know what extension to use when we write out the files
-        
-        // *** In ProcessController constructor - assign the file extension
-        // and pass to 
-        
         // Create a set of models - one per type
         // Iterate through files in input dir
         // Read file into a model

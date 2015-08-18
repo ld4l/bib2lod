@@ -28,8 +28,8 @@ import org.ld4l.bib2lod.processor.ProcessController;
 public class Bib2Lod {
     
     private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
-    private static final List<String> validActions = 
-            new ArrayList<String>(Arrays.asList("dedupe"));
+   
+    private static final List<String> validActions = Action.validActions();
     
     private static final List<String> validFormats = RdfFormat.validFormats();
     private static final RdfFormat defaultFormat = RdfFormat.RDFXML;
@@ -56,7 +56,7 @@ public class Bib2Lod {
             return;
         }
 
-        List<String> actions = getValidActions(cmd.getOptionValues("actions"));
+        List<Action> actions = getValidActions(cmd.getOptionValues("actions"));
         if (actions == null) {
             return;
         }
@@ -92,6 +92,7 @@ public class Bib2Lod {
             return defaultFormat;
         } else {
             RdfFormat format = RdfFormat.get(selectedFormat);
+            // *** TODO test that a bad format returns null here
             if (format != null) {
                 return format;
             } else {
@@ -109,17 +110,22 @@ public class Bib2Lod {
      * @param actions
      * @return
      */
-    private static List<String> getValidActions(String[] selectedActions) {
-        List<String> actions = new ArrayList<String>(Arrays.asList(selectedActions));
-        if (actions.retainAll(validActions)) {
-            if (actions.size() == 0) {
-                logger.fatal("No valid actions specified.");
-                return null;
+    private static List<Action> getValidActions(String[] selectedActions) {
+
+        List<Action> actions = new ArrayList<Action>();
+        for (String selectedAction : selectedActions) {
+            Action action = Action.get(selectedAction);
+            // *** TODO test that a bad action returns null here
+            if (action != null) {
+                actions.add(action);
             } else {
-                logger.warn("Invalid actions removed.");
+                logger.warn("Invalid action '" + selectedAction + "' removed.");
             }
+            
         }
-        return actions;
+        
+        return actions.isEmpty() ? null : actions;
+
     }
 
 
