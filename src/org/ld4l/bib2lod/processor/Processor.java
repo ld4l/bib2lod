@@ -55,13 +55,16 @@ public abstract class Processor {
     
     protected String createOutputDir() {
         
+        String outputDirName = null;
+        
         try {
-            return Files.createDirectory(Paths.get(mainOutputPath, 
+            outputDirName = Files.createDirectory(Paths.get(mainOutputPath, 
                     getOutputDirName())).toString();
         } catch (IOException e) {
             e.printStackTrace();
-            return null;
         }
+        
+        return outputDirName;
     }
     
     protected abstract String getOutputDirName();

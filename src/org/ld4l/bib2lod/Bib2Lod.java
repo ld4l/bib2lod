@@ -196,6 +196,7 @@ public class Bib2Lod {
      * @param options
      */
     private static void printHelp(Options options) {
+        
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(80);
         formatter.printHelp("bib2lod", options, true);

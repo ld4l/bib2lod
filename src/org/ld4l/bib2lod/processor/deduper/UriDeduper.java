@@ -25,10 +25,5 @@ public class UriDeduper extends Processor {
     protected String getOutputDirName() {
         return outputDirName;
     }
-
-    public static String getOutputdirname() {
-        return outputDirName;
-    }
-
     
 }

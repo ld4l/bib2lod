@@ -29,21 +29,24 @@ public class ProcessController {
     
     public String processAll(List<String> actions) {
         
+        String resultDir = null;
+        
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.
 
         // TODO This should only be done in the case of certain actions:
         // deduping, for example.
-        TypeSplitter splitter = new TypeSplitter(localNamespace, rdfFormat, 
-                inputPath, mainOutputPath);
-        String splitPath = splitter.process();
-
-        // TODO Insert other processes here
+        if (actions.contains("dedupe")) {
+            TypeSplitter splitter = new TypeSplitter(localNamespace, rdfFormat, 
+                    inputPath, mainOutputPath);
+            resultDir = splitter.process();
+        }
         
-        // Return path to final results (splitPath is only temporary here).
-        String results = splitPath;
+        // TODO Insert other processes here
+
+        // Return path to final results.
         logger.trace("Done!");
-        return results;
+        return resultDir;
 
     }
 
