@@ -39,7 +39,7 @@ public class Bib2Lod {
      * @param args
      */
     public static void main(String[] args) {
-
+        
         // Define program options
         Options options = getOptions();
         
@@ -62,42 +62,27 @@ public class Bib2Lod {
 
         String format = getValidFormat(cmd.getOptionValue("format"));
 
-        File inDir = getInputDirectory(cmd.getOptionValue("indir"));
-        if (inDir == null) {
+        String inPath = cmd.getOptionValue("indir");
+        if (! isValidInputDirectory(inPath)) {
             return;
         }
         
-        File outDir = createOutputDirectory(cmd.getOptionValue("outdir"));
+        String outDir = 
+                createTopLevelOutputDir(cmd.getOptionValue("outdir"));
         if (outDir == null) {
             return;
         }
-        
-        ProcessController processController = new ProcessController(namespace, format, inDir, outDir);        
-        processController.process(actions);
-        
-        
-//         
-//        List<InputStream> records = readFiles(readdir);
-//        
-//        // Process the RDF input files and receive a union model for writing.
-//        RDFPostProcessor p = new RDFPostProcessor(localNamespace);
-//        Model allRecords = p.processRecords(records);
-//        
-//        // Write out the union model to a file.
-//        try {
-//            String outfile = getOutputFilename(outdir);
-//            OutputStream out = new FileOutputStream(outfile);
-//            // Second param = RDF serialization. We may want to be able to 
-//            // specify this on the commandline. For now we use the default
-//            // RDF/XML.
-//            allRecords.write(out, null);
-//            out.close();
-//        } catch (IOException e) {
-//            // TODO Auto-generated catch block
-//            e.printStackTrace();
-//        }    
-//        
-          logger.info("Done!");
+               
+        ProcessController processController = 
+                new ProcessController(
+                        namespace, format, inPath, outDir); 
+        String resultsDir = processController.processAll(actions);
+        if (resultsDir == null) {
+            logger.trace("Processing failed.");
+        } else {
+            logger.trace("Done! Results in " + resultsDir);
+        }
+
     }
 
     private static String getValidFormat(String selectedFormat) {
@@ -127,7 +112,7 @@ public class Bib2Lod {
                 logger.fatal("No valid actions specified.");
                 return null;
             } else {
-                logger.error("Invalid actions removed.");
+                logger.warn("Invalid actions removed.");
             }
         }
         return actions;
@@ -140,49 +125,50 @@ public class Bib2Lod {
      * @param path - absolute or relative path to input directory
      * @return the input directory if it exists, otherwise null
      */
-    private static File getInputDirectory(String path) {
+    private static boolean isValidInputDirectory(String path) {
 
         File inDir = new File(path);
         if (!inDir.isDirectory()) {
-            try {
-                logger.fatal("Input directory " + inDir.getCanonicalPath() 
-                        + " does not exist or is not a directory.");
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            return null;
+            logger.fatal("Input directory " + path
+                    + " does not exist or is not a directory.");
+            return false;
         }
         
-        return inDir;
+        return true;
     }
     
     /**
      * Make output directory and any intermediate directories. Return the 
      * output directory if it was successfully created, otherwise log an error
      * and return null.
-     * @param path - absolute or relative path to output directory. A child
+     * @param outDirName - absolute or relative path to output directory. A child
      * directory named with current datetime will be created under it.
      * @return the output directory if it was successfully created, otherwise 
      * null
      */
-    private static File createOutputDirectory(String path) {
+    private static String createTopLevelOutputDir(String outDirName) {
+        
+        String outDirCanonicalPath = null;
+        
         DateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd-HHmmss");
         Date date = new Date();
         String now = dateFormat.format(date);
-        File outDir = new File(path, now);
-        if (! outDir.mkdirs()) {
-            try {
-                String outPath = outDir.getCanonicalPath();
-                logger.error("Cannot create output directory " + outPath + ".");
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-            return null;
-        } 
         
-        return outDir;
+        File outDir = new File(outDirName, now);
+        
+        try {
+            outDirCanonicalPath = outDir.getCanonicalPath();
+        } catch (IOException e) {
+            e.printStackTrace();
+            outDirCanonicalPath = outDir.getAbsolutePath();
+        }
+        
+        if (! outDir.mkdirs()) {
+            logger.error("Cannot create output directory " + outDirCanonicalPath + ".");
+            return null;
+        }     
+        
+        return outDirCanonicalPath;
     }
 
         
