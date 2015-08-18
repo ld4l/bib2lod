@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod;
 
-import org.ld4l.bib2lod.Ontology;
-
-public enum RdfType {
+public enum Ld4lType {
 
     PERSON (Ontology.BIBFRAME_LD4L.namespace(), "Person"),
     WORK (Ontology.BIBFRAME_LD4L.namespace(), "Work"),
@@ -14,7 +12,7 @@ public enum RdfType {
     private final String localname;
     // private final String uri;
 
-    RdfType(String namespace, String localname) {
+    Ld4lType(String namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
         // this.uri = namespace + localname;
@@ -32,5 +30,4 @@ public enum RdfType {
     public String localname() {
         return this.localname;
     }
-
 }
