@@ -44,15 +44,15 @@ public class ProcessController {
         // NB If there are earlier actions, the TypeSplitter constructor gets
         // passed in the resultsDir of the previous process, not this.inputPath.
         
-        // Fix to use Action
-        if (actions.contains("dedupe")) {
+        if (actions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
             TypeSplitter splitter = new TypeSplitter(localNamespace, rdfFormat, 
                     currentInputDir, mainOutputDir);
             outputDir = splitter.process();
         }
         
         // TODO Insert other processes here
-        // outputDir becomes new currentInputDir
+        // currentInputDir = previous outputDir
+        // New outputDir defined by processor
 
         // Return path to final results.
         logger.trace("Done!");
