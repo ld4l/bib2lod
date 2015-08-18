@@ -30,16 +30,17 @@ public class Bib2Lod {
     private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
     private static final List<String> validActions = 
             new ArrayList<String>(Arrays.asList("dedupe"));
-    private static final List<String> validFormats = 
-            new ArrayList<String>(Arrays.asList("ntriples", "rdfxml"));
-    private static final String defaultFormat = "rdfxml";
+    
+    private static final List<String> validFormats = RdfFormat.validFormats();
+    private static final RdfFormat defaultFormat = RdfFormat.RDFXML;
+
 
     /** 
      * Read in program options and call appropriate processing functionality.
      * @param args
      */
     public static void main(String[] args) {
-        
+
         // Define program options
         Options options = getOptions();
         
@@ -60,7 +61,7 @@ public class Bib2Lod {
             return;
         }
 
-        String format = getValidFormat(cmd.getOptionValue("format"));
+        RdfFormat format = getValidFormat(cmd.getOptionValue("format"));
 
         String absInputDir = getAbsoluteInputDir(
                 cmd.getOptionValue("indir"));
@@ -85,16 +86,19 @@ public class Bib2Lod {
 
     }
 
-    private static String getValidFormat(String selectedFormat) {
+    private static RdfFormat getValidFormat(String selectedFormat) {
 
         if (selectedFormat == null) {
             return defaultFormat;
-        } else if (validFormats.contains(selectedFormat)) {
-            return selectedFormat;
-        } else {            
-            logger.error("Invalid format. Using default format " 
-                    + defaultFormat + ".");                    
-            return defaultFormat;            
+        } else {
+            RdfFormat format = RdfFormat.get(selectedFormat);
+            if (format != null) {
+                return format;
+            } else {
+                logger.error("Invalid format. Using default format " 
+                        + defaultFormat.format() + ".");                    
+                return defaultFormat;                
+            }
         }
     }
 
@@ -235,33 +239,6 @@ public class Bib2Lod {
         return null;
     }
     
-
-    /**
-     * Convert a directory of RDF files into a list of input streams for
-     * processing.
-     * @param directory - the directory
-     * @return List<InputStream>
-     */
-//    private static List<InputStream> readFiles(File directory) {
-//        // Convert the directory of RDF files into a list of input streams
-//        // for processing.
-//
-//        // Despite the name, lists both files and directories.
-//        File[] items = directory.listFiles();
-//        List<InputStream> records = new ArrayList<InputStream>();
-//    
-//        for (File file : items) {
-//            if (file.isFile()) {
-//                try {
-//                    records.add(new FileInputStream(file));
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//            }
-//        }  
-//        return records;
-//    }
     
     /**
      * Define the commandline options accepted by the program.
@@ -301,7 +278,7 @@ public class Bib2Lod {
                 .hasArg()
                 .desc("RDF serialization format of input and output. Valid"
                         + " formats: " + StringUtils.join(validFormats, ", ") 
-                        + ". Defaults to " + defaultFormat + ".")
+                        + ". Defaults to " + defaultFormat.format() + ".")
                 .build();
         options.addOption(formatOption);      
 
@@ -321,30 +298,7 @@ public class Bib2Lod {
     }
 
 
-    /**
-     * Convert a directory of RDF files into a list of input streams for
-     * processing.
-     * @param readdir - path to the directory
-     * @return List<InputStream>
-     */
-//    private static List<InputStream> readFiles(String readdir) {
-//        File directory = new File(readdir);
-//        return readFiles(directory);
-//    }
-    
-//    private static String getOutputFilename(String outdir) {
-//        
-//        DateFormat dateFormat = new SimpleDateFormat("yyyyMMdd-HHmmss");
-//        Date date = new Date();
-//        String now = dateFormat.format(date);
-//        // Currently allowing only RDF/XML output. Later may offer 
-//        // serialization as a program argument. This will affect extension
-//        // as well as second parameter to allRecords.write(out, null) above.
-//        String ext = "rdf";
-//        String filename = "out." + now.toString() + "." + ext;
-//        Path path = Paths.get(outdir, filename);   
-//        return path.toString();
-//    }
+
         
 }
 

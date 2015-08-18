@@ -6,6 +6,7 @@ import java.nio.file.Paths;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.RdfFormat;
 
 public abstract class Processor {
 
@@ -13,13 +14,13 @@ public abstract class Processor {
     private static final Logger logger = LogManager.getLogger(Processor.class);
     
     protected String localNamespace;
-    protected String rdfFormat;
+    protected RdfFormat rdfFormat;
     
     protected String inputDir;
     private String mainOutputDir;
     
     
-    public Processor(String localNamespace, String rdfFormat, String inputDir, 
+    public Processor(String localNamespace, RdfFormat rdfFormat, String inputDir, 
             String mainOutputDir) {
         
         this.localNamespace = localNamespace;
@@ -55,5 +56,5 @@ public abstract class Processor {
     }
     
 
-  
+ 
 }

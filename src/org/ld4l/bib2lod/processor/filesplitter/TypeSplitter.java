@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.processor.filesplitter;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
@@ -9,7 +10,7 @@ public class TypeSplitter extends Processor {
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubdir = "statementsBySubjectType";
     
-    public TypeSplitter(String localNamespace, String rdfFormat, String inputDir,
+    public TypeSplitter(String localNamespace, RdfFormat rdfFormat, String inputDir,
             String mainOutputDir) {
         
         super(localNamespace, rdfFormat, inputDir, mainOutputDir);
@@ -21,19 +22,23 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
 
-        logger.debug("input directory = " + inputDir);
-        
         String outputDir = createOutputDir(outputSubdir);
         if (outputDir == null) {
             return null;
         }
+
+        // TODO - we need an enum of rdf formats to file extensions - 
+        // so we know what extension to use when we write out the files
         
-        // Iterate through files in input dir
+        // *** In ProcessController constructor - assign the file extension
+        // and pass to 
+        
         // Create a set of models - one per type
+        // Iterate through files in input dir
         // Read file into a model
-        // for each triple, get its type and add the triple to the appropriate
-        // model
-        // at the end, write each model out to a file
+        // For each type: get all the statements with subjects of that type
+        // write to the appropriate model
+        // at the end, write each output model to a file
 
         return outputDir;
 
