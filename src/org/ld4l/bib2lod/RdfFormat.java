@@ -26,6 +26,10 @@ public enum RdfFormat {
     public String extension() {
         return this.extension;
     }
+    
+    public String fullExtension() {
+        return "." + this.extension;
+    }
  
     private static final Map<String, RdfFormat> lookup = 
             new HashMap<String, RdfFormat>();
