@@ -12,6 +12,10 @@ public class UriDeduper extends Processor {
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubdir = "deduped";
     
+    // TODO Like TypeSplitter, we want to define types to dedupe on. Exclude,
+    // for example, annotations, held items, titles, since these are not 
+    // re-used.
+    
     public UriDeduper(String localNamespace, RdfFormat rdfFormat, String inputDir,
             String mainOutputDir) {
         
