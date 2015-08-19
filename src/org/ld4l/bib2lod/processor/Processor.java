@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.processor;
 
 import java.io.File;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
@@ -11,6 +13,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.riot.RDFDataMgr;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.RdfFormat;
@@ -101,10 +104,26 @@ public abstract class Processor {
             } else {
                 objectValue = object.toString();
             }
-            buffer.append("Statement: " + subjectValue + " " + propertyUri + " " + objectValue + "\n");
+            buffer.append("Statement: " + subjectValue + " " + propertyUri + 
+                    " " + objectValue + "\n");
         }
         return buffer.toString();
     }
+    
+    protected void writeModelToFile(String outputDir, String outFileName, 
+            Model model) {          
+            
+        File outFile = new File(outputDir, outFileName);
+    
+        try {
+            FileOutputStream outStream = new FileOutputStream(outFile);
+            RDFDataMgr.write(outStream, model, this.rdfFormat.rdfFormat());
+        } catch (FileNotFoundException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+    }
+    
 
 //    Following probably not needed - Jena can read from file directly into model
 //    /**

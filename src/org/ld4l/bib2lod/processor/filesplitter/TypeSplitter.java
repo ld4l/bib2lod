@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod.processor.filesplitter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,7 +14,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -33,7 +30,8 @@ public class TypeSplitter extends Processor {
     // An array-backed list should be fine here; we don't need to modify it.
     // TODO Figure out which other types to include here
     private static List<BibframeType> typesToSplit = Arrays.asList(
-      BibframeType.ANNOTATION,                                     
+      BibframeType.ANNOTATION,  
+      BibframeType.HELD_ITEM,
       BibframeType.INSTANCE,
       BibframeType.ORGANIZATION,
       BibframeType.PERSON,
@@ -59,10 +57,11 @@ public class TypeSplitter extends Processor {
         // Map each Bibframe type to an (empty for now) model
         Map<BibframeType, Model> modelsByType = getModelsByType();
         
-
-
-//        File inputFiles = new File(inputDir);
-//        File[] files = inputFiles.listFiles();
+        // Create another model to accumulate any leftover triples that didn't
+        // get put into a type model. 
+        // TODO These should be examined later to see if a new type model should
+        // be created.
+        Model remainderModel = ModelFactory.createDefaultModel();
         
         // For each file in the input directory
         for ( File file : new File(inputDir).listFiles() ) {
@@ -106,34 +105,31 @@ public class TypeSplitter extends Processor {
                 // Remove the resulting graph from the input model, so we
                 // don't have to query against those statements again.
                 inputModel.remove(resultModel);
+                
+                // Store the remaining triples so we don't lose them.
+                remainderModel.add(inputModel);
 
             }
         }
         
-        // TODO Put this in a separate method
         // After processing all files, write models out to files using
         // type.localname() + "." + this.rdfFormat.fullExtension();
         // and a Jena method to write out the model
-        for (BibframeType type: typesToSplit) {
-            
-            Model modelForType = modelsByType.get(type);
-            
-            String outFileName = type.localname() + this.rdfFormat.fullExtension();
-            
-            // TODO From here on can be a Processor method
-            File outFile = new File(outputDir, outFileName);
-            
-            try {
-                FileOutputStream outStream = new FileOutputStream(outFile);
-                RDFDataMgr.write(outStream, modelForType, this.rdfFormat.rdfFormat());
-            } catch (FileNotFoundException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-        }
+        for (BibframeType type: typesToSplit) {   
+            String outFileName = type.localname() + 
+                    this.rdfFormat.fullExtension();
+            Model modelForType = modelsByType.get(type);                                                                                                                    
+            writeModelToFile(outputDir, outFileName, modelForType);
+
+        }      
+        
+        // Write the remaining triples out to a separate file
+        String remainderFileName = 
+                "Miscellaneous" + this.rdfFormat.fullExtension();
+        writeModelToFile(outputDir, remainderFileName, remainderModel);
 
         return outputDir;
-
+                                                                                                                               
     }
     
     

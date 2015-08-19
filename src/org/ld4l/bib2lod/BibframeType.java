@@ -5,6 +5,7 @@ public enum BibframeType {
     
     ANNOTATION ("Annotation"),
     AUTHORITY ("Authority"),
+    HELD_ITEM ("HeldItem"),
     INSTANCE ("Instance"),
     ORGANIZATION ("Organization"),
     // External namespace: e.g.
