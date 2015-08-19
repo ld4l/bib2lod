@@ -6,7 +6,11 @@ import java.nio.file.Files;
 import java.nio.file.Paths;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.RdfFormat;
@@ -37,12 +41,20 @@ public abstract class Processor {
     
     public abstract String process();
     
-    public Model getModelFromFile(File file) {
+    protected Model getModelFromFile(File file) {
         return getModelFromFile(file.toString());
     }
     
-    public Model getModelFromFile(String filename) {
-        return RDFDataMgr.loadModel(filename);
+    protected Model getModelFromFile(String filename) {
+        //return RDFDataMgr.loadModel(filename);
+        Model model = ModelFactory.createDefaultModel() ; 
+        model.read(filename);
+        return model;
+    }
+    
+    protected void writeModelToFile(String filename, String outputDir) {
+        // get an output stream
+        // RDFDataMgr.write(OutputStream, Model, serialization)
     }
     
     /**
@@ -63,6 +75,35 @@ public abstract class Processor {
         }
         
         return outputDir;
+    }
+    
+    protected String showStatements(Model model) {
+        
+        StringBuffer buffer = new StringBuffer();
+        
+        StmtIterator stmts = model.listStatements();
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.next();
+            Resource subject = stmt.getSubject();
+            String subjectValue = null;
+            if (subject.isURIResource()) {
+                subjectValue = "<" + subject.getURI() + ">";
+            } else {
+                subjectValue = subject.toString();
+            }
+            String propertyUri = "<" + stmt.getPredicate().getURI() + ">";
+            RDFNode object = stmt.getObject();
+            String objectValue = null;
+            if (object.isLiteral()) {
+                objectValue = "\"" + object.asLiteral().getLexicalForm() + "\"";
+            } else if (object.isURIResource()) {
+                objectValue = "<" + object.asResource().getURI() + ">";
+            } else {
+                objectValue = object.toString();
+            }
+            buffer.append("Statement: " + subjectValue + " " + propertyUri + " " + objectValue + "\n");
+        }
+        return buffer.toString();
     }
 
 //    Following probably not needed - Jena can read from file directly into model

@@ -273,6 +273,8 @@ public class Bib2Lod {
                 .longOpt("namespace")
                 .required()
                 .hasArg()
+                // Should namespace used in deduping?? Do we want to dedupe only 
+                // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
                 .build();
         options.addOption(namespaceOption);
