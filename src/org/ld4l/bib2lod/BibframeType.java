@@ -3,22 +3,23 @@ package org.ld4l.bib2lod;
 
 public enum BibframeType {
     
+    ANNOTATION ("Annotation"),
     AUTHORITY ("Authority"),
     INSTANCE ("Instance"),
-    // What does bibframe use for organization?
-    // ORGANIZATION (Ontology.BIBFRAME.namespace(), "Organization"),
+    ORGANIZATION ("Organization"),
     // External namespace: e.g.
     // CREATOR ("
     PERSON ("Person"),
+    TITLE ("Title"),
+    TOPIC ("Topic"),
     WORK ("Work");
-
 
     private final String namespace;
     private final String localname;
     // private final String uri;
 
     /** 
-     * Constructor for types in external namespaces 
+     * Constructor for types in external namespaces.
      * 
      * @param namespace
      * @param localname
@@ -30,7 +31,7 @@ public enum BibframeType {
     }
     
     /**
-     * Constructor for type in Bibframe namespace
+     * Constructor for types in Bibframe namespace.
      * @param localname
      */
     BibframeType(String localname) {
