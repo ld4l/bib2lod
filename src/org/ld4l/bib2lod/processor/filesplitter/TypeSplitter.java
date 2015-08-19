@@ -15,10 +15,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
@@ -38,17 +35,11 @@ public class TypeSplitter extends Processor {
     private static List<BibframeType> typesToSplit = Arrays.asList(
       BibframeType.ANNOTATION,                                     
       BibframeType.INSTANCE,
+      BibframeType.ORGANIZATION,
       BibframeType.PERSON,
       BibframeType.TITLE,
       BibframeType.WORK        
     );
-    
-//    private static String queryTemplate = 
-//            "CONSTRUCT ?s ?p ?o "
-//            + "WHERE { "
-//            + "?s ?p ?o . "
-//            + "?s a <TYPE> . "
-//            + "}";
     
     public TypeSplitter(String localNamespace, RdfFormat rdfFormat, String inputDir,
             String mainOutputDir) {
@@ -68,10 +59,7 @@ public class TypeSplitter extends Processor {
         // Map each Bibframe type to an (empty for now) model
         Map<BibframeType, Model> modelsByType = getModelsByType();
         
-        // Map each Bibframe type to a construct query used to populate the 
-        // model.
-        Map<BibframeType, Query> constructQueriesByType = 
-                getConstructQueriesByType();
+
 
 //        File inputFiles = new File(inputDir);
 //        File[] files = inputFiles.listFiles();
@@ -83,6 +71,12 @@ public class TypeSplitter extends Processor {
             
             // Read RDF from file into a model
             Model inputModel = getModelFromFile(file);
+            
+            // Map each Bibframe type to a construct query used to populate the 
+            // model. NB We need the model to create the type resource in the
+            // query.
+            Map<BibframeType, Query> constructQueriesByType = 
+                    getConstructQueriesByType(inputModel);
             
             // logger.debug(showStatements(inputModel));
             
@@ -156,22 +150,17 @@ public class TypeSplitter extends Processor {
         return modelsByType;
     }
     
-    private Map<BibframeType, Query> getConstructQueriesByType() {
-      
-        // Using a base query builder, cloning it, and adding on to it doesn't
-        // work, as the base query gets modified with the clone.
-//        ConstructBuilder baseCb = new ConstructBuilder()
-//            .addConstruct("?s", "?p", "?o")
-//            .addWhere("?s", "?p", "?o");
+    private Map<BibframeType, Query> getConstructQueriesByType(Model model) {
 
         Map<BibframeType, Query> constructQueriesByType = 
                 new HashMap<BibframeType, Query>();
         
         for (BibframeType type : typesToSplit) {
+            Resource typeResource = model.createResource(type.uri());
             ConstructBuilder cb = new ConstructBuilder() 
                 .addConstruct("?s", "?p", "?o")
                 .addWhere("?s", "?p", "?o")
-                .addWhere("?s", RDF.type,   type.uri());
+                .addWhere("?s", RDF.type, typeResource);
             Query typeQuery = cb.build();
             logger.debug(typeQuery.serialize());
             constructQueriesByType.put(type, typeQuery);
