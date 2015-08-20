@@ -27,8 +27,10 @@ public class TypeSplitter extends Processor {
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubdir = "statementsBySubjectType";
     
-    // An array-backed list should be fine here; we don't need to modify it.
-    // TODO Figure out which other types to include here
+    // An array-backed list should be fine here; we don't need to modify it. We
+    // need to exclude supertypes of the types we want to collect, such as 
+    // bf:Authority.
+    // TODO Figure out if other types should be included here.
     private static List<BibframeType> typesToSplit = Arrays.asList(
       BibframeType.ANNOTATION,  
       BibframeType.HELD_ITEM,
@@ -36,6 +38,7 @@ public class TypeSplitter extends Processor {
       BibframeType.ORGANIZATION,
       BibframeType.PERSON,
       BibframeType.TITLE,
+      BibframeType.TOPIC,
       BibframeType.WORK        
     );
     
@@ -90,8 +93,9 @@ public class TypeSplitter extends Processor {
                 // Run the query against the input model
                 QueryExecution qexec = QueryExecutionFactory.create(
                         queryForType, inputModel);
-                Model resultModel = qexec.execConstruct();
-                logger.debug(showStatements(resultModel));
+                Model constructModel = qexec.execConstruct();
+                logger.debug("CONSTRUCT MODEL");
+                logger.debug(showStatements(constructModel));
                 qexec.close();
                 
                 // Get the model for this type
@@ -100,21 +104,21 @@ public class TypeSplitter extends Processor {
                 // Add resulting graph to the model for this type
                 // *** TODO Make sure this modifies the model in the map -
                 // modelForType should be a reference
-                modelForType.add(resultModel);
+                modelForType.add(constructModel);
                 
                 // Remove the resulting graph from the input model, so we
-                // don't have to query against those statements again.
-                inputModel.remove(resultModel);
-                
-                // Store the remaining triples so we don't lose them.
-                remainderModel.add(inputModel);
+                // don't have to query against those statements on the next 
+                // iteration of the loop on this file.
+                inputModel.remove(constructModel);
 
             }
+            
+            // Add to the remainder model the statements from this file that 
+            // didn't get siphoned off to the type files.
+            remainderModel.add(inputModel);
         }
         
-        // After processing all files, write models out to files using
-        // type.localname() + "." + this.rdfFormat.fullExtension();
-        // and a Jena method to write out the model
+        // After processing all input files, write models to output files
         for (BibframeType type: typesToSplit) {   
             String outFileName = type.localname() + 
                     this.rdfFormat.fullExtension();
@@ -123,9 +127,11 @@ public class TypeSplitter extends Processor {
 
         }      
         
-        // Write the remaining triples out to a separate file
+        // Write any remaining triples out to a separate file. 
+        // TODO Later these should be analyzed to see if we need to add more 
+        // types to split on. For now we just don't want to lose them.
         String remainderFileName = 
-                "Miscellaneous" + this.rdfFormat.fullExtension();
+                "Other" + this.rdfFormat.fullExtension();
         writeModelToFile(outputDir, remainderFileName, remainderModel);
 
         return outputDir;
