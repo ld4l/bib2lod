@@ -11,6 +11,7 @@ public enum BibframeType {
     // External namespace: e.g.
     // CREATOR ("
     PERSON ("Person"),
+    PLACE ("Place"),
     TITLE ("Title"),
     TOPIC ("Topic"),
     WORK ("Work");

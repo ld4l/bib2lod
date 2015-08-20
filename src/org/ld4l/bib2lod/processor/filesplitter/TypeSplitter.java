@@ -37,6 +37,7 @@ public class TypeSplitter extends Processor {
       BibframeType.INSTANCE,
       BibframeType.ORGANIZATION,
       BibframeType.PERSON,
+      BibframeType.PLACE,
       BibframeType.TITLE,
       BibframeType.TOPIC,
       BibframeType.WORK        
