@@ -24,6 +24,7 @@ import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
+    @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubdir = "statementsBySubjectType";
     
@@ -69,56 +70,18 @@ public class TypeSplitter extends Processor {
         
         // For each file in the input directory
         for ( File file : new File(inputDir).listFiles() ) {
-            
-            // TODO - put loop body into method processRdfFile
-            
-            // Read RDF from file into a model
-            Model inputModel = getModelFromFile(file);
-            
-            // Map each Bibframe type to a construct query used to populate the 
-            // model. NB We need the model to create the type resource in the
-            // query.
-            Map<BibframeType, Query> constructQueriesByType = 
-                    getConstructQueriesByType(inputModel);
-            
-            // logger.debug(showStatements(inputModel));
-            
-            // For each Bibframe type
-            for (BibframeType type: typesToSplit) {
-                
-                // TODO Put loop body into a method processType
-
-                // Get the construct query for this type
-                Query queryForType = constructQueriesByType.get(type);
-                
-                // Run the query against the input model
-                QueryExecution qexec = QueryExecutionFactory.create(
-                        queryForType, inputModel);
-                Model constructModel = qexec.execConstruct();
-                logger.debug("CONSTRUCT MODEL");
-                logger.debug(showStatements(constructModel));
-                qexec.close();
-                
-                // Get the model for this type
-                Model modelForType = modelsByType.get(type);
-                
-                // Add resulting graph to the model for this type
-                // *** TODO Make sure this modifies the model in the map -
-                // modelForType should be a reference
-                modelForType.add(constructModel);
-                
-                // Remove the resulting graph from the input model, so we
-                // don't have to query against those statements on the next 
-                // iteration of the loop on this file.
-                inputModel.remove(constructModel);
-
-            }
-            
-            // Add to the remainder model the statements from this file that 
-            // didn't get siphoned off to the type files.
-            remainderModel.add(inputModel);
+            processInputFile(file, modelsByType, remainderModel);
         }
         
+        writeModelsToFiles(outputDir, modelsByType, remainderModel);
+        
+        return outputDir;
+                                                                                                                               
+    }
+    
+    private void writeModelsToFiles(String outputDir, Map<BibframeType, 
+            Model> modelsByType, Model remainderModel) {
+                   
         // After processing all input files, write models to output files
         for (BibframeType type: typesToSplit) {   
             String outFileName = type.localname() + 
@@ -134,12 +97,57 @@ public class TypeSplitter extends Processor {
         String remainderFileName = 
                 "Other" + this.rdfFormat.fullExtension();
         writeModelToFile(outputDir, remainderFileName, remainderModel);
-
-        return outputDir;
-                                                                                                                               
+        
     }
-    
-    
+
+    private void processInputFile(File inputFile, Map<BibframeType, 
+            Model> modelsByType, Model remainderModel) {
+            
+        // Read RDF from file into a model
+        Model inputModel = getModelFromFile(inputFile);
+        
+        // Map each Bibframe type to a construct query used to populate the 
+        // model. NB We need the model to create the type resource in the
+        // query.
+        Map<BibframeType, Query> constructQueriesByType = 
+                getConstructQueriesByType(inputModel);
+        
+        // For each Bibframe type
+        for (BibframeType type: typesToSplit) {
+            
+            // Get the query and model for this type
+            Query queryForType = constructQueriesByType.get(type);
+            Model modelForType = modelsByType.get(type);
+            splitByType(type, queryForType, modelForType, inputModel);
+            
+        }
+        
+        // Add to the remainder model the statements from this file that 
+        // didn't get siphoned off to the type files.
+        remainderModel.add(inputModel);
+    }
+
+
+    private void splitByType(BibframeType type, Query query, Model modelForType,
+            Model inputModel) {
+ 
+        // Run the query against the input model
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, inputModel);
+        Model constructModel = qexec.execConstruct();
+        qexec.close();
+
+        // Add resulting graph to the model for this type
+        // *** TODO Make sure this modifies the model in the map -
+        // modelForType should be a reference
+        modelForType.add(constructModel);
+        
+        // Remove the resulting graph from the input model, so we
+        // don't have to query against those statements on the next 
+        // iteration of the loop on this file.
+        inputModel.remove(constructModel);        
+    }
+
     private Map<BibframeType, Model> getModelsByType() {
         
         Map<BibframeType, Model> modelsByType = 
@@ -165,7 +173,7 @@ public class TypeSplitter extends Processor {
                 .addWhere("?s", "?p", "?o")
                 .addWhere("?s", RDF.type, typeResource);
             Query typeQuery = cb.build();
-            logger.debug(typeQuery.serialize());
+            // logger.debug(typeQuery.serialize());
             constructQueriesByType.put(type, typeQuery);
         }
         

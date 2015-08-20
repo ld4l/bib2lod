@@ -36,7 +36,7 @@ public class UriDeduper extends Processor {
             return null;
         }
         
-        logger.debug("input directory = " + inputDir);
+        //logger.debug("input directory = " + inputDir);
         
         return outputDir;
 
