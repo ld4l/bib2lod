@@ -1,17 +1,21 @@
 package org.ld4l.bib2lod;
 
-
+// TODO This can probably be removed.
 public enum BibframeType {
     
     ANNOTATION ("Annotation"),
     AUTHORITY ("Authority"),
+    FAMILY ("Family"),
     HELD_ITEM ("HeldItem"),
     INSTANCE ("Instance"),
+    JURISDICTION ("Jurisdiction"),
+    MEETING ("Meeting"),
     ORGANIZATION ("Organization"),
     // External namespace: e.g.
     // CREATOR ("
     PERSON ("Person"),
     PLACE ("Place"),
+    TEMPORAL ("Temporal"),
     TITLE ("Title"),
     TOPIC ("Topic"),
     WORK ("Work");

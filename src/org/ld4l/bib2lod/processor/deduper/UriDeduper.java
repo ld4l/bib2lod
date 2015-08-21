@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.processor.deduper;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.RdfFormat;
@@ -16,10 +17,10 @@ public class UriDeduper extends Processor {
     // for example, annotations, held items, titles, since these are not 
     // re-used.
     
-    public UriDeduper(String localNamespace, RdfFormat rdfFormat, String inputDir,
-            String mainOutputDir) {
-        
-        super(localNamespace, rdfFormat, inputDir, mainOutputDir);
+    public UriDeduper(OntModel bfOntModelInf, String localNamespace, 
+            RdfFormat rdfFormat, String inputDir, String mainOutputDir) {
+                 
+        super(bfOntModelInf, localNamespace, rdfFormat, inputDir, mainOutputDir);
 
     }
     

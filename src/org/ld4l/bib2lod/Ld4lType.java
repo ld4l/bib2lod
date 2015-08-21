@@ -1,10 +1,11 @@
 package org.ld4l.bib2lod;
 
+// TODO This can probably be removed.
 public enum Ld4lType {
 
-    PERSON (Ontology.BIBFRAME_LD4L.namespace(), "Person"),
-    WORK (Ontology.BIBFRAME_LD4L.namespace(), "Work"),
-    INSTANCE (Ontology.BIBFRAME_LD4L.namespace(), "Instance"),
+    PERSON (Ontology.LD4L.namespace(), "Person"),
+    WORK (Ontology.LD4L.namespace(), "Work"),
+    INSTANCE (Ontology.LD4L.namespace(), "Instance"),
     ORGANIZATION (Ontology.FOAF.namespace(), "Organization"),
     SUBJECT (Ontology.DCTERMS.namespace(), "Subject");
 

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.arq.querybuilder.ConstructBuilder;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -44,10 +45,10 @@ public class TypeSplitter extends Processor {
       BibframeType.WORK        
     );
     
-    public TypeSplitter(String localNamespace, RdfFormat rdfFormat, String inputDir,
-            String mainOutputDir) {
+    public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
+            RdfFormat rdfFormat, String inputDir, String mainOutputDir) {
         
-        super(localNamespace, rdfFormat, inputDir, mainOutputDir);
+        super(bfOntModelInf, localNamespace, rdfFormat, inputDir, mainOutputDir);
    
     }
 
@@ -83,12 +84,13 @@ public class TypeSplitter extends Processor {
             Model> modelsByType, Model remainderModel) {
                    
         // After processing all input files, write models to output files
-        for (BibframeType type: typesToSplit) {   
-            String outFileName = type.localname() + 
-                    this.rdfFormat.fullExtension();
-            Model modelForType = modelsByType.get(type);                                                                                                                    
-            writeModelToFile(outputDir, outFileName, modelForType);
-
+        for (BibframeType type: typesToSplit) {  
+            Model modelForType = modelsByType.get(type);
+            if (! modelForType.isEmpty()) {
+                String outFileName = type.localname() + 
+                        this.rdfFormat.fullExtension();                                                                                                                        
+                writeModelToFile(outputDir, outFileName, modelForType);
+            }
         }      
         
         // Write any remaining triples out to a separate file. 
@@ -104,7 +106,7 @@ public class TypeSplitter extends Processor {
             Model> modelsByType, Model remainderModel) {
             
         // Read RDF from file into a model
-        Model inputModel = getModelFromFile(inputFile);
+        Model inputModel = readModelFromFile(inputFile);
         
         // Map each Bibframe type to a construct query used to populate the 
         // model. NB We need the model to create the type resource in the

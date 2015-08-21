@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -24,6 +25,8 @@ public abstract class Processor {
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(Processor.class);
     
+    protected OntModel bfOntModelInf;
+    
     protected String localNamespace;
     protected RdfFormat rdfFormat;
     
@@ -31,8 +34,10 @@ public abstract class Processor {
     private String mainOutputDir;
     
     
-    public Processor(String localNamespace, RdfFormat rdfFormat, String inputDir, 
-            String mainOutputDir) {
+    public Processor(OntModel bfOntModelInf, String localNamespace,  
+            RdfFormat rdfFormat, String inputDir, String mainOutputDir) {
+        
+        this.bfOntModelInf = bfOntModelInf;
         
         this.localNamespace = localNamespace;
         this.rdfFormat = rdfFormat;
@@ -44,11 +49,11 @@ public abstract class Processor {
     
     public abstract String process();
     
-    protected Model getModelFromFile(File file) {
-        return getModelFromFile(file.toString());
+    protected Model readModelFromFile(File file) {
+        return readModelFromFile(file.toString());
     }
     
-    protected Model getModelFromFile(String filename) {
+    protected Model readModelFromFile(String filename) {
         //return RDFDataMgr.loadModel(filename);
         Model model = ModelFactory.createDefaultModel() ; 
         model.read(filename);
