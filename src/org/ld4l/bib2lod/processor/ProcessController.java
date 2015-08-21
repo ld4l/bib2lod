@@ -67,20 +67,31 @@ public class ProcessController {
         this.ld4lInf = ModelFactory.createOntologyModel(
                 OntModelSpec.OWL_MEM_MICRO_RULE_INF, ld4lBase);  
 
-        if (logger.isDebugEnabled()) {
-            String bfNamespace = Ontology.BIBFRAME.namespace();
-            OntClass person = bfBase.getOntClass(bfNamespace  + "Person");
-            Individual p1 = bfBase.createIndividual(bfNamespace + "person1", person);
-            
-            for (Iterator<Resource> i = p1.listRDFTypes(true); i.hasNext();) {
-                logger.debug(p1.getURI() + " is asserted in class " + i.next());
-            }
-            p1 = bfOntModelInf.getIndividual(bfNamespace + "person1");
-            for (Iterator<Resource> i = p1.listRDFTypes(false); i.hasNext();) {
-                // NB This includes the asserted as well as the inferred classes.
-                logger.debug(p1.getURI() + " is inferred to be in class " + i.next());
-            }
-        }
+//        if (logger.isDebugEnabled()) {
+//            String bfNamespace = Ontology.BIBFRAME.namespace();
+//            OntClass person = bfBase.getOntClass(bfNamespace  + "Person");
+//            Individual p1 = bfBase.createIndividual(bfNamespace + "person1", person);
+//            
+//            for (Iterator<Resource> i = p1.listRDFTypes(true); i.hasNext();) {
+//                logger.debug(p1.getURI() + " is asserted in class " + i.next());
+//            }
+//            
+//            p1 = bfOntModelInf.getIndividual(bfNamespace + "person1");
+//            for (Iterator<Resource> i = p1.listRDFTypes(false); i.hasNext();) {
+//                // NB This includes the asserted as well as the inferred classes.
+//                logger.debug(p1.getURI() + " is inferred to be in class " + i.next());
+//            }
+//            
+//            for (Iterator<Resource> i = p1.listRDFTypes(true); i.hasNext();) {
+//                // NB This includes the asserted as well as the inferred classes.
+//                logger.debug(p1.getURI() + " is directly inferred to be in class " + i.next());
+//            }
+//            
+//            OntClass personClass = bfOntModelInf.getOntClass(bfNamespace + "Person");
+//            for (Iterator<OntClass> i = personClass.listSuperClasses(); i.hasNext();) {
+//                logger.debug(personClass.getURI() + " is a subclass of " + i.next());
+//            }           
+//        }
     }
     
     public String processAll(List<Action> actions) {
