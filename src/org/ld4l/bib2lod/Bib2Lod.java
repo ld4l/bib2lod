@@ -279,6 +279,8 @@ public class Bib2Lod {
                 .build();
         options.addOption(namespaceOption);
         
+         // TODO Since we need to write out ntriples regardless of input format, we can
+         // just deduce input format - naively for now, from file extensions.
         Option formatOption = Option.builder("f")
                 .longOpt("format")
                 .required(false)
