@@ -51,7 +51,8 @@ public class ProcessController {
         // hard-coded. But if we loop through the rdf directory, we don't get
         // named references to the models.
         // See https://jena.apache.org/documentation/ontology/#creating-ontology-models
-        // on managing file references.
+        // on managing file references. Use Jena's DocumentManager and
+        // FileManager.
         String rdfDir = "rdf";
         
 
@@ -110,8 +111,13 @@ public class ProcessController {
         // passed in the resultsDir of the previous process, not this.inputPath.
         
         if (actions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
-            // TODO Not sure whether we need to send both bfBase and bfInf. Is
-            // the inference model enough?
+
+            // TODO Add another process to convert blank nodes to URI resources.
+            // Also much easier using ntriples.
+//            BlankNodeToUriConverter bnodeConverter = 
+//                    new BlankNodeToUriConverter(bfOntModelInf, localNamespace, 
+//                            rdfFormat, currentInputDir, mainOutputDir);
+            
             TypeSplitter splitter = new TypeSplitter(bfOntModelInf, localNamespace, rdfFormat, 
                     currentInputDir, mainOutputDir);
             outputDir = splitter.process();
