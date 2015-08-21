@@ -60,11 +60,6 @@ public abstract class Processor {
         return model;
     }
     
-    protected void writeModelToFile(String filename, String outputDir) {
-        // get an output stream
-        // RDFDataMgr.write(OutputStream, Model, serialization)
-    }
-    
     /**
      * Create a subdirectory of main output directory for the output of this
      * process.
