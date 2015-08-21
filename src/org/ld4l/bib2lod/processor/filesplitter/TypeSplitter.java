@@ -1,12 +1,15 @@
 package org.ld4l.bib2lod.processor.filesplitter;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.arq.querybuilder.ConstructBuilder;
+import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Query;
@@ -19,6 +22,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.BibframeType;
+import org.ld4l.bib2lod.Ontology;
 import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.Processor;
 
@@ -34,9 +38,12 @@ public class TypeSplitter extends Processor {
     // bf:Authority.
     // TODO Figure out if other types should be included here.
     private static List<BibframeType> typesToSplit = Arrays.asList(
-      BibframeType.ANNOTATION,  
+      BibframeType.ANNOTATION,
+      BibframeType.FAMILY,
       BibframeType.HELD_ITEM,
       BibframeType.INSTANCE,
+      BibframeType.JURISDICTION,
+      BibframeType.MEETING,
       BibframeType.ORGANIZATION,
       BibframeType.PERSON,
       BibframeType.PLACE,
@@ -140,8 +147,6 @@ public class TypeSplitter extends Processor {
         qexec.close();
 
         // Add resulting graph to the model for this type
-        // *** TODO Make sure this modifies the model in the map -
-        // modelForType should be a reference
         modelForType.add(constructModel);
         
         // Remove the resulting graph from the input model, so we

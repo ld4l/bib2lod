@@ -1,11 +1,10 @@
 package org.ld4l.bib2lod;
 
-// TODO This can probably be removed.
 public enum Ld4lType {
 
-    PERSON (Ontology.LD4L.namespace(), "Person"),
-    WORK (Ontology.LD4L.namespace(), "Work"),
-    INSTANCE (Ontology.LD4L.namespace(), "Instance"),
+    PERSON ("Person"),
+    WORK ("Work"),
+    INSTANCE ("Instance"),
     ORGANIZATION (Ontology.FOAF.namespace(), "Organization"),
     SUBJECT (Ontology.DCTERMS.namespace(), "Subject");
 
@@ -13,10 +12,24 @@ public enum Ld4lType {
     private final String localname;
     // private final String uri;
 
+    /** 
+     * Constructor for types in external namespaces.
+     * 
+     * @param namespace
+     * @param localname
+     */    
     Ld4lType(String namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
         // this.uri = namespace + localname;
+    }
+
+    /**
+     * Constructor for types in LD4L namespace.
+     * @param localname
+     */
+    Ld4lType(String localname) {
+        this(Ontology.LD4L.namespace(), localname);
     }
     
     public String uri() {
