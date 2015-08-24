@@ -55,7 +55,6 @@ public class ProcessController {
         // FileManager.
         String rdfDir = "rdf";
         
-
         File bfOntFile = new File(rdfDir, Ontology.BIBFRAME.filename());
         OntModel bfBase = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
         bfBase.read(bfOntFile.toString(), "RDF/XML"); 
@@ -106,14 +105,18 @@ public class ProcessController {
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.
         // Use Action rank to order the actions
+        
+        // Correct errors in the Bibframe RDF that choke the ingest process.
+        // Could do this after deduping, but probably these corrections should 
+        // be included in deduped data.
 
         // NB If there are earlier actions, the TypeSplitter constructor gets
         // passed in the resultsDir of the previous process, not this.inputPath.
         
         if (actions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
 
-            // TODO Add another process to convert blank nodes to URI resources.
-            // Also much easier using ntriples.
+            // TODO Maybe: add another process to convert blank nodes to URI 
+            // resources. Not sure if needed.
 //            BlankNodeToUriConverter bnodeConverter = 
 //                    new BlankNodeToUriConverter(bfOntModelInf, localNamespace, 
 //                            rdfFormat, currentInputDir, mainOutputDir);
@@ -125,7 +128,11 @@ public class ProcessController {
         
         // TODO Insert other processes here
         // currentInputDir = previous outputDir
-        // New outputDir defined by processor
+        // New outputDir defined by processor.
+        // Stages:
+        // Convert Bibframe RDF to LD4L RDF
+        // Entity resolution
+        
 
         // Return path to final results.
         logger.trace("Done!");
