@@ -6,6 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.arq.querybuilder.ConstructBuilder;
 import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
@@ -28,14 +29,11 @@ public class TypeSplitter extends Processor {
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubdir = "statementsBySubjectType";
     
-    // An array-backed list should be fine here; we don't need to modify it. We
-    // need to exclude supertypes of the types we want to collect, such as 
-    // bf:Authority.
     // TODO Figure out if other types should be included here.
     // NB These must be explicitly specified. We don't want to split on all
-    // types (e.g., supertypes of these, such as Agent), and we don't always 
-    // want to split on the lowest type in the hierarchy (e.g., we want to split
-    // on Work rather than its subtypes).
+    // types (e.g., supertypes of these, such as Agent, Authority), and we don't 
+    // always want to split on the lowest type in the hierarchy (e.g., we want 
+    // to split on Work rather than its subtypes).
     private static final List<String> typesToSplit = Arrays.asList(
       Ontology.BIBFRAME.namespace() + "Annotation",
       Ontology.BIBFRAME.namespace() + "Family",
@@ -68,10 +66,10 @@ public class TypeSplitter extends Processor {
         
         // Map each Bibframe type to an (empty for now) model
         // TODO Here and elsewhere - maybe just use uris (Strings) as keys 
-        // instead of OntClasses? The only place we're actually using the 
+        // instead of Stringes? The only place we're actually using the 
         // class rather than the uri is in getting the filename - which we 
         // could do with a String manipulation.
-        Map<OntClass, Model> modelsByType = getModelsByType();
+        Map<String, Model> modelsByType = getModelsByType();
 
         // Create another model to accumulate any leftover triples that didn't
         // get put into a type model. 
@@ -82,7 +80,7 @@ public class TypeSplitter extends Processor {
         // Map each Bibframe type to a construct query used to populate the 
         // model. NB We need the model to create the type resource in the
         // query.
-        Map<OntClass, Query> constructQueriesByType = getConstructQueriesByType();
+        Map<String, Query> constructQueriesByType = getConstructQueriesByType();
                 
         
         // For each file in the input directory
@@ -97,11 +95,11 @@ public class TypeSplitter extends Processor {
                                                                                                                                
     }
     
-    private void writeModelsToFiles(String outputDir, Map<OntClass, 
+    private void writeModelsToFiles(String outputDir, Map<String, 
             Model> modelsByType, Model remainderModel) {
                    
         // After processing all input files, write models to output files
-        for (OntClass ontClass: modelsByType.keySet()) {  
+        for (String ontClass: modelsByType.keySet()) {  
             Model model = modelsByType.get(ontClass);
             if (! model.isEmpty()) {
                 String outFileName = getFilenameForType(ontClass);                                                                                                                 
@@ -118,20 +116,21 @@ public class TypeSplitter extends Processor {
         
     }
 
-    private String getFilenameForType(OntClass ontClass) {
-        return Ontology.BIBFRAME.prefix() + ontClass.getLocalName();
+    private String getFilenameForType(String uri) {
+        return Ontology.BIBFRAME.prefix() + 
+                StringUtils.substringAfterLast(uri, "/");
     }
 
     private void processInputFile(File inputFile, 
-            Map<OntClass, Model> modelsByType, Model remainderModel, 
-            Map<OntClass, Query> constructQueriesByType) {
+            Map<String, Model> modelsByType, Model remainderModel, 
+            Map<String, Query> constructQueriesByType) {
             
         // Read RDF from file into a model
         Model inputModel = readModelFromFile(inputFile);
    
         // For each Bibframe type
         // for (String uri: typesToSplit) {       
-        for (OntClass ontClass : constructQueriesByType.keySet()) {
+        for (String ontClass : constructQueriesByType.keySet()) {
             // Get the query and model for this type
             Query query = constructQueriesByType.get(ontClass);
             Model model = modelsByType.get(ontClass);
@@ -162,34 +161,32 @@ public class TypeSplitter extends Processor {
         inputModel.remove(constructModel);        
     }
 
-    private Map<OntClass, Model> getModelsByType() {
+    private Map<String, Model> getModelsByType() {
         
-        Map<OntClass, Model> modelsByType = 
-                new HashMap<OntClass, Model>();
+        Map<String, Model> modelsByType = 
+                new HashMap<String, Model>();
 
         for (String uri: typesToSplit) {
-            Model model = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-            OntClass ontClass = bfOntModelInf.getOntClass(uri);
-            modelsByType.put(ontClass, model);     
+            modelsByType.put(uri, 
+                    ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
 
         return modelsByType;
     }
     
-    private Map<OntClass, Query> getConstructQueriesByType() {
+    private Map<String, Query> getConstructQueriesByType() {
 
-        Map<OntClass, Query> constructQueriesByType = 
-                new HashMap<OntClass, Query>();
+        Map<String, Query> constructQueriesByType = 
+                new HashMap<String, Query>();
         
         for (String uri : typesToSplit) {
-            OntClass ontClass = bfOntModelInf.getOntClass(uri);
             ConstructBuilder cb = new ConstructBuilder() 
                 .addConstruct("?s", "?p", "?o")
                 .addWhere("?s", "?p", "?o")
-                .addWhere("?s", RDF.type, ontClass);
+                .addWhere("?s", RDF.type, bfOntModelInf.getOntClass(uri));
             Query query = cb.build();
             //logger.debug(query.serialize());
-            constructQueriesByType.put(ontClass, query);
+            constructQueriesByType.put(uri, query);
         }
         
         return constructQueriesByType;  

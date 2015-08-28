@@ -49,6 +49,22 @@ public abstract class Processor {
 
     }
     
+    /**
+     * Constructor for processes that don't use OntModels.
+     * @param localNamespace
+     * @param inputDir
+     * @param mainOutputDir
+     */
+    public Processor(String localNamespace, String inputDir, 
+            String mainOutputDir) {
+            
+        this.localNamespace = localNamespace;
+        
+        this.inputDir = inputDir;
+        this.mainOutputDir = mainOutputDir;
+
+    }
+    
     public abstract String process();
     
     protected Model readModelFromFile(File file) {
