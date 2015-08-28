@@ -1,15 +1,12 @@
 package org.ld4l.bib2lod.processor.filesplitter;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.arq.querybuilder.ConstructBuilder;
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Query;
@@ -22,8 +19,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.BibframeType;
-import org.ld4l.bib2lod.Ontology;
-import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.Processor;
 
 
@@ -94,8 +89,7 @@ public class TypeSplitter extends Processor {
         for (BibframeType type: typesToSplit) {  
             Model modelForType = modelsByType.get(type);
             if (! modelForType.isEmpty()) {
-                String outFileName = type.localname() + 
-                        DEFAULT_FORMAT.fullExtension();                                                                                                                        
+                String outFileName = type.localname() ;                                                                                                                       
                 writeModelToFile(outputDir, outFileName, modelForType);
             }
         }      
@@ -103,8 +97,8 @@ public class TypeSplitter extends Processor {
         // Write any remaining triples out to a separate file. 
         // TODO Later these should be analyzed to see if we need to add more 
         // types to split on. For now we just don't want to lose them.
-        String remainderFileName = 
-                "Other" + DEFAULT_FORMAT.fullExtension();
+        String remainderFileName = "Other";
+                
         writeModelToFile(outputDir, remainderFileName, remainderModel);
         
     }

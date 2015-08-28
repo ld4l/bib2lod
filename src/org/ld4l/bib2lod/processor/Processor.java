@@ -7,6 +7,7 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -15,17 +16,19 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RDFFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.RdfFormat;
 
 
 public abstract class Processor {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(Processor.class);   
-    protected static final RdfFormat DEFAULT_FORMAT = RdfFormat.NTRIPLES;
     
+    private static final RDFFormat DEFAULT_FORMAT = RDFFormat.NTRIPLES;
+    private static final String DEFAULT_FORMAT_FILE_EXTENSION = "nt";
+
     protected OntModel bfOntModelInf;
     
     protected String localNamespace;
@@ -113,11 +116,12 @@ public abstract class Processor {
     protected void writeModelToFile(String outputDir, String outFileName, 
             Model model) {          
             
-        File outFile = new File(outputDir, outFileName);
+        File outFile = new File(outputDir, outFileName + "." + 
+                DEFAULT_FORMAT_FILE_EXTENSION);
     
         try {
             FileOutputStream outStream = new FileOutputStream(outFile);
-            RDFDataMgr.write(outStream, model, DEFAULT_FORMAT.rdfFormat());
+            RDFDataMgr.write(outStream, model, DEFAULT_FORMAT);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

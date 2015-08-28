@@ -3,7 +3,6 @@ package org.ld4l.bib2lod.processor.deduper;
 import org.apache.jena.ontology.OntModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.Processor;
 import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 

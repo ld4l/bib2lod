@@ -10,7 +10,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
 import org.ld4l.bib2lod.Ontology;
-import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
 
@@ -18,9 +17,7 @@ import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 public class ProcessController {
 
     private static final Logger logger = LogManager.getLogger(ProcessController.class);
-    
 
-    
     protected String localNamespace;
     
     protected String inputDir;
