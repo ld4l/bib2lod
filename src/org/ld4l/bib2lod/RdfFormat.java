@@ -48,7 +48,7 @@ public enum RdfFormat {
     private static final Map<RDFFormat, RdfFormat> lookupByRDFFormat = 
             new HashMap<RDFFormat, RdfFormat>();
     
-    private static List<String> validFormats = 
+    private static List<String> allFormats = 
             new ArrayList<String>();
     
     static {
@@ -57,7 +57,7 @@ public enum RdfFormat {
             lookup.put(format, rf);
             RDFFormat rdfFormat = rf.rdfFormat;
             lookupByRDFFormat.put(rdfFormat, rf);
-            validFormats.add(format);
+            allFormats.add(format);
         }
     }
 
@@ -69,8 +69,8 @@ public enum RdfFormat {
         return lookupByRDFFormat.get(format);
     }
     
-    public static List<String> validFormats() {
-        return validFormats;
+    public static List<String> allFormats() {
+        return allFormats;
     }
     
 }

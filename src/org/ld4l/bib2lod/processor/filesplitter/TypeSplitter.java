@@ -53,9 +53,9 @@ public class TypeSplitter extends Processor {
     );
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
-            RdfFormat rdfFormat, String inputDir, String mainOutputDir) {
+            String inputDir, String mainOutputDir) {
         
-        super(bfOntModelInf, localNamespace, rdfFormat, inputDir, mainOutputDir);
+        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
    
     }
 
@@ -95,7 +95,7 @@ public class TypeSplitter extends Processor {
             Model modelForType = modelsByType.get(type);
             if (! modelForType.isEmpty()) {
                 String outFileName = type.localname() + 
-                        this.rdfFormat.fullExtension();                                                                                                                        
+                        DEFAULT_FORMAT.fullExtension();                                                                                                                        
                 writeModelToFile(outputDir, outFileName, modelForType);
             }
         }      
@@ -104,7 +104,7 @@ public class TypeSplitter extends Processor {
         // TODO Later these should be analyzed to see if we need to add more 
         // types to split on. For now we just don't want to lose them.
         String remainderFileName = 
-                "Other" + this.rdfFormat.fullExtension();
+                "Other" + DEFAULT_FORMAT.fullExtension();
         writeModelToFile(outputDir, remainderFileName, remainderModel);
         
     }

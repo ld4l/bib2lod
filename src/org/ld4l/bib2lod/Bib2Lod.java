@@ -28,10 +28,8 @@ public class Bib2Lod {
     
     private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
    
-    private static final List<String> validActions = Action.validActions();
+    private static final List<String> VALID_ACTIONS = Action.validActions();
     
-    private static final List<String> validFormats = RdfFormat.validFormats();
-    private static final RdfFormat defaultFormat = RdfFormat.RDFXML;
 
 
     /** 
@@ -60,8 +58,6 @@ public class Bib2Lod {
             return;
         }
 
-        RdfFormat format = getValidFormat(cmd.getOptionValue("format"));
-
         String absInputDir = getAbsoluteInputDir(
                 cmd.getOptionValue("indir"));
         if (absInputDir == null) {
@@ -75,7 +71,7 @@ public class Bib2Lod {
         }
                
         ProcessController processController = new ProcessController(namespace, 
-                format, absInputDir, absTopLevelOutputDir); 
+                absInputDir, absTopLevelOutputDir); 
         String absFinalOutpuDir = processController.processAll(actions);
         if (absFinalOutpuDir == null) {
             logger.trace("Processing failed.");
@@ -85,22 +81,6 @@ public class Bib2Lod {
 
     }
 
-    private static RdfFormat getValidFormat(String selectedFormat) {
-
-        if (selectedFormat == null) {
-            return defaultFormat;
-        } else {
-            RdfFormat format = RdfFormat.get(selectedFormat);
-            // *** TODO test that a bad format returns null here
-            if (format != null) {
-                return format;
-            } else {
-                logger.error("Invalid format. Using default format " 
-                        + defaultFormat.format() + ".");                    
-                return defaultFormat;                
-            }
-        }
-    }
 
     /**
      * Validate actions.
@@ -277,19 +257,7 @@ public class Bib2Lod {
                 // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
                 .build();
-        options.addOption(namespaceOption);
-        
-         // TODO Since we need to write out ntriples regardless of input format, we can
-         // just deduce input format - naively for now, from file extensions.
-        Option formatOption = Option.builder("f")
-                .longOpt("format")
-                .required(false)
-                .hasArg()
-                .desc("RDF serialization format of input and output. Valid"
-                        + " formats: " + StringUtils.join(validFormats, ", ") 
-                        + ". Defaults to " + defaultFormat.format() + ".")
-                .build();
-        options.addOption(formatOption);      
+        options.addOption(namespaceOption);     
 
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
@@ -298,7 +266,7 @@ public class Bib2Lod {
                 .required()
                 .hasArg()
                 .desc("Processing actions. Valid actions: " 
-                        + StringUtils.join(validActions, ", ") + ".")
+                        + StringUtils.join(VALID_ACTIONS, ", ") + ".")
                 .argName("dedupe")
                 .build();
         options.addOption(actions);

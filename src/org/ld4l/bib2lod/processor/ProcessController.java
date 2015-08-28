@@ -1,15 +1,11 @@
 package org.ld4l.bib2lod.processor;
 
 import java.io.File;
-import java.util.Iterator;
 import java.util.List;
 
-import org.apache.jena.ontology.Individual;
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
@@ -23,8 +19,9 @@ public class ProcessController {
 
     private static final Logger logger = LogManager.getLogger(ProcessController.class);
     
+
+    
     protected String localNamespace;
-    protected RdfFormat rdfFormat;
     
     protected String inputDir;
     protected String mainOutputDir;
@@ -32,11 +29,9 @@ public class ProcessController {
     protected OntModel bfOntModelInf;
     protected OntModel ld4lInf;
     
-    public ProcessController(String localNamespace, RdfFormat rdfFormat, 
-            String inputDir, String outputDir) {
+    public ProcessController(String localNamespace, String inputDir, String outputDir) {
         
         this.localNamespace = localNamespace;
-        this.rdfFormat = rdfFormat;
         
         this.inputDir = inputDir;
         this.mainOutputDir = outputDir;
@@ -121,8 +116,8 @@ public class ProcessController {
 //                    new BlankNodeToUriConverter(bfOntModelInf, localNamespace, 
 //                            rdfFormat, currentInputDir, mainOutputDir);
             
-            TypeSplitter splitter = new TypeSplitter(bfOntModelInf, localNamespace, rdfFormat, 
-                    currentInputDir, mainOutputDir);
+            TypeSplitter splitter = new TypeSplitter(bfOntModelInf, 
+                    localNamespace,currentInputDir, mainOutputDir);
             outputDir = splitter.process();
         }
         

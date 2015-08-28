@@ -23,24 +23,24 @@ import org.ld4l.bib2lod.RdfFormat;
 public abstract class Processor {
 
     @SuppressWarnings("unused")
-    private static final Logger logger = LogManager.getLogger(Processor.class);
+    private static final Logger logger = LogManager.getLogger(Processor.class);   
+    protected static final RdfFormat DEFAULT_FORMAT = RdfFormat.NTRIPLES;
     
     protected OntModel bfOntModelInf;
     
     protected String localNamespace;
-    protected RdfFormat rdfFormat;
     
     protected String inputDir;
     private String mainOutputDir;
+
     
     
     public Processor(OntModel bfOntModelInf, String localNamespace,  
-            RdfFormat rdfFormat, String inputDir, String mainOutputDir) {
+            String inputDir, String mainOutputDir) {
         
         this.bfOntModelInf = bfOntModelInf;
         
         this.localNamespace = localNamespace;
-        this.rdfFormat = rdfFormat;
         
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
@@ -117,7 +117,7 @@ public abstract class Processor {
     
         try {
             FileOutputStream outStream = new FileOutputStream(outFile);
-            RDFDataMgr.write(outStream, model, this.rdfFormat.rdfFormat());
+            RDFDataMgr.write(outStream, model, DEFAULT_FORMAT.rdfFormat());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
