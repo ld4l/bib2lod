@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.arq.querybuilder.ConstructBuilder;
-import org.apache.jena.ontology.OntClass;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.Query;
@@ -59,16 +58,7 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
 
-        String outputDir = createOutputDir(outputSubdir);
-        if (outputDir == null) {
-            return null;
-        }
-        
         // Map each Bibframe type to an (empty for now) model
-        // TODO Here and elsewhere - maybe just use uris (Strings) as keys 
-        // instead of Stringes? The only place we're actually using the 
-        // class rather than the uri is in getting the filename - which we 
-        // could do with a String manipulation.
         Map<String, Model> modelsByType = getModelsByType();
 
         // Create another model to accumulate any leftover triples that didn't
@@ -89,15 +79,20 @@ public class TypeSplitter extends Processor {
                     constructQueriesByType);
         }
         
-        writeModelsToFiles(outputDir, modelsByType, remainderModel);
-        
+        String outputDir = writeModelsToFiles(modelsByType, remainderModel);
+                      
         return outputDir;
                                                                                                                                
     }
     
-    private void writeModelsToFiles(String outputDir, Map<String, 
-            Model> modelsByType, Model remainderModel) {
-                   
+    private String writeModelsToFiles(Map<String, Model> modelsByType, 
+            Model remainderModel) {
+            
+        String outputDir = createOutputDir(outputSubdir);
+        if (outputDir == null) {
+            return null;
+        }
+              
         // After processing all input files, write models to output files
         for (String ontClass: modelsByType.keySet()) {  
             Model model = modelsByType.get(ontClass);
@@ -113,6 +108,8 @@ public class TypeSplitter extends Processor {
         String remainderFileName = "Other";
                 
         writeModelToFile(outputDir, remainderFileName, remainderModel);
+        
+        return outputDir;
         
     }
 
