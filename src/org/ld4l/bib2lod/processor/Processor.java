@@ -6,6 +6,7 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Paths;
+import java.util.List;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -39,6 +40,8 @@ public abstract class Processor {
     
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
+
+        logger.debug("In constructor for " + this.getClass().toString());
         
         this.bfOntModelInf = bfOntModelInf;
         
@@ -57,7 +60,9 @@ public abstract class Processor {
      */
     public Processor(String localNamespace, String inputDir, 
             String mainOutputDir) {
-            
+
+        logger.debug("In constructor for " + this.getClass().toString());
+        
         this.localNamespace = localNamespace;
         
         this.inputDir = inputDir;
@@ -128,8 +133,8 @@ public abstract class Processor {
         return buffer.toString();
     }
     
-    protected void writeModelToFile(String outputDir, String outFileName, 
-            Model model) {          
+    protected void writeModelToFile(Model model, String outputDir, 
+            String outFileName) {          
             
         File outFile = new File(outputDir, outFileName + "." + 
                 DEFAULT_FORMAT_FILE_EXTENSION);
@@ -141,6 +146,15 @@ public abstract class Processor {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    
+    protected void writeFiles(List<FileOutputStream> streams, 
+            String outputDir) {
+        
+        for (FileOutputStream stream : streams) {
+            
+        }
+        
     }
     
 

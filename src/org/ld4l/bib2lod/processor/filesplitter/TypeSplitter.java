@@ -52,7 +52,7 @@ public class TypeSplitter extends Processor {
             String inputDir, String mainOutputDir) {
         
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
-  
+
     }
 
     @Override
@@ -72,7 +72,6 @@ public class TypeSplitter extends Processor {
         // query.
         Map<String, Query> constructQueriesByType = getConstructQueriesByType();
                 
-        
         // For each file in the input directory
         for ( File file : new File(inputDir).listFiles() ) {
             processInputFile(file, modelsByType, remainderModel, 
@@ -98,7 +97,7 @@ public class TypeSplitter extends Processor {
             Model model = modelsByType.get(ontClass);
             if (! model.isEmpty()) {
                 String outFileName = getFilenameForType(ontClass);                                                                                                                 
-                writeModelToFile(outputDir, outFileName, model);
+                writeModelToFile(model, outputDir, outFileName);
             }
         }      
         
@@ -107,7 +106,7 @@ public class TypeSplitter extends Processor {
         // types to split on. For now we just don't want to lose them.
         String remainderFileName = "Other";
                 
-        writeModelToFile(outputDir, remainderFileName, remainderModel);
+        writeModelToFile(remainderModel, outputDir, remainderFileName);
         
         return outputDir;
         
@@ -188,8 +187,5 @@ public class TypeSplitter extends Processor {
         
         return constructQueriesByType;  
     }
-    
-
-
 
 }

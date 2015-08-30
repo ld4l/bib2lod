@@ -29,17 +29,20 @@ public class UriDeduper extends Processor {
     @Override
     public String process() {
 
+        // Stub method
+        return inputDir;
+
         // TODO should we use localNamespace so we dedupe only uris in that
         // namespace?
         
-        String outputDir = createOutputDir(outputSubdir);
-        if (outputDir == null) {
-            return null;
-        }
-        
-        //logger.debug("input directory = " + inputDir);
-        
-        return outputDir;
+//        String outputDir = createOutputDir(outputSubdir);
+//        if (outputDir == null) {
+//            return null;
+//        }
+//        
+//        //logger.debug("input directory = " + inputDir);
+//        
+//        return outputDir;
 
     }
 

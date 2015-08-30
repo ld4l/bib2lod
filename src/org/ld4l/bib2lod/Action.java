@@ -1,43 +1,48 @@
 package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.ld4l.bib2lod.processor.BNodeToUriConverter;
+import org.ld4l.bib2lod.processor.Processor;
+import org.ld4l.bib2lod.processor.deduper.UriDeduper;
+import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
+
 public enum Action {
 
-    // GET_MARC ("get_marc", 1),
-    // MARC2MARCXML ("marc2marcxml", 2),
+    // GET_MARC ("get_marc"),
+    // MARC2MARCXML ("marc2marcxml"),
     // Clean up MARCXML records: correct known errors, enhance with ??
-    // PREPROCESS_MARCXML ("preprocess", 3),
-    // MARCXML2BIBFRAME ("marcxml2bibframe", 4),
-    DEDUPE_BIBFRAME_URIS ("dedupe", 5);
-    // BIBFRAME2LD4L ("bibframe2ld4l, 6");
+    // PREPROCESS_MARCXML ("preprocess"),
+    // MARCXML2BIBFRAME ("marcxml2bibframe"),
+    CONVERT_BNODES("convert_bnodes", BNodeToUriConverter.class),
+    SPLIT_TYPES("split_types", TypeSplitter.class),
+    DEDUPE_BIBFRAME_URIS ("dedupe", UriDeduper.class);
+    // BIBFRAME2LD4L ("bibframe2ld4l");
+    // RESOLVE_TO_EXTERNAL_ENTITIES);
     
     private final String action;    
-    // Use for ordering actions
-    private final Integer rank;
+    private final Class<?> processorClass;
 
-    // TODO Can we make this an int rather than an Integer
-    Action(String action, Integer rank) {
+    // TODO What is the type on Class? Could we make it <Processor>?
+    Action(String action, Class<?> processorClass) {
         this.action = action;
-        this.rank = rank;
+        this.processorClass = processorClass;
     }
     
     public String action() {
         return this.action;
     }
     
-    public Integer rank() {
-        return this.rank;
+    public Class<?> processorClass() {
+        return this.processorClass;
     }
-    
+     
     private static final Map<String, Action> lookup = 
             new HashMap<String, Action>();
-
-    private static final Map<Integer, Action> byRank = 
-            new HashMap<Integer, Action>();
     
     private static List<String> validActions = 
             new ArrayList<String>();
@@ -46,8 +51,6 @@ public enum Action {
         for (Action actionValue : Action.values()) {
             String action = actionValue.action();
             lookup.put(action, actionValue);
-            Integer actionRank = actionValue.rank();
-            byRank.put(actionRank, actionValue);
             validActions.add(action);
         }
     }
@@ -56,21 +59,9 @@ public enum Action {
         return lookup.get(action); 
     }
     
-    public static Action getByRank(Integer rank) {
-        return byRank.get(rank);
-    }
-    
+
     public static List<String> validActions() {
         return validActions;
-    }
-    
-
-    
-
-    
-    public static Action getByRank(int rank) {
-        return byRank.get(rank);
-        
     }
     
 }

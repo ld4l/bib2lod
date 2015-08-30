@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.processor;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
 import org.apache.jena.ontology.OntModel;
@@ -86,35 +88,74 @@ public class ProcessController {
 //        }
     }
     
-    public String processAll(List<Action> actions) {
+    public String processAll(List<Action> selectedActions) {
         
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
-        String outputDir = null;
-        String currentInputDir = this.inputDir;
+        String outputDir = this.inputDir;
         
         // TODO Implement earlier actions: marcxml pre-processing, 
-        // marcxml2bibframe conversion, etc.
-        // Use Action rank to order the actions
-        
+        // marcxml2bibframe conversion, etc.        
         // Correct errors in the Bibframe RDF that choke the ingest process.
         // Could do this after deduping, but probably these corrections should 
         // be included in deduped data.
 
-        // NB If there are earlier actions, the TypeSplitter constructor gets
-        // passed in the resultsDir of the previous process, not this.inputPath.
-        
-        if (actions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
+        for (Action a : Action.values()) {
+            Class<?> c = a.processorClass();
+            if (selectedActions.contains(a)) {
+                Processor processor;
+                Constructor<?> constructor;
+                try {
+                    constructor = c.getConstructor(
+                            OntModel.class, String.class, String.class, 
+                            String.class);
+                    processor = (Processor) constructor.newInstance(
+                            bfOntModelInf,localNamespace, outputDir, 
+                            mainOutputDir);
+                } catch (NoSuchMethodException e) {
+                    try {
+                        constructor = c.getConstructor(String.class, 
+                                String.class, String.class);
+                        processor = (Processor) constructor.newInstance(
+                                localNamespace, outputDir, mainOutputDir);          
+                    } catch (Exception e1) {
+                        e1.printStackTrace();
+                        return null;
+                    }
+                    try {
+                        
+                    } catch (Exception e1) {
+                        // TODO Auto-generated catch block
+                        e1.printStackTrace();
+                    } 
+                } catch (Exception e) {
+                    e.printStackTrace();
+                    return null;
+                }
+                logger.debug("Output dir = " + outputDir);
+                outputDir = processor.process();
+            }
 
-            // TODO Maybe: add another process to convert blank nodes to URI 
-            // resources. Not sure if needed.
-//            BlankNodeToUriConverter bnodeConverter = 
-//                    new BlankNodeToUriConverter(bfOntModelInf, localNamespace, 
-//                            rdfFormat, currentInputDir, mainOutputDir);
+        }
+        
+
+        // Return path to final results.
+        logger.trace("Done!");
+        return outputDir;
+
+/* Previous approach where individual processors were called by name. 
+        if (selectedActions.contains(Action.CONVERT_BNODES)) {
             
-            TypeSplitter splitter = new TypeSplitter(bfOntModelInf, 
-                    localNamespace,currentInputDir, mainOutputDir);
+            Processor bnodeConverter = new BNodeToUriConverter(localNamespace,
+                    outputDir, mainOutputDir);
+            outputDir = bnodeConverter.process();
+        }
+        if (selectedActions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
+
+
+            Processor splitter = new TypeSplitter(bfOntModelInf, 
+                    localNamespace, outputDir, mainOutputDir);
             outputDir = splitter.process();
         }
         
@@ -124,12 +165,8 @@ public class ProcessController {
         // Stages:
         // Convert Bibframe RDF to LD4L RDF
         // Entity resolution
+*/
         
-
-        // Return path to final results.
-        logger.trace("Done!");
-        return outputDir;
-
     }
 
 
