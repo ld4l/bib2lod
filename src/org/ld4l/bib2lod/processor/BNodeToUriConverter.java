@@ -8,7 +8,7 @@ public class BNodeToUriConverter extends Processor {
     @SuppressWarnings("unused")
     private static final Logger logger = 
             LogManager.getLogger(BNodeToUriConverter.class);
-    private static final String outputSubdir = "noBNodes";
+    private static final String outputSubDir = "noBNodes";
     
     public BNodeToUriConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -18,9 +18,7 @@ public class BNodeToUriConverter extends Processor {
     }
 
     @Override
-    public String process() {
-        
-        return stubProcess(outputSubdir);
-        
+    public String process() {        
+        return stubProcess(outputSubDir);        
     }
 }

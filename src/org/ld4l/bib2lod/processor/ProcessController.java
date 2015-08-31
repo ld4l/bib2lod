@@ -22,7 +22,7 @@ public class ProcessController {
 
     private String localNamespace;
     
-    private String inputDir;
+    private String mainInputDir;
     private String mainOutputDir;
     
     private OntModel bfOntModelInf;
@@ -32,7 +32,7 @@ public class ProcessController {
         
         this.localNamespace = localNamespace;
         
-        this.inputDir = inputDir;
+        this.mainInputDir = inputDir;
         this.mainOutputDir = outputDir;
         
         loadOntModels();
@@ -95,11 +95,13 @@ public class ProcessController {
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
-        String outputDir = this.inputDir;
+        String newInputDir = this.mainInputDir;
+        String outputDir = null;
         
-        logger.debug("outputDir = " + outputDir);
-        logger.debug("mainOutputDir = " + mainOutputDir);
-        
+        logger.trace("STARTING processAll() method");
+        logger.trace("mainInputDir = " + mainInputDir);
+        logger.trace("newInputDir = " + newInputDir);
+
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
         // Correct errors in the Bibframe RDF that choke the ingest process.
@@ -110,20 +112,21 @@ public class ProcessController {
             Class<?> c = a.processorClass();
             if (selectedActions.contains(a)) {
                 Processor processor;
-                Constructor<?> constructor;
+                Constructor<?> constructor; 
+                logger.trace("newInputDir = " + newInputDir);
                 try {
                     constructor = c.getConstructor(
                             OntModel.class, String.class, String.class, 
                             String.class);
                     processor = (Processor) constructor.newInstance(
-                            bfOntModelInf,localNamespace, outputDir, 
+                            bfOntModelInf,localNamespace, newInputDir, 
                             mainOutputDir);
                 } catch (NoSuchMethodException e) {
                     try {
                         constructor = c.getConstructor(String.class, 
                                 String.class, String.class);
                         processor = (Processor) constructor.newInstance(
-                                localNamespace, outputDir, mainOutputDir);          
+                                localNamespace, newInputDir, mainOutputDir);          
                     } catch (Exception e1) {
                         e1.printStackTrace();
                         return null;
@@ -132,13 +135,15 @@ public class ProcessController {
                     e.printStackTrace();
                     return null;
                 }
-                logger.debug("Output dir = " + outputDir);
+                logger.trace("STARTING PROCESS " + c.getName());
+                logger.trace("newInputDir = " + newInputDir);
                 outputDir = processor.process();
+                newInputDir = outputDir;
+                logger.trace("DONE WITH PROCESS");
+                logger.trace("Output dir = " + outputDir);                
             }
-
         }
         
-
         // Return path to final results.
         logger.trace("Done!");
         return outputDir;

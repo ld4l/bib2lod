@@ -42,7 +42,7 @@ public abstract class Processor {
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
-        logger.debug("In constructor for " + this.getClass().toString());
+        logger.trace("In constructor for " + this.getClass().toString());
         
         this.bfOntModelInf = bfOntModelInf;
         
