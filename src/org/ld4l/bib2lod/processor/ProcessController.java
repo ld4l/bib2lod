@@ -20,13 +20,13 @@ public class ProcessController {
 
     private static final Logger logger = LogManager.getLogger(ProcessController.class);
 
-    protected String localNamespace;
+    private String localNamespace;
     
-    protected String inputDir;
-    protected String mainOutputDir;
+    private String inputDir;
+    private String mainOutputDir;
     
-    protected OntModel bfOntModelInf;
-    protected OntModel ld4lInf;
+    private OntModel bfOntModelInf;
+    // private OntModel ld4lInf;
     
     public ProcessController(String localNamespace, String inputDir, String outputDir) {
         
@@ -50,16 +50,18 @@ public class ProcessController {
         String rdfDir = "rdf";
         
         File bfOntFile = new File(rdfDir, Ontology.BIBFRAME.filename());
-        OntModel bfBase = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        bfBase.read(bfOntFile.toString(), "RDF/XML"); 
+        OntModel bfOntModelBase = 
+                ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+        bfOntModelBase.read(bfOntFile.toString(), "RDF/XML"); 
         this.bfOntModelInf = ModelFactory.createOntologyModel(
-                OntModelSpec.OWL_MEM_MICRO_RULE_INF, bfBase);
+                OntModelSpec.OWL_MEM_MICRO_RULE_INF, bfOntModelBase);
         
-        File ld4lOntFile = new File(rdfDir, Ontology.LD4L.filename());
-        OntModel ld4lBase = ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        ld4lBase.read(ld4lOntFile.toString(), "RDF/XML"); 
-        this.ld4lInf = ModelFactory.createOntologyModel(
-                OntModelSpec.OWL_MEM_MICRO_RULE_INF, ld4lBase);  
+//        File ld4lOntFile = new File(rdfDir, Ontology.LD4L.filename());
+//        OntModel ld4lOntModelBase = 
+//                  ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
+//        ld4lBase.read(ld4lOntFile.toString(), "RDF/XML"); 
+//        this.ld4lOntModelInf = ModelFactory.createOntologyModel(
+//                OntModelSpec.OWL_MEM_MICRO_RULE_INF, ld4lOntModelBase);  
 
 //        if (logger.isDebugEnabled()) {
 //            String bfNamespace = Ontology.BIBFRAME.namespace();
@@ -123,12 +125,6 @@ public class ProcessController {
                         e1.printStackTrace();
                         return null;
                     }
-                    try {
-                        
-                    } catch (Exception e1) {
-                        // TODO Auto-generated catch block
-                        e1.printStackTrace();
-                    } 
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;

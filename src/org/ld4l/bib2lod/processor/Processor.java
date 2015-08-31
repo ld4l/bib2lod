@@ -23,7 +23,6 @@ import org.apache.logging.log4j.Logger;
 
 public abstract class Processor {
 
-    @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(Processor.class);   
     
     private static final RDFFormat DEFAULT_FORMAT = RDFFormat.NTRIPLES;
@@ -36,8 +35,7 @@ public abstract class Processor {
     protected String inputDir;
     private String mainOutputDir;
 
-    
-    
+       
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
