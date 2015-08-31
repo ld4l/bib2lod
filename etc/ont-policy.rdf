@@ -1,0 +1,63 @@
+<?xml version='1.0'?>
+
+<!DOCTYPE rdf:RDF [
+    <!ENTITY jena    'http://jena.hpl.hp.com/schemas/'>   
+    <!ENTITY rdf     'http://www.w3.org/1999/02/22-rdf-syntax-ns#'>
+    <!ENTITY rdfs    'http://www.w3.org/2000/01/rdf-schema#'>
+    <!ENTITY xsd     'http://www.w3.org/2001/XMLSchema#'>
+    <!ENTITY base    '&jena;2003/03/ont-manager'>
+    <!ENTITY ont     '&base;#'>
+]>
+
+<rdf:RDF
+    xmlns:rdf ="&rdf;"
+    xmlns:rdfs="&rdfs;"
+    xmlns     ="&ont;"
+    xml:base  ="&base;"
+    >
+   
+    <DocumentManagerPolicy>
+        <!-- policy for controlling the document manager's behaviour -->
+        <processImports rdf:datatype="&xsd;boolean">true</processImports>
+        <cacheModels    rdf:datatype="&xsd;boolean">true</cacheModels>
+    </DocumentManagerPolicy>
+    
+    <OntologySpec>
+        <!-- Not sure if needed -->
+        <!-- local version of the OWL language ontology (in OWL) -->
+        <publicURI rdf:resource="http://www.w3.org/2002/07/owl" />
+        <altURL rdf:resource="file:rdf/owl.ttl" />
+        <language  rdf:resource="http://www.w3.org/2002/07/owl" />
+        <prefix    rdf:datatype="&xsd;string">owl</prefix>
+    </OntologySpec>
+    
+    <OntologySpec>
+        <!-- Not sure if needed -->
+        <!-- local version of the RDFS vocabulary -->
+        <publicURI rdf:resource="http://www.w3.org/2000/01/rdf-schema" />
+        <altURL rdf:resource="file:rdf/rdf-schema.ttl" />
+        <language  rdf:resource="http://www.w3.org/2000/01/rdf-schema" />
+        <prefix    rdf:datatype="&xsd;string">rdfs</prefix>
+    </OntologySpec>
+    
+    <OntologySpec>
+        <!-- Bibframe ontology -->
+        <publicURI rdf:resource="http://bibframe.org/vocab/" />
+        <altURL rdf:resource="file:rdf/bibframe.2014-12-10.rdf" />
+        <!-- optional ontology language term 
+        <language rdf:resource="... encoding used ..." />-->
+        <!-- optional prefix to associate with the public URL -->
+        <prefix rdf:datatype="&xsd;string">bf</prefix>
+    </OntologySpec>
+    
+    <OntologySpec>
+        <!-- LD4L ontology -->
+        <publicURI rdf:resource="http://bibframe.ld4l.org/ontology/" />
+        <altURL rdf:resource="file:rdf/bibframe.ld4l.rdf" />
+        <!-- optional ontology language term 
+        <language rdf:resource="... encoding used ..." />-->
+        <!-- optional prefix to associate with the public URL -->
+        <prefix rdf:datatype="&xsd;string">ld4l</prefix>
+    </OntologySpec>
+    
+</rdf:RDF>

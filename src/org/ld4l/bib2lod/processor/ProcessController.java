@@ -1,18 +1,15 @@
 package org.ld4l.bib2lod.processor;
 
-import java.io.File;
 import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
 import java.util.List;
 
+import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
-import org.ld4l.bib2lod.Ontology;
-import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
 
 
@@ -41,52 +38,26 @@ public class ProcessController {
     
     private void loadOntModels() {
 
-        // TODO Needs a total redo. Ontologies and filenames should not be
-        // hard-coded. But if we loop through the rdf directory, we don't get
-        // named references to the models.
-        // See https://jena.apache.org/documentation/ontology/#creating-ontology-models
-        // on managing file references. Use Jena's DocumentManager and
-        // FileManager.
-        String rdfDir = "rdf";
-        
-        File bfOntFile = new File(rdfDir, Ontology.BIBFRAME.filename());
-        OntModel bfOntModelBase = 
-                ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-        bfOntModelBase.read(bfOntFile.toString(), "RDF/XML"); 
-        this.bfOntModelInf = ModelFactory.createOntologyModel(
-                OntModelSpec.OWL_MEM_MICRO_RULE_INF, bfOntModelBase);
-        
-//        File ld4lOntFile = new File(rdfDir, Ontology.LD4L.filename());
-//        OntModel ld4lOntModelBase = 
-//                  ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM);
-//        ld4lBase.read(ld4lOntFile.toString(), "RDF/XML"); 
-//        this.ld4lOntModelInf = ModelFactory.createOntologyModel(
-//                OntModelSpec.OWL_MEM_MICRO_RULE_INF, ld4lOntModelBase);  
-
+        OntDocumentManager mgr = new OntDocumentManager();
+        OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
+        spec.setDocumentManager(mgr);
+     
+        bfOntModelInf = ModelFactory.createOntologyModel(spec);               
+        bfOntModelInf.read("http://bibframe.org/vocab/");
+              
 //        if (logger.isDebugEnabled()) {
-//            String bfNamespace = Ontology.BIBFRAME.namespace();
-//            OntClass person = bfBase.getOntClass(bfNamespace  + "Person");
-//            Individual p1 = bfBase.createIndividual(bfNamespace + "person1", person);
-//            
-//            for (Iterator<Resource> i = p1.listRDFTypes(true); i.hasNext();) {
-//                logger.debug(p1.getURI() + " is asserted in class " + i.next());
+//            Model m = bfOntModelInf.getBaseModel();
+//            //logger.debug(bfOntModelInf.toString());
+//            //logger.debug(m.toString());
+//            logger.debug(m.size());
+//            logger.debug(bfOntModelInf.size());
+//            Iterator<OntClass> it = bfOntModelInf.listClasses();
+//            while (it.hasNext()) {
+//                OntClass c = it.next();
+//                logger.debug(c.getURI());
 //            }
-//            
-//            p1 = bfOntModelInf.getIndividual(bfNamespace + "person1");
-//            for (Iterator<Resource> i = p1.listRDFTypes(false); i.hasNext();) {
-//                // NB This includes the asserted as well as the inferred classes.
-//                logger.debug(p1.getURI() + " is inferred to be in class " + i.next());
-//            }
-//            
-//            for (Iterator<Resource> i = p1.listRDFTypes(true); i.hasNext();) {
-//                // NB This includes the asserted as well as the inferred classes.
-//                logger.debug(p1.getURI() + " is directly inferred to be in class " + i.next());
-//            }
-//            
-//            OntClass personClass = bfOntModelInf.getOntClass(bfNamespace + "Person");
-//            for (Iterator<OntClass> i = personClass.listSuperClasses(); i.hasNext();) {
-//                logger.debug(personClass.getURI() + " is a subclass of " + i.next());
-//            }           
+//            logger.debug(bfOntModelInf.getOntClass(
+//                    "http://bibframe.org/vocab/Person").getURI());
 //        }
     }
     

@@ -174,8 +174,9 @@ public class TypeSplitter extends Processor {
 
         Map<String, Query> constructQueriesByType = 
                 new HashMap<String, Query>();
-        
+
         for (String uri : typesToSplit) {
+            logger.debug("Class URI: " + uri);
             ConstructBuilder cb = new ConstructBuilder() 
                 .addConstruct("?s", "?p", "?o")
                 .addWhere("?s", "?p", "?o")
