@@ -1,7 +1,5 @@
 package org.ld4l.bib2lod.processor;
 
-import java.io.File;
-
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -22,9 +20,7 @@ public class BNodeToUriConverter extends Processor {
     @Override
     public String process() {
         
-        return inputDir;
+        return stubProcess(outputSubdir);
         
     }
-
-
 }

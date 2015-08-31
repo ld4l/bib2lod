@@ -97,6 +97,9 @@ public class ProcessController {
         // for the new process is created.
         String outputDir = this.inputDir;
         
+        logger.debug("outputDir = " + outputDir);
+        logger.debug("mainOutputDir = " + mainOutputDir);
+        
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
         // Correct errors in the Bibframe RDF that choke the ingest process.

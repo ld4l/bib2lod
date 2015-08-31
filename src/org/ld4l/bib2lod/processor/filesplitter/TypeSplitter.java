@@ -26,7 +26,7 @@ public class TypeSplitter extends Processor {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputSubdir = "statementsBySubjectType";
+    private static final String outputSubDir = "statementsBySubjectType";
     
     // TODO Figure out if other types should be included here.
     // NB These must be explicitly specified. We don't want to split on all
@@ -87,7 +87,7 @@ public class TypeSplitter extends Processor {
     private String writeModelsToFiles(Map<String, Model> modelsByType, 
             Model remainderModel) {
             
-        String outputDir = createOutputDir(outputSubdir);
+        String outputDir = createOutputDir(outputSubDir);
         if (outputDir == null) {
             return null;
         }

@@ -1,10 +1,13 @@
 package org.ld4l.bib2lod.processor;
 
+import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
+
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.List;
 
@@ -101,6 +104,9 @@ public abstract class Processor {
         return outputDir;
     }
     
+    /** 
+     * Debugging method: Output all statements in a model
+     */
     protected String showStatements(Model model) {
         
         StringBuffer buffer = new StringBuffer();
@@ -146,13 +152,25 @@ public abstract class Processor {
         }
     }
     
-    protected void writeFiles(List<FileOutputStream> streams, 
-            String outputDir) {
+    protected String stubProcess(String outputSubDir) {
+        String outputDir = createOutputDir(outputSubDir);
+        copyFiles(inputDir, outputDir);
+        return outputDir;
+    }
+    
+    protected void copyFiles(String inputDir, String outputDir) { 
         
-        for (FileOutputStream stream : streams) {
-            
+        for ( File file : new File(inputDir).listFiles() ) {
+            Path source = file.toPath();
+            String sourceFileName = file.getName();
+            Path target = new File(outputDir, sourceFileName).toPath();
+            try {
+                Files.copy(source, target, COPY_ATTRIBUTES);
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }
         }
-        
     }
     
 

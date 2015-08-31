@@ -11,7 +11,7 @@ public class UriDeduper extends Processor {
 
     @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputSubdir = "deduped";
+    private static final String outputSubDir = "deduped";
     
     // TODO Like TypeSplitter, we want to define types to dedupe on. Exclude,
     // for example, annotations, held items, titles, since these are not 
@@ -35,7 +35,7 @@ public class UriDeduper extends Processor {
         // TODO should we use localNamespace so we dedupe only uris in that
         // namespace?
         
-//        String outputDir = createOutputDir(outputSubdir);
+//        String outputDir = createOutputDir(outputSubDir);
 //        if (outputDir == null) {
 //            return null;
 //        }
