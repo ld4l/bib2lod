@@ -20,7 +20,7 @@ import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.Ontology;
+import org.ld4l.bib2lod.Namespace;
 import org.ld4l.bib2lod.processor.Processor;
 
 
@@ -29,35 +29,33 @@ public class TypeSplitter extends Processor {
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubDir = "statementsBySubjectType";
     
-    private static List<String> typesToSplit;
+    private static final List <String> typesToSplit = Arrays.asList(
+            Namespace.BIBFRAME.namespace() + "Annotation",
+            Namespace.BIBFRAME.namespace() + "Family",
+            Namespace.BIBFRAME.namespace() + "HeldItem",
+            Namespace.BIBFRAME.namespace() + "Instance",
+            Namespace.BIBFRAME.namespace() + "Jurisdiction",
+            Namespace.BIBFRAME.namespace() + "Meeting",
+            Namespace.BIBFRAME.namespace() + "Organization",
+            Namespace.BIBFRAME.namespace() + "Person",
+            Namespace.BIBFRAME.namespace() + "Place",
+            Namespace.BIBFRAME.namespace() + "Title",
+            Namespace.BIBFRAME.namespace() + "Topic",   
+            Namespace.BIBFRAME.namespace() + "Work" 
+    );
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
         
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
         
-        typesToSplit = Arrays.asList(
-            Ontology.BIBFRAME.namespace() + "Annotation",
-            Ontology.BIBFRAME.namespace() + "Family",
-            Ontology.BIBFRAME.namespace() + "HeldItem",
-            Ontology.BIBFRAME.namespace() + "Instance",
-            Ontology.BIBFRAME.namespace() + "Jurisdiction",
-            Ontology.BIBFRAME.namespace() + "Meeting",
-            Ontology.BIBFRAME.namespace() + "Organization",
-            Ontology.BIBFRAME.namespace() + "Person",
-            Ontology.BIBFRAME.namespace() + "Place",
-            Ontology.BIBFRAME.namespace() + "Title",
-            Ontology.BIBFRAME.namespace() + "Topic",   
-            Ontology.BIBFRAME.namespace() + "Work" 
-        );
-
     }
 
     @Override
     public String process() {
 
         // Map each Bibframe type to an (empty for now) model
-        Map<String, Model> modelsByType = getModelsByType();
+        Map<String, Model> modelsByType = createModelsByType();
 
         // Create another model to accumulate any leftover triples that didn't
         // get put into a type model. 
@@ -68,7 +66,7 @@ public class TypeSplitter extends Processor {
         // Map each Bibframe type to a construct query used to populate the 
         // model. NB We need the model to create the type resource in the
         // query.
-        Map<String, Query> constructQueriesByType = getConstructQueriesByType();
+        Map<String, Query> constructQueriesByType = createConstructQueriesByType();
                 
         // For each file in the input directory
         for ( File file : new File(inputDir).listFiles() ) {
@@ -156,7 +154,7 @@ public class TypeSplitter extends Processor {
         inputModel.remove(constructModel);        
     }
 
-    private Map<String, Model> getModelsByType() {
+    private Map<String, Model> createModelsByType() {
         
         Map<String, Model> modelsByType = 
                 new HashMap<String, Model>();
@@ -169,7 +167,7 @@ public class TypeSplitter extends Processor {
         return modelsByType;
     }
     
-    private Map<String, Query> getConstructQueriesByType() {
+    private Map<String, Query> createConstructQueriesByType() {
 
         Map<String, Query> constructQueriesByType = 
                 new HashMap<String, Query>();

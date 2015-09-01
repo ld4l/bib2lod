@@ -10,6 +10,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
+import org.ld4l.bib2lod.Namespace;
 
 
 
@@ -45,7 +46,7 @@ public class ProcessController {
         // TODO Figure out how to avoid hard-coding the ontology URI here. It
         // would be nice to iterate through the files in the rdf directory and
         // read them in, but we need to retain a reference to the ontology.
-        bfOntModelInf.read("http://bibframe.org/vocab/");
+        bfOntModelInf.read(Namespace.BIBFRAME.namespace());
               
     }
     
