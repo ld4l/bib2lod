@@ -41,7 +41,7 @@ public abstract class Processor {
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
-        logger.trace("In constructor for " + this.getClass().toString());
+        // logger.trace("In constructor for " + this.getClass().toString());
         
         this.bfOntModelInf = bfOntModelInf;
         
@@ -61,13 +61,10 @@ public abstract class Processor {
     public Processor(String localNamespace, String inputDir, 
             String mainOutputDir) {
 
-        logger.debug("In constructor for " + this.getClass().toString());
-        
-        this.localNamespace = localNamespace;
-        
+        // logger.trace("In constructor for " + this.getClass().toString());        
+        this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
-
     }
     
     public abstract String process();
@@ -139,9 +136,6 @@ public abstract class Processor {
     protected void appendModelToFile(Model model, File file) {
         FileOutputStream outStream;
         try {
-            // TODO ***** MAKE SURE APPENDING WORKS IN THIS CASE!!! Otherwise
-            // need to write to some other outputstream type, then write to 
-            // the file independently of Jena
             outStream = new FileOutputStream(file, true);
             RDFDataMgr.write(outStream, model, DEFAULT_FORMAT);
         } catch (FileNotFoundException e) {
