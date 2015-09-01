@@ -33,7 +33,6 @@ public class ProcessController {
         this.mainOutputDir = outputDir;
         
         loadOntModels();
-
     }
     
     private void loadOntModels() {
@@ -42,23 +41,12 @@ public class ProcessController {
         OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
         spec.setDocumentManager(mgr);
      
-        bfOntModelInf = ModelFactory.createOntologyModel(spec);               
+        bfOntModelInf = ModelFactory.createOntologyModel(spec);
+        // TODO Figure out how to avoid hard-coding the ontology URI here. It
+        // would be nice to iterate through the files in the rdf directory and
+        // read them in, but we need to retain a reference to the ontology.
         bfOntModelInf.read("http://bibframe.org/vocab/");
               
-//        if (logger.isDebugEnabled()) {
-//            Model m = bfOntModelInf.getBaseModel();
-//            //logger.debug(bfOntModelInf.toString());
-//            //logger.debug(m.toString());
-//            logger.debug(m.size());
-//            logger.debug(bfOntModelInf.size());
-//            Iterator<OntClass> it = bfOntModelInf.listClasses();
-//            while (it.hasNext()) {
-//                OntClass c = it.next();
-//                logger.debug(c.getURI());
-//            }
-//            logger.debug(bfOntModelInf.getOntClass(
-//                    "http://bibframe.org/vocab/Person").getURI());
-//        }
     }
     
     public String processAll(List<Action> selectedActions) {
@@ -84,7 +72,7 @@ public class ProcessController {
             if (selectedActions.contains(a)) {
                 Processor processor;
                 Constructor<?> constructor; 
-                logger.trace("newInputDir = " + newInputDir);
+                // logger.trace("newInputDir = " + newInputDir);
                 try {
                     constructor = c.getConstructor(
                             OntModel.class, String.class, String.class, 
@@ -106,17 +94,17 @@ public class ProcessController {
                     e.printStackTrace();
                     return null;
                 }
-                logger.trace("STARTING PROCESS " + c.getName());
-                logger.trace("newInputDir = " + newInputDir);
+                // logger.trace("STARTING PROCESS " + c.getName());
+                // logger.trace("newInputDir = " + newInputDir);
                 outputDir = processor.process();
                 newInputDir = outputDir;
-                logger.trace("DONE WITH PROCESS");
-                logger.trace("Output dir = " + outputDir);                
+                // logger.trace("DONE WITH PROCESS " + c.getName());
+                // logger.trace("Output dir = " + outputDir);                
             }
         }
         
         // Return path to final results.
-        logger.trace("Done!");
+        // logger.trace("Done with processAll()!");
         return outputDir;
 
 /* Previous approach where individual processors were called by name. 

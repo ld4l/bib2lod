@@ -15,6 +15,8 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.shared.PrefixMapping;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -24,34 +26,30 @@ import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
-    @SuppressWarnings("unused")
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
     private static final String outputSubDir = "statementsBySubjectType";
     
-    // TODO Figure out if other types should be included here.
-    // NB These must be explicitly specified. We don't want to split on all
-    // types (e.g., supertypes of these, such as Agent, Authority), and we don't 
-    // always want to split on the lowest type in the hierarchy (e.g., we want 
-    // to split on Work rather than its subtypes).
-    private static final List<String> typesToSplit = Arrays.asList(
-      Ontology.BIBFRAME.namespace() + "Annotation",
-      Ontology.BIBFRAME.namespace() + "Family",
-      Ontology.BIBFRAME.namespace() + "HeldItem",
-      Ontology.BIBFRAME.namespace() + "Instance",
-      Ontology.BIBFRAME.namespace() + "Jurisdiction",
-      Ontology.BIBFRAME.namespace() + "Meeting",
-      Ontology.BIBFRAME.namespace() + "Organization",
-      Ontology.BIBFRAME.namespace() + "Person",
-      Ontology.BIBFRAME.namespace() + "Place",
-      Ontology.BIBFRAME.namespace() + "Title",
-      Ontology.BIBFRAME.namespace() + "Topic",   
-      Ontology.BIBFRAME.namespace() + "Work" 
-    );
+    private static List<String> typesToSplit;
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
         
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
+        
+        typesToSplit = Arrays.asList(
+            Ontology.BIBFRAME.namespace() + "Annotation",
+            Ontology.BIBFRAME.namespace() + "Family",
+            Ontology.BIBFRAME.namespace() + "HeldItem",
+            Ontology.BIBFRAME.namespace() + "Instance",
+            Ontology.BIBFRAME.namespace() + "Jurisdiction",
+            Ontology.BIBFRAME.namespace() + "Meeting",
+            Ontology.BIBFRAME.namespace() + "Organization",
+            Ontology.BIBFRAME.namespace() + "Person",
+            Ontology.BIBFRAME.namespace() + "Place",
+            Ontology.BIBFRAME.namespace() + "Title",
+            Ontology.BIBFRAME.namespace() + "Topic",   
+            Ontology.BIBFRAME.namespace() + "Work" 
+        );
 
     }
 
@@ -93,10 +91,10 @@ public class TypeSplitter extends Processor {
         }
               
         // After processing all input files, write models to output files
-        for (String ontClass: modelsByType.keySet()) {  
-            Model model = modelsByType.get(ontClass);
+        for (String ontClassUri: modelsByType.keySet()) {  
+            Model model = modelsByType.get(ontClassUri);
             if (! model.isEmpty()) {
-                String outFileName = getFilenameForType(ontClass);                                                                                                                 
+                String outFileName = getFilenameForType(ontClassUri, model);                                                                                                                 
                 writeModelToFile(model, outputDir, outFileName);
             }
         }      
@@ -112,9 +110,10 @@ public class TypeSplitter extends Processor {
         
     }
 
-    private String getFilenameForType(String uri) {
-        return Ontology.BIBFRAME.prefix() + 
-                StringUtils.substringAfterLast(uri, "/");
+    private String getFilenameForType(String ontClassUri, Model model) { 
+        // Get uri with prefix rather than full namespace
+        String shortUri = model.shortForm(ontClassUri);
+        return shortUri.replace(":", "");              
     }
 
     private void processInputFile(File inputFile, 
@@ -176,13 +175,13 @@ public class TypeSplitter extends Processor {
                 new HashMap<String, Query>();
 
         for (String uri : typesToSplit) {
-            logger.debug("Class URI: " + uri);
+            // logger.debug("Class URI: " + uri);
             ConstructBuilder cb = new ConstructBuilder() 
                 .addConstruct("?s", "?p", "?o")
                 .addWhere("?s", "?p", "?o")
                 .addWhere("?s", RDF.type, bfOntModelInf.getOntClass(uri));
             Query query = cb.build();
-            //logger.debug(query.serialize());
+            // logger.debug(query.serialize());
             constructQueriesByType.put(uri, query);
         }
         
