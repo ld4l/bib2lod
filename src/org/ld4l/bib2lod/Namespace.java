@@ -1,27 +1,55 @@
 package org.ld4l.bib2lod;
 
+import java.util.HashMap;
+import java.util.Map;
+
 public enum Namespace {
 
-    // TODO Would be better not to have to hard-code these, especially the 
-    // filenames. Figure out a better approach. See notes in ProcessController.
-    // We do need a reference to some of the ontology models, so an array
-    // or list of models won't work.
-    BIBFRAME ("http://bibframe.org/vocab/"),
-    LD4L ("http://bibframe.ld4l.org/ontology/"),
-    DCTERMS ("http://purl.org/dc/terms/"),
-    FOAF ("http://http://xmlns.com/foaf/0.1/"),
-    MADSRDF ("http://www.loc.gov/mads/rdf/v1#"), // check if needed
-    RELATORS ("http://id.loc.gov/vocabulary/relators/"); // check if needed
+    // Assign prefixes here rather than getting from the models, since they may
+    // not be provided. We're using these just to create filenames, not for
+    // anything significant about the ontologies themselves.
+    BIBFRAME ("http://bibframe.org/vocab/", "bf"),
+    LD4L ("http://bibframe.ld4l.org/ontology/", "ld4l"),
+    DCTERMS ("http://purl.org/dc/terms/", "dcterms"),
+    FOAF ("http://http://xmlns.com/foaf/0.1/", "foaf"),
+    MADSRDF ("http://www.loc.gov/mads/rdf/v1#", "madsrdf"), // check if needed
+    RELATORS ("http://id.loc.gov/vocabulary/relators/", "marcrel"); // check if needed
     
-    private final String namespace;
+    private final String uri;
+    private final String prefix;
     
-    // Ontologies that are loaded from a file in the application
-    Namespace(String namespace) {
-        this.namespace = namespace;
+    Namespace(String uri, String prefix) {
+        this.uri = uri;
+        this.prefix = prefix;
     }
     
-    public String namespace() {
-        return this.namespace;
+    public String uri() {
+        return this.uri;
     }
     
+    public String prefix() {
+        return this.prefix;
+    }
+    
+    private static final Map<String, Namespace> uriToNs = 
+            new HashMap<String, Namespace>();
+
+    private static final Map<String, String> uriToPrefix = 
+            new HashMap<String, String>();
+    
+    static {
+        for (Namespace ns : Namespace.values()) {
+            uriToNs.put(ns.uri(), ns);
+            uriToPrefix.put(ns.uri, ns.prefix());
+        }
+    }
+    
+    public static Namespace get(String uri) { 
+        return uriToNs.get(uri); 
+    }
+    
+    public static String getNsPrefix(String uri) {
+        return uriToPrefix.get(uri);
+    }
+
 }

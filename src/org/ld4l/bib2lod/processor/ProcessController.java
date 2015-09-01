@@ -46,7 +46,7 @@ public class ProcessController {
         // TODO Figure out how to avoid hard-coding the ontology URI here. It
         // would be nice to iterate through the files in the rdf directory and
         // read them in, but we need to retain a reference to the ontology.
-        bfOntModelInf.read(Namespace.BIBFRAME.namespace());
+        bfOntModelInf.read(Namespace.BIBFRAME.uri());
               
     }
     
@@ -58,9 +58,9 @@ public class ProcessController {
         String newInputDir = this.mainInputDir;
         String outputDir = null;
         
-        logger.trace("STARTING processAll() method");
-        logger.trace("mainInputDir = " + mainInputDir);
-        logger.trace("newInputDir = " + newInputDir);
+        // logger.trace("STARTING processAll() method");
+        // logger.trace("mainInputDir = " + mainInputDir);
+        // logger.trace("newInputDir = " + newInputDir);
 
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        

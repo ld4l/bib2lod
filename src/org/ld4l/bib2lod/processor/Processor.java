@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -137,19 +136,22 @@ public abstract class Processor {
         return buffer.toString();
     }
     
-    protected void writeModelToFile(Model model, String outputDir, 
-            String outFileName) {          
-            
-        File outFile = new File(outputDir, outFileName + "." + 
-                DEFAULT_FORMAT_FILE_EXTENSION);
-    
+    protected void appendModelToFile(Model model, File file) {
+        FileOutputStream outStream;
         try {
-            FileOutputStream outStream = new FileOutputStream(outFile);
+            // TODO ***** MAKE SURE APPENDING WORKS IN THIS CASE!!! Otherwise
+            // need to write to some other outputstream type, then write to 
+            // the file independently of Jena
+            outStream = new FileOutputStream(file, true);
             RDFDataMgr.write(outStream, model, DEFAULT_FORMAT);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+    }
+    
+    protected String getOutputFilename(String basename) {
+        return basename + "." +  DEFAULT_FORMAT_FILE_EXTENSION;   
     }
     
     protected String stubProcess(String outputSubDir) {
