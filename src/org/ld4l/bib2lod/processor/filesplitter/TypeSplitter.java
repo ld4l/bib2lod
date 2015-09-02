@@ -78,14 +78,16 @@ public class TypeSplitter extends Processor {
         pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
-                + "WHERE { " 
+                + "WHERE { { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
-                + "OPTIONAL { "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "FILTER ( ?p1 = \"" + OntologyProperty.HAS_AUTHORITY.uri() 
-                + "\" || ?p1 = \"" + OntologyProperty.IDENTIFIER.uri() + 
-                "\" ) } }"                
+                + "FILTER ( ?p1 = <" + OntologyProperty.HAS_AUTHORITY.uri()
+                + "> || ?p1 = <" + OntologyProperty.IDENTIFIER.uri()
+                + "> ) } }"                
         );
         return pss;
     }
