@@ -1,24 +1,21 @@
 package org.ld4l.bib2lod.processor.filesplitter;
 
 import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.arq.querybuilder.ConstructBuilder;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.ontology.OntProperty;
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Namespace;
@@ -47,6 +44,8 @@ public class TypeSplitter extends Processor {
     );
     private final String remainder = "other";
     
+    ParameterizedSparqlString pss;
+    
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
         
@@ -58,10 +57,7 @@ public class TypeSplitter extends Processor {
         
         String outputDir = createOutputDir(outputSubDir);
         
-        // Map each type to a construct query used to populate the model for 
-        // that type.
-        Map<String, Query> constructQueriesByType = 
-                createConstructQueriesByType();
+        ParameterizedSparqlString pss = getParameterizedSparqlString();
        
         // Map each type to a file for writing output.
         Map<String, File> outputFilesByType = 
@@ -69,30 +65,30 @@ public class TypeSplitter extends Processor {
         
         // For each file in the input directory
         for ( File inputFile : new File(inputDir).listFiles() ) {
-            processInputFile(inputFile, constructQueriesByType, 
-                    outputFilesByType);           
+            processInputFile(inputFile, pss, outputFilesByType);                              
         }
               
         return outputDir;                                                                                                                               
     }
     
-    private Map<String, Query> createConstructQueriesByType() {
+    private ParameterizedSparqlString getParameterizedSparqlString() {
 
-        Map<String, Query> constructQueriesByType = 
-                new HashMap<String, Query>();
-
-        for (String uri : typesToSplit) {
-            // logger.debug("Class URI: " + uri);
-            ConstructBuilder cb = new ConstructBuilder() 
-                .addConstruct("?s", "?p", "?o")
-                .addWhere("?s", "?p", "?o")
-                .addWhere("?s", RDF.type, bfOntModelInf.getOntClass(uri));
-            Query query = cb.build();
-            // logger.debug(query.serialize());
-            constructQueriesByType.put(uri, query);
-        }
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
-        return constructQueriesByType;
+        OntProperty bfHasAuthorityProp = bfOntModelInf.getOntProperty(Namespace.BIBFRAME.uri() + "hasAuthority");
+        OntProperty bfIdentifierProp = bfOntModelInf.getOntProperty(Namespace.BIBFRAME.uri() + "identifier");
+        
+        pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
+        pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "OPTIONAL { "
+                + "?o1 ?p2 ?o2 . " 
+                + "FILTER ( ?p1 = \"" + bfHasAuthorityProp + "\" || ?p1 = \"" + bfIdentifierProp + "\" ) } }"                
+        );
+        return pss;
     }
     
     private Map<String, File> createOutputFilesByType(String outputDir) {
@@ -123,8 +119,7 @@ public class TypeSplitter extends Processor {
     }
     
 
-    private void processInputFile(File inputFile, 
-            Map<String, Query> constructQueriesByType,
+    private void processInputFile(File inputFile, ParameterizedSparqlString pss,            
             Map<String, File> outputFilesByType) {
 
         // Read RDF from file into a model
@@ -135,10 +130,10 @@ public class TypeSplitter extends Processor {
    
         // For each Bibframe type to split on
         for (String ontClassUri : typesToSplit) {       
-            // Get the query and model for this type
-            Query query = constructQueriesByType.get(ontClassUri);
+            // Make the type substitution into the parameterized SPARQL string
+            pss.setIri("type", ontClassUri);
             Model model = modelsByType.get(ontClassUri);
-            splitByType(query, model, inputModel);            
+            splitByType(pss, model, inputModel);            
         }
         
         // Add to the remainder model the statements from this file that 
@@ -162,10 +157,11 @@ public class TypeSplitter extends Processor {
         }          
     }
 
-    private void splitByType(Query query, Model model,
+    private void splitByType(ParameterizedSparqlString pss, Model model,
             Model inputModel) {
  
         // Run the query against the input model
+        Query query = pss.asQuery();
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
@@ -194,6 +190,5 @@ public class TypeSplitter extends Processor {
         
         return modelsByType;
     }
-
 
 }
