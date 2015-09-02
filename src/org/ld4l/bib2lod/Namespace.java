@@ -13,6 +13,7 @@ public enum Namespace {
     DCTERMS ("http://purl.org/dc/terms/", "dcterms"),
     FOAF ("http://http://xmlns.com/foaf/0.1/", "foaf"),
     MADSRDF ("http://www.loc.gov/mads/rdf/v1#", "madsrdf"), // check if needed
+    RDFS ("http://http://www.w3.org/2000/01/rdf-schema#", "rdfs"),
     RELATORS ("http://id.loc.gov/vocabulary/relators/", "marcrel"); // check if needed
     
     private final String uri;
