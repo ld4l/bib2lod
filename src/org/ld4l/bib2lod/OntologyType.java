@@ -2,22 +2,25 @@ package org.ld4l.bib2lod;
 
 public enum OntologyType {
 
-    ANNOTATION (Namespace.BIBFRAME.uri(), "Annotation"),
-    FAMILY (Namespace.BIBFRAME.uri(), "Family"),
-    HELD_ITEM (Namespace.BIBFRAME.uri(), "HeldItem"),
-    IDENTIFIER (Namespace.BIBFRAME.uri(), "Identifier"),
-    INSTANCE (Namespace.BIBFRAME.uri(), "Instance"),
-    JURISDICTION (Namespace.BIBFRAME.uri(), "Jurisdiction"),
-    MEETING (Namespace.BIBFRAME.uri(), "Meeting"),
-    ORGANIZATION (Namespace.BIBFRAME.uri(), "Organization"),
-    PERSON (Namespace.BIBFRAME.uri(), "Person"),
-    PROVIDER (Namespace.BIBFRAME.uri(), "Provider"),
-    PLACE (Namespace.BIBFRAME.uri(), "Place"),
-    TITLE (Namespace.BIBFRAME.uri(), "Title"),
-    TOPIC (Namespace.BIBFRAME.uri(), "Topic"),  
-    WORK (Namespace.BIBFRAME.uri(), "Work"),
+    // Maybe create different type enums, one for bibframe, one for madsrdf
+    // or miscellaneous, etc.
     
-    MADSRDF_AUTHORITY (Namespace.MADSRDF.uri(), "Authority");
+    ANNOTATION(Namespace.BIBFRAME.uri(), "Annotation"),
+    FAMILY(Namespace.BIBFRAME.uri(), "Family"),
+    HELD_ITEM(Namespace.BIBFRAME.uri(), "HeldItem"),
+    IDENTIFIER(Namespace.BIBFRAME.uri(), "Identifier"),
+    INSTANCE(Namespace.BIBFRAME.uri(), "Instance"),
+    JURISDICTION(Namespace.BIBFRAME.uri(), "Jurisdiction"),
+    MEETING(Namespace.BIBFRAME.uri(), "Meeting"),
+    ORGANIZATION(Namespace.BIBFRAME.uri(), "Organization"),
+    PERSON(Namespace.BIBFRAME.uri(), "Person"),
+    PROVIDER(Namespace.BIBFRAME.uri(), "Provider"),
+    PLACE(Namespace.BIBFRAME.uri(), "Place"),
+    TITLE(Namespace.BIBFRAME.uri(), "Title"),
+    TOPIC(Namespace.BIBFRAME.uri(), "Topic"),  
+    WORK(Namespace.BIBFRAME.uri(), "Work"),
+    
+    MADSRDF_AUTHORITY(Namespace.MADSRDF.uri(), "Authority");
 
     private final String namespace;
     private final String localname;

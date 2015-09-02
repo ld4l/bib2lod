@@ -13,15 +13,15 @@ import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
 public enum Action {
 
-    // GET_MARC ("get_marc"),
-    // MARC2MARCXML ("marc2marcxml"),
+    // GET_MARC("get_marc"),
+    // MARC2MARCXML("marc2marcxml"),
     // Clean up MARCXML records: correct known errors, enhance with ??
-    // PREPROCESS_MARCXML ("preprocess"),
-    // MARCXML2BIBFRAME ("marcxml2bibframe"),
-    CONVERT_BNODES ("convert_bnodes", BNodeToUriConverter.class),
-    SPLIT_TYPES ("split_types", TypeSplitter.class),
-    DEDUPE_BIBFRAME_URIS ("dedupe", UriDeduper.class);
-    // BIBFRAME2LD4L ("bibframe2ld4l");
+    // PREPROCESS_MARCXML("preprocess"),
+    // MARCXML2BIBFRAME("marcxml2bibframe"),
+    CONVERT_BNODES("convert_bnodes", BNodeToUriConverter.class),
+    SPLIT_TYPES("split_types", TypeSplitter.class),
+    DEDUPE_BIBFRAME_URIS("dedupe", UriDeduper.class);
+    // BIBFRAME2LD4L("bibframe2ld4l");
     // RESOLVE_TO_EXTERNAL_ENTITIES);
     
     private final String action;    

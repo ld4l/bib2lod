@@ -77,7 +77,6 @@ public class TypeSplitter extends Processor {
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
         pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
-        //pss.setNsPrefix("rdfs", Namespace.RDFS.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
                 + "WHERE { { " 
