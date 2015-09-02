@@ -9,7 +9,6 @@ import java.util.Map;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.ontology.OntProperty;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -19,8 +18,9 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Namespace;
+import org.ld4l.bib2lod.OntologyProperty;
+import org.ld4l.bib2lod.OntologyType;
 import org.ld4l.bib2lod.processor.Processor;
-
 
 public class TypeSplitter extends Processor {
 
@@ -28,19 +28,19 @@ public class TypeSplitter extends Processor {
     private static final String outputSubDir = "statementsBySubjectType";
     
     private final List <String> typesToSplit = Arrays.asList(
-            Namespace.BIBFRAME.uri() + "Annotation",
-            Namespace.BIBFRAME.uri() + "Family",
-            Namespace.BIBFRAME.uri() + "HeldItem",
-            Namespace.BIBFRAME.uri() + "Instance",
-            Namespace.BIBFRAME.uri() + "Jurisdiction",
-            Namespace.BIBFRAME.uri() + "Meeting",
-            Namespace.BIBFRAME.uri() + "Organization",
-            Namespace.BIBFRAME.uri() + "Person",
-            Namespace.BIBFRAME.uri() + "Provider",
-            Namespace.BIBFRAME.uri() + "Place",
-            Namespace.BIBFRAME.uri() + "Title",
-            Namespace.BIBFRAME.uri() + "Topic",   
-            Namespace.BIBFRAME.uri() + "Work"           
+            OntologyType.ANNOTATION.uri(),
+            OntologyType.FAMILY.uri(),
+            OntologyType.HELD_ITEM.uri(),
+            OntologyType.INSTANCE.uri(),
+            OntologyType.JURISDICTION.uri(),
+            OntologyType.MEETING.uri(),
+            OntologyType.ORGANIZATION.uri(),
+            OntologyType.PERSON.uri(),
+            OntologyType.PROVIDER.uri(),
+            OntologyType.PLACE.uri(),
+            OntologyType.TITLE.uri(),
+            OntologyType.TOPIC.uri(),
+            OntologyType.WORK.uri()         
     );
     private final String remainder = "other";
     
@@ -74,10 +74,7 @@ public class TypeSplitter extends Processor {
     private ParameterizedSparqlString getParameterizedSparqlString() {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
-        
-        OntProperty bfHasAuthorityProp = bfOntModelInf.getOntProperty(Namespace.BIBFRAME.uri() + "hasAuthority");
-        OntProperty bfIdentifierProp = bfOntModelInf.getOntProperty(Namespace.BIBFRAME.uri() + "identifier");
-        
+
         pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
@@ -86,7 +83,9 @@ public class TypeSplitter extends Processor {
                 + "?s1 a ?type . "
                 + "OPTIONAL { "
                 + "?o1 ?p2 ?o2 . " 
-                + "FILTER ( ?p1 = \"" + bfHasAuthorityProp + "\" || ?p1 = \"" + bfIdentifierProp + "\" ) } }"                
+                + "FILTER ( ?p1 = \"" + OntologyProperty.HAS_AUTHORITY.uri() 
+                + "\" || ?p1 = \"" + OntologyProperty.IDENTIFIER.uri() + 
+                "\" ) } }"                
         );
         return pss;
     }
@@ -132,6 +131,7 @@ public class TypeSplitter extends Processor {
         for (String ontClassUri : typesToSplit) {       
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", ontClassUri);
+            logger.debug(pss.toString());
             Model model = modelsByType.get(ontClassUri);
             splitByType(pss, model, inputModel);            
         }
