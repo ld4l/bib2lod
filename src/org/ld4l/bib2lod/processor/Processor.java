@@ -27,8 +27,14 @@ public abstract class Processor {
 
     private static final Logger logger = LogManager.getLogger(Processor.class);   
     
-    private static final RDFFormat DEFAULT_FORMAT = RDFFormat.NTRIPLES;
-    private static final String DEFAULT_FORMAT_FILE_EXTENSION = "nt";
+    /* It's necessary to output ntriples, for two reasons: (1) append to file
+     * doesn't produce valid RDF in RDFXML, since the <rdf> element is repeated
+     * (not sure whether json and ttl would work); (2) The links to blank nodes
+     * are lost, since no identifier is assigned to them.
+     */ 
+    private static final RDFFormat RDF_OUTPUT_FORMAT = 
+            RDFFormat.NTRIPLES;
+    private static final String RDF_OUTPUT_FORMAT_FILE_EXTENSION = "nt";
 
     protected OntModel bfOntModelInf;
     
@@ -137,7 +143,7 @@ public abstract class Processor {
         FileOutputStream outStream;
         try {
             outStream = new FileOutputStream(file, true);
-            RDFDataMgr.write(outStream, model, DEFAULT_FORMAT);
+            RDFDataMgr.write(outStream, model, RDF_OUTPUT_FORMAT);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -145,7 +151,7 @@ public abstract class Processor {
     }
     
     protected String getOutputFilename(String basename) {
-        return basename + "." +  DEFAULT_FORMAT_FILE_EXTENSION;   
+        return basename + "." +  RDF_OUTPUT_FORMAT_FILE_EXTENSION;   
     }
     
     protected String stubProcess(String outputSubDir) {
