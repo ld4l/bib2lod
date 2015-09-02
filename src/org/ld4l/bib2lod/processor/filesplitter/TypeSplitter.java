@@ -39,6 +39,7 @@ public class TypeSplitter extends Processor {
             Namespace.BIBFRAME.uri() + "Meeting",
             Namespace.BIBFRAME.uri() + "Organization",
             Namespace.BIBFRAME.uri() + "Person",
+            Namespace.BIBFRAME.uri() + "Provider",
             Namespace.BIBFRAME.uri() + "Place",
             Namespace.BIBFRAME.uri() + "Title",
             Namespace.BIBFRAME.uri() + "Topic",   
