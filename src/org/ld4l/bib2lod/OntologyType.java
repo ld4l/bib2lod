@@ -5,6 +5,7 @@ public enum OntologyType {
     ANNOTATION (Namespace.BIBFRAME.uri(), "Annotation"),
     FAMILY (Namespace.BIBFRAME.uri(), "Family"),
     HELD_ITEM (Namespace.BIBFRAME.uri(), "HeldItem"),
+    IDENTIFIER (Namespace.BIBFRAME.uri(), "Identifier"),
     INSTANCE (Namespace.BIBFRAME.uri(), "Instance"),
     JURISDICTION (Namespace.BIBFRAME.uri(), "Jurisdiction"),
     MEETING (Namespace.BIBFRAME.uri(), "Meeting"),
@@ -14,7 +15,9 @@ public enum OntologyType {
     PLACE (Namespace.BIBFRAME.uri(), "Place"),
     TITLE (Namespace.BIBFRAME.uri(), "Title"),
     TOPIC (Namespace.BIBFRAME.uri(), "Topic"),  
-    WORK (Namespace.BIBFRAME.uri(), "Work");
+    WORK (Namespace.BIBFRAME.uri(), "Work"),
+    
+    MADSRDF_AUTHORITY (Namespace.MADSRDF.uri(), "Authority");
 
     private final String namespace;
     private final String localname;

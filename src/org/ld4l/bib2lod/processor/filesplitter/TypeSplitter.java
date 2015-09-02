@@ -15,6 +15,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Namespace;
@@ -76,6 +77,7 @@ public class TypeSplitter extends Processor {
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
         pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
+        //pss.setNsPrefix("rdfs", Namespace.RDFS.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
                 + "WHERE { { " 
@@ -85,9 +87,13 @@ public class TypeSplitter extends Processor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "FILTER ( ?p1 = <" + OntologyProperty.HAS_AUTHORITY.uri()
-                + "> || ?p1 = <" + OntologyProperty.IDENTIFIER.uri()
-                + "> ) } }"                
+                + "?o1 a <" + OntologyType.MADSRDF_AUTHORITY.uri() + "> "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a <" + OntologyType.IDENTIFIER.uri() + "> "
+                + "} }"                
         );
         return pss;
     }
