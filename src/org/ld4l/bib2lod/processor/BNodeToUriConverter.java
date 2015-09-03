@@ -56,31 +56,39 @@ public class BNodeToUriConverter extends Processor {
         StmtIterator statements = inputModel.listStatements();
         while (statements.hasNext()) {
             Statement statement = statements.next();
-            Resource subject = statement.getSubject();
-            Property property = statement.getPredicate();
-            RDFNode object = statement.getObject();
-            if (!subject.isAnon() && !object.isAnon()) {
-                continue;
-            }
-            Resource newSubject = subject;
-            RDFNode newObject = object;
-            if (subject.isAnon()) {
-                newSubject = createUriResourceForAnonNode(subject, 
-                        labelToUriResource, assertions);
-            }
-            if (object.isAnon()) {
-                newObject = createUriResourceForAnonNode(object, 
-                        labelToUriResource, assertions);               
-            }
-            retractions.add(subject, property, object);
-            // This handles cases where both subject and object are blank nodes.
-            assertions.add(newSubject, property, newObject);
+            convertBNodesToUris(statement, assertions, retractions, 
+                    labelToUriResource);
         }
         inputModel.remove(retractions);
         inputModel.add(assertions);   
         return inputModel;
     }
 
+    private void convertBNodesToUris(Statement statement, Model assertions,
+            Model retractions, Map<String, Resource> labelToUriResource) {
+        
+        Resource subject = statement.getSubject();
+        Property property = statement.getPredicate();
+        RDFNode object = statement.getObject();
+        if (!subject.isAnon() && !object.isAnon()) {
+            return;
+        }
+        Resource newSubject = subject;
+        RDFNode newObject = object;
+        if (subject.isAnon()) {
+            newSubject = createUriResourceForAnonNode(subject, 
+                    labelToUriResource, assertions);
+        }
+        if (object.isAnon()) {
+            newObject = createUriResourceForAnonNode(object, 
+                    labelToUriResource, assertions);               
+        }
+        retractions.add(subject, property, object);
+        // This handles cases where both subject and object are blank nodes.
+        assertions.add(newSubject, property, newObject);
+    }        
+    
+    
     private Resource createUriResourceForAnonNode(RDFNode rdfNode, 
             Map<String, Resource> labelToUriResource, Model assertions) {
         Node node = rdfNode.asNode();
