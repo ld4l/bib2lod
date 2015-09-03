@@ -15,18 +15,16 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Namespace;
-import org.ld4l.bib2lod.OntologyProperty;
 import org.ld4l.bib2lod.OntologyType;
 import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
     private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputSubDir = "statementsBySubjectType";
+    private static final String outputSubDir = "TypeSplitter";
     
     private final List <String> typesToSplit = Arrays.asList(
             OntologyType.ANNOTATION.uri(),
@@ -138,7 +136,7 @@ public class TypeSplitter extends Processor {
         for (String ontClassUri : typesToSplit) {       
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", ontClassUri);
-            logger.debug(pss.toString());
+            // logger.debug(pss.toString());
             Model model = modelsByType.get(ontClassUri);
             splitByType(pss, model, inputModel);            
         }

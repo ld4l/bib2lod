@@ -140,14 +140,22 @@ public abstract class Processor {
     }
     
     protected void appendModelToFile(Model model, File file) {
+        writeModelToFile(model, file, true);
+    }
+
+    protected void writeModelToFile(Model model, File file) {
+        writeModelToFile(model, file, false);
+    }
+    
+    protected void writeModelToFile(Model model, File file, boolean append) {
         FileOutputStream outStream;
         try {
-            outStream = new FileOutputStream(file, true);
+            outStream = new FileOutputStream(file, append);
             RDFDataMgr.write(outStream, model, RDF_OUTPUT_FORMAT);
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        }
+        }        
     }
     
     protected String getOutputFilename(String basename) {
