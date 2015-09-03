@@ -18,28 +18,26 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
-import org.apache.jena.riot.RDFFormat;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.RdfFormat;
 
 
 public abstract class Processor {
 
     private static final Logger logger = LogManager.getLogger(Processor.class);   
     
-    /* It's necessary to output ntriples, for two reasons: (1) append to file
-     * doesn't produce valid RDF in RDFXML, since the <rdf> element is repeated
-     * (not sure whether json and ttl would work); (2) The links to blank nodes
-     * are lost, since no identifier is assigned to them.
-     */ 
-    private static final RDFFormat RDF_OUTPUT_FORMAT = 
-            RDFFormat.NTRIPLES;
-    private static final String RDF_OUTPUT_FORMAT_FILE_EXTENSION = "nt";
+    /* Some processors MUST output ntriples, for two reasons: (1) append to 
+     * file doesn't produce valid RDF in RDFXML, since the <rdf> element is
+     * repeated (not sure whether json and ttl would work); (2) The links to 
+     * blank nodes are lost, since no identifier is assigned to them. (2) is no
+     * longer relevant once BNodeToUriConverter has applied.
+     */
+    private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
+            RdfFormat.NTRIPLES;
 
-    protected OntModel bfOntModelInf;
-    
-    protected String localNamespace;
-    
+    protected OntModel bfOntModelInf;    
+    protected String localNamespace;    
     protected String inputDir;
     private String mainOutputDir;
 
@@ -47,19 +45,16 @@ public abstract class Processor {
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
-        // logger.trace("In constructor for " + this.getClass().toString());
-        
-        this.bfOntModelInf = bfOntModelInf;
-        
-        this.localNamespace = localNamespace;
-        
+        // logger.trace("In constructor for " + this.getClass().toString());        
+        this.bfOntModelInf = bfOntModelInf;        
+        this.localNamespace = localNamespace;        
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
 
     }
     
     /**
-     * Constructor for processes that don't use OntModels.
+     * Constructor for processes that don't use the loaded OntModel(s).
      * @param localNamespace
      * @param inputDir
      * @param mainOutputDir
@@ -84,6 +79,11 @@ public abstract class Processor {
         Model model = ModelFactory.createDefaultModel() ; 
         model.read(filename);
         return model;
+    }
+    
+    protected RdfFormat getRdfOutputFormat() {
+        // TODO default behavior should be to output the format that's input
+        return DEFAULT_RDF_OUTPUT_FORMAT;
     }
     
     /**
@@ -151,7 +151,7 @@ public abstract class Processor {
         FileOutputStream outStream;
         try {
             outStream = new FileOutputStream(file, append);
-            RDFDataMgr.write(outStream, model, RDF_OUTPUT_FORMAT);
+            RDFDataMgr.write(outStream, model, getRdfOutputFormat().format());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -159,7 +159,7 @@ public abstract class Processor {
     }
     
     protected String getOutputFilename(String basename) {
-        return basename + "." +  RDF_OUTPUT_FORMAT_FILE_EXTENSION;   
+        return basename + "." +  getRdfOutputFormat().extension();   
     }
     
     protected String stubProcess(String outputSubDir) {
@@ -182,45 +182,5 @@ public abstract class Processor {
             }
         }
     }
-    
-
-//    Following probably not needed - Jena can read from file directly into model
-//    /**
-//     * Convert a directory of RDF files into a list of input streams for
-//     * processing.
-//     * @param directory - the directory
-//     * @return List<InputStream>
-//     */
-//    protected List<InputStream> readRdfFiles(File directory) {
-//        // Convert the directory of RDF files into a list of input streams
-//        // for processing.
-//
-//        // Despite the name, lists both files and directories.
-//        File[] items = directory.listFiles();
-//        List<InputStream> inStreams = new ArrayList<InputStream>();
-//    
-//        for (File file : items) {
-//            if (file.isFile()) {
-//                try {
-//                    inStreams.add(new FileInputStream(file));
-//                } catch (FileNotFoundException e) {
-//                    // TODO Auto-generated catch block
-//                    e.printStackTrace();
-//                }
-//            }
-//        }  
-//        return inStreams;
-//    }
-    
-//    /**
-//     * Convert a directory of RDF files into a list of input streams for
-//     * processing.
-//     * @param readdir - path to the directory
-//     * @return List<InputStream>
-//     */
-//    protected List<InputStream> readRdfFiles(String readdir) {
-//        File directory = new File(readdir);
-//        return readRdfFiles(directory);
-//    }
  
 }
