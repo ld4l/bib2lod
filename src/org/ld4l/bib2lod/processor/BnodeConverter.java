@@ -16,16 +16,16 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BnodeToUriResourceConverter extends Processor {
+public class BnodeConverter extends Processor {
 
     @SuppressWarnings("unused")
     private static final Logger logger = 
-            LogManager.getLogger(BnodeToUriResourceConverter.class);
+            LogManager.getLogger(BnodeConverter.class);
     private static final String outputSubDir = "BNodeToUriConverter";
     
 
     
-    public BnodeToUriResourceConverter(String localNamespace, 
+    public BnodeConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
                         
         super(localNamespace, inputDir, mainOutputDir);
