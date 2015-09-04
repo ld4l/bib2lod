@@ -16,16 +16,16 @@ import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BNodeToUriConverter extends Processor {
+public class BnodeToUriResourceConverter extends Processor {
 
     @SuppressWarnings("unused")
     private static final Logger logger = 
-            LogManager.getLogger(BNodeToUriConverter.class);
+            LogManager.getLogger(BnodeToUriResourceConverter.class);
     private static final String outputSubDir = "BNodeToUriConverter";
     
 
     
-    public BNodeToUriConverter(String localNamespace, 
+    public BnodeToUriResourceConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
                         
         super(localNamespace, inputDir, mainOutputDir);
@@ -56,7 +56,7 @@ public class BNodeToUriConverter extends Processor {
         StmtIterator statements = inputModel.listStatements();
         while (statements.hasNext()) {
             Statement statement = statements.next();
-            convertBNodesToUris(statement, assertions, retractions, 
+            convertBnodesToUris(statement, assertions, retractions, 
                     labelToUriResource);
         }
         inputModel.remove(retractions);
@@ -64,7 +64,7 @@ public class BNodeToUriConverter extends Processor {
         return inputModel;
     }
 
-    private void convertBNodesToUris(Statement statement, Model assertions,
+    private void convertBnodesToUris(Statement statement, Model assertions,
             Model retractions, Map<String, Resource> labelToUriResource) {
         
         Resource subject = statement.getSubject();

@@ -6,7 +6,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ld4l.bib2lod.processor.BNodeToUriConverter;
+import org.ld4l.bib2lod.processor.BnodeToUriResourceConverter;
 import org.ld4l.bib2lod.processor.Processor;
 import org.ld4l.bib2lod.processor.deduper.UriDeduper;
 import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
@@ -18,7 +18,7 @@ public enum Action {
     // Clean up MARCXML records: correct known errors, enhance with ??
     // PREPROCESS_MARCXML("preprocess"),
     // MARCXML2BIBFRAME("marcxml2bibframe"),
-    CONVERT_BNODES("convert_bnodes", BNodeToUriConverter.class),
+    CONVERT_BNODES("convert_bnodes", BnodeToUriResourceConverter.class),
     SPLIT_TYPES("split_types", TypeSplitter.class),
     DEDUPE_BIBFRAME_URIS("dedupe", UriDeduper.class);
     // BIBFRAME2LD4L("bibframe2ld4l");
