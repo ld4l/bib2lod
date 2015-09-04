@@ -151,7 +151,7 @@ public abstract class Processor {
         FileOutputStream outStream;
         try {
             outStream = new FileOutputStream(file, append);
-            RDFDataMgr.write(outStream, model, getRdfOutputFormat().format());
+            RDFDataMgr.write(outStream, model, getRdfOutputFormat().jenaRDFFormat());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

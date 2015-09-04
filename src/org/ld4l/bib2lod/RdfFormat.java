@@ -9,16 +9,17 @@ import org.apache.jena.riot.RDFFormat;
 
 public enum RdfFormat {
 
+    // TODO Add other supported types
     NTRIPLES("ntriples", RDFFormat.NTRIPLES, "nt"),
     RDFXML("rdfxml", RDFFormat.RDFXML, "rdf");
 
     private final String label;
-    private final RDFFormat format;
+    private final RDFFormat jenaRDFFormat;
     private final String extension;
     
-    RdfFormat(String label, RDFFormat format, String extension) {
+    RdfFormat(String label, RDFFormat jenaRDFFormat, String extension) {
         this.label = label;
-        this.format = format;
+        this.jenaRDFFormat = jenaRDFFormat;
         this.extension = extension;
     }
     
@@ -26,8 +27,8 @@ public enum RdfFormat {
         return this.label;
     }
     
-    public RDFFormat format() {
-        return this.format;
+    public RDFFormat jenaRDFFormat() {
+        return this.jenaRDFFormat;
     }
     
     public String extension() {
