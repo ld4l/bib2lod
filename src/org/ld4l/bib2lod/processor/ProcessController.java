@@ -16,7 +16,7 @@ import org.ld4l.bib2lod.Namespace;
 
 public class ProcessController {
 
-    private static final Logger logger = LogManager.getLogger(ProcessController.class);
+    private static final Logger LOGGER = LogManager.getLogger(ProcessController.class);
 
     private String localNamespace;
     

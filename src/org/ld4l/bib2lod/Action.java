@@ -41,27 +41,27 @@ public enum Action {
         return this.processorClass;
     }
      
-    private static final Map<String, Action> lookup = 
+    private static final Map<String, Action> LOOKUP = 
             new HashMap<String, Action>();
     
-    private static List<String> validActions = 
+    private static final List<String> VALID_ACTIONS = 
             new ArrayList<String>();
 
     static {
         for (Action actionValue : Action.values()) {
             String action = actionValue.action();
-            lookup.put(action, actionValue);
-            validActions.add(action);
+            LOOKUP.put(action, actionValue);
+            VALID_ACTIONS.add(action);
         }
     }
 
     public static Action get(String action) { 
-        return lookup.get(action); 
+        return LOOKUP.get(action); 
     }
     
 
     public static List<String> validActions() {
-        return validActions;
+        return VALID_ACTIONS;
     }
     
 }

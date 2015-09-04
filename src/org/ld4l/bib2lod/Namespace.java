@@ -32,25 +32,25 @@ public enum Namespace {
         return this.prefix;
     }
     
-    private static final Map<String, Namespace> uriToNs = 
+    private static final Map<String, Namespace> LOOKUP_BY_URI = 
             new HashMap<String, Namespace>();
 
-    private static final Map<String, String> uriToPrefix = 
+    private static final Map<String, String> LOOKUP_BY_PREFIX = 
             new HashMap<String, String>();
     
     static {
         for (Namespace ns : Namespace.values()) {
-            uriToNs.put(ns.uri(), ns);
-            uriToPrefix.put(ns.uri, ns.prefix());
+            LOOKUP_BY_URI.put(ns.uri(), ns);
+            LOOKUP_BY_PREFIX.put(ns.uri, ns.prefix());
         }
     }
     
     public static Namespace get(String uri) { 
-        return uriToNs.get(uri); 
+        return LOOKUP_BY_URI.get(uri); 
     }
     
     public static String getNsPrefix(String uri) {
-        return uriToPrefix.get(uri);
+        return LOOKUP_BY_PREFIX.get(uri);
     }
 
 }

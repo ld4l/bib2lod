@@ -25,7 +25,7 @@ import org.ld4l.bib2lod.RdfFormat;
 
 public abstract class Processor {
 
-    private static final Logger logger = LogManager.getLogger(Processor.class);   
+    private static final Logger LOGGER = LogManager.getLogger(Processor.class);   
     
     /* Some processors MUST output ntriples, for two reasons: (1) append to 
      * file doesn't produce valid RDF in RDFXML, since the <rdf> element is

@@ -10,8 +10,8 @@ import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 public class UriDeduper extends Processor {
 
     @SuppressWarnings("unused")
-    private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputSubDir = "UriDeduper";
+    private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
+    private static final String OUTPUT_SUBDIR = "UriDeduper";
     
     // TODO Like TypeSplitter, we want to define types to dedupe on. Exclude,
     // for example, annotations, held items, titles, since these are not 
@@ -28,7 +28,7 @@ public class UriDeduper extends Processor {
 
     @Override
     public String process() {
-        return stubProcess(outputSubDir);
+        return stubProcess(OUTPUT_SUBDIR);
     }
 
 }

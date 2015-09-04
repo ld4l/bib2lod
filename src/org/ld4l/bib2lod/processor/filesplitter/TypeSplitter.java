@@ -24,9 +24,9 @@ import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
-    private static final Logger logger = LogManager.getLogger(TypeSplitter.class);
-    private static final String outputSubDir = "TypeSplitter";
-    private static final RdfFormat rdfOutputFormat = RdfFormat.NTRIPLES;
+    private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
+    private static final String OUTPUT_SUBDIR = "TypeSplitter";
+    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
     private final List <String> typesToSplit = Arrays.asList(
             OntologyType.ANNOTATION.uri(),
@@ -56,7 +56,7 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
         
-        String outputDir = createOutputDir(outputSubDir);
+        String outputDir = createOutputDir(OUTPUT_SUBDIR);
         
         ParameterizedSparqlString pss = getParameterizedSparqlString();
        
@@ -166,7 +166,7 @@ public class TypeSplitter extends Processor {
     
     @Override
     protected RdfFormat getRdfOutputFormat() {
-        return rdfOutputFormat;
+        return RDF_OUTPUT_FORMAT;
     }
 
     private void splitByType(ParameterizedSparqlString pss, Model model,

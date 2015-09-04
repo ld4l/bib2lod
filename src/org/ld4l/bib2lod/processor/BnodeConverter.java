@@ -19,9 +19,9 @@ import org.apache.logging.log4j.Logger;
 public class BnodeConverter extends Processor {
 
     @SuppressWarnings("unused")
-    private static final Logger logger = 
+    private static final Logger LOGGER = 
             LogManager.getLogger(BnodeConverter.class);
-    private static final String outputSubDir = "BNodeToUriConverter";
+    private static final String OUTPUT_SUBDIR = "BNodeToUriConverter";
     
 
     
@@ -34,7 +34,7 @@ public class BnodeConverter extends Processor {
     @Override
     public String process() {        
         
-        String outputDir = createOutputDir(outputSubDir);
+        String outputDir = createOutputDir(OUTPUT_SUBDIR);
         
         for ( File file : new File(inputDir).listFiles() ) {
             Model outputModel = processInputFile(file);

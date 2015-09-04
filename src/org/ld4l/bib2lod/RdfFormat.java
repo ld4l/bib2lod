@@ -39,25 +39,25 @@ public enum RdfFormat {
         return "." + this.extension;
     }
  
-    private static final Map<String, RdfFormat> lookupByLabel =
+    private static final Map<String, RdfFormat> LOOKUP_BY_LABEL =
             new HashMap<String, RdfFormat>();
    
-    private static List<RdfFormat> validFormats =
+    private static final List<RdfFormat> VALID_FORMATS =
             new ArrayList<RdfFormat>();
    
     static {
         for (RdfFormat rf : RdfFormat.values()) {
             String label = rf.label();
-            lookupByLabel.put(label, rf);
-            validFormats.add(rf);
+            LOOKUP_BY_LABEL.put(label, rf);
+            VALID_FORMATS.add(rf);
         }
     }
 
     public static RdfFormat get(String label) {
-        return lookupByLabel.get(label);
+        return LOOKUP_BY_LABEL.get(label);
     }
    
     public static List<RdfFormat> validFormats() {
-        return validFormats;
+        return VALID_FORMATS;
     }
 }

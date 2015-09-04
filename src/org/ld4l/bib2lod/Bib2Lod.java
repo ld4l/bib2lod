@@ -26,11 +26,8 @@ import org.ld4l.bib2lod.processor.ProcessController;
 
 public class Bib2Lod {
     
-    private static final Logger logger = LogManager.getLogger(Bib2Lod.class);
-   
+    private static final Logger LOGGER = LogManager.getLogger(Bib2Lod.class);  
     private static final List<String> VALID_ACTIONS = Action.validActions();
-    
-
 
     /** 
      * Read in program options and call appropriate processing functionality.
@@ -74,9 +71,9 @@ public class Bib2Lod {
                 absInputDir, absTopLevelOutputDir); 
         String absFinalOutpuDir = processController.processAll(actions);
         if (absFinalOutpuDir == null) {
-            logger.trace("Processing failed.");
+            LOGGER.trace("Processing failed.");
         } else {
-            logger.trace("Done! Results in " + absFinalOutpuDir);
+            LOGGER.trace("Done! Results in " + absFinalOutpuDir);
         }
 
     }
@@ -98,7 +95,7 @@ public class Bib2Lod {
             if (action != null) {
                 actions.add(action);
             } else {
-                logger.warn("Invalid action '" + selectedAction + "' removed.");
+                LOGGER.warn("Invalid action '" + selectedAction + "' removed.");
             }
             
         }
@@ -120,7 +117,7 @@ public class Bib2Lod {
         
         File inDir = new File(inDirName);
         if (!inDir.isDirectory()) {
-            logger.fatal("Input directory " + inDirName
+            LOGGER.fatal("Input directory " + inDirName
                     + " does not exist or is not a directory.");
         } else {
             try {
@@ -160,7 +157,7 @@ public class Bib2Lod {
         }
         
         if (! outDir.mkdirs()) {
-            logger.error("Cannot create output directory " + outDirCanonicalPath + ".");
+            LOGGER.error("Cannot create output directory " + outDirCanonicalPath + ".");
             return null;
         }     
         
@@ -179,7 +176,7 @@ public class Bib2Lod {
         String[] schemes = {"http"};
         UrlValidator urlValidator = new UrlValidator(schemes);
         if (!urlValidator.isValid(namespace)) {
-            logger.fatal("Valid HTTP namespace required.");
+            LOGGER.fatal("Valid HTTP namespace required.");
             return false;
         }
         
@@ -212,14 +209,14 @@ public class Bib2Lod {
         try {
             return parser.parse(options, args);
         } catch (MissingOptionException e) {
-            logger.fatal(e.getMessage());
+            LOGGER.fatal(e.getMessage());
             printHelp(options);
         } catch (UnrecognizedOptionException e) {
-            logger.fatal(e.getMessage());
+            LOGGER.fatal(e.getMessage());
             printHelp(options);
         } catch (ParseException e) {
             // TODO Auto-generated catch block
-            logger.fatal(e.getStackTrace().toString());
+            LOGGER.fatal(e.getStackTrace().toString());
         }
         return null;
     }
