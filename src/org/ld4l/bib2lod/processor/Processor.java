@@ -159,7 +159,8 @@ public abstract class Processor {
     }
     
     protected String getOutputFilename(String basename) {
-        return basename + "." +  getRdfOutputFormat().extension();   
+        //return basename + "." +  getRdfOutputFormat().extension(); 
+        return basename + getRdfOutputFormat().fullExtension();
     }
     
     protected String stubProcess(String outputSubDir) {
