@@ -26,7 +26,7 @@ public class BnodeConverter extends Processor {
             String inputDir, String mainOutputDir) {
                         
         super(localNamespace, inputDir, mainOutputDir);
-        LOGGER.debug(outputSubdir);
+
     }
 
     @Override
