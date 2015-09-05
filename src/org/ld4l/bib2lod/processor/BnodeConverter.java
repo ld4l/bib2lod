@@ -21,9 +21,8 @@ public class BnodeConverter extends Processor {
     @SuppressWarnings("unused")
     private static final Logger LOGGER = 
             LogManager.getLogger(BnodeConverter.class);
-    private static final String OUTPUT_SUBDIR = "BNodeToUriConverter";
-    
-
+    private static final String OUTPUT_SUBDIR = "BnodeConverter";
+   
     
     public BnodeConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {

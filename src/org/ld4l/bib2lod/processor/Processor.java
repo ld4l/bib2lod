@@ -31,7 +31,7 @@ public abstract class Processor {
      * file doesn't produce valid RDF in RDFXML, since the <rdf> element is
      * repeated (not sure whether json and ttl would work); (2) The links to 
      * blank nodes are lost, since no identifier is assigned to them. (2) is no
-     * longer relevant once BNodeToUriConverter has applied.
+     * longer relevant once BnodeConverter has applied.
      */
     private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;

@@ -111,7 +111,7 @@ public class ProcessController {
 /* Previous approach where individual processors were called by name. 
         if (selectedActions.contains(Action.CONVERT_BNODES)) {
             
-            Processor bnodeConverter = new BNodeToUriConverter(localNamespace,
+            Processor bnodeConverter = new BnodeConverter(localNamespace,
                     outputDir, mainOutputDir);
             outputDir = bnodeConverter.process();
         }
