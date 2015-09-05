@@ -65,9 +65,8 @@ public abstract class Processor {
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
         this.outputSubdir = 
-        StringUtils.substringAfterLast(this.getClass().getName(), "."); 
-        LOGGER.debug(this.outputSubdir);
-        
+                StringUtils.substringAfterLast(this.getClass().getName(), "."); 
+               
     }
     
     public abstract String process();
