@@ -37,7 +37,7 @@ public abstract class Processor {
     private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
     
-    //protected String outputSubdir;
+    protected String outputSubdir;
     protected OntModel bfOntModelInf;    
     protected String localNamespace;    
     protected String inputDir;
@@ -47,15 +47,8 @@ public abstract class Processor {
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
-        LOGGER.trace("In constructor for " + this.getClass().toString());        
-        this.bfOntModelInf = bfOntModelInf;        
-        this.localNamespace = localNamespace;        
-        this.inputDir = inputDir;
-        this.mainOutputDir = mainOutputDir;
-//        this.outputSubdir = 
-//                StringUtils.substringAfterLast(this.getClass().getName(), ".");
-        //LOGGER.debug(outputSubdir);
-
+        this(localNamespace, inputDir, mainOutputDir);      
+        this.bfOntModelInf = bfOntModelInf;  
     }
     
     /**
@@ -71,6 +64,10 @@ public abstract class Processor {
         this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
+        this.outputSubdir = 
+        StringUtils.substringAfterLast(this.getClass().getName(), "."); 
+        LOGGER.debug(this.outputSubdir);
+        
     }
     
     public abstract String process();
@@ -100,7 +97,7 @@ public abstract class Processor {
     protected String createOutputDir(String subdir) {
         
         String outputDir = null;
-        
+        LOGGER.debug(subdir);
         try {
             outputDir = Files.createDirectory(Paths.get(mainOutputDir, 
                     subdir)).toString();

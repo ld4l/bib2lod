@@ -11,11 +11,12 @@ public class UriDeduper extends Processor {
 
     @SuppressWarnings("unused")
     private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
-    private static final String OUTPUT_SUBDIR = "UriDeduper";
     
     // TODO Like TypeSplitter, we want to define types to dedupe on. Exclude,
     // for example, annotations, held items, titles, since these are not 
-    // re-used.
+    // re-used. BUT they must be the same. We only split on the types we want
+    // to dedupe. Other triples need to go with those items. E.g., the Titles
+    // need to go with their Works/Instances.
     
     public UriDeduper(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -28,7 +29,7 @@ public class UriDeduper extends Processor {
 
     @Override
     public String process() {
-        return stubProcess(OUTPUT_SUBDIR);
+        return stubProcess(outputSubdir);
     }
 
 }

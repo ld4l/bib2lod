@@ -25,7 +25,6 @@ import org.ld4l.bib2lod.processor.Processor;
 public class TypeSplitter extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
-    private static final String OUTPUT_SUBDIR = "TypeSplitter";
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
     private final List <String> typesToSplit = Arrays.asList(
@@ -56,7 +55,7 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
         
-        String outputDir = createOutputDir(OUTPUT_SUBDIR);
+        String outputDir = createOutputDir(outputSubdir);
         
         ParameterizedSparqlString pss = getParameterizedSparqlString();
        

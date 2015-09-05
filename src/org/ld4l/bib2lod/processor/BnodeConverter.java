@@ -18,22 +18,21 @@ import org.apache.logging.log4j.Logger;
 
 public class BnodeConverter extends Processor {
 
-    @SuppressWarnings("unused")
     private static final Logger LOGGER = 
             LogManager.getLogger(BnodeConverter.class);
-    private static final String OUTPUT_SUBDIR = "BnodeConverter";
    
     
     public BnodeConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
                         
         super(localNamespace, inputDir, mainOutputDir);
+        LOGGER.debug(outputSubdir);
     }
 
     @Override
     public String process() {        
         
-        String outputDir = createOutputDir(OUTPUT_SUBDIR);
+        String outputDir = createOutputDir(outputSubdir);
         
         for ( File file : new File(inputDir).listFiles() ) {
             Model outputModel = processInputFile(file);
