@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
+import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -9,9 +10,10 @@ import org.apache.jena.riot.RDFFormat;
 
 public enum RdfFormat {
 
-    // TODO Add other supported types
-    NTRIPLES("ntriples", RDFFormat.NTRIPLES, "nt"),
-    RDFXML("rdfxml", RDFFormat.RDFXML, "rdf");
+    // Currently the only valid output format is ntriples. See notes in 
+    // Bib2Lod.getValidFormat().
+    NTRIPLES("ntriples", RDFFormat.NTRIPLES, "nt");
+    // RDFXML("rdfxml", RDFFormat.RDFXML, "rdf");
 
     private final String label;
     private final RDFFormat jenaRDFFormat;
@@ -42,14 +44,10 @@ public enum RdfFormat {
     private static final Map<String, RdfFormat> LOOKUP_BY_LABEL =
             new HashMap<String, RdfFormat>();
    
-    private static final List<RdfFormat> VALID_FORMATS =
-            new ArrayList<RdfFormat>();
-   
     static {
         for (RdfFormat rf : RdfFormat.values()) {
             String label = rf.label();
             LOOKUP_BY_LABEL.put(label, rf);
-            VALID_FORMATS.add(rf);
         }
     }
 
@@ -57,7 +55,7 @@ public enum RdfFormat {
         return LOOKUP_BY_LABEL.get(label);
     }
    
-    public static List<RdfFormat> validFormats() {
-        return VALID_FORMATS;
+    public static List<RdfFormat> allFormats() {
+        return new ArrayList<RdfFormat>(EnumSet.allOf(RdfFormat.class));
     }
 }

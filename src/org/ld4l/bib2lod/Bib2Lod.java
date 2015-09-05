@@ -28,7 +28,12 @@ public class Bib2Lod {
     
     private static final Logger LOGGER = LogManager.getLogger(Bib2Lod.class);  
     private static final List<String> VALID_ACTIONS = Action.validActions();
-
+//    private static final List<RdfFormat> VALID_RDF_OUTPUT_FORMATS = 
+//            RdfFormat.allFormats();          
+//    private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
+//            RdfFormat.NTRIPLES;            
+            
+    
     /** 
      * Read in program options and call appropriate processing functionality.
      * @param args
@@ -43,13 +48,15 @@ public class Bib2Lod {
         if (cmd == null) {
             return;
         }
-        
+
         // Process commandline arguments and exit if any are invalid.
         String namespace = cmd.getOptionValue("namespace");
         if (!isValidNamespace(namespace)) {
             return;
         }
 
+        // RdfFormat format = getValidOutputFormat(cmd.getOptionValue("format"));
+        
         List<Action> actions = getValidActions(cmd.getOptionValues("actions"));
         if (actions == null) {
             return;
@@ -104,7 +111,32 @@ public class Bib2Lod {
 
     }
 
+    /* Currently allowing only ntriples output format: Some processors MUST 
+     * output ntriples, for two reasons: (1) append to file doesn't produce
+     * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
+     * whether json and ttl would work); (2) The links to blank nodes are lost,
+     * since no identifier is assigned to them. (2) is no longer relevant once
+     * BnodeConverter has applied. Later may consider commandline option to 
+     * specify RDF output format, but for now simpler to only allow ntriple
+     * output across the board. 
+    private static RdfFormat getValidOutputFormat(String selectedFormat) {
 
+        if (selectedFormat == null) {
+            return DEFAULT_RDF_OUTPUT_FORMAT;
+        } else {
+            RdfFormat format = RdfFormat.get(selectedFormat);
+            // *** TODO test that a bad format returns null here
+            if (format != null) {
+                return format;
+            } else {
+                LOGGER.error("Invalid format. Using default format "
+                        + DEFAULT_RDF_OUTPUT_FORMAT.label() + ".");                   
+                return DEFAULT_RDF_OUTPUT_FORMAT;               
+            }
+        }
+    }
+    */
+    
     /**
      * Check for valid input directory. Return the absolute path to the input 
      * directory if it exists, otherwise log an error and return null. 
@@ -230,32 +262,6 @@ public class Bib2Lod {
         
         Options options = new Options();
 
-        Option inputOption = Option.builder("i")
-                .longOpt("indir")
-                .required()
-                .hasArg()
-                .desc("Absolute or relative path to input files.")
-                .build();
-        options.addOption(inputOption);
-        
-        Option outputOption = Option.builder("o")
-                .longOpt("outdir")
-                .required()
-                .hasArg()
-                .desc("Absolute or relative path to output directory.")
-                .build();
-        options.addOption(outputOption);
-        
-        Option namespaceOption = Option.builder("n")
-                .longOpt("namespace")
-                .required()
-                .hasArg()
-                // Should namespace used in deduping?? Do we want to dedupe only 
-                // uris in this namespace?
-                .desc("Local HTTP namespace for minting and deduping URIs.")
-                .build();
-        options.addOption(namespaceOption);     
-
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
         Option actions = Option.builder("a")
@@ -268,6 +274,44 @@ public class Bib2Lod {
                 .build();
         options.addOption(actions);
         
+//        Option formatOption = Option.builder("f")
+//                .longOpt("format")
+//                .required(false)
+//                .hasArg()
+//                .desc("RDF serialization format of input and output. Valid "
+//                        + "formats: " 
+//                        + StringUtils.join(VALID_RDF_OUTPUT_FORMATS, ", ")
+//                        + ". Defaults to " 
+//                        + DEFAULT_RDF_OUTPUT_FORMAT.label() + ".")
+//                .build();
+//        options.addOption(formatOption);  
+        
+        Option inputOption = Option.builder("i")
+                .longOpt("indir")
+                .required()
+                .hasArg()
+                .desc("Absolute or relative path to input files.")
+                .build();
+        options.addOption(inputOption);
+
+        Option namespaceOption = Option.builder("n")
+                .longOpt("namespace")
+                .required()
+                .hasArg()
+                // Should namespace used in deduping?? Do we want to dedupe only 
+                // uris in this namespace?
+                .desc("Local HTTP namespace for minting and deduping URIs.")
+                .build();
+        options.addOption(namespaceOption);  
+        
+        Option outputOption = Option.builder("o")
+                .longOpt("outdir")
+                .required()
+                .hasArg()
+                .desc("Absolute or relative path to output directory.")
+                .build();
+        options.addOption(outputOption);
+ 
         return options;
     }
 

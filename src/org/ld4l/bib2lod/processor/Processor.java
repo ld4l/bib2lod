@@ -32,9 +32,11 @@ public abstract class Processor {
      * file doesn't produce valid RDF in RDFXML, since the <rdf> element is
      * repeated (not sure whether json and ttl would work); (2) The links to 
      * blank nodes are lost, since no identifier is assigned to them. (2) is no
-     * longer relevant once BnodeConverter has applied.
-     */
+     * longer relevant once BnodeConverter has applied.  
     private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
+            RdfFormat.NTRIPLES;
+    */
+    private static final RdfFormat RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
     
     protected String outputSubdir;
@@ -83,8 +85,21 @@ public abstract class Processor {
     }
     
     protected RdfFormat getRdfOutputFormat() {
-        // TODO default behavior should be to output the format that's input
-        return DEFAULT_RDF_OUTPUT_FORMAT;
+        /* Currently allowing only ntriples output format: Some processors MUST 
+         * output ntriples, for two reasons: (1) append to file doesn't produce
+         * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
+         * whether json and ttl would work); (2) The links to blank nodes are lost,
+         * since no identifier is assigned to them. (2) is no longer relevant once
+         * BnodeConverter has applied. Later may consider commandline option to 
+         * specify RDF output format, but for now simpler to only allow ntriple
+         * output across the board. If multiple rdf output formats are 
+         * allowed, the output format for a particular processor should be 
+         * determined as follows, in priority order:
+         * 1. Individual Processor requirement
+         * 2. Commandline option
+         * 3. Same format as input
+         */
+        return RDF_OUTPUT_FORMAT;
     }
     
     /**
@@ -152,7 +167,8 @@ public abstract class Processor {
         FileOutputStream outStream;
         try {
             outStream = new FileOutputStream(file, append);
-            RDFDataMgr.write(outStream, model, getRdfOutputFormat().jenaRDFFormat());
+            RDFDataMgr.write(outStream, model, 
+                    getRdfOutputFormat().jenaRDFFormat());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
