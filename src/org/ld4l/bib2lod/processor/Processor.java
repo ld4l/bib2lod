@@ -10,6 +10,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -35,7 +36,8 @@ public abstract class Processor {
      */
     private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
-
+    
+    //protected String outputSubdir;
     protected OntModel bfOntModelInf;    
     protected String localNamespace;    
     protected String inputDir;
@@ -45,11 +47,14 @@ public abstract class Processor {
     public Processor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
-        // logger.trace("In constructor for " + this.getClass().toString());        
+        LOGGER.trace("In constructor for " + this.getClass().toString());        
         this.bfOntModelInf = bfOntModelInf;        
         this.localNamespace = localNamespace;        
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
+//        this.outputSubdir = 
+//                StringUtils.substringAfterLast(this.getClass().getName(), ".");
+        //LOGGER.debug(outputSubdir);
 
     }
     
@@ -62,7 +67,7 @@ public abstract class Processor {
     public Processor(String localNamespace, String inputDir, 
             String mainOutputDir) {
 
-        // logger.trace("In constructor for " + this.getClass().toString());        
+        // LOGGER.trace("In constructor for " + this.getClass().toString());        
         this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;

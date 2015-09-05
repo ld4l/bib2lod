@@ -138,7 +138,7 @@ public class TypeSplitter extends Processor {
         for (String ontClassUri : typesToSplit) {       
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", ontClassUri);
-            // logger.debug(pss.toString());
+            // LOGGER.debug(pss.toString());
             Model model = modelsByType.get(ontClassUri);
             splitByType(pss, model, inputModel);            
         }

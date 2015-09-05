@@ -58,9 +58,9 @@ public class ProcessController {
         String newInputDir = this.mainInputDir;
         String outputDir = null;
         
-        // logger.trace("STARTING processAll() method");
-        // logger.trace("mainInputDir = " + mainInputDir);
-        // logger.trace("newInputDir = " + newInputDir);
+        // LOGGER.trace("STARTING processAll() method");
+        // LOGGER.trace("mainInputDir = " + mainInputDir);
+        // LOGGER.trace("newInputDir = " + newInputDir);
 
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
@@ -73,7 +73,7 @@ public class ProcessController {
             if (selectedActions.contains(a)) {
                 Processor processor;
                 Constructor<?> constructor; 
-                // logger.trace("newInputDir = " + newInputDir);
+                // LOGGER.trace("newInputDir = " + newInputDir);
                 try {
                     constructor = c.getConstructor(
                             OntModel.class, String.class, String.class, 
@@ -95,17 +95,17 @@ public class ProcessController {
                     e.printStackTrace();
                     return null;
                 }
-                // logger.trace("STARTING PROCESS " + c.getName());
-                // logger.trace("newInputDir = " + newInputDir);
+                // LOGGER.trace("STARTING PROCESS " + c.getName());
+                // LOGGER.trace("newInputDir = " + newInputDir);
                 outputDir = processor.process();
                 newInputDir = outputDir;
-                // logger.trace("DONE WITH PROCESS " + c.getName());
-                // logger.trace("Output dir = " + outputDir);                
+                // LOGGER.trace("DONE WITH PROCESS " + c.getName());
+                // LOGGER.trace("Output dir = " + outputDir);                
             }
         }
         
         // Return path to final results.
-        // logger.trace("Done with processAll()!");
+        // LOGGER.trace("Done with processAll()!");
         return outputDir;
 
 /* Previous approach where individual processors were called by name. 
