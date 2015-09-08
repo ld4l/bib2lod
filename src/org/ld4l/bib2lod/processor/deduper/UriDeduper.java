@@ -7,6 +7,7 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.OntologyType;
+import org.ld4l.bib2lod.RdfFormat;
 import org.ld4l.bib2lod.processor.Processor;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
@@ -24,7 +25,7 @@ public class UriDeduper extends Processor {
      * Identifiers for Instances, Titles for Works and Instances).
      */
     // Maybe should be List<OntologyType>?
-    private static final List<String> typesToDedupe = Arrays.asList(
+    private static final List<String> TYPES_TO_DEDUPE = Arrays.asList(
             // OntologyType.BF_ANNOTATION.uri(),
             OntologyType.BF_FAMILY.uri(),
             // OntologyType.BF_HELD_ITEM.uri(),
@@ -39,6 +40,7 @@ public class UriDeduper extends Processor {
             OntologyType.BF_WORK.uri()         
     );
 
+    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
     public UriDeduper(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -48,7 +50,12 @@ public class UriDeduper extends Processor {
     }
     
     protected static List<String> getTypesToDedupe() {
-        return typesToDedupe;
+        return TYPES_TO_DEDUPE;
+    }
+
+    @Override
+    protected RdfFormat getRdfOutputFormat() {
+        return RDF_OUTPUT_FORMAT;
     }
     
     @Override

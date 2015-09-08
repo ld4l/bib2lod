@@ -24,12 +24,11 @@ import org.ld4l.bib2lod.processor.Processor;
 public class TypeSplitter extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
-    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
+    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
+    private static final List<String> TYPES_TO_SPLIT = UriDeduper.getTypesToDedupe();
+    private static final String REMAINDER = "other";
     
-    private final List <String> typesToSplit = UriDeduper.getTypesToDedupe();
-    private final String remainder = "other";
-    
-    ParameterizedSparqlString pss;
+    private ParameterizedSparqlString pss;
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -90,15 +89,15 @@ public class TypeSplitter extends Processor {
         
         Map<String, File> outputFilesByType = new HashMap<String, File>();
         
-        for (String type : typesToSplit) {
+        for (String type : TYPES_TO_SPLIT) {
             outputFilesByType.put(type, 
                     createOutputFileForType(outputDir, type));
         }
         
         // Add a file for any remaining triples - i.e., where the subject 
         // doesn't belong to one of the types in typesToSplit.
-        outputFilesByType.put(remainder, new File(outputDir, 
-                getOutputFilename(remainder)));
+        outputFilesByType.put(REMAINDER, new File(outputDir, 
+                getOutputFilename(REMAINDER)));
         
         return outputFilesByType;
     }
@@ -124,7 +123,7 @@ public class TypeSplitter extends Processor {
         Map<String, Model> modelsByType = createModelsByType();
    
         // For each Bibframe type to split on
-        for (String ontClassUri : typesToSplit) {       
+        for (String ontClassUri : TYPES_TO_SPLIT) {       
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", ontClassUri);
             // LOGGER.debug(pss.toString());
@@ -134,7 +133,7 @@ public class TypeSplitter extends Processor {
         
         // Add to the remainder model the statements from this file that 
         // didn't get siphoned off to the type files.
-        modelsByType.get(remainder).add(inputModel);
+        modelsByType.get(REMAINDER).add(inputModel);
         
         // Append each model to the appropriate file
         writeModelsToFiles(modelsByType, outputFilesByType);
@@ -182,11 +181,11 @@ public class TypeSplitter extends Processor {
         Map<String, Model> modelsByType = 
                 new HashMap<String, Model>();
 
-        for (String uri: typesToSplit) {
+        for (String uri: TYPES_TO_SPLIT) {
             modelsByType.put(uri, 
                     ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
-        modelsByType.put(remainder, 
+        modelsByType.put(REMAINDER, 
                 ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));
         
         return modelsByType;
