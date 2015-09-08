@@ -1,6 +1,5 @@
 package org.ld4l.bib2lod.processor;
 
-import java.lang.reflect.Constructor;
 import java.util.List;
 
 import org.apache.jena.ontology.OntDocumentManager;
@@ -11,6 +10,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
 import org.ld4l.bib2lod.Namespace;
+import org.ld4l.bib2lod.processor.deduper.UriDeduper;
+import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
 
 
@@ -56,18 +57,41 @@ public class ProcessController {
         // the input directory of the next process, and a new output directory
         // for the new process is created.
         String newInputDir = this.mainInputDir;
-        String outputDir = null;
+        String outputDir = newInputDir;
         
-        // LOGGER.trace("STARTING processAll() method");
-        // LOGGER.trace("mainInputDir = " + mainInputDir);
-        // LOGGER.trace("newInputDir = " + newInputDir);
 
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
         // Correct errors in the Bibframe RDF that choke the ingest process.
         // Could do this after deduping, but probably these corrections should 
         // be included in deduped data.
+        
+        if (selectedActions.contains(Action.DEDUPE_URIS)) {
 
+            // URI deduping requires two previous processing steps.
+            
+            // Required since bnode ids are not guaranteed to be unique across
+            // input files, so Jena may create duplicate ids across files when
+            // reading into and writing out models. 
+            outputDir = new BnodeConverter(localNamespace, 
+                    outputDir, mainOutputDir).process();
+            
+            // Mechanism for handling large data files by reading only partial
+            // data (split by type) into memory for deduping.
+            outputDir = new TypeSplitter(bfOntModelInf,
+                    localNamespace, outputDir, mainOutputDir).process();
+            
+            outputDir = new UriDeduper(bfOntModelInf,
+                    localNamespace, outputDir, mainOutputDir).process();
+        }
+            
+
+        /* Previous approach where processors were called by looping through
+         * Action values. Switch to calling processors by name in order to
+         * express dependencies. Dependencies could be automated by defining
+         * them in the Action enum, but for now this is unnecessarily 
+         * complex. 
+         *
         // Loop on defined Actions rather than selected Actions to ensure 
         // correct order.
         for (Action a : Action.values()) {
@@ -105,33 +129,13 @@ public class ProcessController {
                 LOGGER.trace("Output dir = " + outputDir);                
             }
         }
+        */
         
         // Return path to final results.
         // LOGGER.trace("Done with processAll()!");
         return outputDir;
 
-/* Previous approach where individual processors were called by name. 
-        if (selectedActions.contains(Action.CONVERT_BNODES)) {
-            
-            Processor bnodeConverter = new BnodeConverter(localNamespace,
-                    outputDir, mainOutputDir);
-            outputDir = bnodeConverter.process();
-        }
-        if (selectedActions.contains(Action.DEDUPE_BIBFRAME_URIS)) {
 
-
-            Processor splitter = new TypeSplitter(bfOntModelInf, 
-                    localNamespace, outputDir, mainOutputDir);
-            outputDir = splitter.process();
-        }
-        
-        // TODO Insert other processes here
-        // currentInputDir = previous outputDir
-        // New outputDir defined by processor.
-        // Stages:
-        // Convert Bibframe RDF to LD4L RDF
-        // Entity resolution
-*/
         
     }
 

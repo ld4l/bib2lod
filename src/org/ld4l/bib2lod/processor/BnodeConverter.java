@@ -76,7 +76,7 @@ public class BnodeConverter extends Processor {
         Resource subject = statement.getSubject();
         Property property = statement.getPredicate();
         RDFNode object = statement.getObject();
-        if (!subject.isAnon() && !object.isAnon()) {
+        if (! (subject.isAnon() || object.isAnon()) ) {
             return;
         }
         Resource newSubject = subject;
