@@ -10,8 +10,9 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
 import org.ld4l.bib2lod.Namespace;
+import org.ld4l.bib2lod.processor.deduper.BnodeConverter;
+import org.ld4l.bib2lod.processor.deduper.TypeSplitter;
 import org.ld4l.bib2lod.processor.deduper.UriDeduper;
-import org.ld4l.bib2lod.processor.filesplitter.TypeSplitter;
 
 
 

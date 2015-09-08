@@ -1,7 +1,6 @@
-package org.ld4l.bib2lod.processor.filesplitter;
+package org.ld4l.bib2lod.processor.deduper;
 
 import java.io.File;
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -27,21 +26,7 @@ public class TypeSplitter extends Processor {
     private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
-    private final List <String> typesToSplit = Arrays.asList(
-            //OntologyType.BF_ANNOTATION.uri(),
-            OntologyType.BF_FAMILY.uri(),
-            OntologyType.BF_HELD_ITEM.uri(),
-            OntologyType.BF_INSTANCE.uri(),
-            OntologyType.BF_JURISDICTION.uri(),
-            OntologyType.BF_MEETING.uri(),
-            OntologyType.BF_ORGANIZATION.uri(),
-            OntologyType.BF_PERSON.uri(),
-            //OntologyType.BF_PROVIDER.uri(),
-            OntologyType.BF_PLACE.uri(),
-            //OntologyType.BF_TITLE.uri(),
-            OntologyType.BF_TOPIC.uri(),
-            OntologyType.BF_WORK.uri()         
-    );
+    private final List <String> typesToSplit = UriDeduper.getTypesToDedupe();
     private final String remainder = "other";
     
     ParameterizedSparqlString pss;
@@ -96,11 +81,6 @@ public class TypeSplitter extends Processor {
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a <" + OntologyType.BF_TITLE.uri() + "> "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a <" + OntologyType.BF_ANNOTATION.uri() + "> "
                 + "} }"                
         );
         return pss;
