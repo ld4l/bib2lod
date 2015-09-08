@@ -24,17 +24,17 @@ public enum Action {
     // BIBFRAME2LD4L("bibframe2ld4l");
     // RESOLVE_TO_EXTERNAL_ENTITIES);
     
-    private final String action;    
+    private final String label;    
     private final Class<?> processorClass;
 
     // TODO What is the type on Class? Could we make it <Processor>?
     Action(String action, Class<?> processorClass) {
-        this.action = action;
+        this.label = action;
         this.processorClass = processorClass;
     }
     
-    public String action() {
-        return this.action;
+    public String label() {
+        return this.label;
     }
     
     public Class<?> processorClass() {
@@ -49,7 +49,7 @@ public enum Action {
 
     static {
         for (Action actionValue : Action.values()) {
-            String action = actionValue.action();
+            String action = actionValue.label();
             LOOKUP.put(action, actionValue);
             VALID_ACTIONS.add(action);
         }

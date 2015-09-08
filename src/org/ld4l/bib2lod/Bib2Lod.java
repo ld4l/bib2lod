@@ -98,7 +98,7 @@ public class Bib2Lod {
         List<Action> actions = new ArrayList<Action>();
         for (String selectedAction : selectedActions) {
             Action action = Action.get(selectedAction);
-            // *** TODO test that a bad action returns null here
+            // LOGGER.debug(action);
             if (action != null) {
                 actions.add(action);
             } else {

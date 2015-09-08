@@ -68,6 +68,8 @@ public class ProcessController {
         // Could do this after deduping, but probably these corrections should 
         // be included in deduped data.
 
+        // Loop on defined Actions rather than selected Actions to ensure 
+        // correct order.
         for (Action a : Action.values()) {
             Class<?> c = a.processorClass();
             if (selectedActions.contains(a)) {
@@ -95,12 +97,12 @@ public class ProcessController {
                     e.printStackTrace();
                     return null;
                 }
-                // LOGGER.trace("STARTING PROCESS " + c.getName());
-                // LOGGER.trace("newInputDir = " + newInputDir);
+                LOGGER.trace("STARTING PROCESS " + c.getName());
+                LOGGER.trace("newInputDir = " + newInputDir);
                 outputDir = processor.process();
                 newInputDir = outputDir;
-                // LOGGER.trace("DONE WITH PROCESS " + c.getName());
-                // LOGGER.trace("Output dir = " + outputDir);                
+                LOGGER.trace("DONE WITH PROCESS " + c.getName());
+                LOGGER.trace("Output dir = " + outputDir);                
             }
         }
         
