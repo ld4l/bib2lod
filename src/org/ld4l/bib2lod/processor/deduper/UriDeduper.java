@@ -27,7 +27,7 @@ public class UriDeduper extends Processor {
     
     @Override
     public String process() {
-        return stubProcess(outputSubdir);
+        return stubProcess();
     }
 
 }

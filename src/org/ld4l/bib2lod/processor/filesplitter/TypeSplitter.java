@@ -55,7 +55,7 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
         
-        String outputDir = createOutputDir(outputSubdir);
+        String outputDir = createOutputDir();
         
         ParameterizedSparqlString pss = getParameterizedSparqlString();
        

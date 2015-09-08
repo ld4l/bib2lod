@@ -32,7 +32,7 @@ public class BnodeConverter extends Processor {
     @Override
     public String process() {        
         
-        String outputDir = createOutputDir(outputSubdir);
+        String outputDir = createOutputDir();
         
         for ( File file : new File(inputDir).listFiles() ) {
             Model outputModel = processInputFile(file);

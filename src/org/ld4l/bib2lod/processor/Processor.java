@@ -108,13 +108,12 @@ public abstract class Processor {
      * @param subDirName - the output subdirectory name for this process
      * @return - the full output directory path
      */
-    protected String createOutputDir(String subdir) {
+    protected String createOutputDir() {
         
         String outputDir = null;
-        LOGGER.debug(subdir);
         try {
             outputDir = Files.createDirectory(Paths.get(mainOutputDir, 
-                    subdir)).toString();
+                    outputSubdir)).toString();
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -180,8 +179,8 @@ public abstract class Processor {
         return basename + getRdfOutputFormat().fullExtension();
     }
     
-    protected String stubProcess(String outputSubDir) {
-        String outputDir = createOutputDir(outputSubDir);
+    protected String stubProcess() {
+        String outputDir = createOutputDir();
         copyFiles(inputDir, outputDir);
         return outputDir;
     }
