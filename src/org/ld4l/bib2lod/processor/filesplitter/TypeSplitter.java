@@ -28,19 +28,19 @@ public class TypeSplitter extends Processor {
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
     private final List <String> typesToSplit = Arrays.asList(
-            OntologyType.ANNOTATION.uri(),
-            OntologyType.FAMILY.uri(),
-            OntologyType.HELD_ITEM.uri(),
-            OntologyType.INSTANCE.uri(),
-            OntologyType.JURISDICTION.uri(),
-            OntologyType.MEETING.uri(),
-            OntologyType.ORGANIZATION.uri(),
-            OntologyType.PERSON.uri(),
-            OntologyType.PROVIDER.uri(),
-            OntologyType.PLACE.uri(),
-            OntologyType.TITLE.uri(),
-            OntologyType.TOPIC.uri(),
-            OntologyType.WORK.uri()         
+            //OntologyType.BF_ANNOTATION.uri(),
+            OntologyType.BF_FAMILY.uri(),
+            OntologyType.BF_HELD_ITEM.uri(),
+            OntologyType.BF_INSTANCE.uri(),
+            OntologyType.BF_JURISDICTION.uri(),
+            OntologyType.BF_MEETING.uri(),
+            OntologyType.BF_ORGANIZATION.uri(),
+            OntologyType.BF_PERSON.uri(),
+            //OntologyType.BF_PROVIDER.uri(),
+            OntologyType.BF_PLACE.uri(),
+            //OntologyType.BF_TITLE.uri(),
+            OntologyType.BF_TOPIC.uri(),
+            OntologyType.BF_WORK.uri()         
     );
     private final String remainder = "other";
     
@@ -90,7 +90,17 @@ public class TypeSplitter extends Processor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a <" + OntologyType.IDENTIFIER.uri() + "> "
+                + "?o1 a <" + OntologyType.BF_IDENTIFIER.uri() + "> "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a <" + OntologyType.BF_TITLE.uri() + "> "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a <" + OntologyType.BF_ANNOTATION.uri() + "> "
                 + "} }"                
         );
         return pss;
