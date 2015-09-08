@@ -33,9 +33,10 @@ public class BnodeConverter extends Processor {
     public String process() {        
         
         String outputDir = createOutputDir();
-        
+        int fileCount = 0;
         for ( File file : new File(inputDir).listFiles() ) {
-            Model outputModel = processInputFile(file);
+            fileCount++;
+            Model outputModel = processInputFile(file, fileCount);
             String outputFilename = getOutputFilename(
                     FilenameUtils.getBaseName(file.toString()));
             File outputFile = new File(outputDir, outputFilename); 
@@ -45,25 +46,32 @@ public class BnodeConverter extends Processor {
         return outputDir;
     }
     
-    private Model processInputFile(File inputFile) {
+    private Model processInputFile(File inputFile, int fileCount) {
         
         Model inputModel = readModelFromFile(inputFile);
         Model assertions = ModelFactory.createDefaultModel();
         Model retractions = ModelFactory.createDefaultModel();
-        Map<String, Resource> labelToUriResource = new HashMap<String, Resource>();
+        Map<String, Resource> bnodeIdToUriResource = 
+                new HashMap<String, Resource>();
         StmtIterator statements = inputModel.listStatements();
         while (statements.hasNext()) {
             Statement statement = statements.next();
             convertBnodesToUris(statement, assertions, retractions, 
-                    labelToUriResource);
+                    bnodeIdToUriResource, fileCount);
         }
         inputModel.remove(retractions);
         inputModel.add(assertions);   
+//        if (LOGGER.isDebugEnabled()) {
+//            for (String id: bnodeIdToUriResource.keySet()) {
+//                LOGGER.debug(id + ": " + bnodeIdToUriResource.get(id).toString());
+//            }
+//        }
         return inputModel;
     }
 
     private void convertBnodesToUris(Statement statement, Model assertions,
-            Model retractions, Map<String, Resource> labelToUriResource) {
+            Model retractions, Map<String, Resource> bnodeIdToUriResource,
+            int fileCount) {
         
         Resource subject = statement.getSubject();
         Property property = statement.getPredicate();
@@ -75,11 +83,11 @@ public class BnodeConverter extends Processor {
         RDFNode newObject = object;
         if (subject.isAnon()) {
             newSubject = createUriResourceForAnonNode(subject, 
-                    labelToUriResource, assertions);
+                    bnodeIdToUriResource, assertions, fileCount);
         }
         if (object.isAnon()) {
             newObject = createUriResourceForAnonNode(object, 
-                    labelToUriResource, assertions);               
+                    bnodeIdToUriResource, assertions, fileCount);               
         }
         retractions.add(subject, property, object);
         // This handles cases where both subject and object are blank nodes.
@@ -88,21 +96,28 @@ public class BnodeConverter extends Processor {
     
     
     private Resource createUriResourceForAnonNode(RDFNode rdfNode, 
-            Map<String, Resource> labelToUriResource, Model assertions) {
+            Map<String, Resource> idToUriResource, Model assertions, 
+            int fileCount) {
         Node node = rdfNode.asNode();
-        String label = node.getBlankNodeLabel();
+        // Prepend fileCount to blank node label to ensure that URIs are not
+        // duplicated across files. Blank node ids are locally scoped to a file
+        // and may be duplicated across files, but we do not want convergence
+        // of the same blank node id across files. 
+        String id = fileCount + "_" + node.getBlankNodeId().toString();
         Resource uriResource;
-        if (labelToUriResource.keySet().contains(label)) {
-            uriResource = labelToUriResource.get(label);    
+        if (idToUriResource.keySet().contains(id)) {
+            uriResource = idToUriResource.get(id);  
+            // LOGGER.debug("Found hash key " + id);
         } else {
-            uriResource = assertions.createResource(convertLabelToUri(label));
-            labelToUriResource.put(label, uriResource);
+            uriResource = assertions.createResource(convertLabelToUri(id));
+            idToUriResource.put(id, uriResource);
+            // LOGGER.debug("Creating new hash entry for id " + id);
         }
         return uriResource;
     }
     
-    private String convertLabelToUri(String label) {
-        String localName = label.replaceAll("\\W", "");
+    private String convertLabelToUri(String id) {
+        String localName = id.replaceAll("\\W", "");
         return localNamespace + localName;
     }
 
