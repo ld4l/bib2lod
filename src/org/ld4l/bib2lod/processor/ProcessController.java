@@ -21,7 +21,7 @@ public class ProcessController {
 
     private String localNamespace;
     
-    private String mainInputDir;
+    private String inputDir;
     private String mainOutputDir;
     
     private OntModel bfOntModelInf;
@@ -31,7 +31,7 @@ public class ProcessController {
         
         this.localNamespace = localNamespace;
         
-        this.mainInputDir = inputDir;
+        this.inputDir = inputDir;
         this.mainOutputDir = outputDir;
         
         loadOntModels();
@@ -56,10 +56,9 @@ public class ProcessController {
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
-        String newInputDir = this.mainInputDir;
+        String newInputDir = this.inputDir;
         String outputDir = newInputDir;
         
-
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
         // Correct errors in the Bibframe RDF that choke the ingest process.
