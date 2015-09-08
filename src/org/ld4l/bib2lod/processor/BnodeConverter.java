@@ -99,10 +99,16 @@ public class BnodeConverter extends Processor {
             Map<String, Resource> idToUriResource, Model assertions, 
             int fileCount) {
         Node node = rdfNode.asNode();
-        // Prepend fileCount to blank node label to ensure that URIs are not
-        // duplicated across files. Blank node ids are locally scoped to a file
-        // and may be duplicated across files, but we do not want convergence
-        // of the same blank node id across files. 
+        /*
+         * Prepend fileCount to blank node label to ensure that URIs are not
+         * duplicated across files. Blank node ids are locally scoped to a file
+         * and thus may be duplicated across files, but we do not want 
+         * convergence of the same blank node id across files. Note: The LC 
+         * converter actually creates unique bnode ids by appending the bib id, 
+         * much in the way that unique URIs are created, but when Jena reads the 
+         * RDF file into a model, it generates its own bnode ids that are 
+         * locally scoped to the file.
+         */
         String id = fileCount + "_" + node.getBlankNodeId().toString();
         Resource uriResource;
         if (idToUriResource.keySet().contains(id)) {
