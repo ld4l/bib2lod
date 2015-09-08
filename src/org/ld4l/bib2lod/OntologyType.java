@@ -5,20 +5,20 @@ public enum OntologyType {
     // Maybe create different type enums, one for bibframe, one for madsrdf
     // or miscellaneous, etc.
     
-    ANNOTATION(Namespace.BIBFRAME.uri(), "Annotation"),
-    FAMILY(Namespace.BIBFRAME.uri(), "Family"),
-    HELD_ITEM(Namespace.BIBFRAME.uri(), "HeldItem"),
-    IDENTIFIER(Namespace.BIBFRAME.uri(), "Identifier"),
-    INSTANCE(Namespace.BIBFRAME.uri(), "Instance"),
-    JURISDICTION(Namespace.BIBFRAME.uri(), "Jurisdiction"),
-    MEETING(Namespace.BIBFRAME.uri(), "Meeting"),
-    ORGANIZATION(Namespace.BIBFRAME.uri(), "Organization"),
-    PERSON(Namespace.BIBFRAME.uri(), "Person"),
-    PROVIDER(Namespace.BIBFRAME.uri(), "Provider"),
-    PLACE(Namespace.BIBFRAME.uri(), "Place"),
-    TITLE(Namespace.BIBFRAME.uri(), "Title"),
-    TOPIC(Namespace.BIBFRAME.uri(), "Topic"),  
-    WORK(Namespace.BIBFRAME.uri(), "Work"),
+    BF_ANNOTATION(Namespace.BIBFRAME.uri(), "Annotation"),
+    BF_FAMILY(Namespace.BIBFRAME.uri(), "Family"),
+    BF_HELD_ITEM(Namespace.BIBFRAME.uri(), "HeldItem"),
+    BF_IDENTIFIER(Namespace.BIBFRAME.uri(), "Identifier"),
+    BF_INSTANCE(Namespace.BIBFRAME.uri(), "Instance"),
+    BF_JURISDICTION(Namespace.BIBFRAME.uri(), "Jurisdiction"),
+    BF_MEETING(Namespace.BIBFRAME.uri(), "Meeting"),
+    BF_ORGANIZATION(Namespace.BIBFRAME.uri(), "Organization"),
+    BF_PERSON(Namespace.BIBFRAME.uri(), "Person"),
+    BF_PROVIDER(Namespace.BIBFRAME.uri(), "Provider"),
+    BF_PLACE(Namespace.BIBFRAME.uri(), "Place"),
+    BF_TITLE(Namespace.BIBFRAME.uri(), "Title"),
+    BF_TOPIC(Namespace.BIBFRAME.uri(), "Topic"),  
+    BF_WORK(Namespace.BIBFRAME.uri(), "Work"),
     
     MADSRDF_AUTHORITY(Namespace.MADSRDF.uri(), "Authority");
 
@@ -30,6 +30,7 @@ public enum OntologyType {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;
+        // Convenience field
         this.uri = namespace + localname;
     }
     
