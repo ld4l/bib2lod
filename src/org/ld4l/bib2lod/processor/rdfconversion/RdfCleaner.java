@@ -7,6 +7,8 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
@@ -17,10 +19,12 @@ import org.ld4l.bib2lod.processor.Processor;
 public class RdfCleaner extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
+    private static final Pattern URI_PATTERN = Pattern.compile("[<\"]http://[^\">]+");
     
     public RdfCleaner(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
+
     }
 
     @Override
@@ -33,7 +37,6 @@ public class RdfCleaner extends Processor {
                 String outputFilename =
                         FilenameUtils.getName(file.toString()); 
                 File outputFile = new File(outputDir, outputFilename);
-                LOGGER.debug("output file: " + outputFile.toString());
                 PrintWriter writer = new PrintWriter(new BufferedWriter(
                         new FileWriter(outputFile, true)));               
                 LineIterator iterator = new LineIterator(reader);
@@ -55,18 +58,28 @@ public class RdfCleaner extends Processor {
         return outputDir;
     }
 
-    /*
-     *  String content = "This is the content to write into file";
- PrintWriter out =new PrintWriter(new BufferedWriter(new FileWriter("Data.txt", true)));
- out.append(content);
- out.close();
-     */
     private String processLine(String line) {
-        //String newLine = null;
-        
-        //return newLine;
+        // LOGGER.debug("original: " + line);
+        line = fixUris(line);
+        // LOGGER.debug("new: " + line);
         return line;
     
+    }
+    
+    private String fixUris(String line) {
+
+        Matcher m = URI_PATTERN.matcher(line);
+        StringBuffer result = new StringBuffer();
+        while (m.find()) {
+            /* Could do a uri encoding here. Then the new string will be a
+             * different length from the original. Use technique described in
+             * Matching Regular Expressions p.383.
+             */
+            String replacement = m.group().replaceAll(" ", "_");
+            m.appendReplacement(result, replacement);
+        }
+        m.appendTail(result);
+        return result.toString();
     }
 
 
