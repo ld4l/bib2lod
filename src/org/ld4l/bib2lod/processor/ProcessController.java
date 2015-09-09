@@ -10,9 +10,10 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.Action;
 import org.ld4l.bib2lod.Namespace;
-import org.ld4l.bib2lod.processor.deduper.BnodeConverter;
-import org.ld4l.bib2lod.processor.deduper.TypeSplitter;
-import org.ld4l.bib2lod.processor.deduper.UriDeduper;
+import org.ld4l.bib2lod.processor.rdfconversion.BnodeConverter;
+import org.ld4l.bib2lod.processor.rdfconversion.RdfCleaner;
+import org.ld4l.bib2lod.processor.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.processor.rdfconversion.UriDeduper;
 
 
 
@@ -68,7 +69,10 @@ public class ProcessController {
         
         if (selectedActions.contains(Action.DEDUPE_URIS)) {
 
-            // URI deduping requires two previous processing steps.
+            // URI deduping requires some prior processing steps.
+            
+            outputDir = new RdfCleaner(localNamespace, outputDir, 
+                    mainOutputDir).process();
             
             // Required since bnode ids are not guaranteed to be unique across
             // input files, so Jena may create duplicate ids across files when

@@ -7,9 +7,9 @@ import java.util.List;
 import java.util.Map;
 
 import org.ld4l.bib2lod.processor.Processor;
-import org.ld4l.bib2lod.processor.deduper.BnodeConverter;
-import org.ld4l.bib2lod.processor.deduper.TypeSplitter;
-import org.ld4l.bib2lod.processor.deduper.UriDeduper;
+import org.ld4l.bib2lod.processor.rdfconversion.BnodeConverter;
+import org.ld4l.bib2lod.processor.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.processor.rdfconversion.UriDeduper;
 
 public enum Action {
 

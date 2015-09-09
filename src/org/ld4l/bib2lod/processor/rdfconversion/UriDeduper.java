@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor.deduper;
+package org.ld4l.bib2lod.processor.rdfconversion;
 
 import java.util.Arrays;
 import java.util.List;
