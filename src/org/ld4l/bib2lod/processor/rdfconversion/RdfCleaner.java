@@ -19,7 +19,7 @@ import org.ld4l.bib2lod.processor.Processor;
 public class RdfCleaner extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
-    private static final Pattern URI_PATTERN = Pattern.compile("[<\"]http://[^\">]+");
+    private static final Pattern URI_PATTERN = Pattern.compile("http://[^\"><]+");
     
     public RdfCleaner(String localNamespace, String inputDir,
             String mainOutputDir) {
@@ -75,6 +75,7 @@ public class RdfCleaner extends Processor {
              * different length from the original. Use technique described in
              * Matching Regular Expressions p.383.
              */
+            LOGGER.debug(m.group());
             String replacement = m.group().replaceAll(" ", "_");
             m.appendReplacement(result, replacement);
         }
