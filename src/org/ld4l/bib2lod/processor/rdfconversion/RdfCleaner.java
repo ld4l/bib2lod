@@ -60,6 +60,7 @@ public class RdfCleaner extends Processor {
     @Override
     public String process() {
         
+        LOGGER.info("Start process");
         String outputDir = createOutputDir();
         for ( File file : new File(inputDir).listFiles() ) {
             try {
@@ -85,6 +86,7 @@ public class RdfCleaner extends Processor {
             }
         
         }
+        LOGGER.info("End process");
         return outputDir;
     }
 

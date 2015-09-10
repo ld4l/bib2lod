@@ -33,6 +33,8 @@ public class BnodeConverter extends Processor {
     @Override
     public String process() {        
         
+        LOGGER.info("Start process");
+        
         String outputDir = createOutputDir();
         int fileCount = 0;
         for ( File file : new File(inputDir).listFiles() ) {
@@ -44,6 +46,7 @@ public class BnodeConverter extends Processor {
             writeModelToFile(outputModel, outputFile);
         }   
         
+        LOGGER.info("End process");
         return outputDir;
     }
     

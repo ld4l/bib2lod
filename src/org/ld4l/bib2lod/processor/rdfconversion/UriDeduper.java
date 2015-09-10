@@ -60,7 +60,10 @@ public class UriDeduper extends Processor {
     
     @Override
     public String process() {
-        return stubProcess();
+        LOGGER.info("Start process");
+        String outputDir = stubProcess();
+        LOGGER.info("End process");
+        return outputDir;
     }
 
 }

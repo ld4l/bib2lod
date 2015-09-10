@@ -39,6 +39,8 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
         
+        LOGGER.info("Start process");
+        
         String outputDir = createOutputDir();
         
         ParameterizedSparqlString pss = getParameterizedSparqlString();
@@ -51,7 +53,8 @@ public class TypeSplitter extends Processor {
         for ( File inputFile : new File(inputDir).listFiles() ) {
             processInputFile(inputFile, pss, outputFilesByType);                              
         }
-              
+           
+        LOGGER.info("End process");
         return outputDir;                                                                                                                               
     }
     
