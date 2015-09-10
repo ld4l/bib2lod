@@ -24,7 +24,33 @@ public class RdfCleaner extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
     private static final Pattern URI_PATTERN = 
+            /*
+             * Matches:
+             * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
+             * <http://id.loc.gov/vocabulary/geographicAreas/f-tz---\>
+             * <http://id.loc.gov/authorities/classification/TN"69>
+             * "http://id.loc.gov/authorities/classification/TN&#34;69"
+             * 
+             * Does not match:
+             * "http://id.loc.gov/vocabulary/subjectSchemes/fast" . 
+             * 
+             * Does not break 
+             * <http://id.loc.gov/authorities/classification/TN"69> into
+             * http://id.loc.gov/authorities/classification/TN"
+             * 
+             * The disjunction in the regex is required to handle all these 
+             * cases: If we remove the lookaheads/lookbehinds, then we must
+             * exclude " internal to the uri, so that we don't extend past
+             * the end of a quoted uri. But then we break up 
+             * <http://id.loc.gov/authorities/classification/TN"69> after the
+             * double quote. So here we are saying we have either a bracketed
+             * uri which cannot contain a bracket in the middle (but could 
+             * contain a quote), or a non-bracketed uri (quoted or not) which
+             * cannot contain internal brackets or quotes. A quoted uri in 
+             * rdfxml escapes an actual quote as &#34;
+             */
             Pattern.compile("(?<=<)http://[^>]+(?=>)|(?<!<)http://[^\"><]+(?!>)");
+    
     public RdfCleaner(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
@@ -79,12 +105,20 @@ public class RdfCleaner extends Processor {
             try {
                 String match = m.group();
                 URL url = new URL(match);
-                // Only the multi-argument URI constructor encodes illegal
-                // characters, so use URL methods to break up the string into
-                // components to feed to the URI constructor.
+                /*
+                 * Only the multi-argument URI constructor encodes illegal
+                 * characters, so use URL methods to break up the string into
+                 * components to feed to the URI constructor.
+                 */
                 String uri = new URI(url.getProtocol(), url.getUserInfo(), 
                         url.getHost(), url.getPort(), url.getPath(), 
                         url.getQuery(), url.getRef()).toString();
+                /*
+                 * &#34; must be replaced manually, because the URI constructor
+                 * doesn't change it, but Jena will not accept it when reading
+                 * a file into a model. There may be others here, in which case
+                 * we can use a hash to replace decimal with hex codes.
+                 */
                 uri = uri.replace("&#34;", "%22");
                 if (! uri.equals(m.group().toString())) {
                     text.replace(m.start(), m.end(), uri);
