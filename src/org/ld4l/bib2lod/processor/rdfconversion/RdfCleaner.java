@@ -122,9 +122,9 @@ public class RdfCleaner extends Processor {
                 uri = uri.replace("&#34;", "%22");
                 if (! uri.equals(m.group().toString())) {
                     text.replace(m.start(), m.end(), uri);
-                    LOGGER.debug("Encoding illegal characters:");
-                    LOGGER.debug(match);
-                    LOGGER.debug("uri = " + uri);
+                    // LOGGER.debug("Encoding illegal characters:");
+                    // LOGGER.debug(match);
+                    // LOGGER.debug("uri = " + uri);
                     matchPointer += uri.length() - match.length();
                 }
             } catch (MalformedURLException e) {
