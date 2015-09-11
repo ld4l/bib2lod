@@ -67,11 +67,18 @@ public class RdfCleaner extends Processor {
         LOGGER.info("Start process");
         String outputDir = createOutputDir();
         for ( File file : new File(inputDir).listFiles() ) {
+            String filename = file.getName();
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model). Makes sense to clean them up here.
-            if (file.isDirectory() || file.length() == 0) {
+            if (file.isDirectory()) { 
+                LOGGER.info("Skipping directory " + filename);
                 continue;
             }
+            if (file.length() == 0) {
+                LOGGER.info("Skipping empty file " + filename);
+                continue;
+            }
+            LOGGER.info("Start processing file " + filename);
             try {
                 BufferedReader reader = Files.newBufferedReader(file.toPath());
                 String outputFilename =
@@ -89,11 +96,12 @@ public class RdfCleaner extends Processor {
                 }
                 reader.close();
                 writer.close();
+                LOGGER.info("Done processing file " + filename);
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        
+   
         }
         LOGGER.info("End process");
         return outputDir;

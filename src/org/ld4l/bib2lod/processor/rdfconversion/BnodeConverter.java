@@ -38,12 +38,15 @@ public class BnodeConverter extends Processor {
         String outputDir = createOutputDir();
         int fileCount = 0;
         for ( File file : new File(inputDir).listFiles() ) {
+            String filename = file.getName();
+            LOGGER.info("Start processing file " + filename);
             fileCount++;
             Model outputModel = processInputFile(file, fileCount);
             String outputFilename = getOutputFilename(
                     FilenameUtils.getBaseName(file.toString()));
             File outputFile = new File(outputDir, outputFilename); 
             writeModelToFile(outputModel, outputFile);
+            LOGGER.info("Done processing file " + filename);
         }   
         
         LOGGER.info("End process");

@@ -51,7 +51,10 @@ public class TypeSplitter extends Processor {
         
         // For each file in the input directory
         for ( File inputFile : new File(inputDir).listFiles() ) {
-            processInputFile(inputFile, pss, outputFilesByType);                              
+            String filename = inputFile.getName();
+            LOGGER.info("Start processing file " + filename);
+            processInputFile(inputFile, pss, outputFilesByType);
+            LOGGER.info("Done processing file " + filename);
         }
            
         LOGGER.info("End process");
