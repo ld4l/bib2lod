@@ -69,6 +69,11 @@ public class RdfCleaner extends Processor {
         for ( File file : new File(inputDir).listFiles() ) {
             try {
                 BufferedReader reader = Files.newBufferedReader(file.toPath());
+                // Skip empty file (Jena chokes when reading empty file into 
+                // model). Makes sense to clean it up here.
+                if (reader.read() == -1) {
+                    continue;
+                }
                 String outputFilename =
                         FilenameUtils.getName(file.toString()); 
                 File outputFile = new File(outputDir, outputFilename);
