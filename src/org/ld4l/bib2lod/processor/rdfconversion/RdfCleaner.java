@@ -6,10 +6,12 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
+import java.io.UnsupportedEncodingException;
 import java.net.MalformedURLException;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
+import java.net.URLDecoder;
 import java.nio.file.Files;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -51,10 +53,12 @@ public class RdfCleaner extends Processor {
              */
             Pattern.compile("(?<=<)http://[^>]+(?=>)|(?<!<)http://[^\"><]+(?!>)");
     
+//    private static final Pattern DEC_CODE_PATTERN = 
+//            Pattern.compile("&#(\\d+);");
+    
     public RdfCleaner(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
-
     }
 
     @Override
@@ -99,34 +103,36 @@ public class RdfCleaner extends Processor {
     
     private String encodeUris(String line) {
         // LOGGER.debug("Original line: " + line);     
-        StringBuilder text = new StringBuilder(line);       
-        Matcher m = URI_PATTERN.matcher(text);
+        StringBuilder sb = new StringBuilder(line);       
+        Matcher m = URI_PATTERN.matcher(sb);
         int matchPointer = 0;
-        while (m.find(matchPointer)) {
-            matchPointer = m.end();
+        while (m.find(matchPointer)) {         
             try {
+                matchPointer = m.end();
                 String match = m.group();
-                URL url = new URL(match);
                 /*
                  * Only the multi-argument URI constructor encodes illegal
                  * characters, so use URL methods to break up the string into
                  * components to feed to the URI constructor.
                  */
+                URL url = new URL(match);
                 String uri = new URI(url.getProtocol(), url.getUserInfo(), 
                         url.getHost(), url.getPort(), url.getPath(), 
                         url.getQuery(), url.getRef()).toString();
                 /*
                  * &#34; must be replaced manually, because the URI constructor
-                 * doesn't change it, but Jena will not accept it when reading
+                 * doesn't change it, and Jena will not accept it when reading
                  * a file into a model. There may be others here, in which case
-                 * we can use a hash to replace decimal with hex codes.
+                 * we can replace decimal with hex codes using DEC_CODE_PATTERN
+                 * above.
                  */
                 uri = uri.replace("&#34;", "%22");
                 if (! uri.equals(m.group().toString())) {
-                    text.replace(m.start(), m.end(), uri);
-                    // LOGGER.debug("Encoding illegal characters:");
-                    // LOGGER.debug(match);
-                    // LOGGER.debug("uri = " + uri);
+                    sb.replace(m.start(), m.end(), uri);
+                    // LOGGER.debug("original uri: " + match);
+                    // LOGGER.debug("encoded uri: " + uri);
+                    // Manually reset matchPointer, since the old and new 
+                    // strings may differ in length.
                     matchPointer += uri.length() - match.length();
                 }
             } catch (MalformedURLException e) {
@@ -138,7 +144,7 @@ public class RdfCleaner extends Processor {
             }
         }
         // LOGGER.debug("New line: " + text.toString());
-        return text.toString();
+        return sb.toString();
     }
 
 }
