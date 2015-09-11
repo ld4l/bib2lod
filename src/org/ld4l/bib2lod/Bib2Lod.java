@@ -76,11 +76,11 @@ public class Bib2Lod {
                
         ProcessController processController = new ProcessController(namespace, 
                 absInputDir, absTopLevelOutputDir); 
-        String absFinalOutpuDir = processController.processAll(actions);
-        if (absFinalOutpuDir == null) {
-            LOGGER.trace("Processing failed.");
+        String absFinalOutputDir = processController.processAll(actions);
+        if (absFinalOutputDir == null) {
+            LOGGER.info("Processing failed.");
         } else {
-            LOGGER.trace("Done! Results in " + absFinalOutpuDir);
+            LOGGER.info("Done! Results in " + absFinalOutputDir);
         }
 
     }

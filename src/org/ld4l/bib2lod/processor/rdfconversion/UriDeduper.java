@@ -14,7 +14,7 @@ import org.ld4l.bib2lod.processor.Processor;
 public class UriDeduper extends Processor {
 
     @SuppressWarnings("unused")
-    private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
+    private static final Logger LOGGER = LogManager.getLogger(UriDeduper.class);
 
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
