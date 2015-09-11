@@ -78,9 +78,9 @@ public class Bib2Lod {
                 absInputDir, absTopLevelOutputDir); 
         String absFinalOutputDir = processController.processAll(actions);
         if (absFinalOutputDir == null) {
-            LOGGER.info("Processing failed.");
+            LOGGER.trace("Processing failed.");
         } else {
-            LOGGER.info("Done! Results in " + absFinalOutputDir);
+            LOGGER.trace("Done! Results in " + absFinalOutputDir);
         }
 
     }

@@ -39,7 +39,7 @@ public class TypeSplitter extends Processor {
     @Override
     public String process() {
         
-        LOGGER.info("Start process");
+        LOGGER.trace("Start process");
         
         String outputDir = createOutputDir();
         
@@ -52,12 +52,12 @@ public class TypeSplitter extends Processor {
         // For each file in the input directory
         for ( File inputFile : new File(inputDir).listFiles() ) {
             String filename = inputFile.getName();
-            LOGGER.info("Start processing file " + filename);
+            LOGGER.trace("Start processing file " + filename);
             processInputFile(inputFile, pss, outputFilesByType);
-            LOGGER.info("Done processing file " + filename);
+            LOGGER.trace("Done processing file " + filename);
         }
            
-        LOGGER.info("End process");
+        LOGGER.trace("End process");
         return outputDir;                                                                                                                               
     }
     
