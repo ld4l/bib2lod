@@ -89,6 +89,11 @@ public class RdfCleaner extends Processor {
                 LineIterator iterator = new LineIterator(reader);
                 while (iterator.hasNext()) {
                     String line = iterator.nextLine();
+                    // Remove empty lines
+                    if (line.length() == 0) {
+                        LOGGER.trace("Removing empty line");
+                        continue;
+                    }
                     // LOGGER.debug("Original: " + line);
                     String newLine = processLine(line);
                     // LOGGER.debug("New: " + newLine);
