@@ -1,9 +1,12 @@
 package org.ld4l.bib2lod.processor.rdfconversion;
 
+import java.io.File;
 import java.util.Arrays;
 import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.OntologyType;
@@ -61,9 +64,28 @@ public class UriDeduper extends Processor {
     @Override
     public String process() {
         LOGGER.trace("Start process");
-        String outputDir = stubProcess();
+        
+        String outputDir = createOutputDir();
+        
+        for ( File file : new File(inputDir).listFiles() ) {
+            String filename = file.getName();
+            LOGGER.trace("Start processing file " + filename);
+            Model outputModel = processInputFile(file);
+            String outputFilename = getOutputFilename(
+                    FilenameUtils.getBaseName(file.toString()));
+            File outputFile = new File(outputDir, outputFilename); 
+            writeModelToFile(outputModel, outputFile);
+            LOGGER.trace("Done processing file " + filename);
+        }   
+        
         LOGGER.trace("End process");
         return outputDir;
+    }
+    
+    private Model processInputFile(File inputFile) {
+        Model inputModel = readModelFromFile(inputFile);
+        
+        return inputModel;
     }
 
 }

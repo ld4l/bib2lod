@@ -36,6 +36,7 @@ public class BnodeConverter extends Processor {
         LOGGER.trace("Start process");
         
         String outputDir = createOutputDir();
+        
         int fileCount = 0;
         for ( File file : new File(inputDir).listFiles() ) {
             String filename = file.getName();
