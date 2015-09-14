@@ -69,6 +69,11 @@ public class UriDeduper extends Processor {
         
         String outputDir = createOutputDir();
         
+        for (OntologyType type : TYPES_TO_DEDUPE) {
+            String filename = type.filename();
+            LOGGER.debug(filename);
+        }
+        
         for ( File file : new File(inputDir).listFiles() ) {
             String filename = file.getName();
             LOGGER.trace("Start processing file " + filename);
