@@ -40,8 +40,8 @@ public enum Namespace {
     
     static {
         for (Namespace ns : Namespace.values()) {
-            LOOKUP_BY_URI.put(ns.uri(), ns);
-            LOOKUP_BY_PREFIX.put(ns.uri, ns.prefix());
+            LOOKUP_BY_URI.put(ns.uri, ns);
+            LOOKUP_BY_PREFIX.put(ns.uri, ns.prefix);
         }
     }
     

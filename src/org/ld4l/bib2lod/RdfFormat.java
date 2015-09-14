@@ -46,7 +46,7 @@ public enum RdfFormat {
    
     static {
         for (RdfFormat rf : RdfFormat.values()) {
-            String label = rf.label();
+            String label = rf.label;
             LOOKUP_BY_LABEL.put(label, rf);
         }
     }
