@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.processor.rdfconversion;
 
 import java.io.File;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -23,12 +24,12 @@ import org.ld4l.bib2lod.processor.Processor;
 
 public class TypeSplitter extends Processor {
 
-    private static final Logger LOGGER = LogManager.getLogger(TypeSplitter.class);
+    private static final Logger LOGGER = 
+            LogManager.getLogger(TypeSplitter.class);
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
-    private static final List<String> TYPES_TO_SPLIT = UriDeduper.getTypesToDedupe();
+    private static final List<OntologyType> TYPES_TO_SPLIT = 
+            new ArrayList<OntologyType>(UriDeduper.getTypesToDedupe());
     private static final String REMAINDER = "other";
-    
-    private ParameterizedSparqlString pss;
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -95,8 +96,8 @@ public class TypeSplitter extends Processor {
         
         Map<String, File> outputFilesByType = new HashMap<String, File>();
         
-        for (String type : TYPES_TO_SPLIT) {
-            outputFilesByType.put(type, 
+        for (OntologyType type : TYPES_TO_SPLIT) {
+            outputFilesByType.put(type.uri(), 
                     createOutputFileForType(outputDir, type));
         }
         
@@ -108,13 +109,9 @@ public class TypeSplitter extends Processor {
         return outputFilesByType;
     }
 
-    private File createOutputFileForType(String outputDir, String ontClassUri) {
+    private File createOutputFileForType(String outputDir, OntologyType type) {
         
-        // Name the file using the namespace prefix plus class localname.
-        String localname = StringUtils.substringAfterLast(ontClassUri, "/");
-        String namespace = StringUtils.substringBeforeLast(ontClassUri, "/") + "/";
-        String prefix = Namespace.getNsPrefix(namespace);
-        String basename = prefix + localname;
+        String basename = type.filename();
         return new File(outputDir, getOutputFilename(basename));
     }
     
@@ -129,11 +126,12 @@ public class TypeSplitter extends Processor {
         Map<String, Model> modelsByType = createModelsByType();
    
         // For each Bibframe type to split on
-        for (String ontClassUri : TYPES_TO_SPLIT) {       
+        for (OntologyType type : TYPES_TO_SPLIT) {       
+            String uri = type.uri();
             // Make the type substitution into the parameterized SPARQL string
-            pss.setIri("type", ontClassUri);
+            pss.setIri("type", uri);
             // LOGGER.debug(pss.toString());
-            Model model = modelsByType.get(ontClassUri);
+            Model model = modelsByType.get(uri);
             splitByType(pss, model, inputModel);            
         }
         
@@ -187,8 +185,8 @@ public class TypeSplitter extends Processor {
         Map<String, Model> modelsByType = 
                 new HashMap<String, Model>();
 
-        for (String uri: TYPES_TO_SPLIT) {
-            modelsByType.put(uri, 
+        for (OntologyType type: TYPES_TO_SPLIT) {
+            modelsByType.put(type.uri(), 
                     ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
         modelsByType.put(REMAINDER, 

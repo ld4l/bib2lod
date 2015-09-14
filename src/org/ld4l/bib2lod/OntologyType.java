@@ -1,5 +1,7 @@
 package org.ld4l.bib2lod;
 
+import org.apache.commons.lang3.StringUtils;
+
 public enum OntologyType {
 
     // Maybe create different type enums, one for bibframe, one for madsrdf
@@ -25,6 +27,7 @@ public enum OntologyType {
     private final String namespace;
     private final String localname;
     private final String uri;
+    private final String filename;
     
     OntologyType(String namespace, String localname) {
         // Or should this be a Namespace?
@@ -32,6 +35,11 @@ public enum OntologyType {
         this.localname = localname;
         // Convenience field
         this.uri = namespace + localname;
+        
+        String ln = StringUtils.substringAfterLast(this.uri, "/");
+        String ns = StringUtils.substringBeforeLast(this.uri, "/") + "/";
+        String prefix = Namespace.getNsPrefix(ns);
+        this.filename = prefix + ln;
     }
     
     public String namespace() {
@@ -44,5 +52,9 @@ public enum OntologyType {
     
     public String uri() {
         return this.uri;
+    }
+    
+    public String filename() {
+        return this.filename;
     }
 }

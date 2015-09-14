@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.processor.rdfconversion;
 
 import java.io.File;
 import java.util.Arrays;
+import java.util.LinkedHashSet;
 import java.util.List;
 
 import org.apache.commons.io.FilenameUtils;
@@ -27,20 +28,17 @@ public class UriDeduper extends Processor {
      * related type so that they can be used as a basis for deduping: e.g., 
      * Identifiers for Instances, Titles for Works and Instances).
      */
-    // Maybe should be List<OntologyType>?
-    private static final List<String> TYPES_TO_DEDUPE = Arrays.asList(
-            // OntologyType.BF_ANNOTATION.uri(),
-            OntologyType.BF_FAMILY.uri(),
-            // OntologyType.BF_HELD_ITEM.uri(),
-            OntologyType.BF_INSTANCE.uri(),
-            OntologyType.BF_JURISDICTION.uri(),
-            OntologyType.BF_MEETING.uri(),
-            OntologyType.BF_ORGANIZATION.uri(),
-            OntologyType.BF_PERSON.uri(),
-            //OntologyType.BF_PROVIDER.uri(),
-            OntologyType.BF_PLACE.uri(),
-            OntologyType.BF_TOPIC.uri(),
-            OntologyType.BF_WORK.uri()         
+    private static final LinkedHashSet<OntologyType> TYPES_TO_DEDUPE = 
+            new LinkedHashSet<OntologyType>(Arrays.asList(
+                OntologyType.BF_PERSON,
+                OntologyType.BF_FAMILY,
+                OntologyType.BF_JURISDICTION,
+                OntologyType.BF_MEETING,
+                OntologyType.BF_ORGANIZATION,
+                OntologyType.BF_WORK,  
+                OntologyType.BF_INSTANCE,
+                OntologyType.BF_PLACE,
+                OntologyType.BF_TOPIC)    
     );
 
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
@@ -49,11 +47,15 @@ public class UriDeduper extends Processor {
             String inputDir, String mainOutputDir) {
                  
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
-
+        
+        for (OntologyType s : TYPES_TO_DEDUPE) {
+            LOGGER.debug(s.uri());
+        }
     }
     
-    protected static List<String> getTypesToDedupe() {
+    protected static LinkedHashSet<OntologyType> getTypesToDedupe() {
         return TYPES_TO_DEDUPE;
+
     }
 
     @Override
