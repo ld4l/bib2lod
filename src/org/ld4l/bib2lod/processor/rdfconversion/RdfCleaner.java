@@ -91,12 +91,10 @@ public class RdfCleaner extends Processor {
                     String line = iterator.nextLine();
                     // Remove empty lines
                     if (line.length() == 0) {
-                        LOGGER.trace("Removing empty line");
+                        //LOGGER.debug("Removing empty line");
                         continue;
                     }
-                    // LOGGER.debug("Original: " + line);
                     String processedLine = processLine(line);
-                    // LOGGER.debug("New: " + newLine);
                     writer.append(processedLine + "\n");
                 }
                 reader.close();
@@ -119,12 +117,11 @@ public class RdfCleaner extends Processor {
     
     }
     
-    private String encodeUris(String line) {
-        // LOGGER.debug("Original line: " + line);     
+    private String encodeUris(String line) {    
         StringBuilder sb = new StringBuilder(line);       
         Matcher m = URI_PATTERN.matcher(sb);
         int matchPointer = 0;
-        while (m.find(matchPointer)) {         
+        while (m.find(matchPointer)) { 
             try {
                 matchPointer = m.end();
                 String match = m.group();
@@ -147,8 +144,6 @@ public class RdfCleaner extends Processor {
                 uri = uri.replace("&#34;", "%22");
                 if (! uri.equals(m.group().toString())) {
                     sb.replace(m.start(), m.end(), uri);
-                    // LOGGER.debug("original uri: " + match);
-                    // LOGGER.debug("encoded uri: " + uri);
                     // Manually reset matchPointer, since the old and new 
                     // strings may differ in length.
                     matchPointer += uri.length() - match.length();
@@ -160,8 +155,7 @@ public class RdfCleaner extends Processor {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }
-        }
-        // LOGGER.debug("New line: " + text.toString());
+        }       
         return sb.toString();
     }
 

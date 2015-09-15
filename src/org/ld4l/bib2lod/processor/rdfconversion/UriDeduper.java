@@ -106,9 +106,14 @@ public class UriDeduper extends Processor {
                         LOGGER.trace("Removing empty line");
                         continue;
                     }
-                    // LOGGER.debug("Original: " + line);
                     String processedLine = replaceUris(line, uniqueUris);
-                    // LOGGER.debug("New: " + newLine);
+                    if (LOGGER.isDebugEnabled()) {
+                        // append newline before comparing lines?
+                        if (!line.equals(processedLine)) {
+                            LOGGER.debug("Original: " + line);
+                            LOGGER.debug("New: " + processedLine);
+                        }
+                    }
                     writer.append(processedLine + "\n");
                 }
                 reader.close();
