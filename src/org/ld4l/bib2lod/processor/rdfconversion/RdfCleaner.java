@@ -69,7 +69,8 @@ public class RdfCleaner extends Processor {
         for ( File file : new File(inputDir).listFiles() ) {
             String filename = file.getName();
             // Skip directories and empty files (Jena chokes when reading an 
-            // empty file into a model). Makes sense to clean them up here.
+            // empty file into a model in later processors). Makes sense to 
+            // clean them up here.
             if (file.isDirectory()) { 
                 LOGGER.trace("Skipping directory " + filename);
                 continue;
@@ -79,38 +80,13 @@ public class RdfCleaner extends Processor {
                 continue;
             }
             LOGGER.trace("Start processing file " + filename);
-            try {
-                BufferedReader reader = Files.newBufferedReader(file.toPath());
-                String outputFilename =
-                        FilenameUtils.getName(file.toString()); 
-                File outputFile = new File(outputDir, outputFilename);
-                PrintWriter writer = new PrintWriter(new BufferedWriter(
-                        new FileWriter(outputFile, true)));               
-                LineIterator iterator = new LineIterator(reader);
-                while (iterator.hasNext()) {
-                    String line = iterator.nextLine();
-                    // Remove empty lines
-                    if (line.length() == 0) {
-                        //LOGGER.debug("Removing empty line");
-                        continue;
-                    }
-                    String processedLine = processLine(line);
-                    writer.append(processedLine + "\n");
-                }
-                reader.close();
-                writer.close();
-                LOGGER.trace("Done processing file " + filename);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
-   
+            replaceLinesInFile(file, outputDir); 
         }
         LOGGER.trace("End process");
         return outputDir;
     }
 
-    private String processLine(String line) {
+    protected String processLine(String line) {
         line = encodeUris(line);
         // Any other operations go here
         return line;

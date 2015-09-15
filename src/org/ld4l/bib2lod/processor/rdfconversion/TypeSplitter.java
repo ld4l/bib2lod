@@ -195,4 +195,9 @@ public class TypeSplitter extends Processor {
         return modelsByType;
     }
 
+    @Override
+    protected String processLine(String line) {
+        return line;
+    }
+
 }

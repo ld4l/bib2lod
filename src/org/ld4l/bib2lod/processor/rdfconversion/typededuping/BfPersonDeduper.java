@@ -16,8 +16,7 @@ public class BfPersonDeduper extends TypeDeduper {
     // TODO Maybe pass the model in the constructor so it's an instance 
     // variable? See if we need that.
     public Map<String, String> dedupe(Model model) {
-        
-        LOGGER.trace("Deduping model");
+
         Map<String, String> uniqueUris = new HashMap<String, String>();
         return uniqueUris;        
     }

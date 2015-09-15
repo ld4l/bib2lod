@@ -2,14 +2,21 @@ package org.ld4l.bib2lod.processor;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 
+import java.io.BufferedReader;
+import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.util.List;
 
+import org.apache.commons.io.FilenameUtils;
+import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -199,5 +206,45 @@ public abstract class Processor {
             }
         }
     }
+    
+    protected void replaceLinesInFile(File file, String outputDir) {
+        BufferedReader reader;
+        try {
+            String filename = file.getName();
+            LOGGER.trace("Start replacing lines in file " + filename);
+            reader = Files.newBufferedReader(file.toPath());
+            String outputFilename =
+                    FilenameUtils.getName(file.toString()); 
+            File outputFile = new File(outputDir, outputFilename);
+            PrintWriter writer = new PrintWriter(new BufferedWriter(
+                    new FileWriter(outputFile, true)));               
+            LineIterator iterator = new LineIterator(reader);
+            while (iterator.hasNext()) {
+                String line = iterator.nextLine();
+                // Remove empty lines
+                if (line.length() == 0) {
+                    // LOGGER.trace("Removing empty line");
+                    continue;
+                }
+                String processedLine = processLine(line);
+                if (LOGGER.isDebugEnabled()) {
+                    // append newline before comparing lines?
+                    if (!line.equals(processedLine)) {
+                        LOGGER.debug("Original: " + line);
+                        LOGGER.debug("New: " + processedLine);
+                    }
+                }
+                writer.append(processedLine + "\n");
+            }
+            reader.close();
+            writer.close();
+            LOGGER.trace("Done replacing lines in file " + file);                
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }       
+    }
+    
+    protected abstract String processLine(String line);
  
 }

@@ -135,4 +135,9 @@ public class BnodeConverter extends Processor {
         return localNamespace + localName;
     }
 
+    @Override
+    protected String processLine(String line) {
+        return line;
+    }
+
 }

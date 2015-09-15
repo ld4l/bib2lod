@@ -49,12 +49,13 @@ public class UriDeduper extends Processor {
     );
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
-
+    private Map<String, String> uniqueUris;
     
     public UriDeduper(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
                  
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
+
     }
     
     protected static List<OntologyType> getTypesToDedupe() {
@@ -76,7 +77,7 @@ public class UriDeduper extends Processor {
         
         String outputDir = createOutputDir();
         
-        Map<String, String> uniqueUris = new HashMap<String, String>();
+        uniqueUris = new HashMap<String, String>();
         File[] inputFiles = new File(inputDir).listFiles();
         
         for ( File file : inputFiles ) {
@@ -86,44 +87,8 @@ public class UriDeduper extends Processor {
             }
         } 
         
-        // TODO Move the bulk of this code to Processor - also used by
-        // RdfCleaner. Need to make uniqueUris an instance var, so processLine
-        // takes only one parameter
-        for ( File file : inputFiles ) {
-            BufferedReader reader;
-            try {
-                reader = Files.newBufferedReader(file.toPath());
-                String outputFilename =
-                        FilenameUtils.getName(file.toString()); 
-                File outputFile = new File(outputDir, outputFilename);
-                PrintWriter writer = new PrintWriter(new BufferedWriter(
-                        new FileWriter(outputFile, true)));               
-                LineIterator iterator = new LineIterator(reader);
-                while (iterator.hasNext()) {
-                    String line = iterator.nextLine();
-                    // Remove empty lines
-                    if (line.length() == 0) {
-                        LOGGER.trace("Removing empty line");
-                        continue;
-                    }
-                    String processedLine = replaceUris(line, uniqueUris);
-                    if (LOGGER.isDebugEnabled()) {
-                        // append newline before comparing lines?
-                        if (!line.equals(processedLine)) {
-                            LOGGER.debug("Original: " + line);
-                            LOGGER.debug("New: " + processedLine);
-                        }
-                    }
-                    writer.append(processedLine + "\n");
-                }
-                reader.close();
-                writer.close();
-                LOGGER.trace(
-                        "Done substituting URIs in file " + file.getName());
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+        for ( File file : new File(inputDir).listFiles() ) {
+            replaceLinesInFile(file, outputDir);
         }
 
         LOGGER.trace("End process");
@@ -133,7 +98,7 @@ public class UriDeduper extends Processor {
     private Map<String, String> processInputFile(File inputFile) {
         
         String filename = inputFile.getName();
-        LOGGER.trace("Start deduping file " + filename);
+        LOGGER.trace("Start processing file " + filename);
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
         OntologyType type = OntologyType.getByFilename(basename);
@@ -164,12 +129,12 @@ public class UriDeduper extends Processor {
             e.printStackTrace();
         }
 
-        
-        LOGGER.trace("Done deduping file " + filename);
+        LOGGER.trace("Done processing file " + filename);
         return null;
     }
-    
-    private String replaceUris(String line, Map<String, String> uniqueUris) {
+
+    @Override
+    protected String processLine(String line) {
         int size = uniqueUris.size();
         String[] originalUris = uniqueUris.keySet().toArray(new String[size]);
         String[] replacementUris = 
