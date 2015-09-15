@@ -26,10 +26,10 @@ public class TypeSplitter extends Processor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
-    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
+    // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
     private static final List<OntologyType> TYPES_TO_SPLIT = 
-            new ArrayList<OntologyType>(UriDeduper.getTypesToDedupe());
-    private static final String REMAINDER = "other";
+            UriDeduper.getTypesToDedupe();
+    private static final String REMAINDER = UriDeduper.getRemainder();
     
     public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -156,10 +156,10 @@ public class TypeSplitter extends Processor {
         }          
     }
     
-    @Override
-    protected RdfFormat getRdfOutputFormat() {
-        return RDF_OUTPUT_FORMAT;
-    }
+//    @Override
+//    protected RdfFormat getRdfOutputFormat() {
+//        return RDF_OUTPUT_FORMAT;
+//    }
 
     private void splitByType(ParameterizedSparqlString pss, Model model,
             Model inputModel) {

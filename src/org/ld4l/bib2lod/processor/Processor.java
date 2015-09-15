@@ -33,9 +33,9 @@ public abstract class Processor {
      * repeated (not sure whether json and ttl would work); (2) The links to 
      * blank nodes are lost, since no identifier is assigned to them. (2) is no
      * longer relevant once BnodeConverter has applied.  
-    private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
+       private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
-    */
+     */
     private static final RdfFormat RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
     
@@ -88,13 +88,13 @@ public abstract class Processor {
         /* Currently allowing only ntriples output format: Some processors MUST 
          * output ntriples, for two reasons: (1) append to file doesn't produce
          * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
-         * whether json and ttl would work); (2) The links to blank nodes are lost,
-         * since no identifier is assigned to them. (2) is no longer relevant once
-         * BnodeConverter has applied. Later may consider commandline option to 
-         * specify RDF output format, but for now simpler to only allow ntriple
-         * output across the board. If multiple rdf output formats are 
-         * allowed, the output format for a particular processor should be 
-         * determined as follows, in priority order:
+         * whether json and ttl would work); (2) The links to blank nodes are 
+         * lost, since no identifier is assigned to them. (2) is no longer 
+         * relevant once BnodeConverter has applied. Later may consider 
+         * commandline option to specify RDF output format, but for now simpler 
+         * to only allow ntriple output across the board. If multiple rdf output 
+         * formats are  allowed, the output format for a particular processor 
+         * should be  determined as follows, in order of precedence:
          * 1. Individual Processor requirement
          * 2. Commandline option
          * 3. Same format as input

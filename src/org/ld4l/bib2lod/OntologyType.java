@@ -3,7 +3,10 @@ package org.ld4l.bib2lod;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
+import org.ld4l.bib2lod.processor.rdfconversion.typededuping.BfPersonDeduper;
+import org.ld4l.bib2lod.processor.rdfconversion.typededuping.TypeDeduper;
 
 public enum OntologyType {
 
@@ -18,7 +21,7 @@ public enum OntologyType {
     BF_JURISDICTION(Namespace.BIBFRAME, "Jurisdiction"),
     BF_MEETING(Namespace.BIBFRAME, "Meeting"),
     BF_ORGANIZATION(Namespace.BIBFRAME, "Organization"),
-    BF_PERSON(Namespace.BIBFRAME, "Person"),
+    BF_PERSON(Namespace.BIBFRAME, "Person", BfPersonDeduper.class),
     BF_PROVIDER(Namespace.BIBFRAME, "Provider"),
     BF_PLACE(Namespace.BIBFRAME, "Place"),
     BF_TITLE(Namespace.BIBFRAME, "Title"),
@@ -31,6 +34,7 @@ public enum OntologyType {
     private final String localname;
     private final String uri;
     private final String filename;
+    private Class<?> deduper;
     
     OntologyType(Namespace namespace, String localname) {
         this.namespace = namespace;
@@ -41,7 +45,15 @@ public enum OntologyType {
         String ln = StringUtils.substringAfterLast(this.uri, "/");
         String ns = StringUtils.substringBeforeLast(this.uri, "/") + "/";
         String prefix = Namespace.getNsPrefix(ns);
-        this.filename = prefix + ln;
+        this.filename = prefix + ln;   
+        
+        this.deduper = null;
+    }
+
+    OntologyType(Namespace namespace, String localname, 
+            Class<?> deduper) {
+        this(namespace, localname);
+        this.deduper = deduper;
     }
     
     public Namespace namespace() {
@@ -64,16 +76,22 @@ public enum OntologyType {
         return this.filename;
     }
     
-//    private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
-//            new HashMap<String, OntologyType>();
-//
-//    static {
-//        for (OntologyType type : OntologyType.values()) {
-//            String filename = type.filename;
-//            LOOKUP_BY_FILENAME.put(filename, type);
-//        }
-//    }
-//    public OntologyType getByFilename(String filename) {
-//        return LOOKUP_BY_FILENAME.get(filename);
-//    }
+    public Class<?> deduper() {
+        return this.deduper;
+    }
+    
+    private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
+            new HashMap<String, OntologyType>();
+
+    static {
+        for (OntologyType type : OntologyType.values()) {
+            String filename = type.filename;
+            LOOKUP_BY_FILENAME.put(filename, type);
+        }
+    }
+    public static OntologyType getByFilename(String filename) {
+        String basename = FilenameUtils.getBaseName(filename);
+        return LOOKUP_BY_FILENAME.get(basename);
+    }
+
 }

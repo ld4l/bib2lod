@@ -95,9 +95,9 @@ public class RdfCleaner extends Processor {
                         continue;
                     }
                     // LOGGER.debug("Original: " + line);
-                    String newLine = processLine(line);
+                    String processedLine = processLine(line);
                     // LOGGER.debug("New: " + newLine);
-                    writer.append(newLine + "\n");
+                    writer.append(processedLine + "\n");
                 }
                 reader.close();
                 writer.close();
