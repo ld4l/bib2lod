@@ -2,6 +2,8 @@ package org.ld4l.bib2lod.processor.rdfconversion.typededuping;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -17,7 +19,7 @@ public class BfPersonDeduper extends TypeDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfPersonDeduper.class);
-    private static final String sparql = 
+    private static final Query QUERY = QueryFactory.create(
             "PREFIX bf: <http://bibframe.org/vocab/> "
             + "PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#> "
             + "SELECT ?s ?label "
@@ -26,8 +28,10 @@ public class BfPersonDeduper extends TypeDeduper {
             + " bf:hasAuthority ?a . "
             + "?a a madsrdf:Authority ; "
             + "madsrdf:authoritativeLabel ?label ."
-            + "}";
-    private static final Query query = QueryFactory.create(sparql);
+            + "}"
+    );
+    private static final Pattern NON_WORD_CHAR = Pattern.compile("\\W");
+
             
     
     @Override
@@ -38,14 +42,16 @@ public class BfPersonDeduper extends TypeDeduper {
         Map<String, String> uniqueUris = new HashMap<String, String>();
         Map<String, String> data = new HashMap<String, String>();
         
-        QueryExecution qexec = QueryExecutionFactory.create(query, model);
+        QueryExecution qexec = QueryExecutionFactory.create(QUERY, model);
         ResultSet results = qexec.execSelect();
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             String personUri = soln.getResource("s").getURI();
             String label = soln.getLiteral("label").getLexicalForm();
             LOGGER.debug(personUri + " => " + label);
-            label = label.replace(" ", "");
+            // label = label.replace(" ", "");
+            Matcher m = NON_WORD_CHAR.matcher(label);
+            label = m.replaceAll("");
             if (data.containsKey(label)) {
                 LOGGER.debug("Found matching value for label " + label + " and URI " + personUri);
                 LOGGER.debug("Adding: " + personUri + " => " + data.get(label));
