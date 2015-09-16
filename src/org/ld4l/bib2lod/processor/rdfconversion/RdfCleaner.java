@@ -86,7 +86,7 @@ public class RdfCleaner extends Processor {
         return outputDir;
     }
 
-    protected String processLine(String line) {
+    private String processLine(String line) {
         line = encodeUris(line);
         // Any other operations go here
         return line;
@@ -135,4 +135,41 @@ public class RdfCleaner extends Processor {
         return sb.toString();
     }
 
+    protected void replaceLinesInFile(File file, String outputDir) {
+        BufferedReader reader;
+        try {
+            String filename = file.getName();
+            LOGGER.trace("Start replacing lines in file " + filename);
+            reader = Files.newBufferedReader(file.toPath());
+            String outputFilename =
+                    FilenameUtils.getName(file.toString()); 
+            File outputFile = new File(outputDir, outputFilename);
+            PrintWriter writer = new PrintWriter(new BufferedWriter(
+                    new FileWriter(outputFile, true)));               
+            LineIterator iterator = new LineIterator(reader);
+            while (iterator.hasNext()) {
+                String line = iterator.nextLine();
+                // Remove empty lines
+                if (line.length() == 0) {
+                    // LOGGER.trace("Removing empty line");
+                    continue;
+                }
+                String processedLine = processLine(line);
+                if (LOGGER.isDebugEnabled()) {
+                    // append newline before comparing lines?
+                    if (!line.equals(processedLine)) {
+                        // LOGGER.debug("Original: " + line);
+                        // LOGGER.debug("New: " + processedLine);
+                    }
+                }
+                writer.append(processedLine + "\n");
+            }
+            reader.close();
+            writer.close();
+            LOGGER.trace("Done replacing lines in file " + file);                
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }       
+    }
 }

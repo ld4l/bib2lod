@@ -179,8 +179,7 @@ public class UriDeduper extends Processor {
         return null;
     }
 
-    @Override
-    protected String processLine(String line) {
+    private String processLine(String line) {
         int size = uniqueUris.size();
         String[] originalUris = uniqueUris.keySet().toArray(new String[size]);
         String[] replacementUris = 
