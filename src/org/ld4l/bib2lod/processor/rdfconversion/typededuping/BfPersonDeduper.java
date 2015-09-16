@@ -21,13 +21,6 @@ public class BfPersonDeduper extends TypeDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfPersonDeduper.class);
-    private static final String SPARQL =             "SELECT ?s ?label "
-            + "WHERE { "
-            + "?s a " + OntologyType.BF_PERSON.sparqlUri() +  "; "
-            + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?a . "
-            + "?a a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() + " ; "
-            + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " ?label ."
-            + "}";
     private static final Query QUERY = QueryFactory.create(
             "SELECT ?s ?label "
             + "WHERE { "
@@ -42,26 +35,23 @@ public class BfPersonDeduper extends TypeDeduper {
             
     
     @Override
-    // TODO Maybe pass the model in the constructor so it's an instance 
-    // variable? See if we need that.
     public Map<String, String> dedupe(Model model) {
 
         Map<String, String> uniqueUris = new HashMap<String, String>();
         Map<String, String> data = new HashMap<String, String>();
-        LOGGER.debug(SPARQL);
         QueryExecution qexec = QueryExecutionFactory.create(QUERY, model);
         ResultSet results = qexec.execSelect();
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             String personUri = soln.getResource("s").getURI();
             String label = soln.getLiteral("label").getLexicalForm();
-            LOGGER.debug("Original uri: " + personUri + " => " + label);
+            // LOGGER.debug("Original uri: " + personUri + " => " + label);
             // label = label.replace(" ", "");
             Matcher m = IGNORE.matcher(label);
             label = m.replaceAll("");
             if (data.containsKey(label)) {
-                LOGGER.debug("Found matching value for label " + label + " and URI " + personUri);
-                LOGGER.debug("Adding: " + personUri + " => " + data.get(label));
+                // LOGGER.debug("Found matching value for label " + label + " and URI " + personUri);
+                // LOGGER.debug("Adding: " + personUri + " => " + data.get(label));
                 uniqueUris.put(personUri, data.get(label));
             } else {
                 uniqueUris.put(personUri, personUri);

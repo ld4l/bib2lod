@@ -48,11 +48,11 @@ public class UriDeduper extends Processor {
             OntologyType.BF_WORK,  
             OntologyType.BF_INSTANCE,
             OntologyType.BF_PLACE,
-            OntologyType.BF_TOPIC    
+            OntologyType.BF_TOPIC,
+            OntologyType.MADSRDF_AUTHORITY
     );
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
-    private Map<String, String> uniqueUris;
     
     public UriDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -80,11 +80,11 @@ public class UriDeduper extends Processor {
         
         String outputDir = createOutputDir();
         
-        uniqueUris = new HashMap<String, String>();
+        Map<String, String> uniqueUris = new HashMap<String, String>();
         File[] inputFiles = new File(inputDir).listFiles();
         
         for ( File file : inputFiles ) {
-            Map<String, String> dedupedUris = processInputFile(file);
+            Map<String, String> dedupedUris = dedupeInputFile(file);
             if (dedupedUris != null) {
                 uniqueUris.putAll(dedupedUris);
             }
@@ -102,7 +102,7 @@ public class UriDeduper extends Processor {
                 LineIterator lineIterator = new LineIterator(reader);
                 while (lineIterator.hasNext()) {
                     String line = lineIterator.nextLine();
-                    String processedLine = processLine(line) + "\n";
+                    String processedLine = replaceUrisInLine(line, uniqueUris) + "\n";
                     /* Add the line to a set removes duplicate lines.
                      * NB Another way to replace duplicates would be to read 
                      * the lines into a Jena model, which also automatically 
@@ -137,7 +137,7 @@ public class UriDeduper extends Processor {
         return outputDir;
     }
 
-    private Map<String, String> processInputFile(File inputFile) {
+    private Map<String, String> dedupeInputFile(File inputFile) {
         
         String filename = inputFile.getName();
         LOGGER.trace("Start processing file " + filename);
@@ -179,7 +179,8 @@ public class UriDeduper extends Processor {
         return null;
     }
 
-    private String processLine(String line) {
+    private String replaceUrisInLine(String line, 
+            Map<String, String> uniqueUris) {
         int size = uniqueUris.size();
         String[] originalUris = uniqueUris.keySet().toArray(new String[size]);
         String[] replacementUris = 
