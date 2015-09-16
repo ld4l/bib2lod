@@ -30,7 +30,7 @@ public class BfPersonDeduper extends TypeDeduper {
             + "madsrdf:authoritativeLabel ?label ."
             + "}"
     );
-    private static final Pattern NON_WORD_CHAR = Pattern.compile("\\W");
+    private static final Pattern IGNORE = Pattern.compile("\\s|\\.$");
 
             
     
@@ -48,16 +48,15 @@ public class BfPersonDeduper extends TypeDeduper {
             QuerySolution soln = results.next();
             String personUri = soln.getResource("s").getURI();
             String label = soln.getLiteral("label").getLexicalForm();
-            LOGGER.debug(personUri + " => " + label);
+            LOGGER.debug("Original uri: " + personUri + " => " + label);
             // label = label.replace(" ", "");
-            Matcher m = NON_WORD_CHAR.matcher(label);
+            Matcher m = IGNORE.matcher(label);
             label = m.replaceAll("");
             if (data.containsKey(label)) {
                 LOGGER.debug("Found matching value for label " + label + " and URI " + personUri);
                 LOGGER.debug("Adding: " + personUri + " => " + data.get(label));
                 uniqueUris.put(personUri, data.get(label));
             } else {
-                //LOGGER.debug("Found new value");
                 uniqueUris.put(personUri, personUri);
                 data.put(label, personUri);
             }
