@@ -41,8 +41,12 @@ public enum OntologyType {
         // Convenience field
         this.uri = namespace.uri() + localname;
         
-        String ln = StringUtils.substringAfterLast(this.uri, "/");
-        String ns = StringUtils.substringBeforeLast(this.uri, "/") + "/";
+        String namespaceUri = namespace.uri();
+        
+        // Last char of namespace can be / or #
+        String lastChar = namespaceUri.substring(namespaceUri.length() - 1);
+        String ln = StringUtils.substringAfterLast(this.uri, lastChar);
+        String ns = StringUtils.substringBeforeLast(this.uri, lastChar) + lastChar;
         String prefix = Namespace.getNsPrefix(ns);
         this.filename = prefix + ln;   
         
