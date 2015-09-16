@@ -25,15 +25,12 @@ public class BfPersonDeduper extends TypeDeduper {
             "SELECT ?s ?label "
             + "WHERE { "
             + "?s a " + OntologyType.BF_PERSON.sparqlUri() +  "; "
-            + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?a . "
-            + "?a a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() + " ; "
-            + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " ?label ."
+            + OntologyProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + "?label . "
             + "}"
     );
     private static final Pattern IGNORE = Pattern.compile("\\s|\\.$");
 
-            
-    
+
     @Override
     public Map<String, String> dedupe(Model model) {
 

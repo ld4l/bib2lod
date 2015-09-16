@@ -67,26 +67,27 @@ public class TypeSplitter extends Processor {
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
         pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
+        pss.setNsPrefix("madsrdf", Namespace.MADSRDF.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
-                + "WHERE { { " 
+                + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . " 
-                + "?o1 a <" + OntologyType.MADSRDF_AUTHORITY.uri() + "> "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a <" + OntologyType.BF_IDENTIFIER.uri() + "> "
+//                + "} UNION { "
+//                + "?s1 ?p1 ?o1 . "
+//                + "?s1 a ?type . "
+//                + "?o1 ?p2 ?o2 . " 
+//                + "?o1 a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a <" + OntologyType.BF_TITLE.uri() + "> "
+                + "?o1 a " + OntologyType.BF_IDENTIFIER.sparqlUri()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntologyType.BF_TITLE.sparqlUri()
                 + "} }"                
         );
         return pss;
@@ -103,6 +104,7 @@ public class TypeSplitter extends Processor {
         
         // Add a file for any remaining triples - i.e., where the subject 
         // doesn't belong to one of the types in typesToSplit.
+        // NB This is why the map keys are strings rather than OntologyTypes. d
         outputFilesByType.put(REMAINDER, new File(outputDir, 
                 getOutputFilename(REMAINDER)));
         
@@ -131,8 +133,8 @@ public class TypeSplitter extends Processor {
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", uri);
             // LOGGER.debug(pss.toString());
-            Model model = modelsByType.get(uri);
-            splitByType(pss, model, inputModel);            
+            Model modelForType = modelsByType.get(uri);
+            splitByType(pss, modelForType, inputModel);            
         }
         
         // Add to the remainder model the statements from this file that 
@@ -161,18 +163,20 @@ public class TypeSplitter extends Processor {
 //        return RDF_OUTPUT_FORMAT;
 //    }
 
-    private void splitByType(ParameterizedSparqlString pss, Model model,
+    private void splitByType(ParameterizedSparqlString pss, Model modelForType,
             Model inputModel) {
  
         // Run the query against the input model
         Query query = pss.asQuery();
+        // LOGGER.debug("Query: " + query.toString());
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
+        // LOGGER.debug("Model size: " + constructModel.size());
         qexec.close();
 
         // Add resulting graph to the model for this type
-        model.add(constructModel);
+        modelForType.add(constructModel);
         
         // Remove the resulting graph from the input model, so we
         // don't have to query against those statements on the next 
