@@ -230,8 +230,8 @@ public abstract class Processor {
                 if (LOGGER.isDebugEnabled()) {
                     // append newline before comparing lines?
                     if (!line.equals(processedLine)) {
-                        LOGGER.debug("Original: " + line);
-                        LOGGER.debug("New: " + processedLine);
+                        // LOGGER.debug("Original: " + line);
+                        // LOGGER.debug("New: " + processedLine);
                     }
                 }
                 writer.append(processedLine + "\n");

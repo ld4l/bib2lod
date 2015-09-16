@@ -82,16 +82,23 @@ public enum OntologyType {
     
     private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
             new HashMap<String, OntologyType>();
+    
+    private static final Map<Class<?>, OntologyType> LOOKUP_BY_CLASS = 
+            new HashMap<Class<?>, OntologyType>();
 
     static {
         for (OntologyType type : OntologyType.values()) {
-            String filename = type.filename;
-            LOOKUP_BY_FILENAME.put(filename, type);
+            LOOKUP_BY_FILENAME.put(type.filename, type);
+            LOOKUP_BY_CLASS.put(type.deduper, type);
         }
     }
+    
     public static OntologyType getByFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
     }
 
+    public static OntologyType getByClass(Class<?> cls) {
+        return LOOKUP_BY_FILENAME.get(cls);
+    }
 }

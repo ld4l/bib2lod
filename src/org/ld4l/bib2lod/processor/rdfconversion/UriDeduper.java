@@ -88,6 +88,13 @@ public class UriDeduper extends Processor {
         } 
         
         for ( File file : new File(inputDir).listFiles() ) {
+            // *** NO We need to also remove duplicates
+            // Easiest way to do that is to read into model and read out
+            // Or is there a string fn to do this?
+            // If dealing with models, maybe we want to do the replacements on
+            // models as well...then when we write out the model, duplicates 
+            // will be eliminated.
+            // FIX THIS!!! 
             replaceLinesInFile(file, outputDir);
         }
 
@@ -118,6 +125,10 @@ public class UriDeduper extends Processor {
             Model model = readModelFromFile(inputFile);
             // TODO Maybe pass the model in the constructor so it's an instance 
             // variable?
+            // TODO Possibly we don't need different deduper subclasses, but
+            // just need to define the query for each type in a hash. Then 
+            // eliminate TypeDeduper and its subclasses and just use generic
+            // methods to execute the query and manage the results.
             TypeDeduper deduper = (TypeDeduper) cls.newInstance();
             return deduper.dedupe(model);
             

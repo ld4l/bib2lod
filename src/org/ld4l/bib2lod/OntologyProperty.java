@@ -2,8 +2,10 @@ package org.ld4l.bib2lod;
 
 public enum OntologyProperty {
 
-    HAS_AUTHORITY(Namespace.BIBFRAME, "hasAuthority"),
-    IDENTIFIER(Namespace.BIBFRAME, "identifier");
+    BF_AUTHORIZED_ACCESS_POINT(Namespace.BIBFRAME, "authorizedAccessPoint"),
+    BF_HAS_AUTHORITY(Namespace.BIBFRAME, "hasAuthority"),
+    BF_IDENTIFIER(Namespace.BIBFRAME, "identifier");
+
     
     private final Namespace namespace;
     private final String localname;
