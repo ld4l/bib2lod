@@ -9,8 +9,11 @@ import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.Iterator;
+import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
@@ -88,14 +91,46 @@ public class UriDeduper extends Processor {
         } 
         
         for ( File file : new File(inputDir).listFiles() ) {
-            // *** NO We need to also remove duplicates
-            // Easiest way to do that is to read into model and read out
-            // Or is there a string fn to do this?
-            // If dealing with models, maybe we want to do the replacements on
-            // models as well...then when we write out the model, duplicates 
-            // will be eliminated.
-            // FIX THIS!!! 
-            replaceLinesInFile(file, outputDir);
+            // Replace URIs using the uniqueUris map. Then remove duplicate 
+            // lines created from this replacement.
+
+            try {
+                String filename = file.getName();
+                LOGGER.trace("Start replacing lines in file " + filename);
+                BufferedReader reader = Files.newBufferedReader(file.toPath());
+                Set<String> uniqueLines = new LinkedHashSet<String>();             
+                LineIterator lineIterator = new LineIterator(reader);
+                while (lineIterator.hasNext()) {
+                    String line = lineIterator.nextLine();
+                    String processedLine = processLine(line) + "\n";
+                    /* Add the line to a set removes duplicate lines.
+                     * NB Another way to replace duplicates would be to read 
+                     * the lines into a Jena model, which also automatically 
+                     * removes duplicate triples. We could compare performance 
+                     * with the Set approach if that becomes an issue (though
+                     * I would suspect that the Set would be faster than a 
+                     * Model. Use of a model  has the advantage that the lines 
+                     * don't have to be identical in terms of spaces.
+                     */
+                    uniqueLines.add(processedLine);
+                }
+                reader.close();
+                
+                String outputFilename =
+                        FilenameUtils.getName(file.toString()); 
+                File outputFile = new File(outputDir, outputFilename);
+                PrintWriter writer = new PrintWriter(new BufferedWriter(
+                        new FileWriter(outputFile, true)));  
+                Iterator<String> setIterator = uniqueLines.iterator();
+                while (setIterator.hasNext()) {
+                    writer.append(setIterator.next());
+                }
+                writer.close();                
+                LOGGER.trace("Done replacing lines in file " + file);                
+            } catch (IOException e) {
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }       
         }
 
         LOGGER.trace("End process");
