@@ -43,14 +43,13 @@ public abstract class Processor {
        private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
             RdfFormat.NTRIPLES;
      */
-    private static final RdfFormat RDF_OUTPUT_FORMAT = 
-            RdfFormat.NTRIPLES;
-    
-    protected String outputSubdir;
-    protected OntModel bfOntModelInf;    
-    protected String localNamespace;    
-    protected String inputDir;
-    private String mainOutputDir;
+    private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
+            
+    protected final String outputSubdir;
+    protected final String localNamespace;    
+    protected final String inputDir;
+    private final String mainOutputDir;
+    protected OntModel bfOntModelInf; 
 
        
     public Processor(OntModel bfOntModelInf, String localNamespace,  

@@ -82,10 +82,10 @@ public class ProcessController {
             
             // Mechanism for handling large data files by reading only partial
             // data (split by type) into memory for deduping.
-            outputDir = new TypeSplitter(bfOntModelInf,
+            outputDir = new TypeSplitter(
                     localNamespace, outputDir, mainOutputDir).process();
             
-            outputDir = new UriDeduper(bfOntModelInf,
+            outputDir = new UriDeduper(
                     localNamespace, outputDir, mainOutputDir).process();
         }
             

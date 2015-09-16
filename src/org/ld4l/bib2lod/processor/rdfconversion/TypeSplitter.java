@@ -31,10 +31,10 @@ public class TypeSplitter extends Processor {
             UriDeduper.getTypesToDedupe();
     private static final String REMAINDER = UriDeduper.getRemainder();
     
-    public TypeSplitter(OntModel bfOntModelInf, String localNamespace, 
-            String inputDir, String mainOutputDir) {
+    public TypeSplitter(String localNamespace, String inputDir, 
+            String mainOutputDir) {   
         
-        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);  
+        super(localNamespace, inputDir, mainOutputDir);  
     }
 
     @Override

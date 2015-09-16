@@ -54,10 +54,10 @@ public class UriDeduper extends Processor {
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     private Map<String, String> uniqueUris;
     
-    public UriDeduper(OntModel bfOntModelInf, String localNamespace, 
+    public UriDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
                  
-        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
+        super(localNamespace, inputDir, mainOutputDir);
 
     }
     
