@@ -14,20 +14,27 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.OntologyProperty;
+import org.ld4l.bib2lod.OntologyType;
 
 public class BfPersonDeduper extends TypeDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfPersonDeduper.class);
-    private static final Query QUERY = QueryFactory.create(
-            "PREFIX bf: <http://bibframe.org/vocab/> "
-            + "PREFIX madsrdf: <http://www.loc.gov/mads/rdf/v1#> "
-            + "SELECT ?s ?label "
+    private static final String SPARQL =             "SELECT ?s ?label "
             + "WHERE { "
-            + "?s a bf:Person ; "
-            + " bf:hasAuthority ?a . "
-            + "?a a madsrdf:Authority ; "
-            + "madsrdf:authoritativeLabel ?label ."
+            + "?s a " + OntologyType.BF_PERSON.sparqlUri() +  "; "
+            + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?a . "
+            + "?a a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() + " ; "
+            + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " ?label ."
+            + "}";
+    private static final Query QUERY = QueryFactory.create(
+            "SELECT ?s ?label "
+            + "WHERE { "
+            + "?s a " + OntologyType.BF_PERSON.sparqlUri() +  "; "
+            + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?a . "
+            + "?a a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() + " ; "
+            + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " ?label ."
             + "}"
     );
     private static final Pattern IGNORE = Pattern.compile("\\s|\\.$");
@@ -41,7 +48,7 @@ public class BfPersonDeduper extends TypeDeduper {
 
         Map<String, String> uniqueUris = new HashMap<String, String>();
         Map<String, String> data = new HashMap<String, String>();
-        
+        LOGGER.debug(SPARQL);
         QueryExecution qexec = QueryExecutionFactory.create(QUERY, model);
         ResultSet results = qexec.execSelect();
         while (results.hasNext()) {

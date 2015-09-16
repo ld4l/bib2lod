@@ -4,7 +4,8 @@ public enum OntologyProperty {
 
     BF_AUTHORIZED_ACCESS_POINT(Namespace.BIBFRAME, "authorizedAccessPoint"),
     BF_HAS_AUTHORITY(Namespace.BIBFRAME, "hasAuthority"),
-    BF_IDENTIFIER(Namespace.BIBFRAME, "identifier");
+    BF_IDENTIFIER(Namespace.BIBFRAME, "identifier"),
+    MADSRDF_AUTHORITATIVE_LABEL(Namespace.MADSRDF, "authoritativeLabel");
 
     
     private final Namespace namespace;
@@ -15,7 +16,7 @@ public enum OntologyProperty {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;
-        this.uri = namespace + localname;
+        this.uri = namespace.uri() + localname;
     }
     
     public Namespace namespace() {
@@ -32,5 +33,13 @@ public enum OntologyProperty {
     
     public String uri() {
         return this.uri;
+    }
+    
+    public String prefixedForm() {
+        return this.namespace.prefix() + ":" + this.localname;
+    }
+    
+    public String sparqlUri() {
+        return "<" + this.uri + ">";
     }
 }
