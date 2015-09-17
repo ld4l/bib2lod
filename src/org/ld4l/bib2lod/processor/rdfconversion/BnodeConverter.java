@@ -68,11 +68,11 @@ public class BnodeConverter extends Processor {
         }
         inputModel.remove(retractions);
         inputModel.add(assertions);   
-//        if (LOGGER.isDebugEnabled()) {
-//            for (String id: bnodeIdToUriResource.keySet()) {
-//                LOGGER.debug(id + ": " + bnodeIdToUriResource.get(id).toString());
-//            }
-//        }
+        if (LOGGER.isDebugEnabled()) {
+            for (String id: bnodeIdToUriResource.keySet()) {
+                LOGGER.debug(id + ": " + bnodeIdToUriResource.get(id).toString());
+            }
+        }
         return inputModel;
     }
 
