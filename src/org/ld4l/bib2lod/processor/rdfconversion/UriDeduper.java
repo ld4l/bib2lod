@@ -48,9 +48,10 @@ public class UriDeduper extends Processor {
             OntologyType.BF_WORK,  
             OntologyType.BF_INSTANCE,
             OntologyType.BF_PLACE,
-            OntologyType.BF_TOPIC,
-            OntologyType.MADSRDF_AUTHORITY
+            OntologyType.BF_TOPIC
+            //OntologyType.MADSRDF_AUTHORITY
     );
+
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
@@ -102,7 +103,7 @@ public class UriDeduper extends Processor {
                 LineIterator lineIterator = new LineIterator(reader);
                 while (lineIterator.hasNext()) {
                     String line = lineIterator.nextLine();
-                    String processedLine = replaceUrisInLine(line, uniqueUris) + "\n";
+                    String processedLine = replaceUris(line, uniqueUris) + "\n";
                     /* Add the line to a set removes duplicate lines.
                      * NB Another way to replace duplicates would be to read 
                      * the lines into a Jena model, which also automatically 
@@ -145,18 +146,19 @@ public class UriDeduper extends Processor {
         String basename = FilenameUtils.getBaseName(inputFile.toString());
         OntologyType type = OntologyType.getByFilename(basename);
         if (type == null) {
-            LOGGER.debug("No type found for file " + basename);
+            LOGGER.warn("No type found for file " + basename);
             return null;
         }
         LOGGER.debug("Type = " + type.toString());
+
+        String className = 
+                "org.ld4l.bib2lod.processor.rdfconversion.typededuping."
+                + StringUtils.capitalize(type.namespace().prefix() 
+                + type.localname() + "Deduper");
         
         try {
-            // TODO Consider using a factory instead of defining the deduper
-            // in the type. 
-            Class<?> cls = type.deduper();
-            if (cls == null) {
-                return null;
-            }
+            Class<?> cls = Class.forName(className);
+
             Model model = readModelFromFile(inputFile);
             // TODO Maybe pass the model in the constructor so it's an instance 
             // variable?
@@ -173,14 +175,16 @@ public class UriDeduper extends Processor {
         } catch (IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
+        } catch (ClassNotFoundException e) {
+            LOGGER.warn("No class found for type " + type.toString());
+            return null;
         }
 
         LOGGER.trace("Done processing file " + filename);
         return null;
     }
 
-    private String replaceUrisInLine(String line, 
-            Map<String, String> uniqueUris) {
+    private String replaceUris(String line, Map<String, String> uniqueUris) {          
         int size = uniqueUris.size();
         String[] originalUris = uniqueUris.keySet().toArray(new String[size]);
         String[] replacementUris = 

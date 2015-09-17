@@ -20,7 +20,7 @@ public enum OntologyType {
     BF_JURISDICTION(Namespace.BIBFRAME, "Jurisdiction"),
     BF_MEETING(Namespace.BIBFRAME, "Meeting"),
     BF_ORGANIZATION(Namespace.BIBFRAME, "Organization"),
-    BF_PERSON(Namespace.BIBFRAME, "Person", BfPersonDeduper.class),
+    BF_PERSON(Namespace.BIBFRAME, "Person"),
     BF_PROVIDER(Namespace.BIBFRAME, "Provider"),
     BF_PLACE(Namespace.BIBFRAME, "Place"),
     BF_TITLE(Namespace.BIBFRAME, "Title"),
@@ -33,7 +33,6 @@ public enum OntologyType {
     private final String localname;
     private final String uri;
     private final String filename;
-    private Class<?> deduper;
     
     OntologyType(Namespace namespace, String localname) {
         this.namespace = namespace;
@@ -50,13 +49,9 @@ public enum OntologyType {
         String prefix = Namespace.getNsPrefix(ns);
         this.filename = prefix + ln;   
         
-        this.deduper = null;
-    }
-
-    OntologyType(Namespace namespace, String localname, 
-            Class<?> deduper) {
-        this(namespace, localname);
-        this.deduper = deduper;
+        String className = StringUtils.capitalize(this.namespace.prefix() + 
+                this.localname + "Deduper");
+                
     }
     
     public Namespace namespace() {
@@ -79,10 +74,6 @@ public enum OntologyType {
         return this.filename;
     }
     
-    public Class<?> deduper() {
-        return this.deduper;
-    }
-    
     public String prefixedForm() {
         return this.namespace.prefix() + ":" + this.localname;
     }
@@ -94,13 +85,10 @@ public enum OntologyType {
     private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
             new HashMap<String, OntologyType>();
     
-    private static final Map<Class<?>, OntologyType> LOOKUP_BY_CLASS = 
-            new HashMap<Class<?>, OntologyType>();
 
     static {
         for (OntologyType type : OntologyType.values()) {
             LOOKUP_BY_FILENAME.put(type.filename, type);
-            LOOKUP_BY_CLASS.put(type.deduper, type);
         }
     }
     
@@ -109,7 +97,4 @@ public enum OntologyType {
         return LOOKUP_BY_FILENAME.get(basename);
     }
 
-    public static OntologyType getByClass(Class<?> cls) {
-        return LOOKUP_BY_FILENAME.get(cls);
-    }
 }
