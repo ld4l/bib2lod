@@ -28,7 +28,6 @@ public class BfPersonDeduper extends TypeDeduper {
             + OntologyProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + "?label . "
             + "}"
     );
-    private static final Pattern IGNORE = Pattern.compile("\\s|\\.$");
 
 
     @Override
@@ -43,9 +42,7 @@ public class BfPersonDeduper extends TypeDeduper {
             String personUri = soln.getResource("s").getURI();
             String label = soln.getLiteral("label").getLexicalForm();
             LOGGER.debug("Original uri: " + personUri + " => " + label);
-            // label = label.replace(" ", "");
-            Matcher m = IGNORE.matcher(label);
-            label = m.replaceAll("");
+            label = normalizeAgentName(label);
             if (data.containsKey(label)) {
                 LOGGER.debug("Found matching value for label " + label + " and URI " + personUri);
                 LOGGER.debug("Adding: " + personUri + " => " + data.get(label));
