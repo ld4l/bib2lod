@@ -68,7 +68,7 @@ public abstract class Processor {
     public Processor(String localNamespace, String inputDir, 
             String mainOutputDir) {
 
-        // LOGGER.trace("In constructor for " + this.getClass().toString());        
+        LOGGER.trace("In constructor for " + this.getClass().toString());        
         this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;

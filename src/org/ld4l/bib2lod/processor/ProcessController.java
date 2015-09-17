@@ -103,7 +103,7 @@ public class ProcessController {
             if (selectedActions.contains(a)) {
                 Processor processor;
                 Constructor<?> constructor; 
-                // LOGGER.trace("newInputDir = " + newInputDir);
+                LOGGER.trace("newInputDir = " + newInputDir);
                 try {
                     constructor = c.getConstructor(
                             OntModel.class, String.class, String.class, 
@@ -136,7 +136,7 @@ public class ProcessController {
         */
         
         // Return path to final results.
-        // LOGGER.trace("Done with processAll()!");
+        LOGGER.trace("Done with processAll()!");
         return outputDir;
 
 

@@ -120,11 +120,11 @@ public class BnodeConverter extends Processor {
         Resource uriResource;
         if (idToUriResource.keySet().contains(id)) {
             uriResource = idToUriResource.get(id);  
-            // LOGGER.debug("Found hash key " + id);
+            LOGGER.debug("Found hash key " + id);
         } else {
             uriResource = assertions.createResource(convertLabelToUri(id));
             idToUriResource.put(id, uriResource);
-            // LOGGER.debug("Creating new hash entry for id " + id);
+            LOGGER.debug("Creating new hash entry for id " + id);
         }
         return uriResource;
     }

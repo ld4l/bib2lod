@@ -132,7 +132,7 @@ public class TypeSplitter extends Processor {
             String uri = type.uri();
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", uri);
-            // LOGGER.debug(pss.toString());
+            LOGGER.debug(pss.toString());
             Model modelForType = modelsByType.get(uri);
             splitByType(pss, modelForType, inputModel);            
         }
@@ -168,11 +168,11 @@ public class TypeSplitter extends Processor {
  
         // Run the query against the input model
         Query query = pss.asQuery();
-        // LOGGER.debug("Query: " + query.toString());
+        LOGGER.debug("Query: " + query.toString());
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
-        // LOGGER.debug("Model size: " + constructModel.size());
+        LOGGER.debug("Model size: " + constructModel.size());
         qexec.close();
 
         // Add resulting graph to the model for this type

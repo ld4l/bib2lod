@@ -151,15 +151,15 @@ public class RdfCleaner extends Processor {
                 String line = iterator.nextLine();
                 // Remove empty lines
                 if (line.length() == 0) {
-                    // LOGGER.trace("Removing empty line");
+                    LOGGER.trace("Removing empty line");
                     continue;
                 }
                 String processedLine = processLine(line);
                 if (LOGGER.isDebugEnabled()) {
                     // append newline before comparing lines?
                     if (!line.equals(processedLine)) {
-                        // LOGGER.debug("Original: " + line);
-                        // LOGGER.debug("New: " + processedLine);
+                        LOGGER.debug("Original: " + line);
+                        LOGGER.debug("New: " + processedLine);
                     }
                 }
                 writer.append(processedLine + "\n");
