@@ -33,7 +33,7 @@ public abstract class TypeDeduper {
      * @param name
      * @return
      */
-    protected String normalizeAgentName(String name) {
+    protected String normalizeAuthorityName(String name) {
         
         LOGGER.debug("Original name: " + name);
         

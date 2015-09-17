@@ -8,54 +8,54 @@ public class TypeDeduperTest {
     private BfPersonDeduper deduper = new BfPersonDeduper();
 
     @Test
-    public void testNormalizeAgentName1() {
+    public void testNormalizeAuthorityName1() {
         
         String normalizedName = "twain,_mark_1835_1910";        
         String name = "Twain, Mark, 1835-1910";
-        name = deduper.normalizeAgentName(name);
+        name = deduper.normalizeAuthorityName(name);
         Assert.assertEquals(name, normalizedName);
         
     }
 
     @Test
-    public void testNormalizeAgentName2() {
+    public void testNormalizeAuthorityName2() {
 
         String normalizedName = "twain,_mark_1835_1910";        
         String name = "Twain, Mark, 1835-1910.";
-        name = deduper.normalizeAgentName(name);
+        name = deduper.normalizeAuthorityName(name);
         Assert.assertEquals(name, normalizedName);
         
     }
     
     @Test
-    public void testNormalizeAgentName3() {
+    public void testNormalizeAuthorityName3() {
 
       String normalizedName = "gordon,_burgess_l_burgess_lee_1892";      
       String name = "Gordon, Burgess L. (Burgess Lee), 1892-";
-      name = deduper.normalizeAgentName(name);
+      name = deduper.normalizeAuthorityName(name);
       Assert.assertEquals(name, normalizedName);
       
     }
 
     
     @Test
-    public void testNormalizeAgentName4() {
+    public void testNormalizeAuthorityName4() {
 
         String normalizedName = "railton,_stephen_1948";
         String name = "Railton, Stephen, 1948-"; 
-        name = deduper.normalizeAgentName(name);
+        name = deduper.normalizeAuthorityName(name);
         Assert.assertEquals(name, normalizedName);        
     }
     
     @Test
-    public void testNormalizeAgentName5() {
+    public void testNormalizeAuthorityName5() {
 
 
         
     }
     
     @Test
-    public void testNormalizeAgentName6() {
+    public void testNormalizeAuthorityName6() {
 
 
         
