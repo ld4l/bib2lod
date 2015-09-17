@@ -49,9 +49,13 @@ public abstract class TypeDeduper {
         name = m.replaceAll(" ");
         
         // Replace all but first comma with whitespace
-        name = name.replaceAll(",", "*");
-        name = name.replaceFirst("\\*", ",");
-        name = name.replaceAll("\\*", " ");
+//        name = name.replaceAll(",", "*");
+//        name = name.replaceFirst("\\*", ",");
+//        name = name.replaceAll("\\*", " ");        
+        int index = name.indexOf(",");
+        String firstPart = name.substring(0, index+1);
+        String secondPart = name.substring(index);
+        name = firstPart + secondPart.replace(",", " ");
         
         // Trim whitespace from both ends
         name = StringUtils.strip(name);
