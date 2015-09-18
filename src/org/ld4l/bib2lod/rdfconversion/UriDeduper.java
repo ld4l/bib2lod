@@ -46,8 +46,7 @@ public class UriDeduper extends RdfProcessor {
             OntologyType.BF_WORK,  
             OntologyType.BF_INSTANCE,
             OntologyType.BF_PLACE,
-            OntologyType.BF_TOPIC,
-            OntologyType.MADSRDF_AUTHORITY
+            OntologyType.BF_TOPIC
     );
 
     private static final String REMAINDER = "other";

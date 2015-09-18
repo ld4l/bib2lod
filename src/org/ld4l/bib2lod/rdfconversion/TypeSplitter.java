@@ -70,11 +70,11 @@ public class TypeSplitter extends RdfProcessor {
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
-//                + "} UNION { "
-//                + "?s1 ?p1 ?o1 . "
-//                + "?s1 a ?type . "
-//                + "?o1 ?p2 ?o2 . " 
-//                + "?o1 a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "

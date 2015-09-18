@@ -4,13 +4,12 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.lang3.StringUtils;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfPersonDeduper;
 
 public enum OntologyType {
 
     // Maybe create different type enums, one for bibframe, one for madsrdf
-    // or miscellaneous, etc.
+    // or miscellaneous, etc.? For now, no need.
     
     BF_ANNOTATION(Namespace.BIBFRAME, "Annotation"),
     BF_FAMILY(Namespace.BIBFRAME, "Family"),
