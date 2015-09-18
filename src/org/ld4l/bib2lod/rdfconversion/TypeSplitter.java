@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor.rdfconversion;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.util.ArrayList;
@@ -17,12 +17,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.Namespace;
-import org.ld4l.bib2lod.OntologyType;
 import org.ld4l.bib2lod.RdfFormat;
-import org.ld4l.bib2lod.processor.Processor;
 
-public class TypeSplitter extends Processor {
+public class TypeSplitter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
@@ -104,7 +101,7 @@ public class TypeSplitter extends Processor {
         
         // Add a file for any remaining triples - i.e., where the subject 
         // doesn't belong to one of the types in typesToSplit.
-        // NB This is why the map keys are strings rather than OntologyTypes. d
+        // NB This is why the map keys are strings rather than OntologyTypes.
         outputFilesByType.put(REMAINDER, new File(outputDir, 
                 getOutputFilename(REMAINDER)));
         

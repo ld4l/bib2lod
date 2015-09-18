@@ -1,22 +1,15 @@
-package org.ld4l.bib2lod.processor;
+package org.ld4l.bib2lod.rdfconversion;
 
 import static java.nio.file.StandardCopyOption.COPY_ATTRIBUTES;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileWriter;
 import java.io.IOException;
-import java.io.PrintWriter;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
-import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -31,9 +24,9 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.RdfFormat;
 
 
-public abstract class Processor {
+public abstract class RdfProcessor {
 
-    private static final Logger LOGGER = LogManager.getLogger(Processor.class);   
+    private static final Logger LOGGER = LogManager.getLogger(RdfProcessor.class);   
     
     /* Some processors MUST output ntriples, for two reasons: (1) append to 
      * file doesn't produce valid RDF in RDFXML, since the <rdf> element is
@@ -52,7 +45,7 @@ public abstract class Processor {
     protected OntModel bfOntModelInf; 
 
        
-    public Processor(OntModel bfOntModelInf, String localNamespace,  
+    public RdfProcessor(OntModel bfOntModelInf, String localNamespace,  
             String inputDir, String mainOutputDir) {
 
         this(localNamespace, inputDir, mainOutputDir);      
@@ -65,7 +58,7 @@ public abstract class Processor {
      * @param inputDir
      * @param mainOutputDir
      */
-    public Processor(String localNamespace, String inputDir, 
+    public RdfProcessor(String localNamespace, String inputDir, 
             String mainOutputDir) {
 
         LOGGER.trace("In constructor for " + this.getClass().toString());        

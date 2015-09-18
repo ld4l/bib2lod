@@ -6,10 +6,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ld4l.bib2lod.processor.Processor;
-import org.ld4l.bib2lod.processor.rdfconversion.BnodeConverter;
-import org.ld4l.bib2lod.processor.rdfconversion.TypeSplitter;
-import org.ld4l.bib2lod.processor.rdfconversion.UriDeduper;
+import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
+import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.rdfconversion.UriDeduper;
 
 public enum Action {
 

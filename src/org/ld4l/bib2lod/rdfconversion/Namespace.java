@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.util.HashMap;
 import java.util.Map;

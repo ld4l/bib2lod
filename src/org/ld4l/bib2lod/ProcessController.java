@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor;
+package org.ld4l.bib2lod;
 
 import java.util.List;
 
@@ -8,12 +8,11 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.Action;
-import org.ld4l.bib2lod.Namespace;
-import org.ld4l.bib2lod.processor.rdfconversion.BnodeConverter;
-import org.ld4l.bib2lod.processor.rdfconversion.RdfCleaner;
-import org.ld4l.bib2lod.processor.rdfconversion.TypeSplitter;
-import org.ld4l.bib2lod.processor.rdfconversion.UriDeduper;
+import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
+import org.ld4l.bib2lod.rdfconversion.Namespace;
+import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
+import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.rdfconversion.UriDeduper;
 
 
 

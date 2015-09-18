@@ -1,11 +1,11 @@
-package org.ld4l.bib2lod;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang3.StringUtils;
-import org.ld4l.bib2lod.processor.rdfconversion.typededuping.BfPersonDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfPersonDeduper;
 
 public enum OntologyType {
 

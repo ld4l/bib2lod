@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor.rdfconversion;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -22,12 +22,10 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.OntologyType;
-import org.ld4l.bib2lod.processor.Processor;
-import org.ld4l.bib2lod.processor.rdfconversion.typededuping.TypeDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.TypeDeduper;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
-public class UriDeduper extends Processor {
+public class UriDeduper extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(UriDeduper.class);
 
@@ -54,6 +52,9 @@ public class UriDeduper extends Processor {
 
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
+    private static final String TYPE_DEDUPING_PACKAGE = 
+            "org.ld4l.bib2lod.rdfconversion.typededuping";
+    
     
     public UriDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -152,7 +153,7 @@ public class UriDeduper extends Processor {
         LOGGER.debug("Type = " + type.toString());
 
         String className = 
-                "org.ld4l.bib2lod.processor.rdfconversion.typededuping."
+                TYPE_DEDUPING_PACKAGE + "."
                 + StringUtils.capitalize(type.namespace().prefix() 
                 + type.localname() + "Deduper");
         

@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor.rdfconversion;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -20,9 +20,8 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.processor.Processor;
 
-public class RdfCleaner extends Processor {
+public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
     private static final Pattern URI_PATTERN = 

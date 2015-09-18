@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.processor.rdfconversion.typededuping;
+package org.ld4l.bib2lod.rdfconversion.typededuping;
 
 import java.util.Map;
 import java.util.regex.Matcher;

@@ -1,7 +1,8 @@
-package org.ld4l.bib2lod.processor.rdfconversion.typededuping;
+package org.ld4l.bib2lod.rdfconversion.typededuping;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfPersonDeduper;
 
 public class TypeDeduperTest {
     
