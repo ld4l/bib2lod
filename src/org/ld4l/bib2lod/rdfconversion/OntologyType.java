@@ -20,7 +20,7 @@ public enum OntologyType {
     BF_JURISDICTION(Namespace.BIBFRAME, "Jurisdiction"),
     BF_MEETING(Namespace.BIBFRAME, "Meeting"),
     BF_ORGANIZATION(Namespace.BIBFRAME, "Organization"),
-    BF_PERSON(Namespace.BIBFRAME, "Person"),
+    BF_PERSON(Namespace.BIBFRAME, "Person", BfPersonDeduper.class),
     BF_PROVIDER(Namespace.BIBFRAME, "Provider"),
     BF_PLACE(Namespace.BIBFRAME, "Place"),
     BF_TITLE(Namespace.BIBFRAME, "Title"),
@@ -33,59 +33,56 @@ public enum OntologyType {
     private final String localname;
     private final String uri;
     private final String filename;
+    private Class<?> deduper;
     
     OntologyType(Namespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
-        // Convenience field
         this.uri = namespace.uri() + localname;
-        
-        String namespaceUri = namespace.uri();
-        
-        // Last char of namespace can be / or #
-        String lastChar = namespaceUri.substring(namespaceUri.length() - 1);
-        String ln = StringUtils.substringAfterLast(this.uri, lastChar);
-        String ns = StringUtils.substringBeforeLast(this.uri, lastChar) + lastChar;
-        String prefix = Namespace.getNsPrefix(ns);
-        this.filename = prefix + ln;   
-        
-        String className = StringUtils.capitalize(this.namespace.prefix() + 
-                this.localname + "Deduper");
-                
+        this.filename = this.namespace.prefix() + this.localname; 
+        this.deduper = null;
+    }
+
+    OntologyType(Namespace namespace, String localname, Class<?> deduper) {   
+        this(namespace, localname);
+        this.deduper = deduper;
     }
     
     public Namespace namespace() {
-        return this.namespace;
+        return namespace;
     }
     
     public String namespaceUri() {
-        return this.namespace.uri();
+        return namespace.uri();
     }
 
     public String localname() {
-        return this.localname;
+        return localname;
     }
     
     public String uri() {
-        return this.uri;
+        return uri;
     }
     
     public String filename() {
-        return this.filename;
+        return filename;
     }
     
     public String prefixedForm() {
-        return this.namespace.prefix() + ":" + this.localname;
+        return namespace.prefix() + ":" + localname;
     }
     
     public String sparqlUri() {
-        return "<" + this.uri + ">";
+        return "<" + uri + ">";
+    }
+   
+    public Class<?> deduper() {
+        return deduper;
     }
     
     private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
             new HashMap<String, OntologyType>();
     
-
     static {
         for (OntologyType type : OntologyType.values()) {
             LOOKUP_BY_FILENAME.put(type.filename, type);

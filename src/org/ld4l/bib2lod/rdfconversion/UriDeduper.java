@@ -46,14 +46,12 @@ public class UriDeduper extends RdfProcessor {
             OntologyType.BF_WORK,  
             OntologyType.BF_INSTANCE,
             OntologyType.BF_PLACE,
-            OntologyType.BF_TOPIC
-            //OntologyType.MADSRDF_AUTHORITY
+            OntologyType.BF_TOPIC,
+            OntologyType.MADSRDF_AUTHORITY
     );
 
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
-    private static final String TYPE_DEDUPING_PACKAGE = 
-            "org.ld4l.bib2lod.rdfconversion.typededuping";
     
     
     public UriDeduper(String localNamespace, 
@@ -152,22 +150,25 @@ public class UriDeduper extends RdfProcessor {
         }
         LOGGER.debug("Type = " + type.toString());
 
-        String className = 
-                TYPE_DEDUPING_PACKAGE + "."
-                + StringUtils.capitalize(type.namespace().prefix() 
-                + type.localname() + "Deduper");
-        
-        try {
-            Class<?> cls = Class.forName(className);
 
-            Model model = readModelFromFile(inputFile);
-            // TODO Maybe pass the model in the constructor so it's an instance 
-            // variable?
+        try {
+            Class<?> cls = type.deduper();
+            if (cls == null) {
+                LOGGER.debug(
+                        "No deduper class found for type " + type.toString());
+                return null;
+            }
+
             // TODO Possibly we don't need different deduper subclasses, but
             // just need to define the query for each type in a hash. Then 
             // eliminate TypeDeduper and its subclasses and just use generic
             // methods to execute the query and manage the results.
             TypeDeduper deduper = (TypeDeduper) cls.newInstance();
+
+            // TODO Maybe pass the model to the constructor so it's an instance 
+            // variable?
+            Model model = readModelFromFile(inputFile);
+
             return deduper.dedupe(model);
             
         } catch (InstantiationException e) {
@@ -176,9 +177,6 @@ public class UriDeduper extends RdfProcessor {
         } catch (IllegalAccessException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
-        } catch (ClassNotFoundException e) {
-            LOGGER.warn("No class found for type " + type.toString());
-            return null;
         }
 
         LOGGER.trace("Done processing file " + filename);
