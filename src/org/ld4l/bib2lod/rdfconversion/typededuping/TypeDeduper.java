@@ -8,6 +8,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.OntologyType;
 
 // TODO If only abstract methods, change to an interface
 public abstract class TypeDeduper {
@@ -19,7 +20,7 @@ public abstract class TypeDeduper {
     private static final Pattern CONVERT_TO_WHITESPACE = 
             Pattern.compile("[^a-zA-Z0-9#&+,]");
             
-    public abstract Map<String, String> dedupe(Model model);
+    public abstract Map<String, String> dedupe(OntologyType type, Model model);
     
     /**
      * Normalize agent name according to NACO normalization rules:
@@ -35,7 +36,7 @@ public abstract class TypeDeduper {
      */
     protected String normalizeAuthorityName(String name) {
         
-        LOGGER.debug("Original name: " + name);
+        LOGGER.debug("Original name: #" + name + "#");
         
         // Remove specified characters
         Matcher m = DELETE.matcher(name);
@@ -53,9 +54,11 @@ public abstract class TypeDeduper {
 //        name = name.replaceFirst("\\*", ",");
 //        name = name.replaceAll("\\*", " ");        
         int index = name.indexOf(",");
-        String firstPart = name.substring(0, index+1);
-        String secondPart = name.substring(index);
-        name = firstPart + secondPart.replace(",", " ");
+        if (index > -1) {
+            String firstPart = name.substring(0, index+1);
+            String secondPart = name.substring(index);
+            name = firstPart + secondPart.replace(",", " ");
+        }
         
         // Trim whitespace from both ends
         name = StringUtils.strip(name);

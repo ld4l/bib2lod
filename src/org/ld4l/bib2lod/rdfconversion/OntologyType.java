@@ -4,7 +4,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfPersonDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 
 public enum OntologyType {
 
@@ -12,21 +12,23 @@ public enum OntologyType {
     // or miscellaneous, etc.? For now, no need.
     
     BF_ANNOTATION(Namespace.BIBFRAME, "Annotation"),
-    BF_FAMILY(Namespace.BIBFRAME, "Family"),
+    BF_FAMILY(Namespace.BIBFRAME, "Family", BfAgentDeduper.class),
     BF_HELD_ITEM(Namespace.BIBFRAME, "HeldItem"),
     BF_IDENTIFIER(Namespace.BIBFRAME, "Identifier"),
     BF_INSTANCE(Namespace.BIBFRAME, "Instance"),
-    BF_JURISDICTION(Namespace.BIBFRAME, "Jurisdiction"),
     BF_MEETING(Namespace.BIBFRAME, "Meeting"),
-    BF_ORGANIZATION(Namespace.BIBFRAME, "Organization"),
-    BF_PERSON(Namespace.BIBFRAME, "Person", BfPersonDeduper.class),
+    BF_ORGANIZATION(Namespace.BIBFRAME, "Organization", BfAgentDeduper.class),
+    BF_PERSON(Namespace.BIBFRAME, "Person", BfAgentDeduper.class),
     BF_PROVIDER(Namespace.BIBFRAME, "Provider"),
     BF_PLACE(Namespace.BIBFRAME, "Place"),
     BF_TITLE(Namespace.BIBFRAME, "Title"),
     BF_TOPIC(Namespace.BIBFRAME, "Topic"),  
     BF_WORK(Namespace.BIBFRAME, "Work"),
     
-    MADSRDF_AUTHORITY(Namespace.MADSRDF, "Authority");
+    MADSRDF_AUTHORITY(Namespace.MADSRDF, "Authority"),
+    
+    SCHEMA_GOVERNMENT_ORGANIZATION(Namespace.SCHEMA, "GovernmentOrganization", 
+            BfAgentDeduper.class);
 
     private final Namespace namespace;
     private final String localname;

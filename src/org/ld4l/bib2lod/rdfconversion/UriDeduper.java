@@ -40,7 +40,7 @@ public class UriDeduper extends RdfProcessor {
     private static final List<OntologyType> TYPES_TO_DEDUPE = Arrays.asList(
             OntologyType.BF_PERSON,
             OntologyType.BF_FAMILY,
-            OntologyType.BF_JURISDICTION,
+            OntologyType.SCHEMA_GOVERNMENT_ORGANIZATION,
             OntologyType.BF_MEETING,
             OntologyType.BF_ORGANIZATION,
             OntologyType.BF_WORK,  
@@ -149,7 +149,6 @@ public class UriDeduper extends RdfProcessor {
         }
         LOGGER.debug("Type = " + type.toString());
 
-
         try {
             Class<?> cls = type.deduper();
             if (cls == null) {
@@ -167,8 +166,7 @@ public class UriDeduper extends RdfProcessor {
             // TODO Maybe pass the model to the constructor so it's an instance 
             // variable?
             Model model = readModelFromFile(inputFile);
-
-            return deduper.dedupe(model);
+            return deduper.dedupe(type, model);
             
         } catch (InstantiationException e) {
             // TODO Auto-generated catch block
