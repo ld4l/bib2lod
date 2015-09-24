@@ -143,8 +143,7 @@ public class TypeSplitter extends RdfProcessor {
     
     private void writeModelsToFiles(Map<String, Model> modelsByType,             
             Map<String, File> outputFilesByType) {
-            
-            
+                  
         for (String ontClassUri: outputFilesByType.keySet()) { 
             File outFile = outputFilesByType.get(ontClassUri);
             Model model = modelsByType.get(ontClassUri);
