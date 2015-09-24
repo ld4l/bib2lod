@@ -4,7 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 
-public class TypeDeduperTest {
+public class BfAgentDeduperTest {
     
     private BfAgentDeduper deduper = new BfAgentDeduper();
 

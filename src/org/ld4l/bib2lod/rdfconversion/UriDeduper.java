@@ -40,7 +40,7 @@ public class UriDeduper extends RdfProcessor {
     private static final List<OntologyType> TYPES_TO_DEDUPE = Arrays.asList(
             OntologyType.BF_PERSON,
             OntologyType.BF_FAMILY,
-            OntologyType.SCHEMA_GOVERNMENT_ORGANIZATION,
+            OntologyType.BF_JURISDICTION,
             OntologyType.BF_MEETING,
             OntologyType.BF_ORGANIZATION,
             OntologyType.BF_WORK,  

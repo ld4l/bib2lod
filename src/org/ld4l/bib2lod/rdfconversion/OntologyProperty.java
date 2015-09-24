@@ -6,6 +6,7 @@ public enum OntologyProperty {
     BF_AUTHORIZED_ACCESS_POINT(Namespace.BIBFRAME, "authorizedAccessPoint"),
     BF_HAS_AUTHORITY(Namespace.BIBFRAME, "hasAuthority"),
     BF_IDENTIFIER(Namespace.BIBFRAME, "identifier"),
+    BF_LABEL(Namespace.BIBFRAME, "label"),
     MADSRDF_AUTHORITATIVE_LABEL(Namespace.MADSRDF, "authoritativeLabel");
 
     
