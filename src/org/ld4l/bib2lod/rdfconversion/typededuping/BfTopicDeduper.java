@@ -154,7 +154,8 @@ public class BfTopicDeduper extends TypeDeduper {
                 return subjectHeading;
             }            
         }
-       
+        LOGGER.debug("No FAST heading. Using label or authorizedAccessPoint to "
+                + "dedupe");
         return getDefaultKey(soln);
     }
     
