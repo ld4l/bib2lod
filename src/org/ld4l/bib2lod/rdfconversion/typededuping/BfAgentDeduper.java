@@ -43,7 +43,8 @@ public class BfAgentDeduper extends TypeDeduper {
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
-                return uniqueUris;
+                LOGGER.debug("No key for " + agentUri + "; can't dedupe");
+                continue;
             }
 
             LOGGER.debug("Original uri: " + agentUri + " => " + key);
