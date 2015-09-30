@@ -47,7 +47,8 @@ public class BfTopicDeduper extends TypeDeduper {
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
-                return uniqueUris;
+                LOGGER.debug("No key for " + topicUri + "; can't dedupe");
+                continue;
             }
 
             LOGGER.debug("Original uri: " + topicUri + " => " + key);
