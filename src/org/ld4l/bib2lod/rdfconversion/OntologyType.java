@@ -5,6 +5,7 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfTopicDeduper;
 
 public enum OntologyType {
@@ -16,7 +17,7 @@ public enum OntologyType {
     BF_FAMILY(Namespace.BIBFRAME, "Family", BfAgentDeduper.class),
     BF_HELD_ITEM(Namespace.BIBFRAME, "HeldItem"),
     BF_IDENTIFIER(Namespace.BIBFRAME, "Identifier"),
-    BF_INSTANCE(Namespace.BIBFRAME, "Instance"),    
+    BF_INSTANCE(Namespace.BIBFRAME, "Instance", BfInstanceDeduper.class),    
     BF_JURISDICTION(Namespace.BIBFRAME, "Jurisdiction", BfAgentDeduper.class),
     BF_MEETING(Namespace.BIBFRAME, "Meeting"),
     BF_ORGANIZATION(Namespace.BIBFRAME, "Organization", BfAgentDeduper.class),            
