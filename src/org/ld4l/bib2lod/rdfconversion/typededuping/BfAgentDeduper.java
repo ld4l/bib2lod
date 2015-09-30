@@ -95,6 +95,9 @@ public class BfAgentDeduper extends TypeDeduper {
             for (String uri : uniqueUris.keySet()) {
                 LOGGER.debug(uri + " => " + uniqueUris.get(uri));
             }
+            for (String key : uniqueAgents.keySet()) {
+                LOGGER.debug(key + " => " + uniqueAgents.get(key));
+            }
         }
         
         return uniqueUris;        
