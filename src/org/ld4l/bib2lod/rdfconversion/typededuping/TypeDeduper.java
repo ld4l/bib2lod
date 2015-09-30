@@ -63,9 +63,13 @@ public abstract class TypeDeduper {
         name = StringUtils.strip(name);
         
         // Collapse sequences of whitespace resulting from previous 
-        // manipulations; convert to _ so don't need to double-quote as hash
-        // keys.
-        name = name.replaceAll("\\s+", "_");
+        // manipulations. Don't convert to underscore: NACO rules convert 
+        // underscore to blank, so if we convert blanks to underscores, we 
+        // won't know if an underscore was originally a blank or an underscore.
+        // so all blanks shouldn't be converted to underscore: we don't know 
+        // if an underscore was originally a blank or an underscore.
+        // name = name.replaceAll("\\s+", "_");
+        name = name.replaceAll("\\s+", " ");
         
         LOGGER.debug("Normalized name: " + name);
         return name;
