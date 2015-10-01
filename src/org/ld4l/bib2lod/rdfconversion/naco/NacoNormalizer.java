@@ -39,8 +39,8 @@ public class NacoNormalizer {
         '\u02bb', // Romanized ayn 
         
         /* Combining diacritics 
-         * Characters marked with * - not to be confused with non-combining 
-         * (spacing) character equivalents.
+         * Characters marked with * should not to be confused with their 
+         * non-combining (spacing) character equivalents.
          * NB Not sure why some diacritics are included and not others. Is this
          * deliberate or omission?
          * Couldn't find: pseudo question mark, right cedilla

@@ -4,6 +4,7 @@ import org.junit.Assert;
 import org.junit.Test;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 
+// TODO Write more tests
 public class NacoNormalizerTest {
 
     @Test
