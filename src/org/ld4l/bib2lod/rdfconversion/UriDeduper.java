@@ -59,7 +59,6 @@ public class UriDeduper extends RdfProcessor {
             String inputDir, String mainOutputDir) {
                  
         super(localNamespace, inputDir, mainOutputDir);
-
     }
     
     protected static List<OntologyType> getTypesToDedupe() {

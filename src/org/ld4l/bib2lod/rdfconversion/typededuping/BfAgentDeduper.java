@@ -9,13 +9,13 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntologyProperty;
 import org.ld4l.bib2lod.rdfconversion.OntologyType;
+import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 public class BfAgentDeduper extends TypeDeduper {
 
@@ -48,7 +48,7 @@ public class BfAgentDeduper extends TypeDeduper {
             }
 
             LOGGER.debug("Original uri: " + agentUri + " => " + key);
-            key = normalizeAuthorityName(key);
+            key = NacoNormalizer.normalize(key);
             
             Resource auth = soln.getResource("auth");
             String authUri = auth == null ? null : auth.getURI();            
