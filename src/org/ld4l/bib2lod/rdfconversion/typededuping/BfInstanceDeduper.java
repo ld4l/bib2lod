@@ -77,8 +77,8 @@ public class BfInstanceDeduper extends TypeDeduper {
     private Query getQuery() {
         
         String queryString = 
-                "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " + 
-                " SELECT ?instance ?worldcatId "
+                "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
+                + "SELECT ?instance ?worldcatId "
                 + "WHERE { "
                 + "?instance a " + OntologyType.BF_INSTANCE.sparqlUri() + " . "
                 + "OPTIONAL { ?instance "

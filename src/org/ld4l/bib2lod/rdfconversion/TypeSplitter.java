@@ -62,8 +62,8 @@ public class TypeSplitter extends RdfProcessor {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
-        pss.setNsPrefix("bf", Namespace.BIBFRAME.uri());
-        pss.setNsPrefix("madsrdf", Namespace.MADSRDF.uri());
+        pss.setNsPrefix("bf", OntNamespace.BIBFRAME.uri());
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
         pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
                 + "WHERE {  { " 

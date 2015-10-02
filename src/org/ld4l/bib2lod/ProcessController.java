@@ -9,7 +9,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
-import org.ld4l.bib2lod.rdfconversion.Namespace;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
 import org.ld4l.bib2lod.rdfconversion.UriDeduper;
@@ -48,7 +48,7 @@ public class ProcessController {
         // TODO Figure out how to avoid hard-coding the ontology URI here. It
         // would be nice to iterate through the files in the rdf directory and
         // read them in, but we need to retain a reference to the ontology.
-        bfOntModelInf.read(Namespace.BIBFRAME.uri());
+        bfOntModelInf.read(OntNamespace.BIBFRAME.uri());
               
     }
     

@@ -3,28 +3,29 @@ package org.ld4l.bib2lod.rdfconversion;
 
 public enum OntologyProperty {
 
-    BF_AUTHORIZED_ACCESS_POINT(Namespace.BIBFRAME, "authorizedAccessPoint"),
-    BF_HAS_AUTHORITY(Namespace.BIBFRAME, "hasAuthority"),
-    BF_IDENTIFIER(Namespace.BIBFRAME, "identifier"),
-    BF_IDENTIFIER_VALUE(Namespace.BIBFRAME, "identifierValue"),
-    BF_LABEL(Namespace.BIBFRAME, "label"),
-    BF_SYSTEM_NUMBER(Namespace.BIBFRAME, "systemNumber"),
-    MADSRDF_AUTHORITATIVE_LABEL(Namespace.MADSRDF, "authoritativeLabel"),
-    MADSRDF_IS_MEMBER_OF_MADS_SCHEME(Namespace.MADSRDF, "isMemberOfMADSScheme");
+    BF_AUTHORIZED_ACCESS_POINT(OntNamespace.BIBFRAME, "authorizedAccessPoint"),
+    BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
+    BF_IDENTIFIER(OntNamespace.BIBFRAME, "identifier"),
+    BF_IDENTIFIER_VALUE(OntNamespace.BIBFRAME, "identifierValue"),
+    BF_LABEL(OntNamespace.BIBFRAME, "label"),
+    BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
+    MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
+    MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
+            OntNamespace.MADSRDF, "isMemberOfMADSScheme");
 
     
-    private final Namespace namespace;
+    private final OntNamespace namespace;
     private final String localname;
     private final String uri;
     
-    OntologyProperty(Namespace namespace, String localname) {
+    OntologyProperty(OntNamespace namespace, String localname) {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;
         this.uri = namespace.uri() + localname;
     }
     
-    public Namespace namespace() {
+    public OntNamespace namespace() {
         return this.namespace;
     }
     

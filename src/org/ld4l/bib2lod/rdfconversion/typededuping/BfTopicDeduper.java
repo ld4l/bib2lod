@@ -15,9 +15,9 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.Namespace;
 import org.ld4l.bib2lod.rdfconversion.OntologyProperty;
 import org.ld4l.bib2lod.rdfconversion.OntologyType;
+import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 public class BfTopicDeduper extends TypeDeduper {
@@ -25,10 +25,10 @@ public class BfTopicDeduper extends TypeDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfTopicDeduper.class);
 
-    private static final Map<String, Namespace> SCHEMES = 
-            new HashMap<String, Namespace>();
+    private static final Map<String, Vocabulary> SCHEMES = 
+            new HashMap<String, Vocabulary>();
     static {
-        SCHEMES.put("(OCoLC)fst", Namespace.FAST);
+        SCHEMES.put("(OCoLC)fst", Vocabulary.FAST);
     }
  
     @Override
