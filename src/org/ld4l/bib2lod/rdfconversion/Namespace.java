@@ -11,6 +11,9 @@ public enum Namespace {
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
     LD4L("http://bibframe.ld4l.org/ontology/", "ld4l"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),
+    // Vocabulary (instance) namespace rather than ontology namespace; does it
+    // matter?
+    FAST("http://id.worldcat.org/fast/", "fast"),
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
     MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
     RDFS("http://http://www.w3.org/2000/01/rdf-schema#", "rdfs"),

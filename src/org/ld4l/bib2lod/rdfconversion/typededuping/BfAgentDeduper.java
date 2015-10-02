@@ -28,18 +28,33 @@ public class BfAgentDeduper extends TypeDeduper {
         
         LOGGER.debug("Deduping type " + type.toString());
 
+        // Maps local URIs in the Bibframe RDF to deduped URIs (single, unique
+        // URI per bf:Agent or madsrdf:Authority). This map will be used to
+        // replace duplicate URIs for the same individual with a single, unique
+        // URI.
         Map<String, String> uniqueUris = new HashMap<String, String>();
-        Map<String, String> uniqueAgents = new HashMap<String, String>();
-        Map<String, String> uniqueAuths = new HashMap<String, String>();
         
+        // Maps keys for Agent identity matching to the unique Agent URIs. 
+        Map<String, String> uniqueAgents = new HashMap<String, String>();
+        
+        // Maps keys for Authority identity matching to the unique Authority
+        // URIs.
+        Map<String, String> uniqueAuths = new HashMap<String, String>();
+
+        // Execute the query
         Query query = getQuery(type);        
         QueryExecution qexec = QueryExecutionFactory.create(query, model);
         ResultSet results = qexec.execSelect();
         
+        // Loop through query results
         while (results.hasNext()) {
+            
             QuerySolution soln = results.next();
+            
             String agentUri = soln.getResource("agent").getURI();
-            String key = getAgentKey(soln);
+            
+            // Get key for agent identity matching.
+            String key = buildAgentKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
@@ -47,39 +62,55 @@ public class BfAgentDeduper extends TypeDeduper {
                 continue;
             }
 
-            LOGGER.debug("Original uri: " + agentUri + " => " + key);
+            // Normalize the key to remove non-distinctive differences
             key = NacoNormalizer.normalize(key);
-            
+            LOGGER.debug("Original uri: " + agentUri + " has key " + key);
+    
             Resource auth = soln.getResource("auth");
             String authUri = auth == null ? null : auth.getURI();            
 
+            // We've seen this Agent before
             if (uniqueAgents.containsKey(key)) {
-                // We've seen this individual before
+                
                 String uniqueAgentUri = uniqueAgents.get(key);
                 LOGGER.debug("Found matching value for key " + key 
                         + " and agent URI " + agentUri);
-                LOGGER.debug("Adding: " + agentUri + " => " + uniqueAgentUri);
+                LOGGER.debug("Adding: " + agentUri + " => " + uniqueAgentUri);                
+                // The local Agent URI will be replaced by the unique Agent URI
+                // throughout the data
                 uniqueUris.put(agentUri, uniqueAgentUri);
+                
+                // If there's an associated madsrdf:Authority, dedupe that
+                // URI as well.
                 // NB The algorithm assumes the agent key and the authority
-                // key will always be identical. If not, we should normalize
-                // auth labels and dedupe authorities on them, rather than on 
-                // the agent keys.
+                // key will always be identical, and uses the agent keys to 
+                // dedupe authorities. If this assumption is incorrect, we need
+                // to get an authority key and dedupe on that instead.
                 if (authUri != null) {
+                    
+                    // We've seen this Authority before
                     if (uniqueAuths.containsKey(key)) {
                         String uniqueAuthUri = uniqueAuths.get(key);
                         LOGGER.debug("Found matching value for key " 
                                     + key + " and auth URI " + authUri);
                         LOGGER.debug("Adding: " + authUri + " => " 
                                     + uniqueAuthUri);
-                        uniqueUris.put(authUri, uniqueAuthUri);
+                        
+                        // This local Authority URI will be replaced by the
+                        // unique Authority URI throughout the data.
+                        uniqueUris.put(authUri, uniqueAuthUri); 
+                        
                     } else {
+                        // We haven't seen this Authority before
                         LOGGER.debug("Didn't find auth URI for" + key);
+                        // Add the local Authority URI to the maps
                         uniqueAuths.put(key, authUri);
                         uniqueUris.put(authUri, authUri);
                     }
                 }
+                
             } else {
-                // We haven't seen this individual before
+                // We haven't seen this Agent before
                 LOGGER.debug("New agent: " + agentUri);
                 uniqueUris.put(agentUri, agentUri);
                 uniqueAgents.put(key, agentUri);
@@ -92,9 +123,11 @@ public class BfAgentDeduper extends TypeDeduper {
         }
         
         if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("uniqueUris map:");
             for (String uri : uniqueUris.keySet()) {
                 LOGGER.debug(uri + " => " + uniqueUris.get(uri));
             }
+            LOGGER.debug("uniqueAgents map:");
             for (String key : uniqueAgents.keySet()) {
                 LOGGER.debug(key + " => " + uniqueAgents.get(key));
             }
@@ -125,9 +158,9 @@ public class BfAgentDeduper extends TypeDeduper {
                 + OntologyProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?agent " 
                 + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
-    //                + "?auth " 
-    //                + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
-    //                + " ?authLabel . "
+                // + "?auth " 
+                // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
+                // + " ?authLabel . "
                 + "} }";
 
         pss.setCommandText(commandText);
@@ -137,7 +170,7 @@ public class BfAgentDeduper extends TypeDeduper {
 
     }
     
-    private String getAgentKey(QuerySolution soln) {
+    private String buildAgentKey(QuerySolution soln) {
         return getDefaultKey(soln);
     }
     

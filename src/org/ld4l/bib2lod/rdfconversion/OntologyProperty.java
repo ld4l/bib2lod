@@ -9,7 +9,8 @@ public enum OntologyProperty {
     BF_IDENTIFIER_VALUE(Namespace.BIBFRAME, "identifierValue"),
     BF_LABEL(Namespace.BIBFRAME, "label"),
     BF_SYSTEM_NUMBER(Namespace.BIBFRAME, "systemNumber"),
-    MADSRDF_AUTHORITATIVE_LABEL(Namespace.MADSRDF, "authoritativeLabel");
+    MADSRDF_AUTHORITATIVE_LABEL(Namespace.MADSRDF, "authoritativeLabel"),
+    MADSRDF_IS_MEMBER_OF_MADS_SCHEME(Namespace.MADSRDF, "isMemberOfMADSScheme");
 
     
     private final Namespace namespace;

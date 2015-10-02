@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion.typededuping;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -14,6 +15,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.Namespace;
 import org.ld4l.bib2lod.rdfconversion.OntologyProperty;
 import org.ld4l.bib2lod.rdfconversion.OntologyType;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
@@ -23,71 +25,109 @@ public class BfTopicDeduper extends TypeDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfTopicDeduper.class);
 
+    private static final Map<String, Namespace> SCHEMES = 
+            new HashMap<String, Namespace>();
+    static {
+        SCHEMES.put("(OCoLC)fst", Namespace.FAST);
+    }
  
     @Override
     public Map<String, String> dedupe(OntologyType type, Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
-        
+
+        // Maps local URIs in the Bibframe RDF to deduped URIs (single, unique
+        // URI per bf:Agent or madsrdf:Authority). This map will be used to
+        // replace duplicate URIs for the same individual with a single, unique
+        // URI.
         Map<String, String> uniqueUris = new HashMap<String, String>();
+        
+        // Maps keys for Topic identity matching to the unique Topic URIs.         
         Map<String, String> uniqueTopics = new HashMap<String, String>();
+        
+        // Maps keys for Authority identity matching to the unique Authority
+        // URIs.        
         Map<String, String> uniqueAuths = new HashMap<String, String>();
         
+        // Execute the query
         Query query = getQuery();        
         QueryExecution qexec = QueryExecutionFactory.create(query, model);
         ResultSet results = qexec.execSelect();
         
+        // Loop through the query results
         while (results.hasNext()) {
-            QuerySolution soln = results.next();
-            String topicUri = soln.getResource("topic").getURI();
-            String key = getTopicKey(soln);
             
-            // TODO Following is all the same as in BfAgentDeduper. We should
-            // probably be able to write TypeDeduper to do all the work, with
-            // subclasses just providing the query and the key.
+            QuerySolution soln = results.next();
+
+            String topicUri = soln.getResource("topic").getURI();
+            
+            // Get an external URI for this Topic, if there is one. We will 
+            // replace local topic URIs with it throughout the data. In the case 
+            // of topics, we also use the external URI as the key for 
+            // identity-matching, rather than relying on string matching.
+            String externalTopicUri = getExternalTopicUri(soln);
+            
+            // Get key for identity matching.
+            String key = getTopicKey(externalTopicUri, soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
                 LOGGER.debug("No key for " + topicUri + "; can't dedupe");
                 continue;
             }
-
-            LOGGER.debug("Original uri: " + topicUri + " => " + key);
-            key = NacoNormalizer.normalize(key);
             
+            // The external Topic URI will the the replacement URI.      
+            String replacementUri = 
+                    externalTopicUri != null ? externalTopicUri : topicUri;
+
             Resource auth = soln.getResource("auth");
-            String authUri = auth == null ? null : auth.getURI();            
+            String authUri = auth != null ? auth.getURI() : null;
 
             if (uniqueTopics.containsKey(key)) {
-                // We've seen this individual before
+                
+                // We've seen this Topic before
                 String uniqueTopicUri = uniqueTopics.get(key);
                 LOGGER.debug("Found matching value for key " + key 
                         + " and topic URI " + topicUri);
-                LOGGER.debug("Adding: " + topicUri + " => " + uniqueTopicUri);
+                LOGGER.debug("Adding: " + topicUri + " => " + uniqueTopicUri);                
+                // The local Agent URI will be replaced by the unique Agent URI
+                // throughout the data
                 uniqueUris.put(topicUri, uniqueTopicUri);
+                
                 // NB The algorithm assumes the topic key and the authority
                 // key will always be identical. If not, we should normalize
                 // auth labels and dedupe authorities on them, rather than on 
                 // the topic keys.
                 if (authUri != null) {
+                    
+                    // We've seen this Authority before
                     if (uniqueAuths.containsKey(key)) {
                         String uniqueAuthUri = uniqueAuths.get(key);
                         LOGGER.debug("Found matching value for key " 
                                     + key + " and auth URI " + authUri);
                         LOGGER.debug("Adding: " + authUri + " => " 
                                     + uniqueAuthUri);
+                        
+                        // This local Authority URI will be replaced by the
+                        // unique Authority URI throughout the data.
                         uniqueUris.put(authUri, uniqueAuthUri);
+                        
                     } else {
+                        // We haven't seen this Authority before
                         LOGGER.debug("Didn't find auth URI for" + key);
+                        // Add the local Authority URI to the maps
                         uniqueAuths.put(key, authUri);
                         uniqueUris.put(authUri, authUri);
                     }
                 }
+                
             } else {
-                // We haven't seen this individual before
+                // We haven't seen this Topic before
                 LOGGER.debug("New topic: " + topicUri);
-                uniqueUris.put(topicUri, topicUri);
-                uniqueTopics.put(key, topicUri);
+                // For Topics, we're substituting the local URI with an
+                // external URI, if it exists.
+                uniqueUris.put(topicUri, replacementUri);
+                uniqueTopics.put(key, replacementUri);
                 if (authUri != null) {
                     LOGGER.debug("New auth: " + authUri);
                     uniqueUris.put(authUri, authUri);                
@@ -97,8 +137,13 @@ public class BfTopicDeduper extends TypeDeduper {
         }
         
         if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("uniqueUris map:");
             for (String uri : uniqueUris.keySet()) {
                 LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            }
+            LOGGER.debug("uniqueTopics map:");
+            for (String key : uniqueTopics.keySet()) {
+                LOGGER.debug(key + " => " + uniqueTopics.get(key));
             }
         }
         
@@ -117,24 +162,31 @@ public class BfTopicDeduper extends TypeDeduper {
                  * authorities against them directly.
                  */
                 // "SELECT ?topic ?id ?authAccessPt ?label ?auth ?authLabel "
-                "SELECT ?topic ?subjectHeading ?authAccessPoint ?label ?auth "
+                "SELECT ?topic ?authAccessPoint ?label ?auth  ?scheme ?id "
                 + "WHERE { "
                 + "?topic a " + OntologyType.BF_TOPIC.sparqlUri() + " . "
                 + "OPTIONAL { ?topic "
-                + OntologyProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() 
-                + "?authAccessPoint . } "
-                + "OPTIONAL { ?topic  " 
+                + OntologyProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri()
+                + " ?authAccessPoint . } "
+                + "OPTIONAL { ?topic " 
                 + OntologyProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?topic " 
-                + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . } "
-    //                + "?auth " 
-    //                + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
-    //                + " ?authLabel . "
+                + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
+                // The authority seems to always have a scheme, but make it
+                // optional just in case.
+                + "OPTIONAL { ?auth " 
+                + OntologyProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri() 
+                + " ?scheme . } " 
+                // + "?auth " 
+                // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
+                // + " ?authLabel . "
+                + "} "
                 + "OPTIONAL { ?topic "
-                + OntologyProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
-                + "?id . "
-                + "?id a " + OntologyType.BF_IDENTIFIER.sparqlUri() + " ; " 
-                + OntologyProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " ?subjectHeading . "
+                + OntologyProperty.BF_SYSTEM_NUMBER.sparqlUri()
+                + " ?identifier . "
+                + "?identifier a " 
+                + OntologyType.BF_IDENTIFIER.sparqlUri() + " ; " 
+                + OntologyProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " ?id . "
                 + "} }";
 
         LOGGER.debug("QUERY: " + queryString);
@@ -142,23 +194,66 @@ public class BfTopicDeduper extends TypeDeduper {
 
     }
     
-    private String getTopicKey(QuerySolution soln) {
-        
-        // First look for a FAST heading
-        Literal subjectHeadingLiteral = soln.getLiteral("subjectHeading");
-        if (subjectHeadingLiteral != null) {
-            String subjectHeading = subjectHeadingLiteral.getLexicalForm(); 
-            // Leave the (OCoLC)fst prefix on in case we want to use other 
-            // types of identifier values as well.
-            if (subjectHeading.startsWith("(OCoLC)fst")) {
-                LOGGER.debug("Using FAST heading "+ subjectHeading 
-                        + " to dedupe");
-                return subjectHeading;
-            }            
+    /**
+     * Return the Topic URI. Construct the URI from an external source, if there 
+     * is one; otherwise use the local URI from the RDF.
+     * @param soln
+     * @return Topic URI string
+     */   
+    private String getExternalTopicUri(QuerySolution soln) {
+     
+        Literal idLiteral = soln.getLiteral("id");
+        if (idLiteral != null) {
+            String id = idLiteral.getLexicalForm(); 
+            // Currently we have only FAST URIs, but later there may be other
+            // schemes that provide dereferenceable URIs.
+            for (String prefix : SCHEMES.keySet()) {
+                if (id.startsWith(prefix)) {
+                    String localName = id.substring(prefix.length() + 1);
+                    // Remove leading zeros from localName (though not required)
+                    localName = StringUtils.stripStart(localName, "0");
+                    String externalUri = SCHEMES.get(prefix).uri() + localName; 
+                    LOGGER.debug(
+                            "Topic URI from external scheme: " + externalUri);
+                    return externalUri;
+                }        
+            }
         }
-        LOGGER.debug("No FAST heading. Using label or authorizedAccessPoint to "
-                + "dedupe");
-        return getDefaultKey(soln);
+        
+        LOGGER.debug("No external Topic URI found");
+        return null;
+
+    }
+    
+    private String getTopicKey(String externalTopicUri, QuerySolution soln) {
+        
+        // If there's an external Topic URI, use that as the key.
+        if (externalTopicUri != null) {
+            return externalTopicUri;
+        }
+
+        // Otherwise derive the key from the Topic string values:
+        
+        // First get the default key from the available label or 
+        // authorzedAccessPoint values.
+        String key = getDefaultKey(soln);
+        if (key == null) {
+            return null;
+        }
+        
+        // Normalize the label so non-distinctive differences are ignored 
+        // during identity matching.
+        key = NacoNormalizer.normalize(key);
+        
+        // If there's a scheme, prepend it to the label, since deduping is done 
+        // only relative to a scheme: we don't want to match labels in 
+        // different schemes.
+        Resource scheme = soln.getResource("scheme");
+        if (scheme != null) {
+            key = scheme.getURI() + key;
+        }
+        
+        return key;
     }
     
 
