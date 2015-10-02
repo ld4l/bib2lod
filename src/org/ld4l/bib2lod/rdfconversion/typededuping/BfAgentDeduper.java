@@ -76,7 +76,7 @@ public class BfAgentDeduper extends TypeDeduper {
                 LOGGER.debug("Found matching value for key " + key 
                         + " and agent URI " + agentUri);
                 LOGGER.debug("Adding: " + agentUri + " => " + uniqueAgentUri);                
-                // The local Agent URI will be replaced by the unique Agent URI
+                // This local Agent URI will be replaced by the unique Agent URI
                 // throughout the data
                 uniqueUris.put(agentUri, uniqueAgentUri);
                 

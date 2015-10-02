@@ -90,7 +90,7 @@ public class BfTopicDeduper extends TypeDeduper {
                 LOGGER.debug("Found matching value for key " + key 
                         + " and topic URI " + topicUri);
                 LOGGER.debug("Adding: " + topicUri + " => " + uniqueTopicUri);                
-                // The local Agent URI will be replaced by the unique Agent URI
+                // This local Agent URI will be replaced by the unique Agent URI
                 // throughout the data
                 uniqueUris.put(topicUri, uniqueTopicUri);
                 
