@@ -1,7 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 
-public enum OntologyProperty {
+public enum OntProperty {
 
     BF_AUTHORIZED_ACCESS_POINT(OntNamespace.BIBFRAME, "authorizedAccessPoint"),
     BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
@@ -11,14 +11,15 @@ public enum OntologyProperty {
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
-            OntNamespace.MADSRDF, "isMemberOfMADSScheme");
+            OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+    OWL_SAME_AS(OntNamespace.OWL, "sameAs");
 
     
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;
     
-    OntologyProperty(OntNamespace namespace, String localname) {
+    OntProperty(OntNamespace namespace, String localname) {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;

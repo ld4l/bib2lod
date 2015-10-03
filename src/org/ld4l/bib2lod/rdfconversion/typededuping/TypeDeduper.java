@@ -10,7 +10,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntologyType;
+import org.ld4l.bib2lod.rdfconversion.OntType;
 
 // TODO If only abstract methods, change to an interface
 public abstract class TypeDeduper {
@@ -18,7 +18,7 @@ public abstract class TypeDeduper {
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeDeduper.class);
             
-    public abstract Map<String, String> dedupe(OntologyType type, Model model);
+    public abstract Map<String, String> dedupe(OntType type, Model model);
       
     protected String getDefaultKey(QuerySolution soln) {
         // NB It's assumed that bf:authorizedAccessPoint and bf:label values 

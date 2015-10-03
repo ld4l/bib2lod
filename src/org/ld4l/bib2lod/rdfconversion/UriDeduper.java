@@ -37,18 +37,18 @@ public class UriDeduper extends RdfProcessor {
      * related type so that they can be used as a basis for deduping: e.g., 
      * Identifiers for Instances, Titles for Works and Instances). 
      */
-    private static final List<OntologyType> TYPES_TO_DEDUPE = Arrays.asList(
-            OntologyType.BF_PERSON,
-            OntologyType.BF_FAMILY,
+    private static final List<OntType> TYPES_TO_DEDUPE = Arrays.asList(
+            OntType.BF_PERSON,
+            OntType.BF_FAMILY,
             // NB There are no instances of this type in the complete Cornell
             // catalog RDF.
-            OntologyType.BF_JURISDICTION,
-            OntologyType.BF_MEETING,
-            OntologyType.BF_ORGANIZATION,
-            OntologyType.BF_WORK,  
-            OntologyType.BF_INSTANCE,
-            OntologyType.BF_PLACE,
-            OntologyType.BF_TOPIC
+            OntType.BF_JURISDICTION,
+            OntType.BF_MEETING,
+            OntType.BF_ORGANIZATION,
+            OntType.BF_WORK,  
+            OntType.BF_INSTANCE,
+            OntType.BF_PLACE,
+            OntType.BF_TOPIC
     );
 
     private static final String REMAINDER = "other";
@@ -61,7 +61,7 @@ public class UriDeduper extends RdfProcessor {
         super(localNamespace, inputDir, mainOutputDir);
     }
     
-    protected static List<OntologyType> getTypesToDedupe() {
+    protected static List<OntType> getTypesToDedupe() {
         return TYPES_TO_DEDUPE; 
     }
     
@@ -143,7 +143,7 @@ public class UriDeduper extends RdfProcessor {
         LOGGER.trace("Start processing file " + filename);
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntologyType type = OntologyType.getByFilename(basename);
+        OntType type = OntType.getByFilename(basename);
         if (type == null) {
             LOGGER.warn("No type found for file " + basename);
             return null;

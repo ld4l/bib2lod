@@ -10,11 +10,13 @@ import org.apache.jena.query.QueryFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntologyProperty;
-import org.ld4l.bib2lod.rdfconversion.OntologyType;
+import org.ld4l.bib2lod.rdfconversion.OntProperty;
+import org.ld4l.bib2lod.rdfconversion.OntType;
 
 /*
  * NB Possibly we only need to dedupe Instance URIs within a single bib record,
@@ -28,7 +30,7 @@ public class BfInstanceDeduper extends TypeDeduper {
             LogManager.getLogger(BfInstanceDeduper.class);
 
     @Override
-    public Map<String, String> dedupe(OntologyType type, Model model) {
+    public Map<String, String> dedupe(OntType type, Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
         
@@ -84,6 +86,17 @@ public class BfInstanceDeduper extends TypeDeduper {
             }
         }
         
+//        Property sameAs = 
+//                model.createProperty(OntProperty.OWL_SAME_AS.uri());
+//        LOGGER.debug("sameAs: " + sameAs.toString());
+//        for (String worldcatId : uniqueInstances.keySet()) {
+//            Resource subject = model.createResource(worldcatId);
+//            Resource object = 
+//                    model.createResource(uniqueInstances.get(worldcatId));
+//            Statement s = model.createStatement(subject, sameAs, object);
+//            model.add(s);            
+//        }
+        
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
             for (String uri : uniqueUris.keySet()) {
@@ -106,9 +119,9 @@ public class BfInstanceDeduper extends TypeDeduper {
                 "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
                 + "SELECT ?instance ?worldcatId "
                 + "WHERE { "
-                + "?instance a " + OntologyType.BF_INSTANCE.sparqlUri() + " . "
+                + "?instance a " + OntType.BF_INSTANCE.sparqlUri() + " . "
                 + "OPTIONAL { ?instance "
-                + OntologyProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+                + OntProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
                 + "?worldcatId .  "
                 + "FILTER ( fn:starts-with(str(?worldcatId), 'http://www.worldcat.org/oclc/' ) ) } "
                 + "}";

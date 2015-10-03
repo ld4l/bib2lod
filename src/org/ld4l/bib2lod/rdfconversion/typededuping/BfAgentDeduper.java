@@ -13,8 +13,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntologyProperty;
-import org.ld4l.bib2lod.rdfconversion.OntologyType;
+import org.ld4l.bib2lod.rdfconversion.OntProperty;
+import org.ld4l.bib2lod.rdfconversion.OntType;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 public class BfAgentDeduper extends TypeDeduper {
@@ -24,7 +24,7 @@ public class BfAgentDeduper extends TypeDeduper {
 
  
     @Override
-    public Map<String, String> dedupe(OntologyType type, Model model) {
+    public Map<String, String> dedupe(OntType type, Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
 
@@ -136,7 +136,7 @@ public class BfAgentDeduper extends TypeDeduper {
         return uniqueUris;        
     }
     
-    private Query getQuery(OntologyType type) {
+    private Query getQuery(OntType type) {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
@@ -152,12 +152,12 @@ public class BfAgentDeduper extends TypeDeduper {
                 + "WHERE { "
                 + "?agent a ?type . "
                 + "OPTIONAL { ?agent "
-                + OntologyProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
+                + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
                 + "?authAccessPoint . } "
                 + "OPTIONAL { ?agent  " 
-                + OntologyProperty.BF_LABEL.sparqlUri() + " ?label . } "
+                + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?agent " 
-                + OntologyProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
+                + OntProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
                 // + "?auth " 
                 // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
                 // + " ?authLabel . "

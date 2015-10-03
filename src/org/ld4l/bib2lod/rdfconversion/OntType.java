@@ -8,7 +8,7 @@ import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfTopicDeduper;
 
-public enum OntologyType {
+public enum OntType {
 
     // Maybe create different type enums, one for bibframe, one for madsrdf
     // or miscellaneous, etc.? For now, no need.
@@ -39,7 +39,7 @@ public enum OntologyType {
     private final String filename;
     private Class<?> deduper;
     
-    OntologyType(OntNamespace namespace, String localname) {
+    OntType(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
         this.uri = namespace.uri() + localname;
@@ -47,7 +47,7 @@ public enum OntologyType {
         this.deduper = null;
     }
 
-    OntologyType(OntNamespace namespace, String localname, Class<?> deduper) {   
+    OntType(OntNamespace namespace, String localname, Class<?> deduper) {   
         this(namespace, localname);
         this.deduper = deduper;
     }
@@ -84,16 +84,16 @@ public enum OntologyType {
         return deduper;
     }
     
-    private static final Map<String, OntologyType> LOOKUP_BY_FILENAME = 
-            new HashMap<String, OntologyType>();
+    private static final Map<String, OntType> LOOKUP_BY_FILENAME = 
+            new HashMap<String, OntType>();
     
     static {
-        for (OntologyType type : OntologyType.values()) {
+        for (OntType type : OntType.values()) {
             LOOKUP_BY_FILENAME.put(type.filename, type);
         }
     }
     
-    public static OntologyType getByFilename(String filename) {
+    public static OntType getByFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
     }

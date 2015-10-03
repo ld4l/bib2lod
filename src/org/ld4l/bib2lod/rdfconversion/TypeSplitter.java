@@ -23,7 +23,7 @@ public class TypeSplitter extends RdfProcessor {
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
-    private static final List<OntologyType> TYPES_TO_SPLIT = 
+    private static final List<OntType> TYPES_TO_SPLIT = 
             UriDeduper.getTypesToDedupe();
     private static final String REMAINDER = UriDeduper.getRemainder();
     
@@ -73,17 +73,17 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntologyType.MADSRDF_AUTHORITY.sparqlUri() 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.sparqlUri() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntologyType.BF_IDENTIFIER.sparqlUri()
+                + "?o1 a " + OntType.BF_IDENTIFIER.sparqlUri()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntologyType.BF_TITLE.sparqlUri()
+                + "?o1 a " + OntType.BF_TITLE.sparqlUri()
                 + "} }"                
         );
         return pss;
@@ -93,7 +93,7 @@ public class TypeSplitter extends RdfProcessor {
         
         Map<String, File> outputFilesByType = new HashMap<String, File>();
         
-        for (OntologyType type : TYPES_TO_SPLIT) {
+        for (OntType type : TYPES_TO_SPLIT) {
             outputFilesByType.put(type.uri(), 
                     createOutputFileForType(outputDir, type));
         }
@@ -107,7 +107,7 @@ public class TypeSplitter extends RdfProcessor {
         return outputFilesByType;
     }
 
-    private File createOutputFileForType(String outputDir, OntologyType type) {
+    private File createOutputFileForType(String outputDir, OntType type) {
         
         String basename = type.filename();
         return new File(outputDir, getOutputFilename(basename));
@@ -124,7 +124,7 @@ public class TypeSplitter extends RdfProcessor {
         Map<String, Model> modelsByType = createModelsByType();
    
         // For each Bibframe type to split on
-        for (OntologyType type : TYPES_TO_SPLIT) {       
+        for (OntType type : TYPES_TO_SPLIT) {       
             String uri = type.uri();
             // Make the type substitution into the parameterized SPARQL string
             pss.setIri("type", uri);
@@ -184,7 +184,7 @@ public class TypeSplitter extends RdfProcessor {
         Map<String, Model> modelsByType = 
                 new HashMap<String, Model>();
 
-        for (OntologyType type: TYPES_TO_SPLIT) {
+        for (OntType type: TYPES_TO_SPLIT) {
             modelsByType.put(type.uri(), 
                     ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
