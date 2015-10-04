@@ -37,9 +37,8 @@ public class TypeSplitter extends RdfProcessor {
     public String process() {
         
         LOGGER.trace("Start process");
-        
-        String outputDir = createOutputDir();
-        
+        String outputDir = getOutputDir();
+
         ParameterizedSparqlString pss = getParameterizedSparqlString();
        
         // Map each type to a file for writing output.

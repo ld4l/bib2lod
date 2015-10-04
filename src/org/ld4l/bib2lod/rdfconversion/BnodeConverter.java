@@ -32,19 +32,17 @@ public class BnodeConverter extends RdfProcessor {
     public String process() {        
         
         LOGGER.trace("Start process");
-        
-        String outputDir = createOutputDir();
-        
+        String outputDir = getOutputDir();
+
         int fileCount = 0;
         for ( File file : new File(inputDir).listFiles() ) {
             String filename = file.getName();
             LOGGER.trace("Start processing file " + filename);
             fileCount++;
             Model outputModel = processInputFile(file, fileCount);
-            String outputFilename = getOutputFilename(
-                    FilenameUtils.getBaseName(file.toString()));
-            File outputFile = new File(outputDir, outputFilename); 
-            writeModelToFile(outputModel, outputFile);
+            // Write out to same filename as input file
+            String basename = FilenameUtils.getBaseName(file.toString());
+            writeModelToFile(outputModel, basename);
             LOGGER.trace("Done processing file " + filename);
         }   
         

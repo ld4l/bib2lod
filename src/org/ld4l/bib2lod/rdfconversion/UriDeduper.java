@@ -86,8 +86,7 @@ public class UriDeduper extends RdfProcessor {
     public String process() {
         LOGGER.trace("Start process");
         
-        String outputDir = createOutputDir();
-        
+        String outputDir = getOutputDir();        
 
         File[] inputFiles = new File(inputDir).listFiles();
         
@@ -147,9 +146,7 @@ public class UriDeduper extends RdfProcessor {
         // Assumes there aren't too many of these to hold all in memory. If too
         // many, append to file after each iteration through the loop.
         if (!newStatements.isEmpty()) {
-            File newStatementFile = 
-                    new File(outputDir, getOutputFilename("newStatements"));
-            writeModelToFile(newStatements, newStatementFile);
+            writeModelToFile(newStatements, "newStatements");
         }
 
         LOGGER.trace("End process");

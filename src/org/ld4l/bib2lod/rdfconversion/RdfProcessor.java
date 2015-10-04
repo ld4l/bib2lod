@@ -37,7 +37,7 @@ public abstract class RdfProcessor {
      */
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
             
-    private final String outputSubdir;
+    private String outputDir;
     protected final String localNamespace;    
     protected final String inputDir;
     private final String mainOutputDir;
@@ -64,13 +64,16 @@ public abstract class RdfProcessor {
         this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
-        this.outputSubdir = 
-                StringUtils.substringAfterLast(this.getClass().getName(), "."); 
+        this.outputDir = createOutputDir();
                
     }
     
     public abstract String process();
     
+    protected String getOutputDir() {
+        return outputDir;
+    }
+
     protected Model readModelFromFile(File file) {
         return readModelFromFile(file.toString());
     }
@@ -105,14 +108,17 @@ public abstract class RdfProcessor {
      * process.
      * @return - the full output directory path
      */
-    protected String createOutputDir() {
+    private String createOutputDir() {
         
         String outputDir = null;
+        String outputSubdir = 
+                StringUtils.substringAfterLast(this.getClass().getName(), "."); 
         try {
             outputDir = Files.createDirectory(Paths.get(mainOutputDir, 
                     outputSubdir)).toString();
         } catch (IOException e) {
             e.printStackTrace();
+            // TODO Abort program here
         }
         
         return outputDir;
@@ -155,11 +161,24 @@ public abstract class RdfProcessor {
         writeModelToFile(model, file, true);
     }
 
+    protected void appendModelToFile(Model model, String basename) {
+        writeModelToFile(model, basename, true);
+    }
+    
     protected void writeModelToFile(Model model, File file) {
         writeModelToFile(model, file, false);
     }
     
-    protected void writeModelToFile(Model model, File file, boolean append) {
+    protected void writeModelToFile(Model model, String basename) {
+        writeModelToFile(model, basename, false);
+    }
+    
+    private void writeModelToFile(Model model, String basename, boolean append) {
+        File outputFile = new File(outputDir, getOutputFilename(basename));
+        writeModelToFile(model, outputFile, append);
+    }
+    
+    private void writeModelToFile(Model model, File file, boolean append) {
         FileOutputStream outStream;
         try {
             outStream = new FileOutputStream(file, append);
@@ -177,7 +196,6 @@ public abstract class RdfProcessor {
     }
     
     protected String stubProcess() {
-        String outputDir = createOutputDir();
         copyFiles(inputDir, outputDir);
         return outputDir;
     }

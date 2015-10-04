@@ -64,7 +64,8 @@ public class RdfCleaner extends RdfProcessor {
     public String process() {
         
         LOGGER.trace("Start process");
-        String outputDir = createOutputDir();
+        String outputDir = getOutputDir();
+        
         for ( File file : new File(inputDir).listFiles() ) {
             String filename = file.getName();
             // Skip directories and empty files (Jena chokes when reading an 
