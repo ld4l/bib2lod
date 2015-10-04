@@ -37,7 +37,7 @@ public abstract class RdfProcessor {
      */
     private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
             
-    protected final String outputSubdir;
+    private final String outputSubdir;
     protected final String localNamespace;    
     protected final String inputDir;
     private final String mainOutputDir;
@@ -103,7 +103,6 @@ public abstract class RdfProcessor {
     /**
      * Create a subdirectory of main output directory for the output of this
      * process.
-     * @param subDirName - the output subdirectory name for this process
      * @return - the full output directory path
      */
     protected String createOutputDir() {

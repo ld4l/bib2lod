@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion.typededuping;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.query.Query;
@@ -86,16 +88,16 @@ public class BfInstanceDeduper extends TypeDeduper {
             }
         }
         
-//        Property sameAs = 
-//                model.createProperty(OntProperty.OWL_SAME_AS.uri());
-//        LOGGER.debug("sameAs: " + sameAs.toString());
-//        for (String worldcatId : uniqueInstances.keySet()) {
-//            Resource subject = model.createResource(worldcatId);
-//            Resource object = 
-//                    model.createResource(uniqueInstances.get(worldcatId));
-//            Statement s = model.createStatement(subject, sameAs, object);
-//            model.add(s);            
-//        }
+        Property sameAs = 
+                model.createProperty(OntProperty.OWL_SAME_AS.uri());
+        LOGGER.debug("sameAs: " + sameAs.toString());
+        for (String worldcatId : uniqueInstances.keySet()) {
+            Resource subject = 
+                    model.createResource(uniqueInstances.get(worldcatId));
+            Resource object = model.createResource(worldcatId);                   
+            Statement s = model.createStatement(subject, sameAs, object);
+            newStatements.add(s);            
+        }
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
@@ -123,7 +125,8 @@ public class BfInstanceDeduper extends TypeDeduper {
                 + "OPTIONAL { ?instance "
                 + OntProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
                 + "?worldcatId .  "
-                + "FILTER ( fn:starts-with(str(?worldcatId), 'http://www.worldcat.org/oclc/' ) ) } "
+                + "FILTER ( fn:starts-with(str(?worldcatId), "
+                + "'http://www.worldcat.org/oclc/' ) ) } "
                 + "}";
 
         LOGGER.debug("QUERY: " + queryString);

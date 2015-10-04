@@ -1,13 +1,13 @@
 package org.ld4l.bib2lod.rdfconversion.typededuping;
 
+import java.util.List;
 import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntType;
@@ -17,6 +17,8 @@ public abstract class TypeDeduper {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeDeduper.class);
+    
+    protected Model newStatements = ModelFactory.createDefaultModel();
             
     public abstract Map<String, String> dedupe(OntType type, Model model);
       
@@ -40,6 +42,10 @@ public abstract class TypeDeduper {
         }
         
         return null;
+    }
+    
+    public Model getNewStatements() {
+        return newStatements;
     }
 
 }

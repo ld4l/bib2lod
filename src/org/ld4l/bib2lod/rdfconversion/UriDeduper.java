@@ -18,8 +18,10 @@ import java.util.Set;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.reasoner.rulesys.builtins.Print;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.typededuping.TypeDeduper;
@@ -54,11 +56,17 @@ public class UriDeduper extends RdfProcessor {
     private static final String REMAINDER = "other";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
     
+    private Model newStatements;
+    private Map<String, String> uniqueUris;
     
     public UriDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
                  
         super(localNamespace, inputDir, mainOutputDir);
+        
+        newStatements = ModelFactory.createDefaultModel();
+        uniqueUris = new HashMap<String, String>();
+        
     }
     
     protected static List<OntType> getTypesToDedupe() {
@@ -80,14 +88,14 @@ public class UriDeduper extends RdfProcessor {
         
         String outputDir = createOutputDir();
         
-        Map<String, String> uniqueUris = new HashMap<String, String>();
+
         File[] inputFiles = new File(inputDir).listFiles();
         
         for ( File file : inputFiles ) {
-            Map<String, String> dedupedUris = dedupeInputFile(file);
-            if (dedupedUris != null) {
-                uniqueUris.putAll(dedupedUris);
-            }
+            dedupeInputFile(file);
+//            if (dedupedUris != null) {
+//                uniqueUris.putAll(dedupedUris);
+//            }
         } 
         
         for ( File file : new File(inputDir).listFiles() ) {
@@ -103,7 +111,7 @@ public class UriDeduper extends RdfProcessor {
                 while (lineIterator.hasNext()) {
                     String line = lineIterator.nextLine();
                     String processedLine = replaceUris(line, uniqueUris) + "\n";
-                    /* Add the line to a set removes duplicate lines.
+                    /* Adding the line to a set removes duplicate lines.
                      * NB Another way to replace duplicates would be to read 
                      * the lines into a Jena model, which also automatically 
                      * removes duplicate triples. We could compare performance 
@@ -125,19 +133,30 @@ public class UriDeduper extends RdfProcessor {
                 while (setIterator.hasNext()) {
                     writer.append(setIterator.next());
                 }
+
                 writer.close();                
-                LOGGER.trace("Done replacing lines in file " + file);                
+                LOGGER.trace("Done replacing lines in file " + file);   
+                
+                
             } catch (IOException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }       
+        }
+        
+        // Assumes there aren't too many of these to hold all in memory. If too
+        // many, append to file after each iteration through the loop.
+        if (!newStatements.isEmpty()) {
+            File newStatementFile = 
+                    new File(outputDir, getOutputFilename("newStatements"));
+            writeModelToFile(newStatements, newStatementFile);
         }
 
         LOGGER.trace("End process");
         return outputDir;
     }
 
-    private Map<String, String> dedupeInputFile(File inputFile) {
+    private void dedupeInputFile(File inputFile) {
         
         String filename = inputFile.getName();
         LOGGER.trace("Start processing file " + filename);
@@ -146,7 +165,7 @@ public class UriDeduper extends RdfProcessor {
         OntType type = OntType.getByFilename(basename);
         if (type == null) {
             LOGGER.warn("No type found for file " + basename);
-            return null;
+            return;
         }
         LOGGER.debug("Type = " + type.toString());
 
@@ -155,19 +174,24 @@ public class UriDeduper extends RdfProcessor {
             if (cls == null) {
                 LOGGER.debug(
                         "No deduper class found for type " + type.toString());
-                return null;
+                return;
             }
 
-            // TODO Possibly we don't need different deduper subclasses, but
-            // just need to define the query for each type in a hash. Then 
-            // eliminate TypeDeduper and its subclasses and just use generic
-            // methods to execute the query and manage the results.
             TypeDeduper deduper = (TypeDeduper) cls.newInstance();
 
-            // TODO Maybe pass the model to the constructor so it's an instance 
-            // variable?
             Model model = readModelFromFile(inputFile);
-            return deduper.dedupe(type, model);
+            
+
+            Map<String, String> dedupedUris = deduper.dedupe(type, model);
+            if (dedupedUris != null) {
+                uniqueUris.putAll(dedupedUris);
+            }
+            
+            Model statements = deduper.getNewStatements();
+            if (statements != null) {
+                newStatements.add(statements);
+            }
+            
             
         } catch (InstantiationException e) {
             // TODO Auto-generated catch block
@@ -178,7 +202,6 @@ public class UriDeduper extends RdfProcessor {
         }
 
         LOGGER.trace("Done processing file " + filename);
-        return null;
     }
 
     private String replaceUris(String line, Map<String, String> uniqueUris) {          
