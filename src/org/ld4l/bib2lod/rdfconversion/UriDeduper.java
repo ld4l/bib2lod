@@ -115,7 +115,7 @@ public class UriDeduper extends RdfProcessor {
                      * removes duplicate triples. We could compare performance 
                      * with the Set approach if that becomes an issue (though
                      * I would suspect that the Set would be faster than a 
-                     * Model. Use of a model  has the advantage that the lines 
+                     * Model). Use of a model  has the advantage that the lines 
                      * don't have to be identical in terms of spaces.
                      */
                     uniqueLines.add(processedLine);
@@ -177,7 +177,6 @@ public class UriDeduper extends RdfProcessor {
 
             Model model = readModelFromFile(inputFile);
             
-
             Map<String, String> dedupedUris = deduper.dedupe(type, model);
             if (dedupedUris != null) {
                 uniqueUris.putAll(dedupedUris);
