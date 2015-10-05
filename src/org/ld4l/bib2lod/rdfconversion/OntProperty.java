@@ -6,6 +6,7 @@ public enum OntProperty {
     BF_AUTHORIZED_ACCESS_POINT(OntNamespace.BIBFRAME, "authorizedAccessPoint"),
     BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "identifier"),
+    BF_IDENTIFIER_SCHEME(OntNamespace.BIBFRAME, "identifierScheme"),
     BF_IDENTIFIER_VALUE(OntNamespace.BIBFRAME, "identifierValue"),
     BF_LABEL(OntNamespace.BIBFRAME, "label"),
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
