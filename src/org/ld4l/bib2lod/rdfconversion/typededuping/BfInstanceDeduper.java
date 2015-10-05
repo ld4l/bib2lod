@@ -30,6 +30,8 @@ public class BfInstanceDeduper extends TypeDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfInstanceDeduper.class);
+    
+    private static final String WORLDCAT_NS = "http://www.worldcat.org/oclc/";
 
     @Override
     public Map<String, String> dedupe(OntType type, Model model) {
@@ -126,7 +128,7 @@ public class BfInstanceDeduper extends TypeDeduper {
                 + OntProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
                 + "?worldcatId .  "
                 + "FILTER ( fn:starts-with(str(?worldcatId), "
-                + "'http://www.worldcat.org/oclc/' ) ) } "
+                + "\"" + WORLDCAT_NS + "\"  ) ) } "
                 + "}";
 
         LOGGER.debug("QUERY: " + queryString);
