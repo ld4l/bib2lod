@@ -42,8 +42,7 @@ public class UriDeduper extends RdfProcessor {
     private static final List<OntType> TYPES_TO_DEDUPE = Arrays.asList(
             OntType.BF_PERSON,
             OntType.BF_FAMILY,
-            // NB There are no instances of this type in the complete Cornell
-            // catalog RDF.
+            // NB There are no instances of this type in the entire CUL catalog.
             OntType.BF_JURISDICTION,
             OntType.BF_MEETING,
             OntType.BF_ORGANIZATION,

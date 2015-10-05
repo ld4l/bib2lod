@@ -54,10 +54,10 @@ public class NacoNormalizerTest {
     }
     
     @Test
-    public void testNormalize6() {
+    public void testNormalizeNull() {
 
-
-        
+        String s = NacoNormalizer.normalize(null);
+        Assert.assertNull(s);                
     }
     
 }

@@ -22,7 +22,7 @@ public abstract class TypeDeduper {
             
     public abstract Map<String, String> dedupe(OntType type, Model model);
       
-    protected String getDefaultKey(QuerySolution soln) {
+    protected String getDefaultAuthorityKey(QuerySolution soln) {
         // NB It's assumed that bf:authorizedAccessPoint and bf:label values 
         // are identical when both exist. If that turns out to be wrong, we 
         // need some way of resolving discrepancies.
@@ -35,13 +35,19 @@ public abstract class TypeDeduper {
         }
         
         // Else return bf:label, if there is one
+        return getDefaultKey(soln);
+
+    }
+    
+    protected String getDefaultKey(QuerySolution soln) {
+        
         Literal label = soln.getLiteral("label");
         if (label != null) {
             LOGGER.debug("Using bf:label to dedupe");
             return label.getLexicalForm();
         }
         
-        return null;
+        return null;        
     }
     
     public Model getNewStatements() {

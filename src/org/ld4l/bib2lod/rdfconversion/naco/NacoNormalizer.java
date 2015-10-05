@@ -147,6 +147,10 @@ public class NacoNormalizer {
         
     static public String normalize(String s) {
         
+        if (s == null) {
+            return s;
+        }
+        
         StringBuilder sb = new StringBuilder();
         
         // Convert to uppercase first in order to simplify the CONVERT map. 

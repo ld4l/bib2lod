@@ -54,7 +54,7 @@ public class BfAgentDeduper extends TypeDeduper {
             String agentUri = soln.getResource("agent").getURI();
             
             // Get key for agent identity matching.
-            String key = buildAgentKey(soln);
+            String key = getAgentKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
@@ -62,8 +62,6 @@ public class BfAgentDeduper extends TypeDeduper {
                 continue;
             }
 
-            // Normalize the key to remove non-distinctive differences
-            key = NacoNormalizer.normalize(key);
             LOGGER.debug("Original uri: " + agentUri + " has key " + key);
     
             Resource auth = soln.getResource("auth");
@@ -170,8 +168,10 @@ public class BfAgentDeduper extends TypeDeduper {
 
     }
     
-    private String buildAgentKey(QuerySolution soln) {
-        return getDefaultKey(soln);
+    private String getAgentKey(QuerySolution soln) {
+        String key = getDefaultAuthorityKey(soln);
+        // Normalize the key to remove non-distinctive differences
+        return NacoNormalizer.normalize(key);
     }
     
 
