@@ -22,7 +22,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class ResourceDeduper extends RdfProcessor {

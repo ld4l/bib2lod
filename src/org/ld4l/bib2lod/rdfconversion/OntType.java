@@ -4,11 +4,11 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfInstanceDeduper;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfTopicDeduper;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfWorkDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAgentDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
 
 public enum OntType {
 

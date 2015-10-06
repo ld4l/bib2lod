@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.typededuping;
+package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;

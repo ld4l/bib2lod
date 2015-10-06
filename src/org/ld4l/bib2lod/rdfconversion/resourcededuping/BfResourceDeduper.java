@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.typededuping;
+package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
 import java.util.HashMap;
 import java.util.Map;
