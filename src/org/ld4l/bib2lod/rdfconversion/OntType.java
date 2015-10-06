@@ -8,6 +8,7 @@ import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfTopicDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfWorkDeduper;
 
 public enum OntType {
 
@@ -30,7 +31,7 @@ public enum OntType {
     BF_PLACE(OntNamespace.BIBFRAME, "Place", BfResourceDeduper.class),
     BF_TITLE(OntNamespace.BIBFRAME, "Title"),
     BF_TOPIC(OntNamespace.BIBFRAME, "Topic", BfTopicDeduper.class),  
-    BF_WORK(OntNamespace.BIBFRAME, "Work", BfResourceDeduper.class),
+    BF_WORK(OntNamespace.BIBFRAME, "Work", BfWorkDeduper.class),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority");
     

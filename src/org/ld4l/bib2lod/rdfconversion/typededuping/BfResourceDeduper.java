@@ -105,7 +105,7 @@ public class BfResourceDeduper {
         return uniqueUris;        
     }
     
-    private Query getQuery(OntType type) {
+    protected Query getQuery(OntType type) {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         

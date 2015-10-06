@@ -152,7 +152,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
     
     // TODO Query could be a static final field, since there's no type
     // parameterization.
-    private Query getQuery() {
+    protected Query getQuery() {
         
         String queryString = 
                 /* NB We're not getting the authority label because we assume 
