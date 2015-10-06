@@ -114,6 +114,10 @@ public class ResourceDeduper extends RdfProcessor {
             if (dedupedUris != null) {
                 uniqueUris.putAll(dedupedUris);
             }
+            Model statements = deduper.getNewStatements();
+            if (statements != null) {
+                newStatements.add(statements);
+            }
         } 
 //        for ( OntType type : TYPES_TO_DEDUPE ) {
 //            BfResourceDeduper deduper = 
@@ -137,7 +141,7 @@ public class ResourceDeduper extends RdfProcessor {
             // Replace URIs using the uniqueUris map. Then remove duplicate 
             // lines created from this replacement.
             try {
-                String filename = file.getName();
+                LOGGER.trace("Replacing lines in file " + file.getName());
                 BufferedReader reader = Files.newBufferedReader(file.toPath());
                 Set<String> uniqueLines = new LinkedHashSet<String>();             
                 LineIterator lineIterator = new LineIterator(reader);
@@ -168,7 +172,7 @@ public class ResourceDeduper extends RdfProcessor {
                 }
 
                 writer.close();                
-                LOGGER.debug("Done replacing lines in file " + file);   
+                LOGGER.trace("Done replacing lines in file " + file);   
                 
                 
             } catch (IOException e) {
