@@ -12,18 +12,18 @@ import org.apache.logging.log4j.Logger;
  * @author rjy7
  *
  */
-public class BibframeRdfConverter extends RdfProcessor {
+public class BibframeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BibframeRdfConverter.class);
+            LogManager.getLogger(BibframeConverter.class);
     
-    public BibframeRdfConverter(OntModel bfOntModelInf,
+    public BibframeConverter(OntModel bfOntModelInf,
             String localNamespace, String inputDir, String mainOutputDir) {
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
         // TODO Auto-generated constructor stub
     }
 
-    public BibframeRdfConverter(String localNamespace, String inputDir,
+    public BibframeConverter(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
         // TODO Auto-generated constructor stub

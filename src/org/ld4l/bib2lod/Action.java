@@ -5,7 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ld4l.bib2lod.rdfconversion.BibframeRdfConverter;
+import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 
 public enum Action {
@@ -18,7 +18,7 @@ public enum Action {
     // CONVERT_BNODES("convert_bnodes", BnodeConverter.class),
     // SPLIT_TYPES("split_types", TypeSplitter.class),
     DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
-    CONVERT_BIBFRAME_RDF("convert_bibframe", BibframeRdfConverter.class);
+    CONVERT_BIBFRAME_RDF("convert_bibframe", BibframeConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
     
     private final String label;    
