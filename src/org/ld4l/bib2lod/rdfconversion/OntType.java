@@ -4,11 +4,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAgentDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
 
 public enum OntType {
 
@@ -16,22 +11,20 @@ public enum OntType {
     // or miscellaneous, etc.? For now, no need.
     
     BF_ANNOTATION(OntNamespace.BIBFRAME, "Annotation"),
-    BF_EVENT(OntNamespace.BIBFRAME, "Event", BfResourceDeduper.class),
-    BF_FAMILY(OntNamespace.BIBFRAME, "Family", BfAgentDeduper.class),
+    BF_EVENT(OntNamespace.BIBFRAME, "Event"),
+    BF_FAMILY(OntNamespace.BIBFRAME, "Family"),
     BF_HELD_ITEM(OntNamespace.BIBFRAME, "HeldItem"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "Identifier"),
-    BF_INSTANCE(OntNamespace.BIBFRAME, "Instance", BfInstanceDeduper.class),    
-    BF_JURISDICTION(
-            OntNamespace.BIBFRAME, "Jurisdiction", BfAgentDeduper.class),
-    BF_MEETING(OntNamespace.BIBFRAME, "Meeting", BfAgentDeduper.class),
-    BF_ORGANIZATION(
-            OntNamespace.BIBFRAME, "Organization", BfAgentDeduper.class),            
-    BF_PERSON(OntNamespace.BIBFRAME, "Person", BfAgentDeduper.class),
+    BF_INSTANCE(OntNamespace.BIBFRAME, "Instance"),    
+    BF_JURISDICTION(OntNamespace.BIBFRAME, "Jurisdiction"),            
+    BF_MEETING(OntNamespace.BIBFRAME, "Meeting"),
+    BF_ORGANIZATION(OntNamespace.BIBFRAME, "Organization"),                        
+    BF_PERSON(OntNamespace.BIBFRAME, "Person"),
     BF_PROVIDER(OntNamespace.BIBFRAME, "Provider"),
-    BF_PLACE(OntNamespace.BIBFRAME, "Place", BfResourceDeduper.class),
+    BF_PLACE(OntNamespace.BIBFRAME, "Place"),
     BF_TITLE(OntNamespace.BIBFRAME, "Title"),
-    BF_TOPIC(OntNamespace.BIBFRAME, "Topic", BfTopicDeduper.class),  
-    BF_WORK(OntNamespace.BIBFRAME, "Work", BfWorkDeduper.class),
+    BF_TOPIC(OntNamespace.BIBFRAME, "Topic"),  
+    BF_WORK(OntNamespace.BIBFRAME, "Work"),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority");
     
@@ -40,21 +33,15 @@ public enum OntType {
     private final String localname;
     private final String uri;
     private final String filename;
-    private Class<?> deduper;
     
     OntType(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
         this.uri = namespace.uri() + localname;
         this.filename = this.namespace.prefix() + this.localname; 
-        this.deduper = null;
     }
 
-    OntType(OntNamespace namespace, String localname, Class<?> deduper) {   
-        this(namespace, localname);
-        this.deduper = deduper;
-    }
-    
+
     public OntNamespace namespace() {
         return namespace;
     }
@@ -83,10 +70,6 @@ public enum OntType {
         return "<" + uri + ">";
     }
    
-    public Class<?> deduper() {
-        return deduper;
-    }
-    
     private static final Map<String, OntType> LOOKUP_BY_FILENAME = 
             new HashMap<String, OntType>();
     

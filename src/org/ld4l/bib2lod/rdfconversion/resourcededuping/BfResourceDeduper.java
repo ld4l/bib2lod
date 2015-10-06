@@ -31,13 +31,15 @@ public class BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
     
-    Model newStatements;
+    protected Model newStatements;
+    protected OntType type;
     
-    public BfResourceDeduper() {
+    public BfResourceDeduper(OntType type) {
+        this.type = type;
         newStatements = ModelFactory.createDefaultModel();
     }
     
-    public Map<String, String> dedupe(OntType type, Model model) {
+    public Map<String, String> dedupe(Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
 

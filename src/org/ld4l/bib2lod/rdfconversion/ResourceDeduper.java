@@ -22,13 +22,19 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAgentDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.DeduperFactory;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class ResourceDeduper extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(ResourceDeduper.class);
-
+    
+  
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
      * and those which are not likely to have independent significance (e.g.,
@@ -51,28 +57,22 @@ public class ResourceDeduper extends RdfProcessor {
             OntType.BF_TOPIC
     );
 
-    private static final String REMAINDER = "other";
+    private static final String REMAINDER_FILENAME = "other";
+    private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
-    
-    private Model newStatements;
-    private Map<String, String> uniqueUris;
     
     public ResourceDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
                  
-        super(localNamespace, inputDir, mainOutputDir);
-        
-        newStatements = ModelFactory.createDefaultModel();
-        uniqueUris = new HashMap<String, String>();
-        
+        super(localNamespace, inputDir, mainOutputDir);   
     }
     
     protected static List<OntType> getTypesToDedupe() {
         return TYPES_TO_DEDUPE; 
     }
     
-    protected static String getRemainder() {
-        return REMAINDER;
+    protected static String getRemainderFilename() {
+        return REMAINDER_FILENAME;
     }
 
 //    @Override
@@ -84,24 +84,60 @@ public class ResourceDeduper extends RdfProcessor {
     public String process() {
         LOGGER.trace("Start process");
         
-        String outputDir = getOutputDir();        
-
-        File[] inputFiles = new File(inputDir).listFiles();
+        String outputDir = getOutputDir();    
         
+        Model newStatements = ModelFactory.createDefaultModel();
+        Map<String, String> uniqueUris = new HashMap<String, String>();
+
+        /* Can loop on input files or types to dedupe. In the former, send the
+         * file to the factory; factory creates model from file, determines 
+         * deduper type, sends model to deduper constructor to store in instance
+         * field. In the latter, send the type to the factory; factory finds
+         * file from type, creates model from file, and sends model to deduper
+         * constructor to store in instance field. So results are the same,
+         * but the latter has the potential of ordering deduping by type in
+         * case there are dependencies. Iterating on files is easier, however,
+         * so implementing that for now. 
+         */
+        File[] inputFiles = new File(inputDir).listFiles();
         for ( File file : inputFiles ) {
-            dedupeInputFile(file);
+            String filename = file.getName();
+            LOGGER.debug("Deduping file " + filename);
+            BfResourceDeduper deduper = 
+                    DeduperFactory.createBfResourceDeduper(file);
+            if (deduper == null) {
+                LOGGER.debug("No deduper found for file " + filename);
+                continue;
+            }
+            Model model = readModelFromFile(file);
+            Map<String, String> dedupedUris = deduper.dedupe(model);
+            if (dedupedUris != null) {
+                uniqueUris.putAll(dedupedUris);
+            }
+        } 
+//        for ( OntType type : TYPES_TO_DEDUPE ) {
+//            BfResourceDeduper deduper = 
+//                    DeduperFactory.createBfResourceDeduper(type, inputDir);
+//            if (deduper == null) {
+//                LOGGER.debug("No deduper found for type " + type);
+//                continue;
+//            }
+//            Map<String, String> dedupedUris = deduper.dedupe();
 //            if (dedupedUris != null) {
 //                uniqueUris.putAll(dedupedUris);
 //            }
-        } 
-        
-        for ( File file : new File(inputDir).listFiles() ) {
+//            
+//            Model statements = deduper.getNewStatements();
+//            if (statements != null) {
+//                newStatements.add(statements);
+//            }
+//        }
+  
+        for ( File file : inputFiles ) {
             // Replace URIs using the uniqueUris map. Then remove duplicate 
             // lines created from this replacement.
-
             try {
                 String filename = file.getName();
-                LOGGER.trace("Start replacing lines in file " + filename);
                 BufferedReader reader = Files.newBufferedReader(file.toPath());
                 Set<String> uniqueLines = new LinkedHashSet<String>();             
                 LineIterator lineIterator = new LineIterator(reader);
@@ -132,7 +168,7 @@ public class ResourceDeduper extends RdfProcessor {
                 }
 
                 writer.close();                
-                LOGGER.trace("Done replacing lines in file " + file);   
+                LOGGER.debug("Done replacing lines in file " + file);   
                 
                 
             } catch (IOException e) {
@@ -144,59 +180,13 @@ public class ResourceDeduper extends RdfProcessor {
         // Assumes there aren't too many of these to hold all in memory. If too
         // many, append to file after each iteration through the loop.
         if (!newStatements.isEmpty()) {
-            writeModelToFile(newStatements, "newStatements");
+            writeModelToFile(newStatements, NEW_STATEMENT_FILENAME);
         }
 
         LOGGER.trace("End process");
         return outputDir;
     }
 
-    private void dedupeInputFile(File inputFile) {
-        
-        String filename = inputFile.getName();
-        LOGGER.trace("Start processing file " + filename);
-        
-        String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.getByFilename(basename);
-        if (type == null) {
-            LOGGER.warn("No type found for file " + basename);
-            return;
-        }
-        LOGGER.debug("Type = " + type.toString());
-
-        try {
-            Class<?> cls = type.deduper();
-            if (cls == null) {
-                LOGGER.debug(
-                        "No deduper class found for type " + type.toString());
-                return;
-            }
-
-            BfResourceDeduper deduper = (BfResourceDeduper) cls.newInstance();
-
-            Model model = readModelFromFile(inputFile);
-            
-            Map<String, String> dedupedUris = deduper.dedupe(type, model);
-            if (dedupedUris != null) {
-                uniqueUris.putAll(dedupedUris);
-            }
-            
-            Model statements = deduper.getNewStatements();
-            if (statements != null) {
-                newStatements.add(statements);
-            }
-            
-            
-        } catch (InstantiationException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        } catch (IllegalAccessException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }
-
-        LOGGER.trace("Done processing file " + filename);
-    }
 
     private String replaceUris(String line, Map<String, String> uniqueUris) {          
         int size = uniqueUris.size();

@@ -29,12 +29,15 @@ public class BfInstanceDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfInstanceDeduper.class);
-    
-    
+        
     private static final String WORLDCAT_NS = "http://www.worldcat.org/oclc/";
 
+    public BfInstanceDeduper(OntType type) {
+        super(type);
+    } 
+   
     @Override
-    public Map<String, String> dedupe(OntType type, Model model) {
+    public Map<String, String> dedupe(Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
         

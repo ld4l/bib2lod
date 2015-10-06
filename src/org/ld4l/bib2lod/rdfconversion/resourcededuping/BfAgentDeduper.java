@@ -22,9 +22,12 @@ public class BfAgentDeduper extends BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfAgentDeduper.class);
 
- 
+    public BfAgentDeduper(OntType type) {
+        super(type);
+    }  
+    
     @Override
-    public Map<String, String> dedupe(OntType type, Model model) {
+    public Map<String, String> dedupe(Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
 

@@ -30,9 +30,13 @@ public class BfTopicDeduper extends BfResourceDeduper {
     static {
         SCHEMES.put("(OCoLC)fst", Vocabulary.FAST);
     }
+    
+    public BfTopicDeduper(OntType type) {
+        super(type);
+    } 
  
     @Override
-    public Map<String, String> dedupe(OntType type, Model model) {
+    public Map<String, String> dedupe(Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
 

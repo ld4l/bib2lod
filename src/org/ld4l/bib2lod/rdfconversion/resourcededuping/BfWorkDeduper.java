@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryFactory;
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
@@ -12,6 +13,9 @@ public class BfWorkDeduper extends BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfWorkDeduper.class);
     
+    public BfWorkDeduper(OntType type) {
+        super(type);
+    } 
     
     @Override
     protected Query getQuery(OntType type) {

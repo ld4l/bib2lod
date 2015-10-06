@@ -25,7 +25,8 @@ public class TypeSplitter extends RdfProcessor {
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
     private static final List<OntType> TYPES_TO_SPLIT = 
             ResourceDeduper.getTypesToDedupe();
-    private static final String REMAINDER = ResourceDeduper.getRemainder();
+    private static final String REMAINDER_FILENAME = 
+            ResourceDeduper.getRemainderFilename();
     
     public TypeSplitter(String localNamespace, String inputDir, 
             String mainOutputDir) {   
@@ -100,8 +101,8 @@ public class TypeSplitter extends RdfProcessor {
         // Add a file for any remaining triples - i.e., where the subject 
         // doesn't belong to one of the types in typesToSplit.
         // NB This is why the map keys are strings rather than OntologyTypes.
-        outputFilesByType.put(REMAINDER, new File(outputDir, 
-                getOutputFilename(REMAINDER)));
+        outputFilesByType.put(REMAINDER_FILENAME, new File(outputDir, 
+                getOutputFilename(REMAINDER_FILENAME)));
         
         return outputFilesByType;
     }
@@ -134,7 +135,7 @@ public class TypeSplitter extends RdfProcessor {
         
         // Add to the remainder model the statements from this file that 
         // didn't get siphoned off to the type files.
-        modelsByType.get(REMAINDER).add(inputModel);
+        modelsByType.get(REMAINDER_FILENAME).add(inputModel);
         
         // Append each model to the appropriate file
         writeModelsToFiles(modelsByType, outputFilesByType);
@@ -187,7 +188,7 @@ public class TypeSplitter extends RdfProcessor {
             modelsByType.put(type.uri(), 
                     ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
-        modelsByType.put(REMAINDER, 
+        modelsByType.put(REMAINDER_FILENAME, 
                 ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));
         
         return modelsByType;
