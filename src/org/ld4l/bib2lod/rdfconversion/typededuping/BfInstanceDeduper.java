@@ -25,7 +25,7 @@ import org.ld4l.bib2lod.rdfconversion.OntType;
  * in a preprocessing step on the MARCXML, on a record-by-record basis, rather
  * than deduping across entire dataset.
  */
-public class BfInstanceDeduper extends TypeDeduper {
+public class BfInstanceDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfInstanceDeduper.class);
@@ -65,7 +65,7 @@ public class BfInstanceDeduper extends TypeDeduper {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             String instanceUri = soln.getResource("instance").getURI();
-            String key = getInstanceKey(soln);
+            String key = getKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
@@ -172,7 +172,8 @@ public class BfInstanceDeduper extends TypeDeduper {
 
     }
     
-    private String getInstanceKey(QuerySolution soln) {
+    @Override
+    protected String getKey(QuerySolution soln) {
         
         // Dedupe instances on worldcat id
         Resource worldcatId = soln.getResource("worldcatId");

@@ -17,7 +17,7 @@ import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
-public class BfAgentDeduper extends TypeDeduper {
+public class BfAgentDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfAgentDeduper.class);
@@ -54,7 +54,7 @@ public class BfAgentDeduper extends TypeDeduper {
             String agentUri = soln.getResource("agent").getURI();
             
             // Get key for agent identity matching.
-            String key = getAgentKey(soln);
+            String key = getKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
@@ -166,12 +166,6 @@ public class BfAgentDeduper extends TypeDeduper {
         pss.setIri("type", type.uri());
         return pss.asQuery();            
 
-    }
-    
-    private String getAgentKey(QuerySolution soln) {
-        String key = getDefaultResourceKey(soln);
-        // Normalize the key to remove non-distinctive differences
-        return NacoNormalizer.normalize(key);
     }
     
 

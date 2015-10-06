@@ -20,7 +20,7 @@ import org.ld4l.bib2lod.rdfconversion.OntType;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
-public class BfTopicDeduper extends TypeDeduper {
+public class BfTopicDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfTopicDeduper.class);
@@ -234,17 +234,13 @@ public class BfTopicDeduper extends TypeDeduper {
 
         // Otherwise derive the key from the Topic string values:
         
-        // First get the default key from the available label or 
-        // authorizedAccessPoint values.
-        String key = getDefaultResourceKey(soln);
+        // First get the default key from the authorizedAccessPoint or label
+        // values.
+        String key = getKey(soln);
         if (key == null) {
             return null;
         }
-        
-        // Normalize the label so non-distinctive differences are ignored 
-        // during identity matching.
-        key = NacoNormalizer.normalize(key);
-        
+       
         // If there's a scheme, prepend it to the label, since deduping is done 
         // only relative to a scheme: we don't want to match labels in 
         // different schemes.

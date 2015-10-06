@@ -12,6 +12,7 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
@@ -25,13 +26,17 @@ import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
  * @author rjy7
  *
  */
-public class BfResourceDeduper extends TypeDeduper {
+public class BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
-
- 
-    @Override
+    
+    Model newStatements;
+    
+    public BfResourceDeduper() {
+        newStatements = ModelFactory.createDefaultModel();
+    }
+    
     public Map<String, String> dedupe(OntType type, Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
@@ -122,10 +127,35 @@ public class BfResourceDeduper extends TypeDeduper {
         return pss.asQuery();          
 
     }
-    
-    private String getKey(QuerySolution soln) {   
-        String key = getDefaultResourceKey(soln);
+
+    protected String getKey(QuerySolution soln) {
+        // NB It's assumed that bf:authorizedAccessPoint and bf:label values 
+        // are identical when both exist. If that turns out to be wrong, we 
+        // need some way of resolving discrepancies.
+        
+        String key = null;
+
+        // Return authorizedAccessPoint value, if there is one
+        Literal authAccessPoint = soln.getLiteral("authAccessPoint");
+        if (authAccessPoint != null) {
+            LOGGER.debug("Using bf:authorizedAccessPoint to dedupe");
+            key = authAccessPoint.getLexicalForm();
+            
+        } else {       
+            // Else return bf:label, if there is one
+            Literal label = soln.getLiteral("label");
+            if (label != null) {
+                LOGGER.debug("Using bf:label to dedupe");
+                key = label.getLexicalForm();
+            }
+        }
+        
         return NacoNormalizer.normalize(key);
+    }
+   
+    
+    public Model getNewStatements() {
+        return newStatements;
     }
     
 }

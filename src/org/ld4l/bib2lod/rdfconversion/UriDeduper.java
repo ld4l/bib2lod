@@ -20,11 +20,9 @@ import org.apache.commons.io.LineIterator;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.reasoner.rulesys.builtins.Print;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.typededuping.TypeDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class UriDeduper extends RdfProcessor {
@@ -174,7 +172,7 @@ public class UriDeduper extends RdfProcessor {
                 return;
             }
 
-            TypeDeduper deduper = (TypeDeduper) cls.newInstance();
+            BfResourceDeduper deduper = (BfResourceDeduper) cls.newInstance();
 
             Model model = readModelFromFile(inputFile);
             
