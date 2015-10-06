@@ -21,7 +21,7 @@ public enum OntType {
     BF_INSTANCE(OntNamespace.BIBFRAME, "Instance", BfInstanceDeduper.class),    
     BF_JURISDICTION(
             OntNamespace.BIBFRAME, "Jurisdiction", BfAgentDeduper.class),
-    BF_MEETING(OntNamespace.BIBFRAME, "Meeting"),
+    BF_MEETING(OntNamespace.BIBFRAME, "Meeting", BfAgentDeduper.class),
     BF_ORGANIZATION(
             OntNamespace.BIBFRAME, "Organization", BfAgentDeduper.class),            
     BF_PERSON(OntNamespace.BIBFRAME, "Person", BfAgentDeduper.class),
