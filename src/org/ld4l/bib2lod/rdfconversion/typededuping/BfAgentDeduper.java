@@ -169,7 +169,7 @@ public class BfAgentDeduper extends TypeDeduper {
     }
     
     private String getAgentKey(QuerySolution soln) {
-        String key = getDefaultAuthorityKey(soln);
+        String key = getDefaultResourceKey(soln);
         // Normalize the key to remove non-distinctive differences
         return NacoNormalizer.normalize(key);
     }

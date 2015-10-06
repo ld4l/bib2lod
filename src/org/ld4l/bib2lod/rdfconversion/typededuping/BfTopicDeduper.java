@@ -236,7 +236,7 @@ public class BfTopicDeduper extends TypeDeduper {
         
         // First get the default key from the available label or 
         // authorizedAccessPoint values.
-        String key = getDefaultAuthorityKey(soln);
+        String key = getDefaultResourceKey(soln);
         if (key == null) {
             return null;
         }

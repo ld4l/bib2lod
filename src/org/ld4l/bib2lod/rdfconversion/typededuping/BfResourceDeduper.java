@@ -42,7 +42,7 @@ public class BfResourceDeduper extends TypeDeduper {
         Map<String, String> uniqueUris = new HashMap<String, String>();
 
         // Maps keys for Place identity matching to the unique Place URIs. 
-        Map<String, String> uniqueAuths = new HashMap<String, String>();
+        Map<String, String> uniqueResources = new HashMap<String, String>();
         
         // Execute the query
         Query query = getQuery(type);        
@@ -54,35 +54,35 @@ public class BfResourceDeduper extends TypeDeduper {
             
             QuerySolution soln = results.next();
             
-            String authUri = soln.getResource("auth").getURI();
+            String resourceUri = soln.getResource("resource").getURI();   
             
             // Get key for agent identity matching.
             String key = getKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
-                LOGGER.debug("No key for " + authUri + "; can't dedupe");
+                LOGGER.debug("No key for " + resourceUri + "; can't dedupe");
                 continue;
             }
 
-            LOGGER.debug("Original uri: " + authUri + " has key " + key);
+            LOGGER.debug("Original uri: " + resourceUri + " has key " + key);
 
             // We've seen this individual before
-            if (uniqueAuths.containsKey(key)) {
+            if (uniqueResources.containsKey(key)) {
                 
-                String uniquePlaceUri = uniqueAuths.get(key);
+                String uniqueResourceUri = uniqueResources.get(key);
                 LOGGER.debug("Found matching value for key " + key 
-                        + " and authority URI " + authUri);
-                LOGGER.debug("Adding: " + authUri + " => " + uniquePlaceUri);                
-                // This local Place URI will be replaced by the unique Place URI
-                // throughout the data
-                uniqueUris.put(authUri, uniquePlaceUri);
+                        + " and resource URI " + resourceUri);
+                LOGGER.debug("Adding: " + resourceUri + " => " + uniqueResourceUri);                
+                // This local Resource URI will be replaced by the unique 
+                // Resource URI throughout the data
+                uniqueUris.put(resourceUri, uniqueResourceUri);
                                 
             } else {
-                // We haven't seen this Agent before
-                LOGGER.debug("New authority: " + authUri);
-                uniqueUris.put(authUri, authUri);
-                uniqueAuths.put(key, authUri);
+                // We haven't seen this Resource before
+                LOGGER.debug("New resource: " + resourceUri);
+                uniqueUris.put(resourceUri, resourceUri);
+                uniqueResources.put(key, resourceUri);
             }
         }
         
@@ -91,9 +91,9 @@ public class BfResourceDeduper extends TypeDeduper {
             for (String uri : uniqueUris.keySet()) {
                 LOGGER.debug(uri + " => " + uniqueUris.get(uri));
             }
-            LOGGER.debug("uniquePlaces map:");
-            for (String key : uniqueAuths.keySet()) {
-                LOGGER.debug(key + " => " + uniqueAuths.get(key));
+            LOGGER.debug("uniqueResources map:");
+            for (String key : uniqueResources.keySet()) {
+                LOGGER.debug(key + " => " + uniqueResources.get(key));
             }
         }
         
@@ -105,25 +105,26 @@ public class BfResourceDeduper extends TypeDeduper {
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
         String commandText = 
-                "SELECT ?auth ?label "
+                "SELECT ?resource ?authAccessPoint ?label "
                 + "WHERE { "
-                + "?auth a ?type . "
-                + "OPTIONAL { ?authority "
+                + "?resource a ?type . "
+                + "OPTIONAL { ?resource "
                 + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
                 + "?authAccessPoint . } "
-                + "OPTIONAL { ?auth  " 
+                + "OPTIONAL { ?resource  " 
                 + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
 
         pss.setCommandText(commandText);
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
+        LOGGER.debug(pss.toString());
         return pss.asQuery();          
 
     }
     
     private String getKey(QuerySolution soln) {   
-        String key = getDefaultAuthorityKey(soln);
+        String key = getDefaultResourceKey(soln);
         return NacoNormalizer.normalize(key);
     }
     

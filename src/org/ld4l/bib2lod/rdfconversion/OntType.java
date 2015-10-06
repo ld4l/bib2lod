@@ -30,7 +30,7 @@ public enum OntType {
     BF_PLACE(OntNamespace.BIBFRAME, "Place", BfResourceDeduper.class),
     BF_TITLE(OntNamespace.BIBFRAME, "Title"),
     BF_TOPIC(OntNamespace.BIBFRAME, "Topic", BfTopicDeduper.class),  
-    BF_WORK(OntNamespace.BIBFRAME, "Work"),
+    BF_WORK(OntNamespace.BIBFRAME, "Work", BfResourceDeduper.class),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority");
     
