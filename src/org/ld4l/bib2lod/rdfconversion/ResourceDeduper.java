@@ -25,9 +25,9 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
-public class UriDeduper extends RdfProcessor {
+public class ResourceDeduper extends RdfProcessor {
 
-    private static final Logger LOGGER = LogManager.getLogger(UriDeduper.class);
+    private static final Logger LOGGER = LogManager.getLogger(ResourceDeduper.class);
 
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
@@ -57,7 +57,7 @@ public class UriDeduper extends RdfProcessor {
     private Model newStatements;
     private Map<String, String> uniqueUris;
     
-    public UriDeduper(String localNamespace, 
+    public ResourceDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
                  
         super(localNamespace, inputDir, mainOutputDir);

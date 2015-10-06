@@ -24,8 +24,8 @@ public class TypeSplitter extends RdfProcessor {
             LogManager.getLogger(TypeSplitter.class);
     // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
     private static final List<OntType> TYPES_TO_SPLIT = 
-            UriDeduper.getTypesToDedupe();
-    private static final String REMAINDER = UriDeduper.getRemainder();
+            ResourceDeduper.getTypesToDedupe();
+    private static final String REMAINDER = ResourceDeduper.getRemainder();
     
     public TypeSplitter(String localNamespace, String inputDir, 
             String mainOutputDir) {   

@@ -11,8 +11,8 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
+import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
-import org.ld4l.bib2lod.rdfconversion.UriDeduper;
 
 
 
@@ -62,13 +62,10 @@ public class ProcessController {
         
         // TODO Implement earlier actions: marcxml pre-processing, 
         // marcxml2bibframe conversion, etc.        
-        // Correct errors in the Bibframe RDF that choke the ingest process.
-        // Could do this after deduping, but probably these corrections should 
-        // be included in deduped data.
-        
-        if (selectedActions.contains(Action.DEDUPE_URIS)) {
+     
+        if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
 
-            // URI deduping requires some prior processing steps.
+            // Resource deduping requires some prior processing steps.
             
             outputDir = new RdfCleaner(localNamespace, outputDir, 
                     mainOutputDir).process();
@@ -84,8 +81,17 @@ public class ProcessController {
             outputDir = new TypeSplitter(
                     localNamespace, outputDir, mainOutputDir).process();
             
-            outputDir = new UriDeduper(
+            outputDir = new ResourceDeduper(
                     localNamespace, outputDir, mainOutputDir).process();
+        }
+        
+        // TODO Check for valid sequences of actions. E.g., converting bibframe
+        // rdf depends on deduping resources first; but we can dedupe resources
+        // without going on to rdf conversion. This type of validation should
+        // either be done here, or controlled through action dependencies in
+        // the enum. The main Bib2Lod class shouldn't know about it (maybe).
+        if (selectedActions.contains(Action.CONVERT_BIBFRAME_RDF)) {
+            
         }
             
 

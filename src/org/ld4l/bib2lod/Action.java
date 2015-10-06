@@ -1,15 +1,12 @@
 package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
-import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
-import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
-import org.ld4l.bib2lod.rdfconversion.UriDeduper;
+import org.ld4l.bib2lod.rdfconversion.BibframeRdfConverter;
+import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 
 public enum Action {
 
@@ -20,14 +17,15 @@ public enum Action {
     // MARCXML2BIBFRAME("marcxml2bibframe"),
     // CONVERT_BNODES("convert_bnodes", BnodeConverter.class),
     // SPLIT_TYPES("split_types", TypeSplitter.class),
-    DEDUPE_URIS("dedupe", UriDeduper.class);
-    // BIBFRAME2LD4L("bibframe2ld4l");
+    DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
+    CONVERT_BIBFRAME_RDF("convert_bibframe", BibframeRdfConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
     
     private final String label;    
     private final Class<?> processorClass;
 
-    // TODO What is the type on Class? Could we make it <Processor>?
+    // TODO What is the type on Class? Java won't accept Class<RdfProcessor> 
+    // when instantiating subclasses.
     Action(String action, Class<?> processorClass) {
         this.label = action;
         this.processorClass = processorClass;
