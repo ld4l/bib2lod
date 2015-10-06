@@ -20,7 +20,8 @@ import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 /**
  * Default deduper: dedupes on bf:authorizedAccessPoint and/or bf:label
- * string values.
+ * string values. Can apply to any bf:Resource which doesn't have a more 
+ * specific deduper.
  * @author rjy7
  *
  */

@@ -15,6 +15,7 @@ public enum OntType {
     // or miscellaneous, etc.? For now, no need.
     
     BF_ANNOTATION(OntNamespace.BIBFRAME, "Annotation"),
+    BF_EVENT(OntNamespace.BIBFRAME, "Event", BfResourceDeduper.class),
     BF_FAMILY(OntNamespace.BIBFRAME, "Family", BfAgentDeduper.class),
     BF_HELD_ITEM(OntNamespace.BIBFRAME, "HeldItem"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "Identifier"),
