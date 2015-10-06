@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfAgentDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfInstanceDeduper;
-import org.ld4l.bib2lod.rdfconversion.typededuping.BfAuthorityDeduper;
+import org.ld4l.bib2lod.rdfconversion.typededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.typededuping.BfTopicDeduper;
 
 public enum OntType {
@@ -26,7 +26,7 @@ public enum OntType {
             OntNamespace.BIBFRAME, "Organization", BfAgentDeduper.class),            
     BF_PERSON(OntNamespace.BIBFRAME, "Person", BfAgentDeduper.class),
     BF_PROVIDER(OntNamespace.BIBFRAME, "Provider"),
-    BF_PLACE(OntNamespace.BIBFRAME, "Place", BfAuthorityDeduper.class),
+    BF_PLACE(OntNamespace.BIBFRAME, "Place", BfResourceDeduper.class),
     BF_TITLE(OntNamespace.BIBFRAME, "Title"),
     BF_TOPIC(OntNamespace.BIBFRAME, "Topic", BfTopicDeduper.class),  
     BF_WORK(OntNamespace.BIBFRAME, "Work"),

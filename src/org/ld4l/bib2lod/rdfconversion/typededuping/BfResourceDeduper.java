@@ -19,15 +19,15 @@ import org.ld4l.bib2lod.rdfconversion.OntType;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 /**
- * Default Authority deduper: dedupes on bf:authorizedAccessPoint and/or
- * bf:label string values.
+ * Default deduper: dedupes on bf:authorizedAccessPoint and/or bf:label
+ * string values.
  * @author rjy7
  *
  */
-public class BfAuthorityDeduper extends TypeDeduper {
+public class BfResourceDeduper extends TypeDeduper {
 
     private static final Logger LOGGER =          
-            LogManager.getLogger(BfAuthorityDeduper.class);
+            LogManager.getLogger(BfResourceDeduper.class);
 
  
     @Override
