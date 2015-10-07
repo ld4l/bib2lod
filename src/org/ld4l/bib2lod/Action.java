@@ -1,16 +1,14 @@
 package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.EnumSet;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
+import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
 
 public enum Action {
 
@@ -27,14 +25,12 @@ public enum Action {
     // SPLIT_TYPES("split_types", TypeSplitter.class),
     
     DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
-    CONVERT_BIBFRAME_RDF("convert_bibframe", BibframeConverter.class);
+    CONVERT_BIBFRAME("convert_bibframe", BibframeConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
     
     private final String label;    
     private final Class<?> processorClass;
 
-    // TODO What is the type on Class? Java won't accept Class<RdfProcessor> 
-    // when instantiating subclasses.
     Action(String action, Class<?> processorClass) {
         this.label = action;
         this.processorClass = processorClass;
@@ -50,8 +46,10 @@ public enum Action {
     
     public EnumSet<Action> prereqs() {
         EnumSet<Action> prereqs = EnumSet.noneOf(Action.class);
-        if (this.equals(CONVERT_BIBFRAME_RDF)) {
+        if (this.equals(CONVERT_BIBFRAME)) {
             prereqs.add(DEDUPE_RESOURCES);
+        } else if (this.equals(DEDUPE_RESOURCES)) {
+            prereqs.add(SPLIT_TYPES);
         }
         return prereqs;
     }

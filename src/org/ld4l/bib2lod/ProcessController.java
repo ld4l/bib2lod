@@ -93,7 +93,7 @@ public class ProcessController {
         // without going on to rdf conversion. This type of validation should
         // either be done here, or controlled through action dependencies in
         // the enum. The main Bib2Lod class shouldn't know about it (maybe).
-        if (selectedActions.contains(Action.CONVERT_BIBFRAME_RDF)) {
+        if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
             
         }
             
