@@ -28,7 +28,8 @@ public class ProcessController {
     private OntModel bfOntModelInf;
     // private OntModel ld4lInf;
     
-    public ProcessController(String localNamespace, String inputDir, String outputDir) {
+    public ProcessController(String localNamespace, String inputDir, 
+            String outputDir) {
         
         this.localNamespace = localNamespace;
         
@@ -38,10 +39,12 @@ public class ProcessController {
         loadOntModels();
     }
     
+    // TODO So far these are not used. Delete if never used.
     private void loadOntModels() {
 
         OntDocumentManager mgr = new OntDocumentManager();
-        OntModelSpec spec = new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
+        OntModelSpec spec = 
+                new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
         spec.setDocumentManager(mgr);
      
         bfOntModelInf = ModelFactory.createOntologyModel(spec);
