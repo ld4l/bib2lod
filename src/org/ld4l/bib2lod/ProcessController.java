@@ -1,6 +1,6 @@
 package org.ld4l.bib2lod;
 
-import java.util.List;
+import java.util.Set;
 
 import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
@@ -55,7 +55,7 @@ public class ProcessController {
               
     }
     
-    public String processAll(List<Action> selectedActions) {
+    public String processAll(Set<Action> selectedActions) {
         
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory

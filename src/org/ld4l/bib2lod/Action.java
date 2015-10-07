@@ -1,22 +1,31 @@
 package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.EnumSet;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 
 public enum Action {
 
+    // Not yet implemented:
     // GET_MARC("get_marc"),
     // MARC2MARCXML("marc2marcxml"),
     // Clean up MARCXML records: correct known errors, enhance with ??
     // PREPROCESS_MARCXML("preprocess"),
     // MARCXML2BIBFRAME("marcxml2bibframe"),
+    
+    // Remove these because they are not independent actions, but actions that
+    // ResourceDeduper is dependent on.
     // CONVERT_BNODES("convert_bnodes", BnodeConverter.class),
     // SPLIT_TYPES("split_types", TypeSplitter.class),
+    
     DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
     CONVERT_BIBFRAME_RDF("convert_bibframe", BibframeConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
@@ -30,13 +39,29 @@ public enum Action {
         this.label = action;
         this.processorClass = processorClass;
     }
-    
+
     public String label() {
         return this.label;
     }
     
     public Class<?> processorClass() {
         return this.processorClass;
+    }
+    
+    public EnumSet<Action> prereqs() {
+        EnumSet<Action> prereqs = EnumSet.noneOf(Action.class);
+        if (this.equals(CONVERT_BIBFRAME_RDF)) {
+            prereqs.add(DEDUPE_RESOURCES);
+        }
+        return prereqs;
+    }
+    
+    public EnumSet<Action> recursivePrereqs() {
+        EnumSet<Action> recursivePrereqs = this.prereqs();
+        for (Action p : recursivePrereqs) {
+            recursivePrereqs.addAll(p.recursivePrereqs());
+        }     
+        return recursivePrereqs;
     }
      
     private static final Map<String, Action> LOOKUP_BY_LABEL = 
