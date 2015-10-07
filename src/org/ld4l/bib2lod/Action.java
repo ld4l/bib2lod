@@ -48,9 +48,7 @@ public enum Action {
         EnumSet<Action> prereqs = EnumSet.noneOf(Action.class);
         if (this.equals(CONVERT_BIBFRAME)) {
             prereqs.add(DEDUPE_RESOURCES);
-        } else if (this.equals(DEDUPE_RESOURCES)) {
-            prereqs.add(SPLIT_TYPES);
-        }
+        } 
         return prereqs;
     }
     
