@@ -8,6 +8,7 @@ import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
@@ -94,7 +95,8 @@ public class ProcessController {
         // either be done here, or controlled through action dependencies in
         // the enum. The main Bib2Lod class shouldn't know about it (maybe).
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
-            
+            outputDir = new BibframeConverter(localNamespace, outputDir, 
+                    mainOutputDir).process();
         }
             
 

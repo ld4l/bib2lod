@@ -14,19 +14,19 @@ public class DeduperFactory {
     private static final Logger LOGGER = 
             LogManager.getLogger(DeduperFactory.class);
     
-    private static final Map<OntType, Class<?>> TYPE_DEDUPERS =
+    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
             new HashMap<OntType, Class<?>>();
     static {
-        TYPE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
-        TYPE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-        TYPE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
+        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
+        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
     }
 
     public static BfResourceDeduper createBfResourceDeduper(File inputFile) {
@@ -49,7 +49,7 @@ public class DeduperFactory {
         }
 
         // Could use if-thens instead of reflection
-        Class<?> deduperClass = TYPE_DEDUPERS.get(type);
+        Class<?> deduperClass = RESOURCE_DEDUPERS.get(type);
         if (deduperClass == null) {
             LOGGER.debug("No deduper class defined for type " + type);
             return null;
@@ -76,5 +76,4 @@ public class DeduperFactory {
         return null;
     }
             
-
 }

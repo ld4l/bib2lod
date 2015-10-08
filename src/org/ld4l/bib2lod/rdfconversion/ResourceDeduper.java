@@ -179,6 +179,7 @@ public class ResourceDeduper extends RdfProcessor {
                 }
                 reader.close();
                 
+                // Write out the deduped RDF
                 String outputFilename =
                         FilenameUtils.getName(file.toString()); 
                 File outputFile = new File(outputDir, outputFilename);
