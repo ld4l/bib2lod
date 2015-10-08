@@ -63,7 +63,7 @@ public class RdfCleaner extends RdfProcessor {
     @Override
     public String process() {
         
-        LOGGER.trace("Start process");
+        LOGGER.info("Start process");
         String outputDir = getOutputDir();
         
         for ( File file : new File(inputDir).listFiles() ) {
@@ -72,17 +72,17 @@ public class RdfCleaner extends RdfProcessor {
             // empty file into a model in later processors). Makes sense to 
             // clean them up here.
             if (file.isDirectory()) { 
-                LOGGER.trace("Skipping directory " + filename);
+                LOGGER.info("Skipping directory " + filename);
                 continue;
             }
             if (file.length() == 0) {
-                LOGGER.trace("Skipping empty file " + filename);
+                LOGGER.info("Skipping empty file " + filename);
                 continue;
             }
-            LOGGER.trace("Start processing file " + filename);
+            LOGGER.info("Start processing file " + filename);
             replaceLinesInFile(file, outputDir); 
         }
-        LOGGER.trace("End process");
+        LOGGER.info("End process");
         return outputDir;
     }
 
@@ -139,7 +139,7 @@ public class RdfCleaner extends RdfProcessor {
         BufferedReader reader;
         try {
             String filename = file.getName();
-            LOGGER.trace("Start replacing lines in file " + filename);
+            LOGGER.info("Start replacing lines in file " + filename);
             reader = Files.newBufferedReader(file.toPath());
             String outputFilename =
                     FilenameUtils.getName(file.toString()); 
@@ -151,7 +151,7 @@ public class RdfCleaner extends RdfProcessor {
                 String line = iterator.nextLine();
                 // Remove empty lines
                 if (line.length() == 0) {
-                    LOGGER.trace("Removing empty line");
+                    LOGGER.info("Removing empty line");
                     continue;
                 }
                 String processedLine = processLine(line);
@@ -166,7 +166,7 @@ public class RdfCleaner extends RdfProcessor {
             }
             reader.close();
             writer.close();
-            LOGGER.trace("Done replacing lines in file " + file);                
+            LOGGER.info("Done replacing lines in file " + file);                
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

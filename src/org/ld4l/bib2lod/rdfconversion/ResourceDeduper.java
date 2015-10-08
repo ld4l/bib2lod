@@ -82,7 +82,7 @@ public class ResourceDeduper extends RdfProcessor {
     
     @Override
     public String process() {
-        LOGGER.trace("Start process");
+        LOGGER.info("Start process");
         
         String outputDir = getOutputDir();    
 
@@ -123,7 +123,7 @@ public class ResourceDeduper extends RdfProcessor {
         dedupeUris(inputFiles, uniqueUris, outputDir);
         writeNewStatements(newStatements);
 
-        LOGGER.trace("End process");
+        LOGGER.info("End process");
         return outputDir;
     }
 
@@ -159,7 +159,7 @@ public class ResourceDeduper extends RdfProcessor {
             // Replace URIs using the uniqueUris map. Then remove duplicate 
             // lines created from this replacement.
             try {
-                LOGGER.trace("Replacing lines in file " + file.getName());
+                LOGGER.info("Replacing lines in file " + file.getName());
                 BufferedReader reader = Files.newBufferedReader(file.toPath());
                 Set<String> uniqueLines = new LinkedHashSet<String>();             
                 LineIterator lineIterator = new LineIterator(reader);
@@ -190,7 +190,7 @@ public class ResourceDeduper extends RdfProcessor {
                 }
 
                 writer.close();                
-                LOGGER.trace("Done replacing lines in file " + file);   
+                LOGGER.info("Done replacing lines in file " + file);   
                                
             } catch (IOException e) {
                 // TODO Auto-generated catch block

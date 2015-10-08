@@ -60,7 +60,7 @@ public abstract class RdfProcessor {
     public RdfProcessor(String localNamespace, String inputDir, 
             String mainOutputDir) {
 
-        LOGGER.trace("In constructor for " + this.getClass().toString());        
+        LOGGER.info("In constructor for " + this.getClass().toString());        
         this.localNamespace = localNamespace;       
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
