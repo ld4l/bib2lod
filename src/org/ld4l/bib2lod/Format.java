@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion;
+package org.ld4l.bib2lod;
 
 import java.util.ArrayList;
 import java.util.EnumSet;
