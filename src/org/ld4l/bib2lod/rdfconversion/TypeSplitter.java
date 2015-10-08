@@ -22,7 +22,7 @@ public class TypeSplitter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
-    // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;    
+    // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;    
     private static final List<OntType> TYPES_TO_SPLIT = 
             ResourceDeduper.getTypesToDedupe();
     private static final String REMAINDER_FILENAME = 
@@ -152,11 +152,6 @@ public class TypeSplitter extends RdfProcessor {
             }
         }          
     }
-    
-//    @Override
-//    protected RdfFormat getRdfOutputFormat() {
-//        return RDF_OUTPUT_FORMAT;
-//    }
 
     private void splitByType(ParameterizedSparqlString pss, Model modelForType,
             Model inputModel) {

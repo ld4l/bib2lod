@@ -59,7 +59,7 @@ public class ResourceDeduper extends RdfProcessor {
 
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
-    // private static final RdfFormat RDF_OUTPUT_FORMAT = RdfFormat.NTRIPLES;
+    // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
     public ResourceDeduper(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -74,11 +74,6 @@ public class ResourceDeduper extends RdfProcessor {
     protected static String getRemainderFilename() {
         return REMAINDER_FILENAME;
     }
-
-//    @Override
-//    protected RdfFormat getRdfOutputFormat() {
-//        return RDF_OUTPUT_FORMAT;
-//    }
     
     @Override
     public String process() {

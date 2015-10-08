@@ -30,11 +30,6 @@ public class Bib2Lod {
     
     private static final Logger LOGGER = LogManager.getLogger(Bib2Lod.class);  
     private static final List<String> VALID_ACTIONS = Action.validActions();
-//    private static final List<RdfFormat> VALID_RDF_OUTPUT_FORMATS = 
-//            RdfFormat.allFormats();          
-//    private static final RdfFormat DEFAULT_RDF_OUTPUT_FORMAT = 
-//            RdfFormat.NTRIPLES;            
-            
     
     /** 
      * Read in program options and call appropriate processing functionality.
@@ -56,8 +51,6 @@ public class Bib2Lod {
         if (!isValidNamespace(namespace)) {
             return;
         }
-
-        // RdfFormat format = getValidOutputFormat(cmd.getOptionValue("format"));
         
         Set<Action> actions = getValidActions(cmd.getOptionValues("actions"));
         if (actions == null) {
@@ -133,32 +126,6 @@ public class Bib2Lod {
         return allActions;
 
     }
-
-    /* Currently allowing only ntriples output format: Some processors MUST 
-     * output ntriples, for two reasons: (1) append to file doesn't produce
-     * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
-     * whether json and ttl would work); (2) The links to blank nodes are lost,
-     * since no identifier is assigned to them. (2) is no longer relevant once
-     * BnodeConverter has applied. Later may consider commandline option to 
-     * specify RDF output format, but for now simpler to only allow ntriple
-     * output across the board. 
-    private static RdfFormat getValidOutputFormat(String selectedFormat) {
-
-        if (selectedFormat == null) {
-            return DEFAULT_RDF_OUTPUT_FORMAT;
-        } else {
-            RdfFormat format = RdfFormat.get(selectedFormat);
-            // *** TODO test that a bad format returns null here
-            if (format != null) {
-                return format;
-            } else {
-                LOGGER.error("Invalid format. Using default format "
-                        + DEFAULT_RDF_OUTPUT_FORMAT.label() + ".");                   
-                return DEFAULT_RDF_OUTPUT_FORMAT;               
-            }
-        }
-    }
-    */
     
     /**
      * Check for valid input directory. Return the absolute path to the input 
@@ -302,11 +269,11 @@ public class Bib2Lod {
 //                .longOpt("format")
 //                .required(false)
 //                .hasArg()
-//                .desc("RDF serialization format of input and output. Valid "
+//                .desc("Serialization format of input and output. Valid "
 //                        + "formats: " 
-//                        + StringUtils.join(VALID_RDF_OUTPUT_FORMATS, ", ")
+//                        + StringUtils.join(VALID_OUTPUT_FORMATS, ", ")
 //                        + ". Defaults to " 
-//                        + DEFAULT_RDF_OUTPUT_FORMAT.label() + ".")
+//                        + DEFAULT_OUTPUT_FORMAT.label() + ".")
 //                .build();
 //        options.addOption(formatOption);  
         

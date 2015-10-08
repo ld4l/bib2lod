@@ -8,22 +8,28 @@ import java.util.Map;
 
 import org.apache.jena.riot.RDFFormat;
 
-public enum RdfFormat {
+public enum Format {
 
     // Currently the only valid output format is ntriples. See notes in 
     // Bib2Lod.getValidFormat().
-    NTRIPLES("ntriples", RDFFormat.NTRIPLES, "nt");
+    NTRIPLES("ntriples", "nt", RDFFormat.NTRIPLES);
     // RDFXML("rdfxml", RDFFormat.RDFXML, "rdf");
 
     private final String label;
-    private final RDFFormat jenaRDFFormat;
     private final String extension;
+    private RDFFormat jenaRDFFormat;
     
-    RdfFormat(String label, RDFFormat jenaRDFFormat, String extension) {
-        this.label = label;
+    Format(String label, String extension, RDFFormat jenaRDFFormat) {
+        this(label, extension);
         this.jenaRDFFormat = jenaRDFFormat;
-        this.extension = extension;
     }
+    
+    Format(String label, String extension) {
+        this.label = label;
+        this.extension = extension;  
+        this.jenaRDFFormat = null;
+    }
+    
     
     public String label() {
         return this.label;
@@ -41,21 +47,21 @@ public enum RdfFormat {
         return "." + this.extension;
     }
  
-    private static final Map<String, RdfFormat> LOOKUP_BY_LABEL =
-            new HashMap<String, RdfFormat>();
+    private static final Map<String, Format> LOOKUP_BY_LABEL =
+            new HashMap<String, Format>();
    
     static {
-        for (RdfFormat rf : RdfFormat.values()) {
+        for (Format rf : Format.values()) {
             String label = rf.label;
             LOOKUP_BY_LABEL.put(label, rf);
         }
     }
 
-    public static RdfFormat get(String label) {
+    public static Format get(String label) {
         return LOOKUP_BY_LABEL.get(label);
     }
    
-    public static List<RdfFormat> allFormats() {
-        return new ArrayList<RdfFormat>(EnumSet.allOf(RdfFormat.class));
+    public static List<Format> allFormats() {
+        return new ArrayList<Format>(EnumSet.allOf(Format.class));
     }
 }

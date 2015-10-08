@@ -21,15 +21,21 @@ public abstract class RdfProcessor extends Processor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfProcessor.class);   
     
-    /* Some processors MUST output ntriples, for two reasons: (1) append to 
-     * file doesn't produce valid RDF in RDFXML, since the <rdf> element is
-     * repeated (not sure whether json and ttl would work); (2) The links to 
-     * blank nodes are lost, since no identifier is assigned to them. (2) is no
-     * longer relevant once BnodeConverter has applied.  
-       private static final RdfFormat DEFAULT_OUTPUT_FORMAT = 
-            RdfFormat.NTRIPLES;
+    /* Currently allowing only ntriples output format: Some processors MUST 
+     * output ntriples, for two reasons: (1) append to file doesn't produce
+     * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
+     * whether json and ttl would work); (2) The links to blank nodes are 
+     * lost, since no identifier is assigned to them. (2) is no longer 
+     * relevant once BnodeConverter has applied. Later may consider 
+     * commandline option to specify RDF output format, but for now simpler 
+     * to only allow ntriple output across the board. If multiple rdf output 
+     * formats are  allowed, the output format for a particular processor 
+     * should be  determined as follows, in order of precedence:
+     * 1. Individual Processor requirement
+     * 2. Commandline option
+     * 3. Same format as input
      */
-    protected static final RdfFormat OUTPUT_FORMAT = RdfFormat.NTRIPLES;
+    protected static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
             
     protected final String localNamespace;    
     protected OntModel bfOntModelInf; 
@@ -56,30 +62,7 @@ public abstract class RdfProcessor extends Processor {
     }
     
     public abstract String process();
-    
-    protected String getOutputFilename(String basename) {
-        //return basename + "." +  getRdfOutputFormat().extension(); 
-        return basename + getRdfOutputFormat().fullExtension();
-    }
-
-    protected RdfFormat getRdfOutputFormat() {
-        /* Currently allowing only ntriples output format: Some processors MUST 
-         * output ntriples, for two reasons: (1) append to file doesn't produce
-         * valid RDF in RDFXML, since the <rdf> element is repeated (not sure 
-         * whether json and ttl would work); (2) The links to blank nodes are 
-         * lost, since no identifier is assigned to them. (2) is no longer 
-         * relevant once BnodeConverter has applied. Later may consider 
-         * commandline option to specify RDF output format, but for now simpler 
-         * to only allow ntriple output across the board. If multiple rdf output 
-         * formats are  allowed, the output format for a particular processor 
-         * should be  determined as follows, in order of precedence:
-         * 1. Individual Processor requirement
-         * 2. Commandline option
-         * 3. Same format as input
-         */
-        return OUTPUT_FORMAT;
-    }
-    
+     
     protected Model readModelFromFile(File file) {
         return readModelFromFile(file.toString());
     }
@@ -124,6 +107,10 @@ public abstract class RdfProcessor extends Processor {
         return buffer.toString();
     }
     
+    protected Format getOutputFormat() {
+        return RDF_OUTPUT_FORMAT;
+    }
+    
     protected void appendModelToFile(Model model, File file) {
         writeModelToFile(model, file, true);
     }
@@ -150,7 +137,7 @@ public abstract class RdfProcessor extends Processor {
         try {
             outStream = new FileOutputStream(file, append);
             RDFDataMgr.write(outStream, model, 
-                    getRdfOutputFormat().jenaRDFFormat());
+                    getOutputFormat().jenaRDFFormat());
         } catch (FileNotFoundException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
