@@ -71,8 +71,8 @@ public class ProcessController {
 
             // Resource deduping requires some prior processing steps.
             
-            outputDir = new RdfCleaner(localNamespace, outputDir, 
-                    mainOutputDir).process();
+            outputDir = new RdfCleaner(outputDir, mainOutputDir).process();
+                    
             
             // Required since bnode ids are not guaranteed to be unique across
             // input files, so Jena may create duplicate ids across files when
@@ -82,11 +82,10 @@ public class ProcessController {
             
             // Mechanism for handling large data files by reading only partial
             // data (split by type) into memory for deduping.
-            outputDir = new TypeSplitter(
-                    localNamespace, outputDir, mainOutputDir).process();
+            outputDir = new TypeSplitter(outputDir, mainOutputDir).process();
             
-            outputDir = new ResourceDeduper(
-                    localNamespace, outputDir, mainOutputDir).process();
+            outputDir = new ResourceDeduper(outputDir, mainOutputDir).process();
+
         }
         
         // TODO Check for valid sequences of actions. E.g., converting bibframe
