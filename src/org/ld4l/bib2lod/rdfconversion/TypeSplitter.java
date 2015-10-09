@@ -28,10 +28,8 @@ public class TypeSplitter extends RdfProcessor {
     private static final String REMAINDER_FILENAME = 
             ResourceDeduper.getRemainderFilename();
     
-    public TypeSplitter(String localNamespace, String inputDir, 
-            String mainOutputDir) {   
-        
-        super(localNamespace, inputDir, mainOutputDir);  
+    public TypeSplitter(String inputDir, String mainOutputDir) {   
+        super(inputDir, mainOutputDir);  
     }
 
     @Override

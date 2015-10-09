@@ -55,9 +55,8 @@ public class RdfCleaner extends RdfProcessor {
 //    private static final Pattern DEC_CODE_PATTERN = 
 //            Pattern.compile("&#(\\d+);");
     
-    public RdfCleaner(String localNamespace, String inputDir,
-            String mainOutputDir) {
-        super(localNamespace, inputDir, mainOutputDir);
+    public RdfCleaner(String inputDir, String mainOutputDir) {            
+        super(inputDir, mainOutputDir);
     }
 
     @Override

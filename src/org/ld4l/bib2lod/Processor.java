@@ -21,19 +21,13 @@ public abstract class Processor {
     protected final String inputDir;
 
 
-    /**
-     * Constructor for processes that don't use the loaded OntModel(s).
-     * @param localNamespace
-     * @param inputDir
-     * @param mainOutputDir
-     */
+
     public Processor(String inputDir, String mainOutputDir) {
             
         LOGGER.info("In constructor for " + this.getClass().toString());            
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
-        this.outputDir = createOutputDir();
-               
+        this.outputDir = createOutputDir();              
     }
 
     public abstract String process();

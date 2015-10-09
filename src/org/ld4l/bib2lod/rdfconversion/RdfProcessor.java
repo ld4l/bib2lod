@@ -50,7 +50,7 @@ public abstract class RdfProcessor extends Processor {
     }
     
     /**
-     * Constructor for processes that don't use the loaded OntModel(s).
+     * Constructor for processors that don't use the loaded OntModel(s).
      * @param localNamespace
      * @param inputDir
      * @param mainOutputDir
@@ -60,6 +60,17 @@ public abstract class RdfProcessor extends Processor {
         super(inputDir, mainOutputDir);
         LOGGER.info("In constructor for " + this.getClass().toString());        
         this.localNamespace = localNamespace;                      
+    }
+    
+    /** 
+     * Constructor for processors that don't use the loaded OntModel(s) or the
+     * local namespace.
+     * @param inputDir
+     * @param mainOutputDir
+     */
+    public RdfProcessor(String inputDir, String mainOutputDir) {
+        super(inputDir, mainOutputDir);
+        this.localNamespace = null;
     }
     
     public abstract String process();

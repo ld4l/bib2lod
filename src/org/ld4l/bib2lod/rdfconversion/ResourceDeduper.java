@@ -61,10 +61,8 @@ public class ResourceDeduper extends RdfProcessor {
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
-    public ResourceDeduper(String localNamespace, 
-            String inputDir, String mainOutputDir) {
-                 
-        super(localNamespace, inputDir, mainOutputDir);   
+    public ResourceDeduper(String inputDir, String mainOutputDir) {          
+        super(inputDir, mainOutputDir);   
     }
     
     protected static List<OntType> getTypesToDedupe() {
