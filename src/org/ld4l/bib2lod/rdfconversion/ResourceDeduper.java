@@ -7,9 +7,10 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.io.PrintWriter;
 import java.nio.file.Files;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.LinkedHashMap;
 import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
@@ -44,23 +45,13 @@ public class ResourceDeduper extends RdfProcessor {
      * Identifiers for Instances, Titles for Works and Instances). 
      */
     
-    // **** TODO - remove list and use map.keySet() when list is needed
-    private static final List<OntType> TYPES_TO_DEDUPE = Arrays.asList(
-            OntType.BF_PERSON,
-            OntType.BF_EVENT,
-            OntType.BF_FAMILY,
-            // NB There are no instances of this type in the entire CUL catalog.
-            OntType.BF_JURISDICTION,
-            OntType.BF_MEETING,
-            OntType.BF_ORGANIZATION,
-            OntType.BF_WORK,  
-            OntType.BF_INSTANCE,
-            OntType.BF_PLACE,
-            OntType.BF_TOPIC
-    );
 
+
+    // Using LinkedHashMap in case order of processing becomes important
     private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
-            new HashMap<OntType, Class<?>>();
+            new LinkedHashMap<OntType, Class<?>>();
+    private static final List<OntType> TYPES_TO_DEDUPE = 
+            new ArrayList<OntType>();
     static {
         RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
@@ -71,9 +62,17 @@ public class ResourceDeduper extends RdfProcessor {
         RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
+        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class); 
+        
+        // Don't just return the keySet directly, since (1) it's backed by the
+        // map, and (2) since keySet() returns a Set, it's opaque to the caller
+        // that the set is ordered (and backed by the map).
+        Iterator<OntType> it = RESOURCE_DEDUPERS.keySet().iterator();
+        while (it.hasNext()) {
+            TYPES_TO_DEDUPE.add(it.next());
+        }
     }
-    
+
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
@@ -83,7 +82,7 @@ public class ResourceDeduper extends RdfProcessor {
     }
     
     protected static List<OntType> getTypesToDedupe() {
-        return TYPES_TO_DEDUPE; 
+        return TYPES_TO_DEDUPE;
     }
     
     protected static String getRemainderFilename() {
