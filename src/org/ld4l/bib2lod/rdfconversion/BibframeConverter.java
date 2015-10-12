@@ -8,6 +8,7 @@ import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.ProcessorFactory;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BibframeConverterFactory;
@@ -21,25 +22,26 @@ public class BibframeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
+      
+    private static final Map<OntType, Class<?>> BIBFRAME_CONVERTERS =
+            new HashMap<OntType, Class<?>>();
+    static {
+        // Assign temporarily to BfResourceConverter till start implementing
+        // type-specific class
+        BIBFRAME_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_JURISDICTION,  
+                BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_MEETING, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_ORGANIZATION, 
+                BfResourceConverter.class);        
+        BIBFRAME_CONVERTERS.put(OntType.BF_PERSON, BfPersonConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_PLACE, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_TOPIC, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_WORK,  BfResourceConverter.class);            
+    }
     
-//  For generalized ProcessFactory implementation   
-//    private static final Map<OntType, Class<?>> RESOURCE_CONVERTERS =
-//            new HashMap<OntType, Class<?>>();
-//    static {
-//        // Assign temporarily to BfResourceConverter till start implementing
-//        // type-specific class
-//        RESOURCE_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_JURISDICTION,  BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_MEETING,  BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_ORGANIZATION,  BfResourceConverter.class);        
-//        RESOURCE_CONVERTERS.put(OntType.BF_PERSON,  BfPersonConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_PLACE,  BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_TOPIC,  BfResourceConverter.class);
-//        RESOURCE_CONVERTERS.put(OntType.BF_WORK,  BfResourceConverter.class);            
-//    }
-//    
     
     public BibframeConverter(OntModel bfOntModelInf,
             String localNamespace, String inputDir, String mainOutputDir) {
@@ -65,7 +67,8 @@ public class BibframeConverter extends RdfProcessor {
             String filename = file.getName();
             LOGGER.info("Converting file " + filename);
             BfResourceConverter converter = 
-                    BibframeConverterFactory.createBfResourceConverter(file); 
+                    // BibframeConverterFactory.createBfResourceConverter(file); 
+                    ProcessorFactory.createProcessor(file, BIBFRAME_CONVERTERS);
 //            if (converter == null) {
 //                LOGGER.debug("No converter found for file " + filename);
 //                continue;

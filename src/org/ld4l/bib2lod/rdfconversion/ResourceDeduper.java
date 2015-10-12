@@ -22,12 +22,12 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.ProcessorFactory;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAgentDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.DeduperFactory;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class ResourceDeduper extends RdfProcessor {
@@ -59,21 +59,20 @@ public class ResourceDeduper extends RdfProcessor {
             OntType.BF_TOPIC
     );
 
-//    For generalized ProcessFactory implementation
-//    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
-//            new HashMap<OntType, Class<?>>();
-//    static {
-//        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
-//        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-//        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
-//    }
+    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
+            new HashMap<OntType, Class<?>>();
+    static {
+        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
+        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
+    }
     
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
@@ -146,8 +145,8 @@ public class ResourceDeduper extends RdfProcessor {
             String filename = file.getName();
             LOGGER.debug("Deduping file " + filename);
             BfResourceDeduper deduper = 
-                    DeduperFactory.createBfResourceDeduper(file);
-                    //ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
+                    // DeduperFactory.createBfResourceDeduper(file);
+                    ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
             if (deduper == null) {
                 LOGGER.debug("No deduper found for file " + filename);
                 continue;
