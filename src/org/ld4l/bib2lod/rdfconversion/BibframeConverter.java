@@ -4,14 +4,13 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.DeduperFactory;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BibframeConverterFactory;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
@@ -22,6 +21,25 @@ public class BibframeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
+    
+//  For generalized ProcessFactory implementation   
+//    private static final Map<OntType, Class<?>> RESOURCE_CONVERTERS =
+//            new HashMap<OntType, Class<?>>();
+//    static {
+//        // Assign temporarily to BfResourceConverter till start implementing
+//        // type-specific class
+//        RESOURCE_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_JURISDICTION,  BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_MEETING,  BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_ORGANIZATION,  BfResourceConverter.class);        
+//        RESOURCE_CONVERTERS.put(OntType.BF_PERSON,  BfPersonConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_PLACE,  BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_TOPIC,  BfResourceConverter.class);
+//        RESOURCE_CONVERTERS.put(OntType.BF_WORK,  BfResourceConverter.class);            
+//    }
+//    
     
     public BibframeConverter(OntModel bfOntModelInf,
             String localNamespace, String inputDir, String mainOutputDir) {
@@ -36,29 +54,24 @@ public class BibframeConverter extends RdfProcessor {
 
     @Override
     public String process() {
-        
 
         LOGGER.info("Start process");
         
         String outputDir = getOutputDir();    
-
-        // TEMPORARY
-        copyFiles(inputDir, outputDir);
-        
+  
         File[] inputFiles = new File(inputDir).listFiles();
         
-//        for ( File file : inputFiles ) {
-//            String filename = file.getName();
-//            LOGGER.debug("Deduping file " + filename);
-//            BfResourceDeduper deduper = 
-//                    DeduperFactory.createBfResourceDeduper(file);
-//            if (deduper == null) {
-//                LOGGER.debug("No deduper found for file " + filename);
+        for ( File file : inputFiles ) {
+            String filename = file.getName();
+            LOGGER.info("Converting file " + filename);
+            BfResourceConverter converter = 
+                    BibframeConverterFactory.createBfResourceConverter(file); 
+//            if (converter == null) {
+//                LOGGER.debug("No converter found for file " + filename);
 //                continue;
 //            }
-//            Model model = readModelFromFile(file);
-//           
-//        }
+            Model model = readModelFromFile(file);          
+        }
         
         /* Can loop on input files or types to dedupe. In the former, send the
          * file to the factory; factory creates model from file, determines 
@@ -88,24 +101,26 @@ public class BibframeConverter extends RdfProcessor {
 //          }
 //  }
 
-
+        // TEMPORARY
+        copyFiles(inputDir, outputDir);
+        
         LOGGER.info("End process");
         return outputDir;        
 
     }
     
-    private void processInputFile(File inputFile) {
-        
-        String filename = inputFile.getName();
-        LOGGER.info("Start processing file " + filename);
-        
-        String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.getByFilename(basename);
-        if (type == null) {
-            LOGGER.warn("No type found for file " + basename);
-            return;
-        }
-        LOGGER.debug("Type = " + type.toString());
-    }
+//    private void processInputFile(File inputFile) {
+//        
+//        String filename = inputFile.getName();
+//        LOGGER.info("Start processing file " + filename);
+//        
+//        String basename = FilenameUtils.getBaseName(inputFile.toString());
+//        OntType type = OntType.getByFilename(basename);
+//        if (type == null) {
+//            LOGGER.warn("No type found for file " + basename);
+//            return;
+//        }
+//        LOGGER.debug("Type = " + type.toString());
+//    }
 
 }

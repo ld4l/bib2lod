@@ -2,15 +2,18 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.OntType;
 
-public abstract class BfResourceConverter {
+public class BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
     
-    public BfResourceConverter() {
+    public BfResourceConverter(OntType type) {
         // TODO Auto-generated constructor stub
-        LOGGER.info("In BfResourceConverter constructor");
+        LOGGER.debug("In BfResourceConverter constructor");
     }
+    
+
 
 }

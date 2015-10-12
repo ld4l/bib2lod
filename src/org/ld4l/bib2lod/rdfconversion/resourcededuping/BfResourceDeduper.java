@@ -35,6 +35,7 @@ public class BfResourceDeduper {
     protected OntType type;
     
     public BfResourceDeduper(OntType type) {
+        LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
         newStatements = ModelFactory.createDefaultModel();
     }

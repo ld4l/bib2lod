@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
 import java.io.File;
+import java.lang.reflect.Constructor;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -8,7 +9,11 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 
+/* TODO Much of this code is repeated in DeduperFactory. Combine if possible.
+ * Maybe implement an abstract parent class?
+ */
 public class DeduperFactory {
 
     private static final Logger LOGGER = 
@@ -56,8 +61,10 @@ public class DeduperFactory {
         }
  
         try {
-            return (BfResourceDeduper) deduperClass.getConstructor(
-                    OntType.class).newInstance(type);
+            Constructor<?> c = deduperClass.getConstructor(OntType.class);
+            LOGGER.debug("Constructor is: " + c.getName());
+            BfResourceDeduper deduper = (BfResourceDeduper) c.newInstance(type);
+            return deduper;
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();

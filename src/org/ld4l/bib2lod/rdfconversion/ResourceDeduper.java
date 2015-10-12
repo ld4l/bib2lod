@@ -43,6 +43,8 @@ public class ResourceDeduper extends RdfProcessor {
      * related type so that they can be used as a basis for deduping: e.g., 
      * Identifiers for Instances, Titles for Works and Instances). 
      */
+    
+    // **** TODO - remove list and use map.keySet() when list is needed
     private static final List<OntType> TYPES_TO_DEDUPE = Arrays.asList(
             OntType.BF_PERSON,
             OntType.BF_EVENT,
@@ -57,6 +59,22 @@ public class ResourceDeduper extends RdfProcessor {
             OntType.BF_TOPIC
     );
 
+//    For generalized ProcessFactory implementation
+//    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
+//            new HashMap<OntType, Class<?>>();
+//    static {
+//        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
+//        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
+//        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
+//    }
+    
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
@@ -129,6 +147,7 @@ public class ResourceDeduper extends RdfProcessor {
             LOGGER.debug("Deduping file " + filename);
             BfResourceDeduper deduper = 
                     DeduperFactory.createBfResourceDeduper(file);
+                    //ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
             if (deduper == null) {
                 LOGGER.debug("No deduper found for file " + filename);
                 continue;
@@ -163,10 +182,9 @@ public class ResourceDeduper extends RdfProcessor {
                      * NB Another way to replace duplicates would be to read 
                      * the lines into a Jena model, which also automatically 
                      * removes duplicate triples. We could compare performance 
-                     * with the Set approach if that becomes an issue (though
-                     * I would suspect that the Set would be faster than a 
-                     * Model). Use of a model  has the advantage that the lines 
-                     * don't have to be identical in terms of spaces.
+                     * with the Set approach if that becomes an issue. Use of a 
+                     * model  has the advantage that the lines don't have to be 
+                     * identical in terms of spaces.
                      */
                     uniqueLines.add(processedLine);
                 }
