@@ -1,26 +1,18 @@
 package org.ld4l.bib2lod.rdfconversion;
 
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.LinkedHashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.commons.io.LineIterator;
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.ProcessorFactory;
@@ -166,46 +158,24 @@ public class ResourceDeduper extends RdfProcessor {
             String outputDir) {
 
         for ( File file : inputFiles ) {
-            // Replace URIs using the uniqueUris map. Then remove duplicate 
-            // lines created from this replacement.
-            try {
-                LOGGER.info("Replacing lines in file " + file.getName());
-                BufferedReader reader = Files.newBufferedReader(file.toPath());
-                Set<String> uniqueLines = new LinkedHashSet<String>();             
-                LineIterator lineIterator = new LineIterator(reader);
-                while (lineIterator.hasNext()) {
-                    String line = lineIterator.nextLine();
-                    String processedLine = replaceUris(line, uniqueUris) + "\n";
-                    /* Adding the line to a set removes duplicate lines.
-                     * NB Another way to replace duplicates would be to read 
-                     * the lines into a Jena model, which also automatically 
-                     * removes duplicate triples. We could compare performance 
-                     * with the Set approach if that becomes an issue. Use of a 
-                     * model  has the advantage that the lines don't have to be 
-                     * identical in terms of spaces.
-                     */
-                    uniqueLines.add(processedLine);
-                }
-                reader.close();
-                
-                // Write out the deduped RDF
-                String outputFilename =
-                        FilenameUtils.getName(file.toString()); 
-                File outputFile = new File(outputDir, outputFilename);
-                PrintWriter writer = new PrintWriter(new BufferedWriter(
-                        new FileWriter(outputFile, true)));  
-                Iterator<String> setIterator = uniqueLines.iterator();
-                while (setIterator.hasNext()) {
-                    writer.append(setIterator.next());
-                }
 
-                writer.close();                
-                LOGGER.info("Done replacing lines in file " + file);   
-                               
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }       
+            // Rename each resource with the new URI specified in uniqueUris
+            Model model = readModelFromFile(file);
+            for (String originalUri : uniqueUris.keySet()) {
+                String newUri = uniqueUris.get(originalUri);
+                if (! newUri.equals(originalUri)) {
+                    LOGGER.debug("Replacing " + originalUri + " with "+ newUri);                           
+                    Resource resource = model.getResource(originalUri);
+                    ResourceUtils.renameResource(
+                            resource, uniqueUris.get(originalUri));
+                }
+            }
+            
+            // Write out new model to file. Duplicate statements are 
+            // automatically removed.
+            String outputFilename = FilenameUtils.getBaseName(file.toString());
+            writeModelToFile(model, outputFilename);
+
         }        
     }
    
@@ -217,12 +187,5 @@ public class ResourceDeduper extends RdfProcessor {
         }
     }
     
-    private String replaceUris(String line, Map<String, String> uniqueUris) {          
-        int size = uniqueUris.size();
-        String[] originalUris = uniqueUris.keySet().toArray(new String[size]);
-        String[] replacementUris = 
-                uniqueUris.values().toArray(new String[size]);
-        return StringUtils.replaceEach(line, originalUris, replacementUris);
-    }
 
 }
