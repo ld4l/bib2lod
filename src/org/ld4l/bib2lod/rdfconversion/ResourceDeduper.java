@@ -159,7 +159,9 @@ public class ResourceDeduper extends RdfProcessor {
 
         for ( File file : inputFiles ) {
 
-            // Rename each resource with the new URI specified in uniqueUris
+            // Rename each resource with the new URI specified in uniqueUris.
+            // Renaming Resources rather than dumb string replacement avoids
+            // problems of substrings, etc.
             Model model = readModelFromFile(file);
             for (String originalUri : uniqueUris.keySet()) {
                 String newUri = uniqueUris.get(originalUri);
