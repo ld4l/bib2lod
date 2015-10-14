@@ -23,13 +23,13 @@ public class DeduperFactory {
             new HashMap<OntType, Class<?>>();
     static {
         RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAuthorityDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAgentDeduper.class);        
-        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAgentDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
+        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfAuthorityDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
     }
