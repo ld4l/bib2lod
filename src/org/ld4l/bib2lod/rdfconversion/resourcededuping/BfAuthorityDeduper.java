@@ -11,11 +11,11 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
-import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 /**
  * Default deduper for bf:Authority subclasses. Use to dedupe bf:Authorities
@@ -159,7 +159,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                  * wrong, we'll need to normalize the auth labels and dedupe 
                  * authorities against them directly.
                  */
-                // "SELECT ?localAuth ?authAccessPt ?label ?externalAuth 
+                // "SELECT ?localAuth ?authAccessPt ?label ?extAuth 
                 // ?extAuthLabel "
                 "SELECT ?localAuth ?authAccessPoint ?label ?extAuth "
                 + "WHERE { "
@@ -179,6 +179,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         pss.setCommandText(commandText);
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
+        LOGGER.debug(pss.toString());
         return pss.asQuery();            
 
     }
