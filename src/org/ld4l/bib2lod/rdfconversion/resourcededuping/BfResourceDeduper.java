@@ -35,7 +35,7 @@ public class BfResourceDeduper {
     protected OntType type;
     
     public BfResourceDeduper(OntType type) {
-        LOGGER.debug("In constructor for " + this.getClass().getName());
+        // LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
         newStatements = ModelFactory.createDefaultModel();
     }
@@ -115,12 +115,12 @@ public class BfResourceDeduper {
         
         String commandText = 
                 "SELECT ?resource ?authAccessPoint ?label "
-                + "WHERE { "
-                + "?resource a ?type . "
-                + "OPTIONAL { ?resource "
+                + "WHERE { { "
+                + "?resource a ?type ; "
                 + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
                 + "?authAccessPoint . } "
-                + "OPTIONAL { ?resource  " 
+                + "UNION { "
+                + "?resource a ?type ; "
                 + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
 
