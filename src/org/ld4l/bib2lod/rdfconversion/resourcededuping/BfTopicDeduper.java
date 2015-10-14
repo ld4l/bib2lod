@@ -72,7 +72,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
             String externalTopicUri = getExternalTopicUri(soln);
             
             // Get key for identity matching.
-            String key = getTopicKey(externalTopicUri, soln);
+            String key = getKey(externalTopicUri, soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
@@ -94,7 +94,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 LOGGER.debug("Found matching value for key " + key 
                         + " and topic URI " + topicUri);
                 LOGGER.debug("Adding: " + topicUri + " => " + uniqueTopicUri);                
-                // This local Agent URI will be replaced by the unique Agent URI
+                // This local Topic URI will be replaced by the unique Topic URI
                 // throughout the data
                 uniqueUris.put(topicUri, uniqueTopicUri);
                 
@@ -121,6 +121,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
                         LOGGER.debug("Didn't find auth URI for" + key);
                         // Add the local Authority URI to the maps
                         uniqueAuths.put(key, authUri);
+                        // Not sure if this is needed in the map
                         uniqueUris.put(authUri, authUri);
                     }
                 }
@@ -134,6 +135,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 uniqueTopics.put(key, replacementUri);
                 if (authUri != null) {
                     LOGGER.debug("New auth: " + authUri);
+                    // Not sure if this is needed in the map
                     uniqueUris.put(authUri, authUri);                
                     uniqueAuths.put(key, authUri);
                 }
@@ -229,7 +231,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
 
     }
     
-    private String getTopicKey(String externalTopicUri, QuerySolution soln) {
+    private String getKey(String externalTopicUri, QuerySolution soln) {
         
         // If there's an external Topic URI, use that as the key.
         if (externalTopicUri != null) {

@@ -113,10 +113,12 @@ public class BfAgentDeduper extends BfResourceDeduper {
             } else {
                 // We haven't seen this Agent before
                 LOGGER.debug("New agent: " + agentUri);
+                // Not sure if this is needed in the map
                 uniqueUris.put(agentUri, agentUri);
                 uniqueAgents.put(key, agentUri);
                 if (authUri != null) {
                     LOGGER.debug("New auth: " + authUri);
+                    // Not sure if this is needed in the map
                     uniqueUris.put(authUri, authUri);                
                     uniqueAuths.put(key, authUri);
                 }

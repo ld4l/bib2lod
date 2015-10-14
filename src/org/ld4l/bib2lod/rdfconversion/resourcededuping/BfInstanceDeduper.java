@@ -77,19 +77,6 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                 continue;
             }   
             
-//            Resource nonWorldCatId = soln.getResource("nonWorldCatId");
-//            if (nonWorldCatId != null) {                    
-//                String idUri = nonWorldCatId.getURI();
-//                String idKey = getIdentifierKey(soln);
-//            }            
-            // SAME FOR TITLE
-
-            // TODO *** We may want to substitute the worldcat uri for the local
-            // one - pending response from Steven. If not, we need to add a
-            // sameAs statement between the unique Instance URI and the worldcat
-            // URI, so keep another map (or is that just the uniqueInstances
-            // map?
-            
             if (uniqueInstances.containsKey(key)) {
                 // We've seen this Instance before
                 String uniqueInstanceUri = uniqueInstances.get(key);
@@ -105,6 +92,7 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             } else {
                 // We haven't seen this Instance before
                 LOGGER.debug("New instance: " + instanceUri);
+                // Not sure if this is needed in the map
                 uniqueUris.put(instanceUri, instanceUri);
                 uniqueInstances.put(key, instanceUri);
             }

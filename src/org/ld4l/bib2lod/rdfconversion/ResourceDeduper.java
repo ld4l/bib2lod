@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.ProcessorFactory;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAgentDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
@@ -47,6 +48,7 @@ public class ResourceDeduper extends RdfProcessor {
     static {
         RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAgentDeduper.class);
+        RESOURCE_DEDUPERS.put(OntType.BF_HELD_ITEM, BfHeldItemDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAgentDeduper.class);
         RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAgentDeduper.class);
@@ -92,6 +94,18 @@ public class ResourceDeduper extends RdfProcessor {
 
         File[] inputFiles = new File(inputDir).listFiles();
         
+        getUniqueUris(inputFiles, uniqueUris, newStatements);
+        dedupeUris(inputFiles, uniqueUris, outputDir);
+        writeNewStatements(newStatements);
+
+        LOGGER.info("End process");
+        return outputDir;
+    }
+
+
+    private void getUniqueUris(File[] inputFiles, 
+            Map<String, String> uniqueUris, Model newStatements) {
+
         /* Can loop on input files or types to dedupe. In the former, send the
          * file to the factory; factory creates model from file, determines 
          * deduper type, sends model to deduper constructor to store in instance
@@ -120,18 +134,6 @@ public class ResourceDeduper extends RdfProcessor {
 //      }
 //  }
         
-        getUniqueUris(inputFiles, uniqueUris, newStatements);
-        dedupeUris(inputFiles, uniqueUris, outputDir);
-        writeNewStatements(newStatements);
-
-        LOGGER.info("End process");
-        return outputDir;
-    }
-
-
-    private void getUniqueUris(File[] inputFiles, 
-            Map<String, String> uniqueUris, Model newStatements) {
-
         for ( File file : inputFiles ) {
             String filename = file.getName();
             LOGGER.debug("Deduping file " + filename);
@@ -161,7 +163,9 @@ public class ResourceDeduper extends RdfProcessor {
 
             // Rename each resource with the new URI specified in uniqueUris.
             // Renaming Resources rather than dumb string replacement avoids
-            // problems of substrings, etc.
+            // problems of substrings, non-matching whitespace, etc. In 
+            // addition, when working with a model, duplicate statements are
+            // automatically removed rather than requiring a separate step.
             Model model = readModelFromFile(file);
             for (String originalUri : uniqueUris.keySet()) {
                 String newUri = uniqueUris.get(originalUri);
