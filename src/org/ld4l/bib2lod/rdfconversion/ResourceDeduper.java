@@ -172,7 +172,7 @@ public class ResourceDeduper extends RdfProcessor {
                 // Instead of this test, we may want to simply leave entries 
                 // where key and value are the same out of the map.
                 if (! newUri.equals(originalUri)) {
-                    LOGGER.debug("Replacing " + originalUri + " with "+ newUri);                           
+                    LOGGER.debug("Replacing " + originalUri + " with " + newUri);                           
                     Resource resource = model.getResource(originalUri);
                     ResourceUtils.renameResource(
                             resource, uniqueUris.get(originalUri));

@@ -142,8 +142,11 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
         String[] keys = { "lcc", "ddc", "nlm", "udc", "barcode", "id" };
         for (String k : keys) {
             Literal lit = soln.getLiteral(k);
-            if (k != null) {
+            if (lit != null) {
+                LOGGER.debug("Deduping on key type " + k + " with value " + lit.getLexicalForm());          
                 return lit.getLexicalForm();
+            } else {
+                LOGGER.debug("No value for " + k);
             }
         }
         
@@ -152,7 +155,10 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
         if (mark != null) {
             Literal scheme = soln.getLiteral("scheme");
             if (scheme != null) {
+                LOGGER.debug("Deduping on shelfMark and shelfMarkScheme");
                 return scheme.getLexicalForm() + mark.getLexicalForm();
+            } else {
+                LOGGER.debug("No value for shelfMark and shelfMarkScheme");
             }
         }
         
