@@ -1,9 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
-<!-- Status = level of internal log4j events to log to console. Set status to "trace" to troubleshoot log4j -->
+<!-- This configuration can be overridden by placing a file log4j2-test.xml in the same directory (src). -->
+<!-- Status = level of internal log4j events to log to console. Set status to "trace" to troubleshoot log4j2. -->
 <Configuration status="warn">
     <CustomLevels>
         <!-- Use for current issue being debugged, without printing out all
-            statements at DEBUG level.  -->
+            statements at DEBUG level.  Level 450 is between built-in levels INFO and DEBUG. -->
         <CustomLevel name="ONLY" intLevel="450" />
     </CustomLevels>
     <Appenders>
@@ -20,8 +21,8 @@
     </Appenders>
     <Loggers>
         <Root level="error">
-            <AppenderRef ref="RollingFile" level="info"/>
-            <AppenderRef ref="Console" level="info"/>
+            <AppenderRef ref="RollingFile"/>
+            <AppenderRef ref="Console"/>
         </Root>
         <!-- Sample loggers -->
         <!--
@@ -29,15 +30,17 @@
             <AppenderRef ref="Console"/>
         </Logger>
         -->
-        <!-- Custom logger. Call: LOGGER.log(LOGGER.getLevel("ONLY")
+        <!-- Custom logger. Call: LOGGER.log(LOGGER.getLevel("ONLY") -->
+        <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper" level="only">
             <AppenderRef ref="Console"/>
         </Logger>
-        --></Loggers>
+        -->
         <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.RdfProcessor" level="trace">
             <AppenderRef ref="Console"/>
         </Logger>
+        -->
     </Loggers>
 </Configuration>
 
