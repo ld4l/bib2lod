@@ -2,11 +2,6 @@
 <!-- This configuration can be overridden by placing a file log4j2-test.xml in the same directory (src). -->
 <!-- Status = level of internal log4j events to log to console. Set status to "trace" to troubleshoot log4j2. -->
 <Configuration status="warn">
-    <CustomLevels>
-        <!-- Use for current issue being debugged, without printing out all
-            statements at DEBUG level.  Level 450 is between built-in levels INFO and DEBUG. -->
-        <CustomLevel name="ONLY" intLevel="450" />
-    </CustomLevels>
     <Appenders>
         <RollingFile name="RollingFile" fileName="log/bib2lod.log"
             filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
@@ -30,9 +25,8 @@
             <AppenderRef ref="Console"/>
         </Logger>
         -->
-        <!-- Custom logger. Call: LOGGER.log(LOGGER.getLevel("ONLY") -->
         <!--
-        <Logger name="org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper" level="only">
+        <Logger name="org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper" level="debug">
             <AppenderRef ref="Console"/>
         </Logger>
         -->

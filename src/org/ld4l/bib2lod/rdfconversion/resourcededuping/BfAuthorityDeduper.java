@@ -11,7 +11,6 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
@@ -33,7 +32,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
     @Override
     public Map<String, String> dedupe(Model model) {
         
-        LOGGER.debug("Deduping type " + type.toString());
+        LOGGER.trace("Deduping type " + type.toString());
 
         // Maps Authority URIs in the Bibframe RDF to deduped URIs (single, 
         // unique URI per bf:Authority or madsrdf:Authority). This map will be 
@@ -68,11 +67,11 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
-                LOGGER.debug("No key for " + localAuthUri + "; can't dedupe");
+                LOGGER.trace("No key for " + localAuthUri + "; can't dedupe");
                 continue;
             }
 
-            LOGGER.debug("Original uri: " + localAuthUri + " has key " + key);
+            LOGGER.trace("Original uri: " + localAuthUri + " has key " + key);
     
             Resource extAuth = soln.getResource("extAuth");
             String extAuthUri = extAuth == null ? null : extAuth.getURI();            
@@ -81,9 +80,9 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
             if (uniqueLocalAuths.containsKey(key)) {
                 
                 String uniqueLocalAuthUri = uniqueLocalAuths.get(key);
-                LOGGER.debug("Found matching value for key " + key 
+                LOGGER.trace("Found matching value for key " + key 
                         + " and bf:Authority URI " + localAuthUri);
-                LOGGER.debug("Adding: " + localAuthUri + " => " 
+                LOGGER.trace("Adding: " + localAuthUri + " => " 
                         + uniqueLocalAuthUri);                
                 // This local Authority URI will be replaced by the unique 
                 // Authority URI throughout the data.
@@ -101,9 +100,9 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                     // We've seen this Authority before
                     if (uniqueExtAuths.containsKey(key)) {
                         String uniqueAuthUri = uniqueExtAuths.get(key);
-                        LOGGER.debug("Found matching value for key " + key 
+                        LOGGER.trace("Found matching value for key " + key 
                                     + " and external auth URI " + extAuthUri);
-                        LOGGER.debug("Adding: " + extAuthUri + " => " 
+                        LOGGER.trace("Adding: " + extAuthUri + " => " 
                                     + uniqueAuthUri);
                         
                         // This local Authority URI will be replaced by the
@@ -112,7 +111,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                         
                     } else {
                         // We haven't seen this Authority before
-                        LOGGER.debug("Didn't find external auth URI for" + key);
+                        LOGGER.trace("Didn't find external auth URI for" + key);
                         // Add the local Authority URI to the maps
                         uniqueExtAuths.put(key, extAuthUri);
                         uniqueUris.put(extAuthUri, extAuthUri);
@@ -121,12 +120,12 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 
             } else {
                 // We haven't seen this local Authority before
-                LOGGER.debug("New local auth: " + localAuthUri);
+                LOGGER.trace("New local auth: " + localAuthUri);
                 // Not sure if this is needed in the map
                 uniqueUris.put(localAuthUri, localAuthUri);
                 uniqueLocalAuths.put(key, localAuthUri);
                 if (extAuthUri != null) {
-                    LOGGER.debug("New external auth: " + extAuthUri);
+                    LOGGER.trace("New external auth: " + extAuthUri);
                     // Not sure if this is needed in the map
                     uniqueUris.put(extAuthUri, extAuthUri);                
                     uniqueExtAuths.put(key, extAuthUri);
@@ -135,14 +134,14 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         }
         
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("uniqueUris map:");
+            LOGGER.trace("uniqueUris map:");
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
-                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
+                LOGGER.trace(entry.getKey() + " => " + entry.getValue());
             }
-            LOGGER.debug("uniqueLocalAuths map:");
+            LOGGER.trace("uniqueLocalAuths map:");
             for (Map.Entry<String, String> entry : 
                     uniqueLocalAuths.entrySet()) {
-                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
+                LOGGER.trace(entry.getKey() + " => " + entry.getValue());
             }
         }
         
@@ -180,10 +179,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         pss.setCommandText(commandText);
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
-        LOGGER.debug(pss.toString());
-        // Custom log level - see log4j2.xml. No problem if level not defined
-        // in config.
-        // LOGGER.log(Level.getLevel("ONLY"), pss.toString());
+        LOGGER.trace(pss.toString());
         return pss.asQuery();            
 
     }
