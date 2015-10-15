@@ -180,6 +180,9 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
         LOGGER.debug(pss.toString());
+        // Custom log level - see log4j2.xml. No problem if level not defined
+        // in config.
+        // LOGGER.log(Level.getLevel("ONLY"), pss.toString());
         return pss.asQuery();            
 
     }
