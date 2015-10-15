@@ -167,15 +167,15 @@ public class ResourceDeduper extends RdfProcessor {
             // addition, when working with a model, duplicate statements are
             // automatically removed rather than requiring a separate step.
             Model model = readModelFromFile(file);
-            for (String originalUri : uniqueUris.keySet()) {
-                String newUri = uniqueUris.get(originalUri);
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                String originalUri = entry.getKey();
+                String newUri = entry.getValue();
                 // Instead of this test, we may want to simply leave entries 
                 // where key and value are the same out of the map.
                 if (! newUri.equals(originalUri)) {
                     LOGGER.debug("Replacing " + originalUri + " with " + newUri);                           
                     Resource resource = model.getResource(originalUri);
-                    ResourceUtils.renameResource(
-                            resource, uniqueUris.get(originalUri));
+                    ResourceUtils.renameResource(resource, newUri);                          
                 }
             }
  

@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Map.Entry;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.Query;
@@ -144,12 +145,12 @@ public class BfTopicDeduper extends BfResourceDeduper {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
-            for (String uri : uniqueUris.keySet()) {
-                LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
             LOGGER.debug("uniqueTopics map:");
-            for (String key : uniqueTopics.keySet()) {
-                LOGGER.debug(key + " => " + uniqueTopics.get(key));
+            for (Map.Entry<String, String> entry : uniqueTopics.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
         }
         
@@ -213,12 +214,14 @@ public class BfTopicDeduper extends BfResourceDeduper {
             String id = idLiteral.getLexicalForm(); 
             // Currently we have only FAST URIs, but later there may be other
             // schemes that provide dereferenceable URIs.
-            for (String prefix : SCHEMES.keySet()) {
+            for (Entry<String, Vocabulary> entry : SCHEMES.entrySet()) {
+                String prefix = entry.getKey();
+            
                 if (id.startsWith(prefix)) {
                     String localName = id.substring(prefix.length() + 1);
                     // Remove leading zeros from localName (though not required)
                     localName = StringUtils.stripStart(localName, "0");
-                    String externalUri = SCHEMES.get(prefix).uri() + localName; 
+                    String externalUri = entry.getValue().uri() + localName; 
                     LOGGER.debug(
                             "Topic URI from external scheme: " + externalUri);
                     return externalUri;

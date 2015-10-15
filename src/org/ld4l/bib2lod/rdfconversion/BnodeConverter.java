@@ -66,8 +66,9 @@ public class BnodeConverter extends RdfProcessor {
         inputModel.remove(retractions);
         inputModel.add(assertions);   
         if (LOGGER.isDebugEnabled()) {
-            for (String id: bnodeIdToUriResource.keySet()) {
-                LOGGER.debug(id + ": " + bnodeIdToUriResource.get(id).toString());
+            for (Map.Entry<String, Resource> entry : 
+                    bnodeIdToUriResource.entrySet()) {
+                LOGGER.debug(entry.getKey() + ": " + entry.getValue().toString());
             }
         }
         return inputModel;

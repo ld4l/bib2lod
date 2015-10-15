@@ -83,8 +83,8 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
-            for (String uri : uniqueUris.keySet()) {
-                LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
         }
         

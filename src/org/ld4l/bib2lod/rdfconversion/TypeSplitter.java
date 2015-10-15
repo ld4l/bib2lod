@@ -142,8 +142,9 @@ public class TypeSplitter extends RdfProcessor {
     private void writeModelsToFiles(Map<String, Model> modelsByType,             
             Map<String, File> outputFilesByType) {
                   
-        for (String ontClassUri: outputFilesByType.keySet()) { 
-            File outFile = outputFilesByType.get(ontClassUri);
+        for (Map.Entry<String, File> entry : outputFilesByType.entrySet()) {
+            String ontClassUri = entry.getKey();
+            File outFile = entry.getValue();
             Model model = modelsByType.get(ontClassUri);
             if (! model.isEmpty()) {                                                                                                               
                 appendModelToFile(model, outFile);

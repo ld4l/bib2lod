@@ -96,12 +96,12 @@ public class BfResourceDeduper {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
-            for (String uri : uniqueUris.keySet()) {
-                LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
             LOGGER.debug("uniqueResources map:");
-            for (String key : uniqueResources.keySet()) {
-                LOGGER.debug(key + " => " + uniqueResources.get(key));
+            for (Map.Entry<String, String> entry : uniqueResources.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
         }
         

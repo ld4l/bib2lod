@@ -136,12 +136,13 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
-            for (String uri : uniqueUris.keySet()) {
-                LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
             LOGGER.debug("uniqueLocalAuths map:");
-            for (String key : uniqueLocalAuths.keySet()) {
-                LOGGER.debug(key + " => " + uniqueLocalAuths.get(key));
+            for (Map.Entry<String, String> entry : 
+                    uniqueLocalAuths.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
         }
         

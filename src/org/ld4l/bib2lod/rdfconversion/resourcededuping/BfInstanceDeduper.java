@@ -101,23 +101,25 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         Property sameAs = 
                 model.createProperty(OntProperty.OWL_SAME_AS.uri());
         LOGGER.debug("sameAs: " + sameAs.toString());
-        for (String worldcatId : uniqueInstances.keySet()) {
+        for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
             Resource subject = 
-                    model.createResource(uniqueInstances.get(worldcatId));
-            Resource object = model.createResource(worldcatId);                   
+                    model.createResource(entry.getValue());
+            Resource object = model.createResource(entry.getKey());                   
             Statement s = model.createStatement(subject, sameAs, object);
             newStatements.add(s);            
         }
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
-            for (String uri : uniqueUris.keySet()) {
-                LOGGER.debug(uri + " => " + uniqueUris.get(uri));
+            for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
-            LOGGER.debug("uniqueInstances map:");
-            for (String key : uniqueInstances.keySet()) {
-                LOGGER.debug(key + " => " + uniqueInstances.get(key));
+            LOGGER.debug("uniqueInstances map:");            
+            for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
+            
+
         }
         
         return uniqueUris;        
