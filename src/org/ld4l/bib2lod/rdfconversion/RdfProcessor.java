@@ -124,20 +124,6 @@ public abstract class RdfProcessor extends Processor {
         return RDF_OUTPUT_FORMAT;
     }
     
-// Can't have both of these due to type erasure. Figure out which one is most
-// convenient.
-//    protected void appendModelsToFile(Map<OntModel, File> models) {  
-//        for (Map.Entry<OntModel, File> entry : models.entrySet()) {
-//            appendModelToFile(entry.getKey(), entry.getValue());
-//        }
-//    }
-    
-    protected void appendModelsToFile(Map<OntModel, String> models) {
-        for (Map.Entry<OntModel, String> entry : models.entrySet()) {
-            appendModelToFile(entry.getKey(), entry.getValue());
-        }     
-    }
-    
     protected void appendModelToFile(Model model, File file) {
         writeModelToFile(model, file, true);
     }

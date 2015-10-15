@@ -156,9 +156,15 @@ public class BfResourceDeduper {
         return NacoNormalizer.normalize(key);
     }
    
-    
+  
     public Model getNewStatements() {
         return newStatements;
     }
+    
+    public Map<OntType, Model> getModelsByType(Model model) {
+        Map<OntType, Model> models = new HashMap<OntType, Model>();
+        models.put(type, model);
+        return models;
+    } 
     
 }

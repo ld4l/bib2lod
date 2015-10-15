@@ -37,8 +37,6 @@ public class ResourceDeduper extends RdfProcessor {
      * related type so that they can be used as a basis for deduping: e.g., 
      * Identifiers for Instances, Titles for Works and Instances). 
      */
-    
-
 
     // Using LinkedHashMap in case order of processing becomes important
     private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
@@ -178,12 +176,14 @@ public class ResourceDeduper extends RdfProcessor {
                     ResourceUtils.renameResource(resource, newUri);                          
                 }
             }
- 
+            
+            String basename = FilenameUtils.getBaseName(file.toString());
+
             // Could do as separate processing step after writing out each 
             // model to a single file, but trying this for efficiency. Anyway,
             // it's best to work through the dedupers because they are aware of
             // what types were returned from their query.
-            // splitIntoTypes(model)
+            // splitIntoTypes(model, basename)
             // get the deduper
             // have it split into multiple models and return map of filenames
             // to models - or models to filenames, whichever is easier. Append 
@@ -196,10 +196,20 @@ public class ResourceDeduper extends RdfProcessor {
             // and we transform that here to a map from Model to filename (or
             // the reverse.
             
-            // Write out new model to file. 
-            String outputFilename = FilenameUtils.getBaseName(file.toString());
-            writeModelToFile(model, outputFilename);
-
+            // TODO Since we're doing this twice now, we should probably store
+            // the deduper with the file basename in a map.
+            BfResourceDeduper deduper = 
+                    // DeduperFactory.createBfResourceDeduper(file);
+                    ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
+            // other.nt has no deduper
+            if (deduper == null) {
+                LOGGER.info("No deduper found for file " + file.getName());
+                appendModelToFile(model, basename);
+            } else {
+                Map<OntType, Model> modelsByType = 
+                        deduper.getModelsByType(model);
+                appendModelsToFiles(modelsByType);            
+            }
         }        
     }
    
@@ -208,6 +218,16 @@ public class ResourceDeduper extends RdfProcessor {
         // many, append to file after each iteration through the loop.
         if (!newStatements.isEmpty()) {
             writeModelToFile(newStatements, NEW_STATEMENT_FILENAME);
+        }
+    }
+    
+    private void appendModelsToFiles(Map<OntType, Model> modelsByType) {
+        
+        for (Map.Entry<OntType, Model> entry : modelsByType.entrySet()) {
+            OntType type = entry.getKey();
+            Model model = entry.getValue();
+            String basename = type.filename();
+            appendModelToFile(model, basename);
         }
     }
     

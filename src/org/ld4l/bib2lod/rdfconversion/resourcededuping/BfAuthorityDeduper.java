@@ -187,6 +187,5 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         return pss.asQuery();            
 
     }
-    
 
 }
