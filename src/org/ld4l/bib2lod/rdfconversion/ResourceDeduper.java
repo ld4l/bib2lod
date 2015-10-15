@@ -178,9 +178,25 @@ public class ResourceDeduper extends RdfProcessor {
                             resource, uniqueUris.get(originalUri));
                 }
             }
+ 
+            // Could do as separate processing step after writing out each 
+            // model to a single file, but trying this for efficiency. Anyway,
+            // it's best to work through the dedupers because they are aware of
+            // what types were returned from their query.
+            // splitIntoTypes(model)
+            // get the deduper
+            // have it split into multiple models and return map of filenames
+            // to models - or models to filenames, whichever is easier. Append 
+            // each model to appropriate file.
+
+            // Map<String, Model> models = writeModelsToFiles(models) or
+            // Map<Model, String> models = writeModelsToFiles(models)
+            // OR if the dedupers don't know anything about filenames, just 
+            // have them return a map from Model to OntType (or the reverse),
+            // and we transform that here to a map from Model to filename (or
+            // the reverse.
             
-            // Write out new model to file. Duplicate statements are 
-            // automatically removed.
+            // Write out new model to file. 
             String outputFilename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(model, outputFilename);
 

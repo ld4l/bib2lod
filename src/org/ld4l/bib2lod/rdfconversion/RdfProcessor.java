@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.Map;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -121,6 +122,20 @@ public abstract class RdfProcessor extends Processor {
     
     protected Format getOutputFormat() {
         return RDF_OUTPUT_FORMAT;
+    }
+    
+// Can't have both of these due to type erasure. Figure out which one is most
+// convenient.
+//    protected void appendModelsToFile(Map<OntModel, File> models) {  
+//        for (Map.Entry<OntModel, File> entry : models.entrySet()) {
+//            appendModelToFile(entry.getKey(), entry.getValue());
+//        }
+//    }
+    
+    protected void appendModelsToFile(Map<OntModel, String> models) {
+        for (Map.Entry<OntModel, String> entry : models.entrySet()) {
+            appendModelToFile(entry.getKey(), entry.getValue());
+        }     
     }
     
     protected void appendModelToFile(Model model, File file) {
