@@ -38,27 +38,27 @@ public class ResourceDeduper extends RdfProcessor {
      */
 
     // Using LinkedHashMap in case order of processing becomes important
-    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
+    private static final Map<OntType, Class<?>> DEDUPERS_BY_TYPE =
             new LinkedHashMap<OntType, Class<?>>();
     private static final List<OntType> TYPES_TO_DEDUPE = 
             new ArrayList<OntType>();
     static {
-        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_HELD_ITEM, BfHeldItemDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
-        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class); 
+        DEDUPERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_FAMILY, BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_HELD_ITEM, BfHeldItemDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_JURISDICTION,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_MEETING,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
+        DEDUPERS_BY_TYPE.put(OntType.BF_PERSON,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_PLACE,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
+        DEDUPERS_BY_TYPE.put(OntType.BF_WORK,  BfWorkDeduper.class); 
         
         // Don't just return the keySet directly, since (1) it's backed by the
         // map, and (2) since keySet() returns a Set, it's opaque to the caller
         // that the set is ordered (and backed by the map).
-        Iterator<OntType> it = RESOURCE_DEDUPERS.keySet().iterator();
+        Iterator<OntType> it = DEDUPERS_BY_TYPE.keySet().iterator();
         while (it.hasNext()) {
             TYPES_TO_DEDUPE.add(it.next());
         }
@@ -82,7 +82,7 @@ public class ResourceDeduper extends RdfProcessor {
                 new HashMap<String, BfResourceDeduper>();
         
         for (Map.Entry<OntType, Class<?>> entry : 
-                RESOURCE_DEDUPERS.entrySet()) {
+                DEDUPERS_BY_TYPE.entrySet()) {
             OntType type = entry.getKey();
             String basename = type.filename();
 

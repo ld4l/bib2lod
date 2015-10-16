@@ -25,25 +25,25 @@ public class BibframeConverter extends RdfProcessor {
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
       
-    private static final Map<OntType, Class<?>> BIBFRAME_CONVERTERS =
+    private static final Map<OntType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<OntType, Class<?>>();
     static {
         // Assign temporarily to BfResourceConverter till start implementing
         // type-specific converter classes.
-        BIBFRAME_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_HELD_ITEM, 
+        CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
                 BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_JURISDICTION,  
+        CONVERTERS_BY_TYPE.put(OntType.BF_INSTANCE, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_JURISDICTION,  
                 BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_MEETING, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_ORGANIZATION, 
+        CONVERTERS_BY_TYPE.put(OntType.BF_MEETING, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
                 BfResourceConverter.class);        
-        BIBFRAME_CONVERTERS.put(OntType.BF_PERSON, BfPersonConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_PLACE, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_TOPIC, BfResourceConverter.class);
-        BIBFRAME_CONVERTERS.put(OntType.BF_WORK,  BfResourceConverter.class);            
+        CONVERTERS_BY_TYPE.put(OntType.BF_PERSON, BfPersonConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_TOPIC, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_WORK,  BfResourceConverter.class);            
     }
     
     private Map<OntType, BfResourceConverter> converters; 
@@ -67,7 +67,7 @@ public class BibframeConverter extends RdfProcessor {
                 new HashMap<OntType, BfResourceConverter>();
         
         for (Map.Entry<OntType, Class<?>> entry : 
-                BIBFRAME_CONVERTERS.entrySet()) {
+                CONVERTERS_BY_TYPE.entrySet()) {
             OntType type = entry.getKey();
             Class<?> converterClass = entry.getValue();
 
