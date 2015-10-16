@@ -4,6 +4,8 @@ import java.io.File;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
+import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +13,6 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.ProcessorFactory;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BibframeConverterFactory;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
@@ -27,9 +28,11 @@ public class BibframeConverter extends RdfProcessor {
             new HashMap<OntType, Class<?>>();
     static {
         // Assign temporarily to BfResourceConverter till start implementing
-        // type-specific class
+        // type-specific converter classes.
         BIBFRAME_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
         BIBFRAME_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
+        BIBFRAME_CONVERTERS.put(OntType.BF_HELD_ITEM, 
+                BfResourceConverter.class);
         BIBFRAME_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
         BIBFRAME_CONVERTERS.put(OntType.BF_JURISDICTION,  
                 BfResourceConverter.class);
@@ -60,22 +63,7 @@ public class BibframeConverter extends RdfProcessor {
         LOGGER.info("Start process");
         
         String outputDir = getOutputDir();    
-  
-        File[] inputFiles = new File(inputDir).listFiles();
-        
-        for ( File file : inputFiles ) {
-            String filename = file.getName();
-            LOGGER.info("Converting file " + filename);
-            BfResourceConverter converter = 
-                    // BibframeConverterFactory.createBfResourceConverter(file); 
-                    ProcessorFactory.createProcessor(file, BIBFRAME_CONVERTERS);
-//            if (converter == null) {
-//                LOGGER.debug("No converter found for file " + filename);
-//                continue;
-//            }
-            Model model = readModelFromFile(file);          
-        }
-        
+
         /* Can loop on input files or types to dedupe. In the former, send the
          * file to the factory; factory creates model from file, determines 
          * deduper type, sends model to deduper constructor to store in instance
@@ -103,6 +91,44 @@ public class BibframeConverter extends RdfProcessor {
 //              newStatements.add(statements);
 //          }
 //  }
+        
+        File[] inputFiles = new File(inputDir).listFiles();
+        
+        for ( File file : inputFiles ) {
+            String filename = file.getName();
+            String basename = FilenameUtils.getBaseName(file.toString());
+            LOGGER.debug("Converting file " + filename);
+            OntType type = OntType.getByFilename(basename);
+            if (type == null) {
+                LOGGER.debug("No converter found for file " + filename);
+                // TODO *** What to do here? - 
+                // we still need to convert other.nt ***
+                // Unless we've gotten rid of all other statements
+                // Either (a) eliminate other file by putting all statements
+                // into a type file, or (b) query the other model to get the
+                // types represented in the file. Then for each type, 
+                // get a converter and convert. Would be a reason to store
+                // the converter instances in an instance variable here, so 
+                // they can be re-used, like the dedupers.
+                // NB File newStatements.nt should not be converted.                
+                continue;
+            }
+            LOGGER.debug("Type = " + type);
+            Class<?> converterClass = BIBFRAME_CONVERTERS.get(type);
+            LOGGER.debug("Found class " + converterClass.toString() 
+                    + " for type " + type);
+            try {
+                BfResourceConverter converter = (BfResourceConverter) 
+                        converterClass.getConstructor(
+                                OntType.class).newInstance(type);
+            } catch (Exception e) {
+                LOGGER.debug("No converter created for type " + type);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }    
+
+            Model model = readModelFromFile(file);          
+        }
 
         // TEMPORARY
         copyFiles(inputDir, outputDir);
