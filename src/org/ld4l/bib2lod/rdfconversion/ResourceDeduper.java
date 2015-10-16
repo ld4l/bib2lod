@@ -15,7 +15,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.ProcessorFactory;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
@@ -26,8 +25,7 @@ import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class ResourceDeduper extends RdfProcessor {
 
-    private static final Logger LOGGER = LogManager.getLogger(ResourceDeduper.class);
-    
+    private static final Logger LOGGER = LogManager.getLogger(ResourceDeduper.class);  
   
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
@@ -64,13 +62,48 @@ public class ResourceDeduper extends RdfProcessor {
             TYPES_TO_DEDUPE.add(it.next());
         }
     }
+    
+    // Maps file basenames to a deduper instance.
+    private Map<String, BfResourceDeduper> dedupers;
 
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
     public ResourceDeduper(String inputDir, String mainOutputDir) {          
-        super(inputDir, mainOutputDir);   
+        super(inputDir, mainOutputDir);           
+        dedupers = createDedupers();
+    }
+    
+    private Map<String, BfResourceDeduper> createDedupers() {
+        
+        Map<String, BfResourceDeduper> dedupers = 
+                new HashMap<String, BfResourceDeduper>();
+        
+        for (Map.Entry<OntType, Class<?>> entry : 
+                RESOURCE_DEDUPERS.entrySet()) {
+            OntType type = entry.getKey();
+            String basename = type.filename();
+            LOGGER.debug("Creating deduper for type " + type 
+                    + " and file basename " + basename);
+            
+            Class<?> cls = entry.getValue();
+            LOGGER.debug("Deduper class: " + cls.getName());
+
+            try {
+                BfResourceDeduper deduper = (BfResourceDeduper) 
+                        cls.getConstructor(OntType.class).newInstance(type);
+                LOGGER.debug("Adding entry to map: " + basename + " => " 
+                        + deduper.toString());
+                dedupers.put(basename,  deduper);      
+            } catch (Exception e) {
+                LOGGER.info("No deduper created for type " + type);
+                // TODO Auto-generated catch block
+                e.printStackTrace();
+            }              
+        }
+        
+        return dedupers;
     }
     
     protected static List<OntType> getTypesToDedupe() {
@@ -134,12 +167,11 @@ public class ResourceDeduper extends RdfProcessor {
         
         for ( File file : inputFiles ) {
             String filename = file.getName();
-            LOGGER.debug("Deduping file " + filename);
-            BfResourceDeduper deduper = 
-                    // DeduperFactory.createBfResourceDeduper(file);
-                    ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
+            LOGGER.info("Deduping file " + filename);
+            String basename = FilenameUtils.getBaseName(file.toString());
+            BfResourceDeduper deduper = dedupers.get(basename);
             if (deduper == null) {
-                LOGGER.debug("No deduper found for file " + filename);
+                LOGGER.info("No deduper found for file " + filename);
                 continue;
             }
             Model model = readModelFromFile(file);
@@ -171,12 +203,13 @@ public class ResourceDeduper extends RdfProcessor {
                 // Instead of this test, we may want to simply leave entries 
                 // where key and value are the same out of the map.
                 if (! newUri.equals(originalUri)) {
-                    LOGGER.debug("Replacing " + originalUri + " with " + newUri);                           
+                    LOGGER.info("Replacing " + originalUri + " with " + newUri);                           
                     Resource resource = model.getResource(originalUri);
                     ResourceUtils.renameResource(resource, newUri);                          
                 }
             }
-            
+
+            String filename = file.getName();
             String basename = FilenameUtils.getBaseName(file.toString());
 
             // Could do as separate processing step after writing out each 
@@ -196,14 +229,9 @@ public class ResourceDeduper extends RdfProcessor {
             // and we transform that here to a map from Model to filename (or
             // the reverse.
             
-            // TODO Since we're doing this twice now, we should probably store
-            // the deduper with the file basename in a map.
-            BfResourceDeduper deduper = 
-                    // DeduperFactory.createBfResourceDeduper(file);
-                    ProcessorFactory.createProcessor(file, RESOURCE_DEDUPERS);
-            // other.nt has no deduper
+            BfResourceDeduper deduper = dedupers.get(basename);
             if (deduper == null) {
-                LOGGER.info("No deduper found for file " + file.getName());
+                LOGGER.info("No deduper found for file " + filename);
                 appendModelToFile(model, basename);
             } else {
                 Map<OntType, Model> modelsByType = 
