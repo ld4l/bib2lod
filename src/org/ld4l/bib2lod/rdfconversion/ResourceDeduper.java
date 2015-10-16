@@ -205,35 +205,54 @@ public class ResourceDeduper extends RdfProcessor {
                 }
             }
 
-            String filename = file.getName();
             String basename = FilenameUtils.getBaseName(file.toString());
-
-            // Could do as separate processing step after writing out each 
-            // model to a single file, but trying this for efficiency. Anyway,
-            // it's best to work through the dedupers because they are aware of
-            // what types were returned from their query.
-            // splitIntoTypes(model, basename)
-            // get the deduper
-            // have it split into multiple models and return map of filenames
-            // to models - or models to filenames, whichever is easier. Append 
-            // each model to appropriate file.
-
-            // Map<String, Model> models = writeModelsToFiles(models) or
-            // Map<Model, String> models = writeModelsToFiles(models)
-            // OR if the dedupers don't know anything about filenames, just 
-            // have them return a map from Model to OntType (or the reverse),
-            // and we transform that here to a map from Model to filename (or
-            // the reverse.
             
-            BfResourceDeduper deduper = dedupers.get(basename);
-            if (deduper == null) {
-                LOGGER.info("No deduper found for file " + filename);
-                appendModelToFile(model, basename);
-            } else {
-                Map<OntType, Model> modelsByType = 
-                        deduper.getModelsByType(model);
-                appendModelsToFiles(modelsByType);            
-            }
+            /*
+             * Second round of type-splitting: put each type into separate
+             * file - i.e, separate Titles into separate file from Works and
+             * Instances.
+             * 
+             * Could do as independent processing step after writing out each
+             * model to a single file, but trying approach below for efficiency. 
+             * Anyway, it's best to work through the dedupers because they are 
+             * aware of what types were returned from their query.
+             * splitIntoTypes(model, basename)
+             * get the deduper
+             * have it split into multiple models and return map of filenames
+             * to models - or models to filenames, whichever is easier. Append 
+             * each model to appropriate file.
+             * 
+             * Map<String, Model> models = writeModelsToFiles(models) or
+             * Map<Model, String> models = writeModelsToFiles(models)
+             * OR if the dedupers don't know anything about filenames, just 
+             * have them return a map from Model to OntType (or the reverse),
+             * and we transform that here to a map from Model to filename (or
+             * the reverse.
+             * 
+             * Not seeing a need for this now. Possibly it could be a 
+             * performance improvement: smaller files to read into converters,
+             * don't have to loop through each type for each file, since we
+             * know which type is represented in  each file. Save for later
+             * consideration.
+             *
+
+             * 
+             * BfResourceDeduper deduper = dedupers.get(basename);
+             * if (deduper == null) {
+             *    LOGGER.info("No deduper found for file " + filename);
+             *   appendModelToFile(model, basename);
+             * } else {
+             *    Map<OntType, Model> modelsByType = 
+             *           deduper.getModelsByType(model);
+             *   appendModelsToFiles(modelsByType);            
+             * }
+             * 
+             */
+
+            // Write out new model to file. Duplicate statements are 
+            // automatically removed.
+            LOGGER.info("Writing model for file " + file.getName());
+            writeModelToFile(model, basename);    
         }        
     }
    
@@ -244,16 +263,17 @@ public class ResourceDeduper extends RdfProcessor {
             writeModelToFile(newStatements, NEW_STATEMENT_FILENAME);
         }
     }
-    
-    private void appendModelsToFiles(Map<OntType, Model> modelsByType) {
-        
-        for (Map.Entry<OntType, Model> entry : modelsByType.entrySet()) {
-            OntType type = entry.getKey();
-            Model model = entry.getValue();
-            String basename = type.filename();
-            appendModelToFile(model, basename);
-        }
-    }
+  
+// Use for second round of type splitting. See comments above.
+//    private void appendModelsToFiles(Map<OntType, Model> modelsByType) {
+//        
+//        for (Map.Entry<OntType, Model> entry : modelsByType.entrySet()) {
+//            OntType type = entry.getKey();
+//            Model model = entry.getValue();
+//            String basename = type.filename();
+//            appendModelToFile(model, basename);
+//        }
+//    }
     
 
 }
