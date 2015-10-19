@@ -122,13 +122,11 @@ public class ResourceDeduper extends RdfProcessor {
         String outputDir = getOutputDir();    
 
         Map<String, String> uniqueUris = new HashMap<String, String>();
-        Model newStatements = ModelFactory.createDefaultModel();
 
         File[] inputFiles = new File(inputDir).listFiles();
         
-        getUniqueUris(inputFiles, uniqueUris, newStatements);
+        getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
-        writeNewStatements(newStatements);
 
         LOGGER.info("End process");
         return outputDir;
@@ -136,7 +134,7 @@ public class ResourceDeduper extends RdfProcessor {
 
 
     private void getUniqueUris(File[] inputFiles, 
-            Map<String, String> uniqueUris, Model newStatements) {
+            Map<String, String> uniqueUris) {
 
         /* Can loop on input files or types to dedupe. In the former, send the
          * file to the factory; factory creates model from file, determines 
@@ -180,10 +178,13 @@ public class ResourceDeduper extends RdfProcessor {
             if (dedupedUris != null) {
                 uniqueUris.putAll(dedupedUris);
             }
-            Model statements = deduper.getNewStatements();
-            if (statements != null) {
-                newStatements.add(statements);
-            }
+            
+            // If deduping has generated any new assertions (e.g., Instance
+            // deduping asserts the sameAs relation between a local Instance URI 
+            // and the corresponding WorldCat URI) write these out to a file.
+            // Do per input file, so we don't have to hold all in memory.
+            writeNewStatements(deduper.getNewStatements());
+
         }         
     }
     
@@ -262,10 +263,8 @@ public class ResourceDeduper extends RdfProcessor {
     }
    
     private void writeNewStatements(Model newStatements) {
-        // Assumes there aren't too many of these to hold all in memory. If too
-        // many, append to file after each iteration through the loop.
         if (!newStatements.isEmpty()) {
-            writeModelToFile(newStatements, NEW_STATEMENT_FILENAME);
+            appendModelToFile(newStatements, NEW_STATEMENT_FILENAME);
         }
     }
   
