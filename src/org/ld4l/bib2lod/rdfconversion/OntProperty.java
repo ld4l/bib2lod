@@ -22,7 +22,6 @@ public enum OntProperty {
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
     OWL_SAME_AS(OntNamespace.OWL, "sameAs");
-
     
     private final OntNamespace namespace;
     private final String localname;

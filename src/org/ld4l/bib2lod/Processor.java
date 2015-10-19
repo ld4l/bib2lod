@@ -72,15 +72,20 @@ public abstract class Processor {
     protected void copyFiles(String inputDir, String outputDir) { 
         
         for ( File file : new File(inputDir).listFiles() ) {
-            Path source = file.toPath();
-            String sourceFileName = file.getName();
-            Path target = new File(outputDir, sourceFileName).toPath();
-            try {
-                Files.copy(source, target, COPY_ATTRIBUTES);
-            } catch (IOException e) {
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }
+            copyFile(file, outputDir);
+        }
+    }
+    
+    protected void copyFile(File file, String outputDir) {
+
+        Path source = file.toPath();
+        String sourceFileName = file.getName();
+        Path target = new File(outputDir, sourceFileName).toPath();
+        try {
+            Files.copy(source, target, COPY_ATTRIBUTES);
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
         }
     }
 }

@@ -26,7 +26,8 @@ public enum OntType {
     BF_TOPIC(OntNamespace.BIBFRAME, "Topic"),  
     BF_WORK(OntNamespace.BIBFRAME, "Work"),
     
-    MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority");
+    MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
+    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject");
     
 
     private final OntNamespace namespace;

@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntType;
@@ -12,6 +13,11 @@ public class BfResourceConverter {
     public BfResourceConverter(OntType type) {
         // TODO Auto-generated constructor stub
         LOGGER.debug("In BfResourceConverter constructor");
+    }
+    
+    public Model convert(Model model) {
+        
+        return model;
     }
     
 
