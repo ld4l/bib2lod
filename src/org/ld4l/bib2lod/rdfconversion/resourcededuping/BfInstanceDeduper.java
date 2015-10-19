@@ -99,12 +99,16 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             }
         }
         
+        // NB Since Instance keys are always WorldCat URIs, we can always add
+        // the sameAs assertion. If we add other types of keys, we'll have to 
+        // test here that the map key is a URI.
         for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
             Resource subject = 
                     model.createResource(entry.getValue());
-            Resource object = model.createResource(entry.getKey());                   
-            Statement s = model.createStatement(subject, OWL.sameAs, object);
-            newStatements.add(s);            
+            Resource object = model.createResource(entry.getKey()); 
+            LOGGER.debug("Adding " + subject.getURI() 
+                    + " owl:sameAs " + object.getURI());
+            newAssertions.add(subject, OWL.sameAs, object);            
         }
         
         if (LOGGER.isDebugEnabled()) {
@@ -116,8 +120,6 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
                 LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
-            
-
         }
         
         return uniqueUris;        

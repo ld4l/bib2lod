@@ -30,13 +30,13 @@ public class BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
     
-    protected Model newStatements;
+    protected Model newAssertions;
     protected OntType type;
     
     public BfResourceDeduper(OntType type) {
         LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
-        newStatements = ModelFactory.createDefaultModel();
+        newAssertions = ModelFactory.createDefaultModel();
     }
     
     public Map<String, String> dedupe(Model model) {
@@ -157,8 +157,8 @@ public class BfResourceDeduper {
     }
    
   
-    public Model getNewStatements() {
-        return newStatements;
+    public Model getNewAssertions() {
+        return newAssertions;
     }
     
     public Map<OntType, Model> getModelsByType(Model model) {

@@ -65,7 +65,7 @@ public class ResourceDeduper extends RdfProcessor {
     }
 
     private static final String REMAINDER_FILENAME = "other";
-    private static final String NEW_STATEMENT_FILENAME = "newStatements";
+    private static final String NEW_ASSERTIONS_FILENAME = "newAssertions";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
     // Maps file basenames to deduper instances.
@@ -77,8 +77,8 @@ public class ResourceDeduper extends RdfProcessor {
         dedupers = createDedupers();
     }
     
-    public static String getNewStatementFilename() {
-        return NEW_STATEMENT_FILENAME;
+    public static String getNewAssertionsFilename() {
+        return NEW_ASSERTIONS_FILENAME;
     }
     
     private Map<String, BfResourceDeduper> createDedupers() {
@@ -160,7 +160,7 @@ public class ResourceDeduper extends RdfProcessor {
 //      
 //      Model statements = deduper.getNewStatements();
 //      if (statements != null) {
-//          newStatements.add(statements);
+//          newAssertions.add(statements);
 //      }
 //  }
         
@@ -180,11 +180,10 @@ public class ResourceDeduper extends RdfProcessor {
             }
             
             // If deduping has generated any new assertions (e.g., Instance
-            // deduping asserts the sameAs relation between a local Instance URI 
-            // and the corresponding WorldCat URI) write these out to a file.
-            // Do per input file, so we don't have to hold all in memory.
-            writeNewStatements(deduper.getNewStatements());
-
+            // deduping asserts owl:sameAs between a local Instance URI and the
+            // corresponding WorldCat URI), write these out to a file. Do per
+            // input file, so we don't have to hold all in memory.
+            writeNewAssertions(deduper.getNewAssertions());
         }         
     }
     
@@ -262,9 +261,9 @@ public class ResourceDeduper extends RdfProcessor {
         }        
     }
    
-    private void writeNewStatements(Model newStatements) {
+    private void writeNewAssertions(Model newStatements) {
         if (!newStatements.isEmpty()) {
-            appendModelToFile(newStatements, NEW_STATEMENT_FILENAME);
+            appendModelToFile(newStatements, NEW_ASSERTIONS_FILENAME);
         }
     }
   

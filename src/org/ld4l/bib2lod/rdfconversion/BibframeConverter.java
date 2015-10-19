@@ -60,8 +60,8 @@ public class BibframeConverter extends RdfProcessor {
     }
     
     private static final String IN_PROGRESS_DIR = "inProgress";
-    private static final String NEW_STATEMENT_FILENAME = 
-            ResourceDeduper.getNewStatementFilename();
+    private static final String NEW_ASSERTIONS_FILENAME = 
+            ResourceDeduper.getNewAssertionsFilename();
     
     private Map<OntType, BfResourceConverter> converters; 
     
@@ -133,7 +133,7 @@ public class BibframeConverter extends RdfProcessor {
 //          
 //          Model statements = deduper.getNewStatements();
 //          if (statements != null) {
-//              newStatements.add(statements);
+//              newAssertions.add(statements);
 //          }
 //  }
         
@@ -146,8 +146,8 @@ public class BibframeConverter extends RdfProcessor {
             // No need to convert new statements that have been added during
             // processing.
             if (FilenameUtils.getBaseName(
-                    file.toString()).equals(NEW_STATEMENT_FILENAME)) {
-                LOGGER.debug("Copying file " + NEW_STATEMENT_FILENAME);
+                    file.toString()).equals(NEW_ASSERTIONS_FILENAME)) {
+                LOGGER.debug("Copying file " + NEW_ASSERTIONS_FILENAME);
                 copyFile(file, outputDir);
                 continue;
             }
