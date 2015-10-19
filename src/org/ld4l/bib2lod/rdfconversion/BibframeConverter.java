@@ -105,11 +105,6 @@ public class BibframeConverter extends RdfProcessor {
         LOGGER.info("Start Bibframe conversion process");
         
         String outputDir = getOutputDir();  
-        
-        if (LOGGER.isDebugEnabled()) {
-            copyFiles(inputDir, outputDir);
-            return outputDir;
-        }
 
         /* Can loop on input files or types to dedupe. In the former, send the
          * file to the factory; factory creates model from file, determines 
@@ -149,8 +144,11 @@ public class BibframeConverter extends RdfProcessor {
             // processing.
             if (FilenameUtils.getBaseName(
                     file.toString()).equals("newStatements")) {
+                LOGGER.debug("Copying file newStatements");
                 copyFile(file, outputDir);
+                continue;
             }
+            
             LOGGER.trace("Processing file " + file.getName());
             Model inputModel = readModelFromFile(file);  
             Model outputModel = ModelFactory.createDefaultModel();
@@ -175,6 +173,7 @@ public class BibframeConverter extends RdfProcessor {
                 }
             }
                         
+            LOGGER.debug("Writing model to file " + outputFile);
             writeModelToFile(outputModel, outputFile);
             
         }
