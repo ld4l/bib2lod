@@ -63,17 +63,22 @@ public class ResourceDeduper extends RdfProcessor {
             TYPES_TO_DEDUPE.add(it.next());
         }
     }
-    
-    // Maps file basenames to deduper instances.
-    private Map<String, BfResourceDeduper> dedupers;
 
     private static final String REMAINDER_FILENAME = "other";
     private static final String NEW_STATEMENT_FILENAME = "newStatements";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
+    // Maps file basenames to deduper instances.
+    private Map<String, BfResourceDeduper> dedupers;
+
+
     public ResourceDeduper(String inputDir, String mainOutputDir) {          
         super(inputDir, mainOutputDir);           
         dedupers = createDedupers();
+    }
+    
+    public static String getNewStatementFilename() {
+        return NEW_STATEMENT_FILENAME;
     }
     
     private Map<String, BfResourceDeduper> createDedupers() {

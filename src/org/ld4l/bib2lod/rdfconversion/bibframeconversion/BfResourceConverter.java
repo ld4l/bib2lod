@@ -12,13 +12,14 @@ public class BfResourceConverter {
     
     public BfResourceConverter(OntType type) {
         // TODO Auto-generated constructor stub
-        LOGGER.debug("In BfResourceConverter constructor");
+        LOGGER.debug("In constructor for " + this.getClass().getName());
     }
     
     public Model convert(Model model) {
         
         return model;
     }
+
     
 
 

@@ -11,7 +11,6 @@ public class BfPersonConverter extends BfResourceConverter {
     
     public BfPersonConverter(OntType type) {
         super(type);
-        LOGGER.debug("In BfPersonConverter constructor");
     }
 
 }

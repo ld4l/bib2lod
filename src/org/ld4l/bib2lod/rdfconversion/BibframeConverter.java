@@ -7,11 +7,10 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ModelFactory;         
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
@@ -35,7 +34,7 @@ public class BibframeConverter extends RdfProcessor {
         // Assign temporarily to BfResourceConverter till start implementing
         // type-specific converter classes.
         CONVERTERS_BY_TYPE.put(OntType.BF_ANNOTATION, 
-                BfResourceConverter.class);
+                BfResourceConverter.class);            
         CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
@@ -60,10 +59,14 @@ public class BibframeConverter extends RdfProcessor {
                 BfResourceConverter.class); 
     }
     
+    private static final String IN_PROGRESS_DIR = "inProgress";
+    private static final String NEW_STATEMENT_FILENAME = 
+            ResourceDeduper.getNewStatementFilename();
+    
     private Map<OntType, BfResourceConverter> converters; 
     
     
-    public BibframeConverter(OntModel bfOntModelInf,
+    public BibframeConverter(OntModel bfOntModelInf,        
             String localNamespace, String inputDir, String mainOutputDir) {
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
         converters = createConverters();
@@ -143,13 +146,14 @@ public class BibframeConverter extends RdfProcessor {
             // No need to convert new statements that have been added during
             // processing.
             if (FilenameUtils.getBaseName(
-                    file.toString()).equals("newStatements")) {
-                LOGGER.debug("Copying file newStatements");
+                    file.toString()).equals(NEW_STATEMENT_FILENAME)) {
+                LOGGER.debug("Copying file " + NEW_STATEMENT_FILENAME);
                 copyFile(file, outputDir);
                 continue;
             }
             
             LOGGER.trace("Processing file " + file.getName());
+            
             Model inputModel = readModelFromFile(file);  
             Model outputModel = ModelFactory.createDefaultModel();
             
