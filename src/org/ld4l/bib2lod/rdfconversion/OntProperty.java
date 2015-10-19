@@ -20,8 +20,7 @@ public enum OntProperty {
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
-            OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
-    OWL_SAME_AS(OntNamespace.OWL, "sameAs");
+            OntNamespace.MADSRDF, "isMemberOfMADSScheme");
     
     private final OntNamespace namespace;
     private final String localname;

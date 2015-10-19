@@ -14,6 +14,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
@@ -98,14 +99,11 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             }
         }
         
-        Property sameAs = 
-                model.createProperty(OntProperty.OWL_SAME_AS.uri());
-        LOGGER.debug("sameAs: " + sameAs.toString());
         for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
             Resource subject = 
                     model.createResource(entry.getValue());
             Resource object = model.createResource(entry.getKey());                   
-            Statement s = model.createStatement(subject, sameAs, object);
+            Statement s = model.createStatement(subject, OWL.sameAs, object);
             newStatements.add(s);            
         }
         
