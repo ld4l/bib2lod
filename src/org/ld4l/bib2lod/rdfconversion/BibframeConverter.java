@@ -63,45 +63,19 @@ public class BibframeConverter extends RdfProcessor {
     private static final String NEW_ASSERTIONS_FILENAME = 
             ResourceDeduper.getNewAssertionsFilename();
     
-    private Map<OntType, BfResourceConverter> converters; 
-    
     
     public BibframeConverter(OntModel bfOntModelInf,        
             String localNamespace, String inputDir, String mainOutputDir) {
         super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
-        converters = createConverters();
     }
 
     public BibframeConverter(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
-        converters = createConverters();
     }
 
-    private Map<OntType, BfResourceConverter> createConverters() {
-        
-        Map<OntType, BfResourceConverter> converters = 
-                new HashMap<OntType, BfResourceConverter>();
-        
-        for (Map.Entry<OntType, Class<?>> entry : 
-                CONVERTERS_BY_TYPE.entrySet()) {
-            OntType type = entry.getKey();
-            Class<?> converterClass = entry.getValue();
 
-            try {
-                BfResourceConverter converter = 
-                        (BfResourceConverter) converterClass
-                        .getConstructor(OntType.class).newInstance(type);                        
-                converters.put(type,  converter);      
-            } catch (Exception e) {
-                LOGGER.info("No converter created for type " + type);
-                // TODO Auto-generated catch block
-                e.printStackTrace();
-            }              
-        }
-        
-        return converters;
-    }
+    
     @Override
     public String process() {
 
@@ -121,7 +95,15 @@ public class BibframeConverter extends RdfProcessor {
         
         for ( File file : inputFiles ) {
             convertFile(file);
-        }        
+        }  
+
+        /*
+         * Possibly we need other steps here: go back through files to do URI
+         * replacements. This entails keeping separate models for statements 
+         * that shouldn't undergo URI replacement: e.g., the new statements
+         * we create linking ld4l entities to bf entities, where the latter
+         * shouldn't undergo URI replacement.
+         */
     }
     
     /*
@@ -140,23 +122,41 @@ public class BibframeConverter extends RdfProcessor {
     private BfResourceConverter getConverterForModel(
             Resource subject, Model model) {
         
-        // This will need modification if ordering of types is crucial.
-        for (Map.Entry<OntType, BfResourceConverter> entry : 
-            converters.entrySet()) {
+        // Will need modification if ordering of types is crucial.
+        for (Map.Entry<OntType, Class<?>> entry : 
+                CONVERTERS_BY_TYPE.entrySet()) {
             OntType type = entry.getKey();
             Resource ontClass = model.createResource(type.uri());
             LOGGER.trace("Checking subject " + subject.getURI() + " and type " 
                         + type.uri());
             if (model.contains(null, RDF.type, ontClass)) {
-                LOGGER.trace("Found converter for subject " + subject.getURI() 
-                        + " of type " + type.uri());
-                return entry.getValue();
+                LOGGER.trace("Found converter class for subject " 
+                        + subject.getURI() + " of type " + type.uri());                        
+                return createConverter(type, entry.getValue());
             }
         }
         
+        LOGGER.debug("No converter found for subject" + subject.getURI());
         return null;
     }
- 
+
+    private BfResourceConverter createConverter(
+            OntType type, Class<?> converterClass) {
+        
+        try {
+            BfResourceConverter converter = 
+                    (BfResourceConverter) converterClass
+                    .getConstructor(OntType.class).newInstance(type);                        
+            return converter;      
+        } catch (Exception e) {
+            LOGGER.info("No converter created for type " + type);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }    
+        
+        return null;
+    }
+    
     private void convertFile(File file) {
         
         String filename = file.getName();

@@ -10,9 +10,11 @@ public class BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
     
+    protected OntType type;
+    
     public BfResourceConverter(OntType type) {
-        // TODO Auto-generated constructor stub
         LOGGER.debug("In constructor for " + this.getClass().getName());
+        this.type = type;
     }
     
     public Model convert(Model inputModel) {  
