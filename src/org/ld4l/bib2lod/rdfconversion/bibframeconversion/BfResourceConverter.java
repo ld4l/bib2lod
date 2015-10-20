@@ -15,9 +15,8 @@ public class BfResourceConverter {
         LOGGER.debug("In constructor for " + this.getClass().getName());
     }
     
-    public Model convert(Model model) {
-        
-        return model;
+    public Model convert(Model inputModel) {  
+        return inputModel;
     }
 
     

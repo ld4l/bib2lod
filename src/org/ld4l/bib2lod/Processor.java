@@ -65,18 +65,45 @@ public abstract class Processor {
     protected abstract Format getOutputFormat();
     
     protected String stubProcess() {
-        copyFiles(inputDir, outputDir);
+        copyFiles(inputDir);
         return outputDir;
     }
     
-    protected void copyFiles(String inputDir, String outputDir) { 
+    /**
+     * Copy a directory of files to this Processor's output directory.
+     * @param inputDir - location of the input files
+     */
+    protected String copyFiles(String inputDir) {
+        return copyFiles(inputDir, outputDir);       
+    }
+    
+    /**
+     * Copy a directory of files to the specified output directory.
+     * @param inputDir - location of the input files
+     * @param outputDir - directory for output files
+     */
+    protected String copyFiles(String inputDir, String outputDir) { 
         
         for ( File file : new File(inputDir).listFiles() ) {
             copyFile(file, outputDir);
         }
+        return outputDir;
     }
     
-    protected void copyFile(File file, String outputDir) {
+    /**
+     * Copy a file to this Processor's output directory.
+     * @param file - the input file
+     */
+    protected String copyFile(File file) {
+        return copyFile(file, outputDir);
+    }
+ 
+    /**
+     * Copy a directory of files to the specified output directory.
+     * @param inputDir - the input file
+     * @param outputDir - directory for output files
+     */
+    protected String copyFile(File file, String outputDir) {
 
         Path source = file.toPath();
         String sourceFileName = file.getName();
@@ -87,5 +114,6 @@ public abstract class Processor {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }
+        return outputDir;
     }
 }

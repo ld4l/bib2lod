@@ -59,7 +59,7 @@ public class BibframeConverter extends RdfProcessor {
                 BfResourceConverter.class); 
     }
     
-    private static final String IN_PROGRESS_DIR = "inProgress";
+//    private static final String IN_PROGRESS_DIR = "inProgress";
     private static final String NEW_ASSERTIONS_FILENAME = 
             ResourceDeduper.getNewAssertionsFilename();
     
@@ -109,82 +109,19 @@ public class BibframeConverter extends RdfProcessor {
         
         String outputDir = getOutputDir();  
 
-        /* Can loop on input files or types to dedupe. In the former, send the
-         * file to the factory; factory creates model from file, determines 
-         * deduper type, sends model to deduper constructor to store in instance
-         * field. In the latter, send the type to the factory; factory finds
-         * file from type, creates model from file, and sends model to deduper
-         * constructor to store in instance field. So results are the same,
-         * but the latter has the potential of ordering deduping by type in
-         * case there are dependencies. Iterating on files is easier, however,
-         * so implementing that for now. 
-         */
-//          for ( OntType type : TYPES_TO_DEDUPE ) {
-//          BfResourceDeduper deduper = 
-//                  DeduperFactory.createBfResourceDeduper(type, inputDir);
-//          if (deduper == null) {
-//              LOGGER.debug("No deduper found for type " + type);
-//              continue;
-//          }
-//          Map<String, String> dedupedUris = deduper.dedupe();
-//          if (dedupedUris != null) {
-//              uniqueUris.putAll(dedupedUris);
-//          }
-//          
-//          Model statements = deduper.getNewStatements();
-//          if (statements != null) {
-//              newAssertions.add(statements);
-//          }
-//  }
+        convertFiles(inputDir, outputDir);
+
+        LOGGER.info("End Bibframe conversion process");
+        return outputDir;        
+    }
+    
+    private void convertFiles(String inputDir, String outputDir) {
         
         File[] inputFiles = new File(inputDir).listFiles();
         
         for ( File file : inputFiles ) {
-            
-            String outputFile = FilenameUtils.getBaseName(file.toString());
-            
-            // No need to convert new statements that have been added during
-            // processing.
-            if (FilenameUtils.getBaseName(
-                    file.toString()).equals(NEW_ASSERTIONS_FILENAME)) {
-                LOGGER.debug("Copying file " + NEW_ASSERTIONS_FILENAME);
-                copyFile(file, outputDir);
-                continue;
-            }
-            
-            LOGGER.trace("Processing file " + file.getName());
-            
-            Model inputModel = readModelFromFile(file);  
-            Model outputModel = ModelFactory.createDefaultModel();
-            
-            ResIterator subjects = inputModel.listSubjects();
-            while (subjects.hasNext()) {
-
-                Resource subject = subjects.nextResource();
-                StmtIterator statements = 
-                        inputModel.listStatements(subject, null, (RDFNode) null);
-                Model subjectModel = ModelFactory.createDefaultModel();
-                subjectModel.add(statements);
-                BfResourceConverter converter = 
-                        getConverterForModel(subject, subjectModel);
-                if (converter == null) {
-                    LOGGER.trace("No converter found for subject " 
-                            + subject.getURI());
-                    outputModel.add(subjectModel);
-                } else {
-                    Model newSubjectModel = converter.convert(subjectModel);
-                    outputModel.add(newSubjectModel);
-                }
-            }
-                        
-            LOGGER.debug("Writing model to file " + outputFile);
-            writeModelToFile(outputModel, outputFile);
-            
-        }
-        
-        LOGGER.info("End Bibframe conversion process");
-        return outputDir;        
-
+            convertFile(file);
+        }        
     }
     
     /*
@@ -194,10 +131,11 @@ public class BibframeConverter extends RdfProcessor {
      * derive the converter type from the filename, as for ResourceDeduper.
      * (However, if there's still an other.nt file we'd have to deal with that
      * as here.) Consider implementing this step.
-     * Note, however, that in the current implementation it doesn't matter how 
-     * the input files are structured - we don't even need the initial type-
-     * splitting or deduping. (So could eliminate the prerequisites on Bibframe
-     * conversion.)
+     * On the other hand, there's an advantage that in the current 
+     * implementation it doesn't matter how the input files are structured - we
+     * wouldn't even need the initial type-splitting or deduping, so the 
+     * processes are more independent. (We could eliminate the prerequisite on
+     * Bibframe conversion, though deduping still depends on type-splitting.)
      */
     private BfResourceConverter getConverterForModel(
             Resource subject, Model model) {
@@ -218,19 +156,48 @@ public class BibframeConverter extends RdfProcessor {
         
         return null;
     }
-    
-//    private void processInputFile(File inputFile) {
-//        
-//        String filename = inputFile.getName();
-//        LOGGER.info("Start processing file " + filename);
-//        
-//        String basename = FilenameUtils.getBaseName(inputFile.toString());
-//        OntType type = OntType.getByFilename(basename);
-//        if (type == null) {
-//            LOGGER.warn("No type found for file " + basename);
-//            return;
-//        }
-//        LOGGER.debug("Type = " + type.toString());
-//    }
+ 
+    private void convertFile(File file) {
+        
+        String filename = file.getName();
+        String outputFile = FilenameUtils.getBaseName(file.toString());
+        
+        // No need to convert new statements that have been added during
+        // processing.
+        if (outputFile.equals(NEW_ASSERTIONS_FILENAME)) {
+            LOGGER.debug("Copying file " + filename);
+            copyFile(file);
+            return;
+        }
+
+        LOGGER.trace("Processing file " + filename);
+        
+        Model inputModel = readModelFromFile(file);  
+        Model outputModel = ModelFactory.createDefaultModel();
+        
+        ResIterator subjects = inputModel.listSubjects();
+        while (subjects.hasNext()) {
+
+            Resource subject = subjects.nextResource();
+            StmtIterator statements = 
+                    inputModel.listStatements(subject, null, (RDFNode) null);
+            Model subjectModel = ModelFactory.createDefaultModel();
+            subjectModel.add(statements);
+            BfResourceConverter converter = 
+                    getConverterForModel(subject, subjectModel);
+            if (converter == null) {
+                LOGGER.trace("No converter found for subject " 
+                        + subject.getURI());
+                outputModel.add(subjectModel);
+            } else {
+                Model newSubjectModel = converter.convert(subjectModel);
+                outputModel.add(newSubjectModel);
+            }
+        }
+                    
+        LOGGER.debug("Writing model to file " + filename);
+        writeModelToFile(outputModel, outputFile);
+        
+    }
 
 }
