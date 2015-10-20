@@ -15,6 +15,9 @@ public class BfPersonConverter extends BfResourceConverter {
     }
     
     public Model convert(Model inputModel) {
+        if (LOGGER.isDebugEnabled()) {
+            printModel(inputModel);
+        }
         return inputModel;
     }
 
