@@ -7,7 +7,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;         
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
@@ -175,22 +175,40 @@ public class BibframeConverter extends RdfProcessor {
         Model inputModel = readModelFromFile(file);  
         Model outputModel = ModelFactory.createDefaultModel();
         
+        // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
         while (subjects.hasNext()) {
 
-            Resource subject = subjects.nextResource();
+            Resource inputSubject = subjects.nextResource();
+
+            // Create a model consisting of just those statements of which this
+            // subject is the subject
             StmtIterator statements = 
-                    inputModel.listStatements(subject, null, (RDFNode) null);
+                    inputModel.listStatements(inputSubject, null, (RDFNode) null);
             Model subjectModel = ModelFactory.createDefaultModel();
             subjectModel.add(statements);
+            LOGGER.debug("subject model = input model: " + inputSubject.getModel().equals(inputModel));
+            LOGGER.debug("subject model = subject model: " + inputSubject.getModel().equals(subjectModel));
+            
+            // NB At this point, subject.getModel() is the inputModel, not the
+            // subjectModel. Get the subject of subjectModel instead.
+            Resource subject = subjectModel.getResource(inputSubject.getURI());
+            LOGGER.debug("subject model = input model: " + subject.getModel().equals(inputModel));
+            LOGGER.debug("subject model = subject model: " + subject.getModel().equals(subjectModel));
+            
+            // Get the converter according to the type of the subject
             BfResourceConverter converter = 
                     getConverterForModel(subject, subjectModel);
+            
             if (converter == null) {
                 LOGGER.trace("No converter found for subject " 
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
-                Model newSubjectModel = converter.convert(subjectModel);
+                Model newSubjectModel = 
+                        // Or could pass these to constructor, and just call 
+                        // converter.convert();
+                        converter.convert(subject, subjectModel);
                 outputModel.add(newSubjectModel);
             }
         }

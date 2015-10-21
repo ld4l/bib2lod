@@ -18,7 +18,11 @@ public enum OntProperty {
     BF_SHELF_MARK_SCHEME(OntNamespace.BIBFRAME, "shelfMarkScheme"),
     BF_SHELF_MARK_UDC(OntNamespace.BIBFRAME, "shelfMarkUdc"),
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
+    
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
+    MADSRDF_IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
+    MADSRDF_IS_IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, ""
+            + "isIdentifiedByAuthority"),   
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme");
     
