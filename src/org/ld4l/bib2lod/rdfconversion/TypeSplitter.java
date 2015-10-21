@@ -62,7 +62,12 @@ public class TypeSplitter extends RdfProcessor {
 
         pss.setNsPrefix("bf", OntNamespace.BIBFRAME.uri());
         pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
-        pss.setCommandText("CONSTRUCT { ?s1 ?p1 ?o1 . "
+        // NB Some of the union clauses apply only to certain types of entities
+        // - e.g., only an Instance has a Provider - but it doesn't matter.
+        // Filters will not make the query run faster since they're applied
+        // after getting the initial result set.
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
@@ -71,19 +76,44 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.sparqlUri() 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.sparqlUri()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.sparqlUri()
+                + "?o1 a " + OntType.BF_IDENTIFIER.sparqlUri() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_TITLE.sparqlUri()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_PROVIDER.sparqlUri() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.sparqlUri() 
+                + "} UNION { "
+                // LC converter typically generates 
+                // :anno bf:annotates :resource rather than
+                // :resource bf:hasAnnotation :anno
+                + "?o1 ?p1 ?s1 . "
+                + "?s1 a ?type . " 
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.sparqlUri()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_CLASSIFICATION.sparqlUri()                 
                 + "} }"                
         );
+        
+        LOGGER.debug(pss.toString());
         return pss;
     }
     
@@ -96,9 +126,9 @@ public class TypeSplitter extends RdfProcessor {
                     createOutputFileForType(outputDir, type));
         }
         
-        // Add a file for any remaining triples - i.e., where the subject 
-        // doesn't belong to one of the types in typesToSplit.
-        // NB This is why the map keys are strings rather than OntologyTypes.
+        // Add a file for any remaining triples.
+        // NB The goal is to eliminate this file; all triples should end up in
+        // one of the other files. 
         outputFilesByType.put(REMAINDER_FILENAME, new File(outputDir, 
                 getOutputFilename(REMAINDER_FILENAME)));
         
