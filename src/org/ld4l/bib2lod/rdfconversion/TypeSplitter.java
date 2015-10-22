@@ -331,7 +331,6 @@ public class TypeSplitter extends RdfProcessor {
     private ParameterizedSparqlString getDefaultSparql() {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
-        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
 
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
