@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -91,9 +93,20 @@ public enum OntType {
         }
     }
     
-    public static OntType getByFilename(String filename) {
+    public static OntType typeForFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
+    }
+    
+    public static List<OntType> authorities() {
+        return Arrays.asList(
+            BF_FAMILY,
+            BF_JURISDICTION,
+            BF_MEETING,
+            BF_ORGANIZATION,
+            BF_PERSON,
+            BF_PLACE,
+            BF_TOPIC);
     }
 
 }

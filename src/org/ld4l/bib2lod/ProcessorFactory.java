@@ -27,7 +27,7 @@ public class ProcessorFactory {
         LOGGER.debug("Creating processor for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.getByFilename(basename);
+        OntType type = OntType.typeForFilename(basename);
         if (type == null) {
             LOGGER.debug("Can't create processor: no type defined for file "
                    + basename);

@@ -49,7 +49,7 @@ public class BibframeConverterFactory {
         LOGGER.info("Creating converter for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.getByFilename(basename);
+        OntType type = OntType.typeForFilename(basename);
         if (type == null) {
             LOGGER.info("Can't create converter: no type defined for file "
                    + basename);

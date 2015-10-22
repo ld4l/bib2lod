@@ -46,7 +46,7 @@ public class DeduperFactory {
         LOGGER.debug("Creating deduper for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.getByFilename(basename);
+        OntType type = OntType.typeForFilename(basename);
         if (type == null) {
             LOGGER.debug("Can't create deduper: no type defined for file "
                    + basename);

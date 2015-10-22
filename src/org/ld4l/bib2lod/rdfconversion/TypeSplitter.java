@@ -164,9 +164,13 @@ public class TypeSplitter extends RdfProcessor {
         // Could create separate subclasses, as for dedupers and converters,
         // but it's just a separate query so may not be worth it.
         
-        ParameterizedSparqlString pss;
+        ParameterizedSparqlString pss = null;
         
-        if (type == OntType.BF_INSTANCE) {
+        if (type == OntType.BF_TOPIC) {          
+            pss = getBfTopicSparql();
+        } else if (OntType.authorities().contains(type)) {
+            pss = getBfAuthoritySparql();
+        } else if (type == OntType.BF_INSTANCE) {       
             pss = getBfInstanceSparql();
         } else if (type == OntType.BF_WORK) {
             pss = getBfWorkSparql();
@@ -180,11 +184,10 @@ public class TypeSplitter extends RdfProcessor {
         return pss.asQuery();
         
     }
-    
-    private ParameterizedSparqlString getBfInstanceSparql() {
-        
-        ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
+    private ParameterizedSparqlString getBfTopicSparql() {
+
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
         pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
 
         pss.setCommandText(
@@ -197,7 +200,50 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed()                 
+                + "} }"                
+        );
+        
+        return pss;
+    }
+    
+    private ParameterizedSparqlString getBfAuthoritySparql() {
+
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()               
+                + "} }"                
+        );
+        
+        return pss;
+    }
+    
+    private ParameterizedSparqlString getBfInstanceSparql() {
+        
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -241,19 +287,12 @@ public class TypeSplitter extends RdfProcessor {
         
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
 
-        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
-
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -264,11 +303,6 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_TITLE.prefixed()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -293,7 +327,7 @@ public class TypeSplitter extends RdfProcessor {
         return pss;
         
     }
-        
+    
     private ParameterizedSparqlString getDefaultSparql() {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
@@ -302,48 +336,10 @@ public class TypeSplitter extends RdfProcessor {
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
-                + "WHERE {  { " 
+                + "WHERE { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_TITLE.prefixed()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
-                + "} UNION { "
-                // LC converter typically generates 
-                // :anno bf:annotates :resource rather than
-                // :resource bf:hasAnnotation :anno
-                + "?o1 ?p1 ?s1 . "
-                + "?s1 a ?type . " 
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
-                + "} }"                
+                + "}"                
         );
         
         return pss;
