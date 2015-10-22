@@ -37,14 +37,22 @@ public enum OntType {
     private final String localname;
     private final String uri;
     private final String filename;
+    private final String prefixed;
+    private final String sparqlUri;
     
     OntType(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
+        
+        // Save as instance variables so don't recompute on each call.
         this.uri = namespace.uri() + localname;
-        this.filename = this.namespace.prefix() + this.localname; 
-    }
+        this.sparqlUri = "<" + this.uri + ">";
+        
+        String prefix = this.namespace.prefix();
+        this.filename = prefix + this.localname; 
+        this.prefixed = prefix + ":" + this.localname;
 
+    }
 
     public OntNamespace namespace() {
         return namespace;
@@ -66,12 +74,12 @@ public enum OntType {
         return filename;
     }
     
-    public String prefixedForm() {
-        return namespace.prefix() + ":" + localname;
+    public String prefixed() {
+        return prefixed; 
     }
     
     public String sparqlUri() {
-        return "<" + uri + ">";
+        return sparqlUri;
     }
    
     private static final Map<String, OntType> LOOKUP_BY_FILENAME = 

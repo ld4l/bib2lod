@@ -1,13 +1,10 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
@@ -22,11 +19,15 @@ public class TypeSplitter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
-    // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;    
+    
+    // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES; 
+    
     private static final List<OntType> TYPES_TO_SPLIT = 
             ResourceDeduper.getTypesToDedupe();
+    
     private static final String REMAINDER_FILENAME = 
             ResourceDeduper.getRemainderFilename();
+
     
     public TypeSplitter(String inputDir, String mainOutputDir) {   
         super(inputDir, mainOutputDir);  
@@ -38,9 +39,11 @@ public class TypeSplitter extends RdfProcessor {
         LOGGER.info("Start process");
         String outputDir = getOutputDir();
 
-        ParameterizedSparqlString pss = getParameterizedSparqlString();
+        //ParameterizedSparqlString pss = getParameterizedSparqlString();
        
-        // Map each type to a file for writing output.
+        // Map each type to a file for writing output. The files are constant
+        // across input files, and output from successive input files is 
+        // appended to each file.
         Map<String, File> outputFilesByType = 
                 createOutputFilesByType(outputDir);
         
@@ -48,75 +51,14 @@ public class TypeSplitter extends RdfProcessor {
         for ( File inputFile : new File(inputDir).listFiles() ) {
             String filename = inputFile.getName();
             LOGGER.info("Start processing file " + filename);
-            processInputFile(inputFile, pss, outputFilesByType);
+            processInputFile(inputFile, outputFilesByType);
             LOGGER.info("Done processing file " + filename);
         }
            
         LOGGER.info("End process");
         return outputDir;                                                                                                                               
     }
-    
-    private ParameterizedSparqlString getParameterizedSparqlString() {
 
-        ParameterizedSparqlString pss = new ParameterizedSparqlString();
-
-        pss.setNsPrefix("bf", OntNamespace.BIBFRAME.uri());
-        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
-        // NB Some of the union clauses apply only to certain types of entities
-        // - e.g., only an Instance has a Provider - but it doesn't matter.
-        // Filters will not make the query run faster since they're applied
-        // after getting the initial result set.
-        pss.setCommandText(
-                "CONSTRUCT { ?s1 ?p1 ?o1 . "
-                + "?o1 ?p2 ?o2 . } "
-                + "WHERE {  { " 
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.sparqlUri()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.sparqlUri() 
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_TITLE.sparqlUri()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_PROVIDER.sparqlUri() 
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.sparqlUri() 
-                + "} UNION { "
-                // LC converter typically generates 
-                // :anno bf:annotates :resource rather than
-                // :resource bf:hasAnnotation :anno
-                + "?o1 ?p1 ?s1 . "
-                + "?s1 a ?type . " 
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.sparqlUri()
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_CLASSIFICATION.sparqlUri()                 
-                + "} }"                
-        );
-        
-        LOGGER.debug(pss.toString());
-        return pss;
-    }
-    
     private Map<String, File> createOutputFilesByType(String outputDir) {
         
         Map<String, File> outputFilesByType = new HashMap<String, File>();
@@ -140,67 +82,36 @@ public class TypeSplitter extends RdfProcessor {
         String basename = type.filename();
         return new File(outputDir, getOutputFilename(basename));
     }
-    
 
-    private void processInputFile(File inputFile, ParameterizedSparqlString pss,            
-            Map<String, File> outputFilesByType) {
-
+    private void processInputFile(File inputFile, 
+            Map<String, File> outputFilesByType) {          
+            
         // Read RDF from file into a model
         Model inputModel = readModelFromFile(inputFile);
         
         // Map each Bibframe type to a model
         Map<String, Model> modelsByType = createModelsByType();
    
-        // For each Bibframe type to split on
+        // For each Bibframe type to split on, retrive from the input model the
+        // statements to add to the output file for that type.
         for (OntType type : TYPES_TO_SPLIT) {       
-            String uri = type.uri();
+            //String uri = type.uri();
             // Make the type substitution into the parameterized SPARQL string
-            pss.setIri("type", uri);
-            LOGGER.debug(pss.toString());
-            Model modelForType = modelsByType.get(uri);
-            splitByType(pss, modelForType, inputModel);            
+            // pss.setIri("type", uri);
+            // LOGGER.debug(pss.toString());
+            Model modelForType = modelsByType.get(type.uri());
+            // splitByType(pss, modelForType, inputModel);    
+            addStatementsForType(type, modelForType, inputModel);
         }
         
         // Add to the remainder model the statements from this file that 
         // didn't get siphoned off to the type files.
+        // NB The goal is to eliminate these by refining the queries to include
+        // all statements in the models for types.
         modelsByType.get(REMAINDER_FILENAME).add(inputModel);
         
         // Append each model to the appropriate file
         writeModelsToFiles(modelsByType, outputFilesByType);
-    }
-    
-    private void writeModelsToFiles(Map<String, Model> modelsByType,             
-            Map<String, File> outputFilesByType) {
-                  
-        for (Map.Entry<String, File> entry : outputFilesByType.entrySet()) {
-            String ontClassUri = entry.getKey();
-            File outFile = entry.getValue();
-            Model model = modelsByType.get(ontClassUri);
-            if (! model.isEmpty()) {                                                                                                               
-                appendModelToFile(model, outFile);
-            }
-        }          
-    }
-
-    private void splitByType(ParameterizedSparqlString pss, Model modelForType,
-            Model inputModel) {
- 
-        // Run the query against the input model
-        Query query = pss.asQuery();
-        LOGGER.debug("Query: " + query.toString());
-        QueryExecution qexec = QueryExecutionFactory.create(
-                query, inputModel);
-        Model constructModel = qexec.execConstruct();
-        LOGGER.debug("Model size: " + constructModel.size());
-        qexec.close();
-
-        // Add resulting graph to the model for this type
-        modelForType.add(constructModel);
-        
-        // Remove the resulting graph from the input model, so we
-        // don't have to query against those statements on the next 
-        // iteration of the loop on this file.
-        inputModel.remove(constructModel);        
     }
 
     private Map<String, Model> createModelsByType() {
@@ -218,4 +129,237 @@ public class TypeSplitter extends RdfProcessor {
         return modelsByType;
     }
 
+    private void addStatementsForType(OntType type, Model modelForType,
+            Model inputModel) {
+
+        //String uri = type.uri();
+        // Make the type substitution into the parameterized SPARQL string
+        // pss.setIri("type", uri);
+        // LOGGER.debug(pss.toString());
+        
+        Query query = getQueryForType(type);
+        
+        // Run the query against the input model
+
+        LOGGER.debug("Query: " + query.toString());
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, inputModel);
+        Model constructModel = qexec.execConstruct();
+        LOGGER.debug("Model size: " + constructModel.size());
+        LOGGER.debug(constructModel.toString());
+        qexec.close();
+
+        // Add resulting graph to the model for this type
+        modelForType.add(constructModel);
+        
+        // Remove the resulting graph from the input model, so we
+        // don't have to query against those statements on the next 
+        // iteration of the loop on this file.
+        inputModel.remove(constructModel);        
+    }
+    
+    private Query getQueryForType(OntType type) {
+        
+        // Type-specific queries
+        // Could create separate subclasses, as for dedupers and converters,
+        // but it's just a separate query so may not be worth it.
+        
+        ParameterizedSparqlString pss;
+        
+        if (type == OntType.BF_INSTANCE) {
+            pss = getBfInstanceSparql();
+        } else if (type == OntType.BF_WORK) {
+            pss = getBfWorkSparql();
+        } else {
+            pss = getDefaultSparql();
+        }
+        
+        pss.setNsPrefix("bf", OntNamespace.BIBFRAME.uri());
+        // Make the type substitution into the parameterized SPARQL string
+        pss.setIri("type", type.uri());
+        return pss.asQuery();
+        
+    }
+    
+    private ParameterizedSparqlString getBfInstanceSparql() {
+        
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_TITLE.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
+                + "} UNION { "
+                // LC converter typically generates 
+                // :anno bf:annotates :resource rather than
+                // :resource bf:hasAnnotation :anno
+                + "?o1 ?p1 ?s1 . "
+                + "?s1 a ?type . " 
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
+                + "} }"                
+        );
+        
+        return pss;
+    }
+
+    private ParameterizedSparqlString getBfWorkSparql() {
+        
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_TITLE.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
+                + "} UNION { "
+                // LC converter typically generates 
+                // :anno bf:annotates :resource rather than
+                // :resource bf:hasAnnotation :anno
+                + "?o1 ?p1 ?s1 . "
+                + "?s1 a ?type . " 
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
+                + "} }"                
+        );
+        
+        return pss;
+        
+    }
+        
+    private ParameterizedSparqlString getDefaultSparql() {
+
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?o1 ?p2 ?o2 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_TITLE.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
+                + "} UNION { "
+                // LC converter typically generates 
+                // :anno bf:annotates :resource rather than
+                // :resource bf:hasAnnotation :anno
+                + "?o1 ?p1 ?s1 . "
+                + "?s1 a ?type . " 
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
+                + "} }"                
+        );
+        
+        return pss;
+    }
+ 
+    private void writeModelsToFiles(Map<String, Model> modelsByType,             
+            Map<String, File> outputFilesByType) {
+                  
+        for (Map.Entry<String, File> entry : outputFilesByType.entrySet()) {
+            String ontClassUri = entry.getKey();
+            File outFile = entry.getValue();
+            Model model = modelsByType.get(ontClassUri);
+            if (! model.isEmpty()) {                                                                                                               
+                appendModelToFile(model, outFile);
+            }
+        }          
+    }
+    
 }
