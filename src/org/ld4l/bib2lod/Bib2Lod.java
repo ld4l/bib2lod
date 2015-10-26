@@ -255,17 +255,16 @@ public class Bib2Lod {
 
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
-        Option actions = Option.builder("a")
+        options.addOption(Option.builder("a")
                 .longOpt("actions")
                 .required()
                 .hasArg()
                 .desc("Processing actions. Valid actions: " 
                         + StringUtils.join(VALID_ACTIONS, ", ") + ".")
                 .argName("dedupe")
-                .build();
-        options.addOption(actions);
+                .build());
         
-//        Option formatOption = Option.builder("f")
+//        options.addOption(Option.builder("f")
 //                .longOpt("format")
 //                .required(false)
 //                .hasArg()
@@ -274,34 +273,30 @@ public class Bib2Lod {
 //                        + StringUtils.join(VALID_OUTPUT_FORMATS, ", ")
 //                        + ". Defaults to " 
 //                        + DEFAULT_OUTPUT_FORMAT.label() + ".")
-//                .build();
-//        options.addOption(formatOption);  
+//                .build());
         
-        Option inputOption = Option.builder("i")
+        options.addOption(Option.builder("i")
                 .longOpt("indir")
                 .required()
                 .hasArg()
                 .desc("Absolute or relative path to input files.")
-                .build();
-        options.addOption(inputOption);
+                .build());
 
-        Option namespaceOption = Option.builder("n")
+        options.addOption(Option.builder("n")
                 .longOpt("namespace")
                 .required()
                 .hasArg()
                 // Should namespace used in deduping?? Do we want to dedupe only 
                 // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
-                .build();
-        options.addOption(namespaceOption);  
+                .build()); 
         
-        Option outputOption = Option.builder("o")
+        options.addOption(Option.builder("o")
                 .longOpt("outdir")
                 .required()
                 .hasArg()
                 .desc("Absolute or relative path to output directory.")
-                .build();
-        options.addOption(outputOption);
+                .build());
  
         return options;
     }

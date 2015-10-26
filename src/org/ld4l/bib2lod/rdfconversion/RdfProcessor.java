@@ -82,6 +82,7 @@ public abstract class RdfProcessor extends Processor {
     
     protected Model readModelFromFile(String filename) {
         //return RDFDataMgr.loadModel(filename);
+        LOGGER.debug("Reading file " + filename);
         Model model = ModelFactory.createDefaultModel() ; 
         model.read(filename);
         return model;
