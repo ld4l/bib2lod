@@ -3,8 +3,10 @@ package org.ld4l.bib2lod.rdfconversion;
 
 public enum OntProperty {
 
+    BF_ANNOTATES(OntNamespace.BIBFRAME, "annotates"),
     BF_AUTHORIZED_ACCESS_POINT(OntNamespace.BIBFRAME, "authorizedAccessPoint"),
     BF_BARCODE(OntNamespace.BIBFRAME, "barcode"),
+    BF_HAS_ANNOTATION(OntNamespace.BIBFRAME, "hasAnnotation"),
     BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "identifier"),
     BF_IDENTIFIER_SCHEME(OntNamespace.BIBFRAME, "identifierScheme"),
@@ -29,35 +31,39 @@ public enum OntProperty {
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;
+    private final String prefixed;
     
     OntProperty(OntNamespace namespace, String localname) {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;
         this.uri = namespace.uri() + localname;
+        
+        String prefix = this.namespace.prefix();
+        this.prefixed = prefix + ":" + this.localname;
     }
     
     public OntNamespace namespace() {
-        return this.namespace;
+        return namespace;
     }
     
     public String namespaceUri() {
-        return this.namespace.uri();
+        return namespace.uri();
     }
     
     public String localname() {
-        return this.localname;
+        return localname;
     }
     
     public String uri() {
-        return this.uri;
+        return uri;
     }
     
-    public String prefixedForm() {
-        return this.namespace.prefix() + ":" + this.localname;
+    public String prefixed() {
+        return prefixed;
     }
     
     public String sparqlUri() {
-        return "<" + this.uri + ">";
+        return "<" + uri + ">";
     }
 }

@@ -12,6 +12,8 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -95,12 +97,7 @@ public class TypeSplitter extends RdfProcessor {
         // For each Bibframe type to split on, retrive from the input model the
         // statements to add to the output file for that type.
         for (OntType type : TYPES_TO_SPLIT) {       
-            //String uri = type.uri();
-            // Make the type substitution into the parameterized SPARQL string
-            // pss.setIri("type", uri);
-            // LOGGER.debug(pss.toString());
             Model modelForType = modelsByType.get(type.uri());
-            // splitByType(pss, modelForType, inputModel);    
             addStatementsForType(type, modelForType, inputModel);
         }
         
@@ -132,22 +129,24 @@ public class TypeSplitter extends RdfProcessor {
     private void addStatementsForType(OntType type, Model modelForType,
             Model inputModel) {
 
-        //String uri = type.uri();
-        // Make the type substitution into the parameterized SPARQL string
-        // pss.setIri("type", uri);
-        // LOGGER.debug(pss.toString());
-        
         Query query = getQueryForType(type);
         
         // Run the query against the input model
-
-        LOGGER.debug("Query: " + query.toString());
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
-        LOGGER.debug("Model size: " + constructModel.size());
-        LOGGER.debug(constructModel.toString());
         qexec.close();
+ 
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Type: " + type.name());
+            LOGGER.debug("Query: " + query.toString());   
+            LOGGER.debug("Model size: " + constructModel.size());
+            StmtIterator it = constructModel.listStatements();
+            while (it.hasNext()) {
+                Statement s = it.nextStatement();
+                LOGGER.debug(s.toString());
+            }
+        }
 
         // Add resulting graph to the model for this type
         modelForType.add(constructModel);
@@ -197,7 +196,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
+                + "?s1 " + OntProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
                 + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed() 
@@ -224,7 +223,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
+                + "?s1 " + OntProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
                 + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()               
@@ -260,7 +259,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
                 + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
+                + "?s1 " + OntProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
@@ -268,7 +267,7 @@ public class TypeSplitter extends RdfProcessor {
                 // LC converter typically generates 
                 // :anno bf:annotates :resource rather than
                 // :resource bf:hasAnnotation :anno
-                + "?o1 ?p1 ?s1 . "
+                + "?o1 " + OntProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
                 + "?s1 a ?type . " 
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
@@ -304,7 +303,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_TITLE.prefixed()
                 + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
+                + "?s1 " + OntProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
@@ -312,7 +311,7 @@ public class TypeSplitter extends RdfProcessor {
                 // LC converter typically generates 
                 // :anno bf:annotates :resource rather than
                 // :resource bf:hasAnnotation :anno
-                + "?o1 ?p1 ?s1 . "
+                + "?o1 " + OntProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
                 + "?s1 a ?type . " 
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
