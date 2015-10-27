@@ -9,7 +9,7 @@ public enum OntNamespace {
     // not be provided. We're using these just to create filenames, not for
     // anything significant about the ontologies themselves.
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
-    LD4L("http://bibframe.ld4l.org/ontology/", "ld4l"),
+    LD4L("http://bib.ld4l.org/ontology/", "ld4l"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
     MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
