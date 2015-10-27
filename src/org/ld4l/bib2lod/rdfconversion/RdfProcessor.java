@@ -3,7 +3,8 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.util.Map;
+
+import javax.security.auth.login.Configuration;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -13,15 +14,19 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.core.config.LoggerConfig;
+import org.apache.logging.log4j.spi.LoggerContext;
 import org.ld4l.bib2lod.Format;
 import org.ld4l.bib2lod.Processor;
 
 
 public abstract class RdfProcessor extends Processor {
 
-    private static final Logger LOGGER = LogManager.getLogger(RdfProcessor.class);   
+    private static final Logger LOGGER = 
+            LogManager.getLogger(RdfProcessor.class);   
     
     /* Currently allowing only ntriples output format: Some processors MUST 
      * output ntriples, for two reasons: (1) append to file doesn't produce
@@ -157,5 +162,20 @@ public abstract class RdfProcessor extends Processor {
             e.printStackTrace();
         }        
     }
+
+    // For development/debugging
+    public static void printModel(Model model, Level level) {
+        StmtIterator statements = model.listStatements();   
+        while (statements.hasNext()) {
+            Statement statement = statements.nextStatement();
+            // NB The level must be enabled for this class,  not the calling
+            // class.
+            // TODO Programmatically set LOGGER level to level, then set back
+            // to previous level. Complicated because log4j2 doesn't have a
+            // Logger.setLevel() method like log4j. 
+            LOGGER.log(level,  statement.toString());
+        }     
+    }
+    
 
 }

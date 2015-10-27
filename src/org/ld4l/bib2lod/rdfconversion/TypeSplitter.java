@@ -12,8 +12,7 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
@@ -141,11 +140,7 @@ public class TypeSplitter extends RdfProcessor {
             LOGGER.debug("Type: " + type.name());
             LOGGER.debug("Query: " + query.toString());   
             LOGGER.debug("Model size: " + constructModel.size());
-            StmtIterator it = constructModel.listStatements();
-            while (it.hasNext()) {
-                Statement s = it.nextStatement();
-                LOGGER.debug(s.toString());
-            }
+            RdfProcessor.printModel(constructModel, Level.DEBUG);
         }
 
         // Add resulting graph to the model for this type

@@ -29,18 +29,7 @@ public class BfResourceConverter {
         return inputModel;
     }
     
-    // For development/debugging
-    protected void printModel(Model model) {
-        
-        if (LOGGER.isDebugEnabled())  {
-            StmtIterator statements = model.listStatements();
-            
-            while (statements.hasNext()) {
-                Statement statement = statements.nextStatement();
-                LOGGER.debug(statement.toString());
-            }
-        }        
-    }
+
 
 
     

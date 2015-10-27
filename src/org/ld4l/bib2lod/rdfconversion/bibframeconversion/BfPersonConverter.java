@@ -3,14 +3,12 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfPersonConverter extends BfResourceConverter {
 
@@ -29,7 +27,7 @@ public class BfPersonConverter extends BfResourceConverter {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Before converson");
-            printModel(model);
+            RdfProcessor.printModel(model, Level.DEBUG);
         }
         
         Model assertions = ModelFactory.createDefaultModel();
@@ -43,7 +41,7 @@ public class BfPersonConverter extends BfResourceConverter {
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("After changing type from bf:Person to foaf:Person");
-            printModel(model);
+            RdfProcessor.printModel(model, Level.DEBUG);
         }
         
         // Create a new foaf:Person with the original URI of the bf:Person. This
@@ -68,16 +66,12 @@ public class BfPersonConverter extends BfResourceConverter {
 //        addStatement(bfPerson, OntProperty.MADSRDF_IDENTIFIES_RWO,
 //                 foafPerson, assertions);
 
-
-        
-
-        
         model.add(assertions);
         model.remove(retractions);
 
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("After applying assertions and retractions:");
-            printModel(model);
+            RdfProcessor.printModel(model, Level.DEBUG);
         }
         
         // TODO make sure if no statements altered we return the input model...
