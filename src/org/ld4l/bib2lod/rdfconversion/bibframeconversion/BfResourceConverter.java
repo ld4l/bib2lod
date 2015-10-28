@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
@@ -60,7 +61,10 @@ public class BfResourceConverter {
         return model.createProperty(property.namespaceUri(), 
                 property.localname());
     }
-    
+ 
+    protected Resource createResource(OntType type, Model model) {
+        return model.createResource(type.uri());
+    }
     
     protected void addStatement(String subjectUri, OntProperty ontProp, 
             Resource object, Model model) {
@@ -75,5 +79,23 @@ public class BfResourceConverter {
                 ontProp.localname());
         model.add(subject, property, object);
     }
+    
+    protected String getBfLabel(Resource subject) {
+        return getLiteralValue(subject, OntProperty.BF_LABEL);
+    }
+    
+    protected String getLiteralValue(Resource subject, OntProperty ontProp) {
+        String value = null;
+        Property property = subject.getModel().getProperty(ontProp.uri());
+        Statement stmt = subject.getProperty(property);
+        if (stmt != null) {
+            Literal literal = stmt.getLiteral();
+            if (literal != null) {
+                value = literal.getLexicalForm();
+            }
+        }
+        return value;
+    }
+    
 
 }

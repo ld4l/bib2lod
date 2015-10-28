@@ -21,12 +21,20 @@ public enum OntProperty {
     BF_SHELF_MARK_UDC(OntNamespace.BIBFRAME, "shelfMarkUdc"),
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
     
+    FOAF_NAME(OntNamespace.FOAF, "name"),
+    
+    
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     MADSRDF_IS_IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, ""
             + "isIdentifiedByAuthority"),   
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
-            OntNamespace.MADSRDF, "isMemberOfMADSScheme");
+            OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+            
+    SCHEMA_BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
+    SCHEMA_DEATHDATE(OntNamespace.SCHEMA, "deathDate");
+            
+      
     
     private final OntNamespace namespace;
     private final String localname;

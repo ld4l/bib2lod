@@ -187,29 +187,32 @@ public class BibframeConverter extends RdfProcessor {
                     inputModel.listStatements(inputSubject, null, (RDFNode) null);
             Model subjectModel = ModelFactory.createDefaultModel();
             subjectModel.add(statements);
-            LOGGER.debug("subject model = input model: " + inputSubject.getModel().equals(inputModel));
-            LOGGER.debug("subject model = subject model: " + inputSubject.getModel().equals(subjectModel));
+            LOGGER.debug("inputSubject.getModel() = inputModel: "
+                    + inputSubject.getModel().equals(inputModel));
+            LOGGER.debug("inputSubject.getModel() = subjectModel: " 
+                    + inputSubject.getModel().equals(subjectModel));
             
             // NB At this point, subject.getModel() is the inputModel, not the
-            // subjectModel. Get the subject of subjectModel instead.
+            // subjectModel. Get the subject of subjectModel instead.            
             Resource subject = subjectModel.getResource(inputSubject.getURI());
-            LOGGER.debug("subject model = input model: " + subject.getModel().equals(inputModel));
-            LOGGER.debug("subject model = subject model: " + subject.getModel().equals(subjectModel));
+            LOGGER.debug("subject.getModel() = inputModel: " 
+                    + subject.getModel().equals(inputModel));
+            LOGGER.debug("subject.getModel() = subjectModel: " 
+                    + subject.getModel().equals(subjectModel));
+            
+            LOGGER.debug("inputSubject.getModel() = subject.getModel(): " 
+                    + inputSubject.getModel().equals(subject.getModel()));
             
             // Get the converter according to the type of the subject
             BfResourceConverter converter = 
                     getConverterForModel(subject, subjectModel);
             
             if (converter == null) {
-                LOGGER.trace("No converter found for subject " 
+                LOGGER.info("No converter found for subject " 
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
-                Model newSubjectModel = 
-                        // Or could pass these to constructor, and just call 
-                        // converter.convert();
-                        converter.convert(subject, subjectModel);
-                outputModel.add(newSubjectModel);
+                outputModel.add(converter.convert(subject, subjectModel));
             }
         }
                     

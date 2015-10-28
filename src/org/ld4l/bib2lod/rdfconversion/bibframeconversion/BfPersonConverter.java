@@ -1,12 +1,22 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.Arrays;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
@@ -15,73 +25,141 @@ public class BfPersonConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPersonConverter.class);
     
-    private static final String URI_POSTFIX = "bfPerson";
+    private static final Pattern BF_PERSON_LABEL = 
+            //* Which date patterns can occur? Look at more data.
+            // dddd-
+            // dddd-dddd
+            // -dddd
+            Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
+    
+
+    private static final List<OntProperty> PROPERTIES_TO_RETRACT = Arrays.asList(
+            OntProperty.BF_LABEL,
+            OntProperty.BF_HAS_AUTHORITY,
+            OntProperty.BF_AUTHORIZED_ACCESS_POINT
+    );
     
     public BfPersonConverter(OntType type) {
         super(type);
+        
     }
     
-    // May want to pass subject and inputModel to constructor instead, to store
-    // in instance field.
     public Model convert(Resource subject, Model model) {
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Before converson");
-            RdfProcessor.printModel(model, Level.DEBUG);
+            RdfProcessor.printModel(model, Level.forName("DEV", 450));
         }
-        
-        Model assertions = ModelFactory.createDefaultModel();
-        Model retractions = ModelFactory.createDefaultModel();
 
-        // Change the type from bf:Person to foaf:Person
-        assertions.add(subject, RDF.type, 
-                model.createResource(OntType.FOAF_PERSON.uri()));
-        retractions.add(subject, RDF.type, 
-                model.createResource(OntType.BF_PERSON.uri()));
+        // Remove Bibframe types and add type foaf:Person
+        subject.removeAll(RDF.type);
+        subject.addProperty(RDF.type, 
+                createResource(OntType.FOAF_PERSON, model));    
+        
+        addLabelProperties(subject, model);
+        addMadsAuthority(subject, model);
+
+
+        for (OntProperty prop : PROPERTIES_TO_RETRACT) {
+            LOGGER.debug("Removing property " + prop.uri());
+            subject.removeAll(createProperty(prop, model));
+        }
 
         if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("After changing type from bf:Person to foaf:Person");
-            RdfProcessor.printModel(model, Level.DEBUG);
+            LOGGER.debug("Model after conversion:");
+            RdfProcessor.printModel(model, Level.forName("DEV", 450));
         }
         
-        // Create a new foaf:Person with the original URI of the bf:Person. This
-        // will maintain relationships from, e.g., a bf:Work to the a 
-        // foaf:Person where originally the relationship was to a bf:Person.
-        // TODO ****************************************************************
-        // Is it really going to be this simple?? Or do we need to maintain
-        // a map from Bibframe individuals to new RWO individuals and manually
-        // make the substitutions in the RDF? This would require a second pass 
-        // over the files once the first pass has created all the RWO URIs.
-        // In that case, leave the original URI of the bf:Person alone, and mint
-        // a new one for the foaf:Person.
-        // *********************************************************************
+        return model;   
+    }
 
- 
-
+    /** 
+     * Add properties derived from bf:label to the foaf:Person: name, birthdate,
+     * deathdate.
+     * @param subject
+     * @param model
+     * @return
+     */
+    private void addLabelProperties(Resource subject, Model model) {
         
-        // TODO Not sure if we should also add the inverse? We could either 
-        // leave the inverse out altogether, or apply reasoning as a general 
-        // conversion step by using an inferencing model based on the LD4L 
-        // ontology.
-//        addStatement(bfPerson, OntProperty.MADSRDF_IDENTIFIES_RWO,
-//                 foafPerson, assertions);
-
-        model.add(assertions);
-        model.remove(retractions);
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("After applying assertions and retractions:");
-            RdfProcessor.printModel(model, Level.DEBUG);
+        // Model model = subject.getModel();
+        
+        Statement labelStmt = subject.getProperty(
+                createProperty(OntProperty.BF_LABEL, model));
+        if (labelStmt != null) {
+            String bfLabel = labelStmt.getLiteral().getLexicalForm();
+            if (bfLabel != null) {
+                Map<OntProperty, String> labelProps = parseLabel(bfLabel);
+                for (Map.Entry<OntProperty, String> entry 
+                        : labelProps.entrySet()) {
+                    OntProperty key = entry.getKey();
+                    String value = entry.getValue();
+                    if (value != null) {
+                        subject.addLiteral(createProperty(key, model), value);
+                    }
+                }
+            }
         }
-        
-        // TODO make sure if no statements altered we return the input model...
-        // if that ever happens?
-        return model;
-    
-
     }
     
+    /**
+     * Parse bf:Person label into name, birth year, death year. No attempt is
+     * made to parse the name itself, reverse last and first names, etc.
+     * @param label
+     * @return
+     */
+    Map<OntProperty, String> parseLabel(String label) {
 
+        Map<OntProperty, String> props = new HashMap<OntProperty, String>();
+        
+        String name = null;
+        String birthyear = null;
+        String deathyear = null;
+        
+        Matcher m = BF_PERSON_LABEL.matcher(label);
+        if (m.find()) {
+            name = m.group(1);
+            name = name.replaceAll(",$", "");
+            birthyear = m.group(2);
+            deathyear = m.group(3);
+            LOGGER.debug(name + " | " + birthyear + " | " + deathyear);
+        }             
+        
+        props.put(OntProperty.FOAF_NAME, name);
+        props.put(OntProperty.SCHEMA_BIRTHDATE, birthyear);
+        props.put(OntProperty.SCHEMA_DEATHDATE, deathyear);
+        
+        return props;   
+    }
     
+    /**
+     * Add madsrdf:isIdentifiedByAuthority property linking foaf:Person to
+     * mads Authority.
+     * @param subject
+     * @param model
+     * @return
+     */
+    private void addMadsAuthority(Resource subject, Model model) {
+        
+        // Model model = subject.getModel();
+        Statement authStmt = subject.getProperty(
+                createProperty(OntProperty.BF_HAS_AUTHORITY, model));
+        if (authStmt != null) {
+            Resource auth = authStmt.getResource();;
+            subject.addProperty(
+                    createProperty(
+                            OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY, 
+                            model), auth);
+            
+            /* For now, not explicitly adding inverse statements. Could do with
+             * a Jena inferencing model before writing out the model, if 
+             * desired.
+            auth.addProperty(
+                    createProperty(
+                            OntProperty.MADSRDF_IDENTIFIES_RWO,
+                            model), subject);
+            */
+        }
 
+    }
 }

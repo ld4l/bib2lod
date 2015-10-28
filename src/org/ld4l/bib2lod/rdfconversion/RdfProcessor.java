@@ -173,7 +173,7 @@ public abstract class RdfProcessor extends Processor {
             // TODO Programmatically set LOGGER level to level, then set back
             // to previous level. Complicated because log4j2 doesn't have a
             // Logger.setLevel() method like log4j. 
-            LOGGER.log(level,  statement.toString());
+            LOGGER.log(level, statement.toString());
         }     
     }
     
