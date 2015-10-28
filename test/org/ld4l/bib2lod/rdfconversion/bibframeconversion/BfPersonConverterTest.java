@@ -16,7 +16,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee)";
         BfPersonConverter converter = getConverter();
         Map<OntProperty, String> parsedLabel = converter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(OntProperty.FOAF_NAME));
+        Assert.assertEquals(name, parsedLabel.get(OntProperty.NAME));
         
     }
     
@@ -27,7 +27,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), 1892-";
         BfPersonConverter converter = getConverter();
         Map<OntProperty, String> parsedLabel = converter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(OntProperty.FOAF_NAME));
+        Assert.assertEquals(name, parsedLabel.get(OntProperty.NAME));
         
     }
     
@@ -38,7 +38,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), 1892-1935";
         BfPersonConverter converter = getConverter();
         Map<OntProperty, String> parsedLabel = converter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(OntProperty.FOAF_NAME));
+        Assert.assertEquals(name, parsedLabel.get(OntProperty.NAME));
         
     }
     
@@ -49,7 +49,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), -1935";
         BfPersonConverter converter = getConverter();
         Map<OntProperty, String> parsedLabel = converter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(OntProperty.FOAF_NAME));
+        Assert.assertEquals(name, parsedLabel.get(OntProperty.NAME));
         
     }
 

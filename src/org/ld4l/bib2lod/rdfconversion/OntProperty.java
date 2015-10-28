@@ -20,19 +20,20 @@ public enum OntProperty {
     BF_SHELF_MARK_SCHEME(OntNamespace.BIBFRAME, "shelfMarkScheme"),
     BF_SHELF_MARK_UDC(OntNamespace.BIBFRAME, "shelfMarkUdc"),
     BF_SYSTEM_NUMBER(OntNamespace.BIBFRAME, "systemNumber"),
-    
-    FOAF_NAME(OntNamespace.FOAF, "name"),
-    
-    
+       
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     MADSRDF_IS_IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, ""
             + "isIdentifiedByAuthority"),   
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+
+    // The OntProperty name doesn't indicate ontology, so that properties from
+    // different ontologies could be swapped in if desired.
+    NAME(OntNamespace.FOAF, "name"),
             
-    SCHEMA_BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
-    SCHEMA_DEATHDATE(OntNamespace.SCHEMA, "deathDate");
+    BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
+    DEATHDATE(OntNamespace.SCHEMA, "deathDate");
             
       
     

@@ -125,9 +125,9 @@ public class BfPersonConverter extends BfResourceConverter {
             LOGGER.debug(name + " | " + birthyear + " | " + deathyear);
         }             
         
-        props.put(OntProperty.FOAF_NAME, name);
-        props.put(OntProperty.SCHEMA_BIRTHDATE, birthyear);
-        props.put(OntProperty.SCHEMA_DEATHDATE, deathyear);
+        props.put(OntProperty.NAME, name);
+        props.put(OntProperty.BIRTHDATE, birthyear);
+        props.put(OntProperty.DEATHDATE, deathyear);
         
         return props;   
     }
