@@ -81,19 +81,15 @@ public class BfPersonConverter extends BfResourceConverter {
         
         // Model model = subject.getModel();
         
-        Statement labelStmt = subject.getProperty(
-                createProperty(OntProperty.BF_LABEL, model));
-        if (labelStmt != null) {
-            String bfLabel = labelStmt.getLiteral().getLexicalForm();
-            if (bfLabel != null) {
-                Map<OntProperty, String> labelProps = parseLabel(bfLabel);
-                for (Map.Entry<OntProperty, String> entry 
-                        : labelProps.entrySet()) {
-                    OntProperty key = entry.getKey();
-                    String value = entry.getValue();
-                    if (value != null) {
-                        subject.addLiteral(createProperty(key, model), value);
-                    }
+        String bfLabel = getBfLabelValue(subject);
+        if (bfLabel != null) {
+            Map<OntProperty, String> labelProps = parseLabel(bfLabel);
+            for (Map.Entry<OntProperty, String> entry 
+                    : labelProps.entrySet()) {
+                OntProperty key = entry.getKey();
+                String value = entry.getValue();
+                if (value != null) {
+                    subject.addLiteral(createProperty(key, model), value);
                 }
             }
         }
