@@ -101,6 +101,10 @@ public abstract class BfResourceConverter {
                 property.localname());
     }
  
+//    protected Property createProperty(OntProperty property, Resource subject) {
+//        return createProperty(property, subject.getModel());
+//    }
+    
     protected Resource createResource(OntType type, Model model) {
         return model.createResource(type.uri());
     }
