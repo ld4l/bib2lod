@@ -5,6 +5,7 @@ import java.util.List;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
@@ -31,19 +32,28 @@ public abstract class BfResourceConverter {
     public Model convert(Resource subject) {  
         return subject.getModel();
     }
+
+    
+    /* -------------------------------------------------------------------------
+     * 
+     * Utilities that bridge Bib2Lod objects and Jena objects and models
+     * 
+     * -----------------------------------------------------------------------*/
     
     protected abstract List<OntProperty> getPropertiesToRetract();
     
     /** 
-     * Add a new object property statement based on a Bibframe object property
-     * statement. Currently the original statement is removed with other 
-     * statements, but we could instead remove it here.
+     * Add a new statement based on a Bibframe statement, using the object of
+     * the Bibframe statement as the object of the new statement. Currently the 
+     * original statement is removed with other statements by calling 
+     * retractProperties(), rather than removing it here.
+     * 
      * @param subject
      * @param oldProp
      * @param newProp
      * @return
      */
-    protected void addObjectProperty(Resource subject, OntProperty oldProp, 
+    protected void addProperty(Resource subject, OntProperty oldProp, 
             OntProperty newProp) {
         
         Model model = subject.getModel();
@@ -51,7 +61,8 @@ public abstract class BfResourceConverter {
         Statement stmt = subject.getProperty(createProperty(oldProp, model));
                 
         if (stmt != null) {
-            Resource object = stmt.getResource();;
+            // Resource object = stmt.getResource();
+            RDFNode object = stmt.getObject();
             subject.addProperty(createProperty(newProp, model), object);
         }
   
@@ -70,11 +81,7 @@ public abstract class BfResourceConverter {
     }
     
     
-    /* -------------------------------------------------------------------------
-     * 
-     * Bridge utilities between Bib2Lod objects and Jena objects and models
-     * 
-     * -----------------------------------------------------------------------*/
+
     
 
 //    protected String mintUri(Resource resource) {

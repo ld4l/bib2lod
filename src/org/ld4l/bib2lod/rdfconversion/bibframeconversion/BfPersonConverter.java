@@ -57,7 +57,7 @@ public class BfPersonConverter extends BfResourceConverter {
         
         addLabelProperties(subject, model);
         
-        addObjectProperty(subject, OntProperty.BF_HAS_AUTHORITY, 
+        addProperty(subject, OntProperty.BF_HAS_AUTHORITY, 
                 OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
         retractProperties(subject);

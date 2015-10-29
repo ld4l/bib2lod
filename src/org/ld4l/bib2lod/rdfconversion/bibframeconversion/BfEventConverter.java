@@ -34,7 +34,7 @@ public class BfEventConverter extends BfResourceConverter {
         subject.removeAll(RDF.type);
         addType(subject, OntType.EVENT);
         
-        addObjectProperty(subject, OntProperty.BF_EVENT_PLACE, 
+        addProperty(subject, OntProperty.BF_EVENT_PLACE, 
                 OntProperty.LOCATION);
         
         return model;
