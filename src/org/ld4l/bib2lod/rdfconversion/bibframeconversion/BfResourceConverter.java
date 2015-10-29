@@ -19,13 +19,13 @@ public abstract class BfResourceConverter {
             LogManager.getLogger(BfResourceConverter.class);
     
     protected OntType type;
-    private String uriPostfix;
+    // private String uriPostfix;
 
     
     public BfResourceConverter(OntType type) {
         LOGGER.trace("In constructor for " + this.getClass().getName());
         this.type = type;
-        uriPostfix = type.namespace().prefix() + type.localname();
+        // uriPostfix = type.namespace().prefix() + type.localname();
     }
     
     public Model convert(Resource subject) {  
@@ -77,13 +77,13 @@ public abstract class BfResourceConverter {
      * -----------------------------------------------------------------------*/
     
 
-    protected String mintUri(Resource resource) {
-        return mintUri(resource.getURI());
-    }
-    
-    protected String mintUri(String uri) {
-        return uri + uriPostfix;
-    }
+//    protected String mintUri(Resource resource) {
+//        return mintUri(resource.getURI());
+//    }
+//    
+//    protected String mintUri(String uri) {
+//        return uri + uriPostfix;
+//    }
     
     
     /**
@@ -101,21 +101,21 @@ public abstract class BfResourceConverter {
         return model.createResource(type.uri());
     }
     
-    protected void addStatement(String subjectUri, OntProperty ontProp, 
-            Resource object, Model model) {
-        
-        Resource subject = model.createResource(subjectUri);
-        addStatement(subject, ontProp, object, model);
-    }
+//    protected void addStatement(String subjectUri, OntProperty ontProp, 
+//            Resource object, Model model) {
+//        
+//        Resource subject = model.createResource(subjectUri);
+//        addStatement(subject, ontProp, object, model);
+//    }
      
-    protected void addStatement(Resource subject, OntProperty ontProp, 
-            Resource object, Model model) {
-        Property property = model.createProperty(ontProp.namespaceUri(), 
-                ontProp.localname());
-        model.add(subject, property, object);
-    }
+//    protected void addStatement(Resource subject, OntProperty ontProp, 
+//            Resource object, Model model) {
+//        Property property = model.createProperty(ontProp.namespaceUri(), 
+//                ontProp.localname());
+//        model.add(subject, property, object);
+//    }
     
-    protected String getBfLabel(Resource subject) {
+    protected String getBfLabelValue(Resource subject) {
         return getLiteralValue(subject, OntProperty.BF_LABEL);
     }
     
