@@ -74,15 +74,15 @@ public class BibframeConverterFactory {
         }
     }
    
-    // If we want to turn the iteration around in ResourceConverter and iterate
-    // over types rather than files, implement this.
-    public static BfResourceConverter createBfResourceConverter(
-            OntType type, String inputDir) {
-        // Get file basename from type (return null if null)
-        // Get converter class from TYPE_converterS (return null if null)
-        // Read input file into model
-        // Create the converter, passing in the model
-        return null;
-    }
+// If we want to turn the iteration around in ResourceConverter and iterate
+// over types rather than files, implement this.
+//    public static BfResourceConverter createBfResourceConverter(
+//            OntType type, String inputDir) {
+//        // Get file basename from type (return null if null)
+//        // Get converter class from TYPE_converterS (return null if null)
+//        // Read input file into model
+//        // Create the converter, passing in the model
+//        return null;
+//    }
             
 }

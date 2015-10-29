@@ -36,7 +36,7 @@ public abstract class BfResourceConverter {
     
     /* -------------------------------------------------------------------------
      * 
-     * Utilities that bridge Bib2Lod objects and Jena objects and models
+     * Utilities bridging Bib2Lod objects and Jena objects and models
      * 
      * -----------------------------------------------------------------------*/
     
@@ -79,9 +79,6 @@ public abstract class BfResourceConverter {
         
         //return subject;
     }
-    
-    
-
     
 
 //    protected String mintUri(Resource resource) {

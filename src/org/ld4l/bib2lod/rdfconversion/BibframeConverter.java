@@ -186,21 +186,10 @@ public class BibframeConverter extends RdfProcessor {
                     inputModel.listStatements(inputSubject, null, (RDFNode) null);
             Model subjectModel = ModelFactory.createDefaultModel();
             subjectModel.add(statements);
-            LOGGER.debug("inputSubject.getModel() = inputModel: "
-                    + inputSubject.getModel().equals(inputModel));
-            LOGGER.debug("inputSubject.getModel() = subjectModel: " 
-                    + inputSubject.getModel().equals(subjectModel));
             
             // NB At this point, subject.getModel() is the inputModel, not the
-            // subjectModel. Get the subject of subjectModel instead.            
+            // subjectModel. Get the subject of the subjectModel instead.            
             Resource subject = subjectModel.getResource(inputSubject.getURI());
-            LOGGER.debug("subject.getModel() = inputModel: " 
-                    + subject.getModel().equals(inputModel));
-            LOGGER.debug("subject.getModel() = subjectModel: " 
-                    + subject.getModel().equals(subjectModel));
-            
-            LOGGER.debug("inputSubject.getModel() = subject.getModel(): " 
-                    + inputSubject.getModel().equals(subject.getModel()));
             
             // Get the converter according to the type of the subject
             BfResourceConverter converter = 
@@ -211,12 +200,10 @@ public class BibframeConverter extends RdfProcessor {
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
-                //outputModel.add(converter.convert(subject, subjectModel));
                 outputModel.add(converter.convert(subject));
             }
         }
-                    
-        LOGGER.debug("Writing model to file " + filename);
+
         writeModelToFile(outputModel, outputFile);
         
     }
