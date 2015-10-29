@@ -26,18 +26,15 @@ public class BfResourceConverter {
         uriPostfix = type.namespace().prefix() + type.localname();
     }
     
-    public Model convert(Resource subject, Model inputModel) {  
-        return inputModel;
+    public Model convert(Resource subject) {  
+        return subject.getModel();
     }
     
-
-
-
-    
+ 
     
     /* -------------------------------------------------------------------------
      * 
-     * Utilities to bridge between Bib2Lod objects and Jena objects and models
+     * Bridge utilities between Bib2Lod objects and Jena objects and models
      * 
      * -----------------------------------------------------------------------*/
     

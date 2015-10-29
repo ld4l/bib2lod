@@ -16,6 +16,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 
 /**
@@ -48,7 +49,7 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
                 BfResourceConverter.class);        
         CONVERTERS_BY_TYPE.put(OntType.BF_PERSON, BfPersonConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfPlaceConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_PROVIDER, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_TITLE, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_TOPIC, BfResourceConverter.class);
@@ -212,7 +213,8 @@ public class BibframeConverter extends RdfProcessor {
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
-                outputModel.add(converter.convert(subject, subjectModel));
+                //outputModel.add(converter.convert(subject, subjectModel));
+                outputModel.add(converter.convert(subject));
             }
         }
                     

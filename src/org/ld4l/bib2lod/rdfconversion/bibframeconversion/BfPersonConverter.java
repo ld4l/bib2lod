@@ -10,9 +10,7 @@ import java.util.regex.Pattern;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -40,12 +38,13 @@ public class BfPersonConverter extends BfResourceConverter {
     );
     
     public BfPersonConverter(OntType type) {
-        super(type);
-        
+        super(type);        
     }
     
-    public Model convert(Resource subject, Model model) {
+    public Model convert(Resource subject) {
         
+        Model model = subject.getModel();
+
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Before converson");
             RdfProcessor.printModel(model, Level.forName("DEV", 450));
