@@ -29,10 +29,13 @@ public enum OntType {
     BF_TOPIC(OntNamespace.BIBFRAME, "Topic"),  
     BF_WORK(OntNamespace.BIBFRAME, "Work"),
     
-    FOAF_PERSON(OntNamespace.FOAF, "Person"),
-    
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
-    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject");
+    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
+    
+    // The OntType names below don't indicate ontology, to abstract away from 
+    // the particular ontology and class used.
+    PERSON(OntNamespace.FOAF, "Person"),
+    PLACE(OntNamespace.PROV, "Location");
     
 
     private final OntNamespace namespace;

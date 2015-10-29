@@ -53,7 +53,7 @@ public class BfPersonConverter extends BfResourceConverter {
         // Remove Bibframe types and add type foaf:Person
         subject.removeAll(RDF.type);
         subject.addProperty(RDF.type, 
-                createResource(OntType.FOAF_PERSON, model));    
+                createResource(OntType.PERSON, model));    
         
         addLabelProperties(subject, model);
         addMadsAuthority(subject, model);

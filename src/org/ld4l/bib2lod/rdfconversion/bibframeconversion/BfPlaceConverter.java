@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntType;
@@ -18,6 +19,10 @@ public class BfPlaceConverter extends BfResourceConverter {
     public Model convert(Resource subject) {
         
         Model model = subject.getModel();
+        
+        subject.removeAll(RDF.type);
+        subject.addProperty(RDF.type, createResource(OntType.PLACE, model));
+        
         // HERE**** Need a type for Place - check Rob's doc
         //subject.addProperty(RDF.type, createResource(OntType.))
         

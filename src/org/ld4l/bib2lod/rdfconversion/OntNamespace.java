@@ -14,6 +14,7 @@ public enum OntNamespace {
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
     MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
     OWL("http://www.w3.org/2002/07/owl#", "owl"),
+    PROV("http://www.w3.org/ns/prov#", "prov"),
     RDFS("http://http://www.w3.org/2000/01/rdf-schema#", "rdfs"),
     RELATORS("http://id.loc.gov/vocabulary/relators/", "marcrel"), // needed?
     SCHEMA("http://schema.org/", "schema");

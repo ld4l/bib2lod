@@ -28,8 +28,8 @@ public enum OntProperty {
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
 
-    // The OntProperty name doesn't indicate ontology, so that properties from
-    // different ontologies could be swapped in if desired.
+    // The OntProperty names below don't indicate ontology, to abstract away 
+    // from  the particular ontology and property used.
     NAME(OntNamespace.FOAF, "name"),
             
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
