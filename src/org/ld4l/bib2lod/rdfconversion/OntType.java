@@ -34,6 +34,7 @@ public enum OntType {
     
     // The OntType names below don't indicate ontology, to abstract away from 
     // the particular ontology and class used.
+    EVENT(OntNamespace.SCHEMA, "Event"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location");
     

@@ -31,11 +31,12 @@ public class BfPersonConverter extends BfResourceConverter {
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
     
 
-    private static final List<OntProperty> PROPERTIES_TO_RETRACT = Arrays.asList(
-            OntProperty.BF_LABEL,
-            OntProperty.BF_HAS_AUTHORITY,
-            OntProperty.BF_AUTHORIZED_ACCESS_POINT
-    );
+    private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
+            Arrays.asList(
+                    OntProperty.BF_LABEL,
+                    OntProperty.BF_HAS_AUTHORITY,
+                    OntProperty.BF_AUTHORIZED_ACCESS_POINT
+            );
     
     public BfPersonConverter(OntType type) {
         super(type);        
@@ -52,18 +53,15 @@ public class BfPersonConverter extends BfResourceConverter {
 
         // Remove Bibframe types and add type foaf:Person
         subject.removeAll(RDF.type);
-        subject.addProperty(RDF.type, 
-                createResource(OntType.PERSON, model));    
+        addType(subject, OntType.PERSON);   
         
         addLabelProperties(subject, model);
-        addMadsAuthority(subject, model);
+        
+        addObjectProperty(subject, OntProperty.BF_HAS_AUTHORITY, 
+                OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
-
-        for (OntProperty prop : PROPERTIES_TO_RETRACT) {
-            LOGGER.debug("Removing property " + prop.uri());
-            subject.removeAll(createProperty(prop, model));
-        }
-
+        retractProperties(subject);
+            
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Model after conversion:");
             RdfProcessor.printModel(model, Level.forName("DEV", 450));
@@ -131,34 +129,8 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
     
-    /**
-     * Add madsrdf:isIdentifiedByAuthority property linking foaf:Person to
-     * mads Authority.
-     * @param subject
-     * @param model
-     * @return
-     */
-    private void addMadsAuthority(Resource subject, Model model) {
-        
-        // Model model = subject.getModel();
-        Statement authStmt = subject.getProperty(
-                createProperty(OntProperty.BF_HAS_AUTHORITY, model));
-        if (authStmt != null) {
-            Resource auth = authStmt.getResource();;
-            subject.addProperty(
-                    createProperty(
-                            OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY, 
-                            model), auth);
-            
-            /* For now, not explicitly adding inverse statements. Could do with
-             * a Jena inferencing model before writing out the model, if 
-             * desired.
-            auth.addProperty(
-                    createProperty(
-                            OntProperty.MADSRDF_IDENTIFIES_RWO,
-                            model), subject);
-            */
-        }
 
+    protected List<OntProperty> getPropertiesToRetract() {
+        return PROPERTIES_TO_RETRACT;
     }
 }

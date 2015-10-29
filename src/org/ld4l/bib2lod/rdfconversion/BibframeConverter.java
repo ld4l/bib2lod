@@ -32,32 +32,30 @@ public class BibframeConverter extends RdfProcessor {
     private static final Map<OntType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<OntType, Class<?>>();
     static {
-        // Assign temporarily to BfResourceConverter till start implementing
-        // type-specific converter classes.
-        CONVERTERS_BY_TYPE.put(OntType.BF_ANNOTATION, 
-                BfResourceConverter.class);            
-        CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
-                BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_IDENTIFIER, 
-                BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_INSTANCE, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_JURISDICTION,  
-                BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_MEETING, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
-                BfResourceConverter.class);        
+//        CONVERTERS_BY_TYPE.put(OntType.BF_ANNOTATION, 
+//                BfResourceConverter.class);            
+//        CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
+//                BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_IDENTIFIER, 
+//                BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_INSTANCE, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_JURISDICTION,  
+//                BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_MEETING, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
+//                BfResourceConverter.class);        
         CONVERTERS_BY_TYPE.put(OntType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfPlaceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_PROVIDER, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_TITLE, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_TOPIC, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_WORK,  BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_AUTHORITY, 
-                BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_COMPLEX_SUBJECT,  
-                BfResourceConverter.class); 
+//        CONVERTERS_BY_TYPE.put(OntType.BF_PROVIDER, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_TITLE, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_TOPIC, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.BF_WORK,  BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_AUTHORITY, 
+//                BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_COMPLEX_SUBJECT,  
+//                BfResourceConverter.class); 
     }
     
 //    private static final String IN_PROGRESS_DIR = "inProgress";

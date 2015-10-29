@@ -6,6 +6,7 @@ public enum OntProperty {
     BF_ANNOTATES(OntNamespace.BIBFRAME, "annotates"),
     BF_AUTHORIZED_ACCESS_POINT(OntNamespace.BIBFRAME, "authorizedAccessPoint"),
     BF_BARCODE(OntNamespace.BIBFRAME, "barcode"),
+    BF_EVENT_PLACE(OntNamespace.BIBFRAME, "eventPlace"),
     BF_HAS_ANNOTATION(OntNamespace.BIBFRAME, "hasAnnotation"),
     BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "identifier"),
@@ -30,13 +31,12 @@ public enum OntProperty {
 
     // The OntProperty names below don't indicate ontology, to abstract away 
     // from  the particular ontology and property used.
-    NAME(OntNamespace.FOAF, "name"),
-            
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
-    DEATHDATE(OntNamespace.SCHEMA, "deathDate");
+    DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
+    LOCATION(OntNamespace.PROV, "atLocation"),
+    NAME(OntNamespace.FOAF, "name");
             
-      
-    
+
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;

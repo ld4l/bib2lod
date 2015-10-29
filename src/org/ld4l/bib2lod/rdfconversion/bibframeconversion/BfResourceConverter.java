@@ -1,17 +1,19 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.List;
+
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
 
-public class BfResourceConverter {
+public abstract class BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
@@ -30,7 +32,43 @@ public class BfResourceConverter {
         return subject.getModel();
     }
     
- 
+    protected abstract List<OntProperty> getPropertiesToRetract();
+    
+    /** 
+     * Add a new object property statement based on a Bibframe object property
+     * statement. Currently the original statement is removed with other 
+     * statements, but we could instead remove it here.
+     * @param subject
+     * @param oldProp
+     * @param newProp
+     * @return
+     */
+    protected void addObjectProperty(Resource subject, OntProperty oldProp, 
+            OntProperty newProp) {
+        
+        Model model = subject.getModel();
+
+        Statement stmt = subject.getProperty(createProperty(oldProp, model));
+                
+        if (stmt != null) {
+            Resource object = stmt.getResource();;
+            subject.addProperty(createProperty(newProp, model), object);
+        }
+  
+        //return subject;
+    }
+    
+    protected void retractProperties(Resource subject) {
+    
+        Model model = subject.getModel();
+        for (OntProperty prop : getPropertiesToRetract()) {
+            LOGGER.debug("Removing property " + prop.uri());
+            subject.removeAll(createProperty(prop, model));
+        }
+        
+        //return subject;
+    }
+    
     
     /* -------------------------------------------------------------------------
      * 
@@ -92,6 +130,11 @@ public class BfResourceConverter {
             }
         }
         return value;
+    }
+    
+    protected void addType(Resource subject, OntType type) {
+        Model model = subject.getModel();
+        subject.addProperty(RDF.type, createResource(type, model));
     }
     
 
