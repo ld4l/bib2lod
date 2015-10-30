@@ -30,8 +30,15 @@ public abstract class BfResourceConverter {
         // so the subject can be assigned to an instance variable. If we 
         // change the flow so that a converter is created for an entire model of
         // subjects of a certain type, the subject will have to be passed to the
-        // convert function.
+        // convert method rather than the constructor.
         this.subject = subject;
+
+        // Possibly a converter could be shared by multiple types - e.g., 
+        // BfFamilyConverter and BfOrganizationConverter could both be
+        // BfAuthorityConverter. Then the original rdf:type must be passed
+        // to the constructor so that we know what new type should be 
+        // assigned. 
+        // this.type = type;
         
         // uriPostfix = type.namespace().prefix() + type.localname();
     }

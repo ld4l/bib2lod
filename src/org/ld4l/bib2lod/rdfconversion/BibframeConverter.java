@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
@@ -46,8 +47,8 @@ public class BibframeConverter extends RdfProcessor {
 //        CONVERTERS_BY_TYPE.put(OntType.BF_JURISDICTION,  
 //                BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(OntType.BF_MEETING, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
-//                BfResourceConverter.class);        
+        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
+                BfOrganizationConverter.class);        
         CONVERTERS_BY_TYPE.put(OntType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfPlaceConverter.class);
 //        CONVERTERS_BY_TYPE.put(OntType.BF_PROVIDER, BfResourceConverter.class);
@@ -201,8 +202,13 @@ public class BibframeConverter extends RdfProcessor {
         // so the subject can be assigned to an instance variable. If we 
         // change the flow so that a converter is created for an entire model of
         // subjects of a certain type, the subject will have to be passed to the
-        // convert function.
+        // convert method rather than the constructor.
         try {
+            // Possibly a converter could be shared by multiple types - e.g., 
+            // BfFamilyConverter and BfOrganizationConverter could both be
+            // BfAuthorityConverter. Then the original rdf:type must be passed
+            // to the constructor so that we know what new type should be 
+            // assigned.
             BfResourceConverter converter = 
                     (BfResourceConverter) converterClass
                     .getConstructor(Resource.class)
