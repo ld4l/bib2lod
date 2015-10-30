@@ -22,6 +22,8 @@ public class BfPersonConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPersonConverter.class);
     
+    private static final OntType NEW_TYPE = OntType.PERSON;
+    
     private static final Pattern BF_PERSON_LABEL = 
             //* Which date patterns can occur? Look at more data.
             // dddd-
@@ -43,17 +45,8 @@ public class BfPersonConverter extends BfResourceConverter {
     
     @Override
     public Model convert() {
-        
-        Model model = subject.getModel();
-
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Before converson");
-            RdfProcessor.printModel(model, Level.forName("DEV", 450));
-        }
-
-        // Remove Bibframe types and add type foaf:Person
-        subject.removeAll(RDF.type);
-        addType(OntType.PERSON);   
+       
+        assignType(); 
         
         addLabelProperties();
         
@@ -61,13 +54,8 @@ public class BfPersonConverter extends BfResourceConverter {
                 OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
         retractProperties();
-            
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Model after conversion:");
-            RdfProcessor.printModel(model, Level.forName("DEV", 450));
-        }
-        
-        return model;   
+                   
+        return subject.getModel();
     }
 
     /** 
@@ -128,5 +116,10 @@ public class BfPersonConverter extends BfResourceConverter {
     @Override
     protected List<OntProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
+    }
+    
+    @Override
+    protected OntType getNewType() {
+        return NEW_TYPE;
     }
 }

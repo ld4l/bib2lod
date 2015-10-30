@@ -15,6 +15,8 @@ public class BfEventConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfEventConverter.class);
+    
+    private static final OntType NEW_TYPE = OntType.EVENT;
 
     private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
@@ -29,19 +31,21 @@ public class BfEventConverter extends BfResourceConverter {
     @Override
     public Model convert() {
         
-        Model model = subject.getModel();
-        
-        subject.removeAll(RDF.type);
-        addType(OntType.EVENT);
+        assignType();
         
         addProperty(OntProperty.BF_EVENT_PLACE, OntProperty.LOCATION);
                 
-        return model;
+        return subject.getModel();
     }
 
     @Override
     protected List<OntProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
+    }
+    
+    @Override
+    protected OntType getNewType() {
+        return NEW_TYPE;
     }
 
 }

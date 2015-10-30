@@ -48,6 +48,8 @@ public abstract class BfResourceConverter {
      * -----------------------------------------------------------------------*/
     
     protected abstract List<OntProperty> getPropertiesToRetract();
+
+    protected abstract OntType getNewType();
     
     /** 
      * Add a new statement based on a Bibframe statement, using the object of
@@ -143,10 +145,15 @@ public abstract class BfResourceConverter {
         return value;
     }
     
-    protected void addType(OntType type) {
-        Model model = subject.getModel();
-        subject.addProperty(RDF.type, createResource(type, model));
+    /**
+     * Remove existing type assertions and assign new type.
+     */
+    protected void assignType() {
+        
+        subject.removeAll(RDF.type);       
+        OntType newType = getNewType();
+        Resource ontClass = createResource(newType, subject.getModel());
+        subject.addProperty(RDF.type,  ontClass);
     }
-    
 
 }

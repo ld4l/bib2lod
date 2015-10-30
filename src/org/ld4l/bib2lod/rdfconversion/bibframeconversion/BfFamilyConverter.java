@@ -17,6 +17,8 @@ public class BfFamilyConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfFamilyConverter.class);
     
+    private static final OntType NEW_TYPE = OntType.FAMILY;
+    
     private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
                     OntProperty.BF_LABEL,
@@ -32,10 +34,7 @@ public class BfFamilyConverter extends BfResourceConverter {
     @Override
     public Model convert() {
         
-        Model model = subject.getModel();
-        
-        subject.removeAll(RDF.type);
-        addType(OntType.FAMILY);
+        assignType();
         
         addProperty(OntProperty.BF_LABEL, OntProperty.NAME);
         
@@ -43,7 +42,8 @@ public class BfFamilyConverter extends BfResourceConverter {
                 OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
         retractProperties();
-        return model;
+        
+        return subject.getModel();
     }
 
 
@@ -51,6 +51,11 @@ public class BfFamilyConverter extends BfResourceConverter {
     @Override
     protected List<OntProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
+    }
+    
+    @Override
+    protected OntType getNewType() {
+        return NEW_TYPE;
     }
 
 }

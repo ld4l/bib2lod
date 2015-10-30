@@ -15,6 +15,8 @@ public class BfPlaceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPlaceConverter.class);
     
+    private static final OntType NEW_TYPE = OntType.PLACE;
+    
     public BfPlaceConverter(Resource subject) {
         super(subject);
     }
@@ -22,8 +24,7 @@ public class BfPlaceConverter extends BfResourceConverter {
     @Override
     public Model convert() {
 
-        subject.removeAll(RDF.type);
-        addType(OntType.PLACE);
+        assignType();
 
         return subject.getModel();
     }
@@ -31,6 +32,11 @@ public class BfPlaceConverter extends BfResourceConverter {
     @Override
     protected List<OntProperty> getPropertiesToRetract() {
         return null;
+    }
+    
+    @Override
+    protected OntType getNewType() {
+        return NEW_TYPE;
     }
 
 }
