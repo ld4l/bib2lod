@@ -9,6 +9,7 @@ public enum OntProperty {
     BF_EVENT_PLACE(OntNamespace.BIBFRAME, "eventPlace"),
     BF_HAS_ANNOTATION(OntNamespace.BIBFRAME, "hasAnnotation"),
     BF_HAS_AUTHORITY(OntNamespace.BIBFRAME, "hasAuthority"),
+    BF_HOLDING_FOR(OntNamespace.BIBFRAME, "holdingFor"),
     BF_IDENTIFIER(OntNamespace.BIBFRAME, "identifier"),
     BF_IDENTIFIER_SCHEME(OntNamespace.BIBFRAME, "identifierScheme"),
     BF_IDENTIFIER_VALUE(OntNamespace.BIBFRAME, "identifierValue"),
@@ -33,6 +34,7 @@ public enum OntProperty {
     // from  the particular ontology and property used.
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
+    IS_HOLDING_FOR(OntNamespace.LD4L, "isHoldingFor"),
     LOCATION(OntNamespace.PROV, "atLocation"),
     NAME(OntNamespace.FOAF, "name");
             

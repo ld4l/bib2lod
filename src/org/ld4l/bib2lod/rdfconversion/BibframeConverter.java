@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
@@ -39,8 +40,8 @@ public class BibframeConverter extends RdfProcessor {
 //                BfResourceConverter.class);            
         CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfEventConverter.class);
         CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfFamilyConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
-//                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
+                BfHeldItemConverter.class);
 //        CONVERTERS_BY_TYPE.put(OntType.BF_IDENTIFIER, 
 //                BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(OntType.BF_INSTANCE, BfResourceConverter.class);

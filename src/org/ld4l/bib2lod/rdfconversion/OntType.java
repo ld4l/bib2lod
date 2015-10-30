@@ -36,6 +36,7 @@ public enum OntType {
     // the particular ontology and class used.
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY(OntNamespace.LD4L, "Family"),
+    ITEM(OntNamespace.LD4L, "Item"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location");
