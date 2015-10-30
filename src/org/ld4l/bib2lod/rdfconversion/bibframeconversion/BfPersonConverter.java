@@ -37,8 +37,8 @@ public class BfPersonConverter extends BfResourceConverter {
                     OntProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
-    public BfPersonConverter(OntType type, Resource subject) {
-        super(type, subject);        
+    public BfPersonConverter(Resource subject) {
+        super(subject);        
     }
     
     @Override

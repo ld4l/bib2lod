@@ -145,7 +145,7 @@ public class BibframeConverter extends RdfProcessor {
             
             // Get the converter according to the type of the subject
             BfResourceConverter converter = 
-                    getConverterForModel(subject, subjectModel);
+                    getConverter(subject, subjectModel);
             
             if (converter == null) {
                 LOGGER.info("No converter found for subject " 
@@ -173,16 +173,16 @@ public class BibframeConverter extends RdfProcessor {
      * processes are more independent. (We could eliminate the prerequisite on
      * Bibframe conversion, though deduping still depends on type-splitting.)
      */
-    private BfResourceConverter getConverterForModel(
-            Resource subject, Model model) {
-        
+    private BfResourceConverter getConverter(Resource subject, Model model) {
+            
+        // Loop through types to find one that is the subject's type.
         // Will need modification if ordering of types is crucial.
         for (Map.Entry<OntType, Class<?>> entry : 
                 CONVERTERS_BY_TYPE.entrySet()) {
+            
             OntType type = entry.getKey();
             Resource ontClass = model.createResource(type.uri());
-            LOGGER.trace("Checking subject " + subject.getURI() + " and type " 
-                        + type.uri());
+
             if (model.contains(null, RDF.type, ontClass)) {
                 LOGGER.trace("Found converter class for subject " 
                         + subject.getURI() + " of type " + type.uri());                        
@@ -199,18 +199,18 @@ public class BibframeConverter extends RdfProcessor {
         
         // NB Currently a new converter is created for each subject resource,
         // so the subject can be assigned to an instance variable. If we 
-        // change flow so that a converter is created for an entire model of
+        // change the flow so that a converter is created for an entire model of
         // subjects of a certain type, the subject will have to be passed to the
         // convert function.
         try {
             BfResourceConverter converter = 
                     (BfResourceConverter) converterClass
-                    .getConstructor(OntType.class, Resource.class)
-                    .newInstance(type, subject);   
+                    .getConstructor(Resource.class)
+                    .newInstance(subject);   
             return converter;      
         } catch (Exception e) {
-            LOGGER.info("No converter created for type " + type);
-            // TODO Auto-generated catch block
+            LOGGER.info("No converter created for class " 
+                    + converterClass.getName());
             e.printStackTrace();
         }    
         

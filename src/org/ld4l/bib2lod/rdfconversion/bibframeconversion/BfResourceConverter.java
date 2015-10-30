@@ -19,14 +19,12 @@ public abstract class BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
     
-    protected OntType type;
     protected Resource subject;
     // private String uriPostfix;
 
     
-    public BfResourceConverter(OntType type, Resource subject) {
+    public BfResourceConverter(Resource subject) {
         LOGGER.debug("In constructor for " + this.getClass().getName());
-        this.type = type;
         
         // NB Currently a new converter is created for each subject resource,
         // so the subject can be assigned to an instance variable. If we 

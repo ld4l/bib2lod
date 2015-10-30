@@ -25,8 +25,8 @@ public class BfFamilyConverter extends BfResourceConverter {
             );
             
     
-    public BfFamilyConverter(OntType type, Resource subject) {
-        super(type, subject);
+    public BfFamilyConverter(Resource subject) {
+        super(subject);
     }
     
     @Override

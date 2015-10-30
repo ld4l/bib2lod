@@ -22,8 +22,8 @@ public class BfEventConverter extends BfResourceConverter {
             
             );
     
-    public BfEventConverter(OntType type, Resource subject) {
-        super(type, subject);
+    public BfEventConverter(Resource subject) {
+        super(subject);
     }
     
     @Override
