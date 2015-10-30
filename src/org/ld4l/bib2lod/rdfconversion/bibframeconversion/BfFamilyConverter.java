@@ -25,23 +25,24 @@ public class BfFamilyConverter extends BfResourceConverter {
             );
             
     
-    public BfFamilyConverter(OntType type) {
-        super(type);
+    public BfFamilyConverter(OntType type, Resource subject) {
+        super(type, subject);
     }
     
-    public Model convert(Resource subject) {
+    @Override
+    public Model convert() {
         
         Model model = subject.getModel();
         
         subject.removeAll(RDF.type);
-        addType(subject, OntType.FAMILY);
+        addType(OntType.FAMILY);
         
-        addProperty(subject, OntProperty.BF_LABEL, OntProperty.NAME);
+        addProperty(OntProperty.BF_LABEL, OntProperty.NAME);
         
-        addProperty(subject, OntProperty.BF_HAS_AUTHORITY, 
+        addProperty(OntProperty.BF_HAS_AUTHORITY, 
                 OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
-        retractProperties(subject);
+        retractProperties();
         return model;
     }
 

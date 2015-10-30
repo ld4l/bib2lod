@@ -15,16 +15,17 @@ public class BfPlaceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPlaceConverter.class);
     
-    public BfPlaceConverter(OntType type) {
-        super(type);
+    public BfPlaceConverter(OntType type, Resource subject) {
+        super(type, subject);
     }
     
-    public Model convert(Resource subject) {
+    @Override
+    public Model convert() {
         
         Model model = subject.getModel();
         
         subject.removeAll(RDF.type);
-        addType(subject, OntType.PLACE);
+        addType(OntType.PLACE);
 
         return model;
     }

@@ -37,11 +37,12 @@ public class BfPersonConverter extends BfResourceConverter {
                     OntProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
-    public BfPersonConverter(OntType type) {
-        super(type);        
+    public BfPersonConverter(OntType type, Resource subject) {
+        super(type, subject);        
     }
     
-    public Model convert(Resource subject) {
+    @Override
+    public Model convert() {
         
         Model model = subject.getModel();
 
@@ -52,14 +53,14 @@ public class BfPersonConverter extends BfResourceConverter {
 
         // Remove Bibframe types and add type foaf:Person
         subject.removeAll(RDF.type);
-        addType(subject, OntType.PERSON);   
+        addType(OntType.PERSON);   
         
-        addLabelProperties(subject, model);
+        addLabelProperties();
         
-        addProperty(subject, OntProperty.BF_HAS_AUTHORITY, 
+        addProperty(OntProperty.BF_HAS_AUTHORITY, 
                 OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
 
-        retractProperties(subject);
+        retractProperties();
             
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("Model after conversion:");
@@ -76,9 +77,9 @@ public class BfPersonConverter extends BfResourceConverter {
      * @param model
      * @return
      */
-    private void addLabelProperties(Resource subject, Model model) {
+    private void addLabelProperties() {
         
-        // Model model = subject.getModel();
+        Model model = subject.getModel();
         
         String bfLabel = getBfLabelValue(subject);
         if (bfLabel != null) {
@@ -124,7 +125,7 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
     
-
+    @Override
     protected List<OntProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }

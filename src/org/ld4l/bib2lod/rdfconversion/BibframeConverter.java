@@ -106,58 +106,7 @@ public class BibframeConverter extends RdfProcessor {
          * shouldn't undergo URI replacement.
          */
     }
-    
-    /*
-     * If as the last step in ResourceDeduper we type-split again, separating 
-     * out all statements by subject type (i.e., put Titles into their own file
-     * rather than combined with bfWork or bfInstance, etc.), then we could
-     * derive the converter type from the filename, as for ResourceDeduper.
-     * (However, if there's still an other.nt file we'd have to deal with that
-     * as here.) Consider implementing this step.
-     * On the other hand, there's an advantage that in the current 
-     * implementation it doesn't matter how the input files are structured - we
-     * wouldn't even need the initial type-splitting or deduping, so the 
-     * processes are more independent. (We could eliminate the prerequisite on
-     * Bibframe conversion, though deduping still depends on type-splitting.)
-     */
-    private BfResourceConverter getConverterForModel(
-            Resource subject, Model model) {
-        
-        // Will need modification if ordering of types is crucial.
-        for (Map.Entry<OntType, Class<?>> entry : 
-                CONVERTERS_BY_TYPE.entrySet()) {
-            OntType type = entry.getKey();
-            Resource ontClass = model.createResource(type.uri());
-            LOGGER.trace("Checking subject " + subject.getURI() + " and type " 
-                        + type.uri());
-            if (model.contains(null, RDF.type, ontClass)) {
-                LOGGER.trace("Found converter class for subject " 
-                        + subject.getURI() + " of type " + type.uri());                        
-                return createConverter(type, entry.getValue());
-            }
-        }
-        
-        LOGGER.debug("No converter found for subject" + subject.getURI());
-        return null;
-    }
 
-    private BfResourceConverter createConverter(
-            OntType type, Class<?> converterClass) {
-        
-        try {
-            BfResourceConverter converter = 
-                    (BfResourceConverter) converterClass
-                    .getConstructor(OntType.class).newInstance(type);                        
-            return converter;      
-        } catch (Exception e) {
-            LOGGER.info("No converter created for type " + type);
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }    
-        
-        return null;
-    }
-    
     private void convertFile(File file) {
         
         String filename = file.getName();
@@ -185,7 +134,8 @@ public class BibframeConverter extends RdfProcessor {
             // Create a model consisting of just those statements of which this
             // subject is the subject
             StmtIterator statements = 
-                    inputModel.listStatements(inputSubject, null, (RDFNode) null);
+                    inputModel.listStatements(inputSubject, null, 
+                            (RDFNode) null);
             Model subjectModel = ModelFactory.createDefaultModel();
             subjectModel.add(statements);
             
@@ -202,12 +152,71 @@ public class BibframeConverter extends RdfProcessor {
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
-                outputModel.add(converter.convert(subject));
+                outputModel.add(converter.convert());
             }
         }
 
         writeModelToFile(outputModel, outputFile);
         
     }
+    
+    /*
+     * If as the last step in ResourceDeduper we type-split again, separating 
+     * out all statements by subject type (i.e., put Titles into their own file
+     * rather than combined with bfWork or bfInstance, etc.), then we could
+     * derive the converter type from the filename, as for ResourceDeduper.
+     * (However, if there's still an other.nt file we'd have to deal with that
+     * as here.) Consider implementing this step.
+     * On the other hand, there's an advantage that in the current 
+     * implementation it doesn't matter how the input files are structured - we
+     * wouldn't even need the initial type-splitting or deduping, so the 
+     * processes are more independent. (We could eliminate the prerequisite on
+     * Bibframe conversion, though deduping still depends on type-splitting.)
+     */
+    private BfResourceConverter getConverterForModel(
+            Resource subject, Model model) {
+        
+        // Will need modification if ordering of types is crucial.
+        for (Map.Entry<OntType, Class<?>> entry : 
+                CONVERTERS_BY_TYPE.entrySet()) {
+            OntType type = entry.getKey();
+            Resource ontClass = model.createResource(type.uri());
+            LOGGER.trace("Checking subject " + subject.getURI() + " and type " 
+                        + type.uri());
+            if (model.contains(null, RDF.type, ontClass)) {
+                LOGGER.trace("Found converter class for subject " 
+                        + subject.getURI() + " of type " + type.uri());                        
+                return createConverter(type, entry.getValue(), subject);
+            }
+        }
+        
+        LOGGER.debug("No converter found for subject " + subject.getURI());
+        return null;
+    }
+
+    private BfResourceConverter createConverter(
+            OntType type, Class<?> converterClass, Resource subject) {
+        
+        // NB Currently a new converter is created for each subject resource,
+        // so the subject can be assigned to an instance variable. If we 
+        // change flow so that a converter is created for an entire model of
+        // subjects of a certain type, the subject will have to be passed to the
+        // convert function.
+        try {
+            BfResourceConverter converter = 
+                    (BfResourceConverter) converterClass
+                    .getConstructor(OntType.class, Resource.class)
+                    .newInstance(type, subject);   
+            return converter;      
+        } catch (Exception e) {
+            LOGGER.info("No converter created for type " + type);
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }    
+        
+        return null;
+    }
+    
+
 
 }

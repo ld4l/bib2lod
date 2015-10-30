@@ -20,16 +20,25 @@ public abstract class BfResourceConverter {
             LogManager.getLogger(BfResourceConverter.class);
     
     protected OntType type;
+    protected Resource subject;
     // private String uriPostfix;
 
     
-    public BfResourceConverter(OntType type) {
-        LOGGER.trace("In constructor for " + this.getClass().getName());
+    public BfResourceConverter(OntType type, Resource subject) {
+        LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
+        
+        // NB Currently a new converter is created for each subject resource,
+        // so the subject can be assigned to an instance variable. If we 
+        // change the flow so that a converter is created for an entire model of
+        // subjects of a certain type, the subject will have to be passed to the
+        // convert function.
+        this.subject = subject;
+        
         // uriPostfix = type.namespace().prefix() + type.localname();
     }
     
-    public Model convert(Resource subject) {  
+    public Model convert() {  
         return subject.getModel();
     }
 
@@ -53,8 +62,8 @@ public abstract class BfResourceConverter {
      * @param newProp
      * @return
      */
-    protected void addProperty(Resource subject, OntProperty oldProp, 
-            OntProperty newProp) {
+    protected void addProperty(OntProperty oldProp, OntProperty newProp) {
+            
         
         Model model = subject.getModel();
 
@@ -65,19 +74,15 @@ public abstract class BfResourceConverter {
             RDFNode object = stmt.getObject();
             subject.addProperty(createProperty(newProp, model), object);
         }
-  
-        //return subject;
     }
     
-    protected void retractProperties(Resource subject) {
+    protected void retractProperties() {
     
         Model model = subject.getModel();
         for (OntProperty prop : getPropertiesToRetract()) {
             LOGGER.debug("Removing property " + prop.uri());
             subject.removeAll(createProperty(prop, model));
         }
-        
-        //return subject;
     }
     
 
@@ -140,7 +145,7 @@ public abstract class BfResourceConverter {
         return value;
     }
     
-    protected void addType(Resource subject, OntType type) {
+    protected void addType(OntType type) {
         Model model = subject.getModel();
         subject.addProperty(RDF.type, createResource(type, model));
     }

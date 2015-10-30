@@ -5,7 +5,6 @@ import java.util.List;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -23,20 +22,20 @@ public class BfEventConverter extends BfResourceConverter {
             
             );
     
-    public BfEventConverter(OntType type) {
-        super(type);
+    public BfEventConverter(OntType type, Resource subject) {
+        super(type, subject);
     }
     
-    public Model convert(Resource subject) {
+    @Override
+    public Model convert() {
         
         Model model = subject.getModel();
         
         subject.removeAll(RDF.type);
-        addType(subject, OntType.EVENT);
+        addType(OntType.EVENT);
         
-        addProperty(subject, OntProperty.BF_EVENT_PLACE, 
-                OntProperty.LOCATION);
-        
+        addProperty(OntProperty.BF_EVENT_PLACE, OntProperty.LOCATION);
+                
         return model;
     }
 
