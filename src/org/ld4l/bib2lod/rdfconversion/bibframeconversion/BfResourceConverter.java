@@ -150,10 +150,12 @@ public abstract class BfResourceConverter {
      */
     protected void assignType() {
         
-        subject.removeAll(RDF.type);       
         OntType newType = getNewType();
-        Resource ontClass = createResource(newType, subject.getModel());
-        subject.addProperty(RDF.type,  ontClass);
+        if (newType != null) {
+            subject.removeAll(RDF.type);                   
+            Resource ontClass = createResource(newType, subject.getModel());
+            subject.addProperty(RDF.type,  ontClass);
+        }
     }
 
 }
