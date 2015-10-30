@@ -72,6 +72,11 @@ public abstract class BfResourceConverter {
     protected void convertProperties() {
         
         Map<OntProperty, OntProperty> propertyMap = getPropertyMap();
+
+        // We may want to add a generic map of properties to convert for
+        // all types. Then individual classes don't need to list these; e.g.
+        // BF_HAS_AUTHORITY => MADSRDF_IDENTIFIED_BY_AUTHORITY.
+        // propertyMap.addAll(UNIVERSAL_PROPERTY_MAP);
         
         if (propertyMap != null) {        
             for (Map.Entry<OntProperty, OntProperty> entry 
@@ -114,6 +119,11 @@ public abstract class BfResourceConverter {
         
         List<OntProperty> propertiesToRetract = getPropertiesToRetract();
         
+        // We may want to add a generic set of properties to retract from
+        // all types. Then individual classes don't need to list these; e.g.
+        // BF_AUTHORIZED_ACCESS_POINT.
+        // propertiesToRetract.addAll(UNIVERSAL_PROPERTIES_TO_RETRACT);
+        
         if (propertiesToRetract != null) {
             Model model = subject.getModel();
             for (OntProperty prop : propertiesToRetract) {
@@ -124,8 +134,6 @@ public abstract class BfResourceConverter {
     }
 
     protected abstract List<OntProperty> getPropertiesToRetract();
-
-
 
     
     protected Resource createResource(OntType type, Model model) {
