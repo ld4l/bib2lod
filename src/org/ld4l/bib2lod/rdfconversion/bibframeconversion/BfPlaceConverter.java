@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.List;
+import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
@@ -22,21 +23,18 @@ public class BfPlaceConverter extends BfResourceConverter {
     }
     
     @Override
-    public Model convert() {
-
-        assignType();
-
-        return subject.getModel();
+    protected OntType getNewType() {
+        return NEW_TYPE;
     }
 
     @Override
-    protected List<OntProperty> getPropertiesToRetract() {
+    protected Map<OntProperty, OntProperty> getPropertyMap() {
         return null;
     }
     
     @Override
-    protected OntType getNewType() {
-        return NEW_TYPE;
+    protected List<OntProperty> getPropertiesToRetract() {
+        return null;
     }
 
 }

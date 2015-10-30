@@ -7,15 +7,15 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDF;
-import org.apache.logging.log4j.Level;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.OntProperty;
 import org.ld4l.bib2lod.rdfconversion.OntType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfPersonConverter extends BfResourceConverter {
 
@@ -31,11 +31,15 @@ public class BfPersonConverter extends BfResourceConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
     
-
+    private static final Map<OntProperty, OntProperty> PROPERTY_MAP =
+            new HashMap<OntProperty, OntProperty>();
+    static {
+        PROPERTY_MAP.put(OntProperty.BF_HAS_AUTHORITY, 
+                OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
+    }
+    
     private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
-                    OntProperty.BF_LABEL,
-                    OntProperty.BF_HAS_AUTHORITY,
                     OntProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
@@ -44,17 +48,11 @@ public class BfPersonConverter extends BfResourceConverter {
     }
     
     @Override
-    public Model convert() {
-       
-        assignType(); 
-        
-        addLabelProperties();
-        
-        addProperty(OntProperty.BF_HAS_AUTHORITY, 
-                OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
-
-        retractProperties();
-                   
+    public Model convert() {       
+        assignType();         
+        convertBfLabel();
+        convertProperties();
+        retractProperties();                   
         return subject.getModel();
     }
 
@@ -65,13 +63,15 @@ public class BfPersonConverter extends BfResourceConverter {
      * @param model
      * @return
      */
-    private void addLabelProperties() {
+    private void convertBfLabel() {
         
         Model model = subject.getModel();
-        
-        String bfLabel = getBfLabelValue(subject);
-        if (bfLabel != null) {
-            Map<OntProperty, String> labelProps = parseLabel(bfLabel);
+        Property property = createProperty(OntProperty.BF_LABEL, model);
+        Statement stmt = subject.getProperty(property);
+        if (stmt != null) {
+            Literal literal = stmt.getLiteral();
+            String label = literal.getLexicalForm();
+            Map<OntProperty, String> labelProps = parseLabel(label);
             for (Map.Entry<OntProperty, String> entry 
                     : labelProps.entrySet()) {
                 OntProperty key = entry.getKey();
@@ -81,6 +81,7 @@ public class BfPersonConverter extends BfResourceConverter {
                 }
             }
         }
+        subject.removeAll(property);
     }
     
     /**
@@ -113,13 +114,20 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
     
-    @Override
-    protected List<OntProperty> getPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
-    }
+
     
     @Override
     protected OntType getNewType() {
         return NEW_TYPE;
+    }
+
+    @Override
+    protected Map<OntProperty, OntProperty> getPropertyMap() {
+        return PROPERTY_MAP;
+    }
+    
+    @Override
+    protected List<OntProperty> getPropertiesToRetract() {
+        return PROPERTIES_TO_RETRACT;
     }
 }

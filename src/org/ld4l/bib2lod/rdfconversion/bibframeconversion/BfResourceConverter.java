@@ -1,8 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.List;
+import java.util.Map;
 
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -35,8 +35,14 @@ public abstract class BfResourceConverter {
         
         // uriPostfix = type.namespace().prefix() + type.localname();
     }
-    
-    public Model convert() {  
+
+    /* 
+     * Default conversion method. Subclasses may override. 
+     */
+    public Model convert() {       
+        assignType();        
+        convertProperties();
+        retractProperties();    
         return subject.getModel();
     }
 
@@ -47,53 +53,84 @@ public abstract class BfResourceConverter {
      * 
      * -----------------------------------------------------------------------*/
     
-    protected abstract List<OntProperty> getPropertiesToRetract();
+    /**
+     * Remove existing type assertions and assign new type.
+     */
+    protected void assignType() {
+        
+        OntType newType = getNewType();
+        if (newType != null) {
+            subject.removeAll(RDF.type);                   
+            Resource ontClass = createResource(newType, subject.getModel());
+            subject.addProperty(RDF.type,  ontClass);
+        }
+    }
 
     protected abstract OntType getNewType();
     
+    
+    protected void convertProperties() {
+        
+        Map<OntProperty, OntProperty> propertyMap = getPropertyMap();
+        
+        if (propertyMap != null) {        
+            for (Map.Entry<OntProperty, OntProperty> entry 
+                    : propertyMap.entrySet()) {      
+                convertProperty(entry.getKey(), entry.getValue());  
+            }
+        }
+    }
+    
+    protected abstract Map<OntProperty, OntProperty> getPropertyMap();
+
     /** 
      * Add a new statement based on a Bibframe statement, using the object of
-     * the Bibframe statement as the object of the new statement. Currently the 
-     * original statement is removed with other statements by calling 
-     * retractProperties(), rather than removing it here.
+     * the Bibframe statement as the object of the new statement. Remove the
+     * original statement.
      * 
      * @param subject
      * @param oldProp
      * @param newProp
      * @return
      */
-    protected void addProperty(OntProperty oldProp, OntProperty newProp) {
-            
-        
+    protected void convertProperty(OntProperty oldProp, OntProperty newProp) {
+                    
         Model model = subject.getModel();
-
-        Statement stmt = subject.getProperty(createProperty(oldProp, model));
+        Property oldProperty = createProperty(oldProp, model);
+        Statement stmt = subject.getProperty(oldProperty);
                 
         if (stmt != null) {
-            // Resource object = stmt.getResource();
             RDFNode object = stmt.getObject();
-            subject.addProperty(createProperty(newProp, model), object);
+            Property newProperty = createProperty(newProp, model);
+            subject.addProperty(newProperty, object);
+            subject.removeAll(oldProperty);
         }
     }
     
+    /**
+     * Retract statements with the specified predicates.
+     */
     protected void retractProperties() {
-    
-        Model model = subject.getModel();
-        for (OntProperty prop : getPropertiesToRetract()) {
-            LOGGER.debug("Removing property " + prop.uri());
-            subject.removeAll(createProperty(prop, model));
+        
+        List<OntProperty> propertiesToRetract = getPropertiesToRetract();
+        
+        if (propertiesToRetract != null) {
+            Model model = subject.getModel();
+            for (OntProperty prop : propertiesToRetract) {
+                LOGGER.debug("Removing property " + prop.uri());
+                subject.removeAll(createProperty(prop, model));
+            }
         }
     }
-    
 
-//    protected String mintUri(Resource resource) {
-//        return mintUri(resource.getURI());
-//    }
-//    
-//    protected String mintUri(String uri) {
-//        return uri + uriPostfix;
-//    }
+    protected abstract List<OntProperty> getPropertiesToRetract();
+
+
+
     
+    protected Resource createResource(OntType type, Model model) {
+        return model.createResource(type.uri());
+    }
     
     /**
      * Create a Jena property from an OntProperty
@@ -110,9 +147,7 @@ public abstract class BfResourceConverter {
 //        return createProperty(property, subject.getModel());
 //    }
     
-    protected Resource createResource(OntType type, Model model) {
-        return model.createResource(type.uri());
-    }
+
     
 //    protected void addStatement(String subjectUri, OntProperty ontProp, 
 //            Resource object, Model model) {
@@ -127,35 +162,34 @@ public abstract class BfResourceConverter {
 //                ontProp.localname());
 //        model.add(subject, property, object);
 //    }
+
     
-    protected String getBfLabelValue(Resource subject) {
-        return getLiteralValue(subject, OntProperty.BF_LABEL);
-    }
+//    protected Literal getLiteral(OntProperty ontProp) {
+//        Property property = subject.getModel().getProperty(ontProp.uri());
+//        Statement stmt = subject.getProperty(property);
+//        if (stmt != null) {
+//            return stmt.getLiteral();
+//        }   
+//        return null;
+//    }
+//    
+//    protected String getLiteralValue(OntProperty ontProp) {
+//        
+//        Literal literal = getLiteral(ontProp);
+//        if (literal != null) {
+//            return literal.getLexicalForm();
+//        }
+//        return null;
+//    }
     
-    protected String getLiteralValue(Resource subject, OntProperty ontProp) {
-        String value = null;
-        Property property = subject.getModel().getProperty(ontProp.uri());
-        Statement stmt = subject.getProperty(property);
-        if (stmt != null) {
-            Literal literal = stmt.getLiteral();
-            if (literal != null) {
-                value = literal.getLexicalForm();
-            }
-        }
-        return value;
-    }
-    
-    /**
-     * Remove existing type assertions and assign new type.
-     */
-    protected void assignType() {
-        
-        OntType newType = getNewType();
-        if (newType != null) {
-            subject.removeAll(RDF.type);                   
-            Resource ontClass = createResource(newType, subject.getModel());
-            subject.addProperty(RDF.type,  ontClass);
-        }
-    }
+//  protected String mintUri(Resource resource) {
+//      return mintUri(resource.getURI());
+//  }
+//  
+//  protected String mintUri(String uri) {
+//      return uri + uriPostfix;
+//  }
+  
+
 
 }
