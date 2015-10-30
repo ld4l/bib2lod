@@ -38,27 +38,27 @@ public class ResourceDeduper extends RdfProcessor {
      */
 
     // Using LinkedHashMap in case order of processing becomes important
-    private static final Map<OntType, Class<?>> DEDUPERS_BY_TYPE =
-            new LinkedHashMap<OntType, Class<?>>();
-    private static final List<OntType> TYPES_TO_DEDUPE = 
-            new ArrayList<OntType>();
+    private static final Map<BfType, Class<?>> DEDUPERS_BY_TYPE =
+            new LinkedHashMap<BfType, Class<?>>();
+    private static final List<BfType> TYPES_TO_DEDUPE = 
+            new ArrayList<BfType>();
     static {
-        DEDUPERS_BY_TYPE.put(OntType.BF_EVENT, BfResourceDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_FAMILY, BfAuthorityDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_HELD_ITEM, BfHeldItemDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_JURISDICTION,  BfAuthorityDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_MEETING,  BfAuthorityDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
-        DEDUPERS_BY_TYPE.put(OntType.BF_PERSON,  BfAuthorityDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_PLACE,  BfAuthorityDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-        DEDUPERS_BY_TYPE.put(OntType.BF_WORK,  BfWorkDeduper.class); 
+        DEDUPERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_HELD_ITEM, BfHeldItemDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_JURISDICTION,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_MEETING,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
+        DEDUPERS_BY_TYPE.put(BfType.BF_PERSON,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_PLACE,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_TOPIC,  BfTopicDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkDeduper.class); 
         
         // Don't just return the keySet directly, since (1) it's backed by the
         // map, and (2) since keySet() returns a Set, it's opaque to the caller
         // that the set is ordered (and backed by the map).
-        Iterator<OntType> it = DEDUPERS_BY_TYPE.keySet().iterator();
+        Iterator<BfType> it = DEDUPERS_BY_TYPE.keySet().iterator();
         while (it.hasNext()) {
             TYPES_TO_DEDUPE.add(it.next());
         }
@@ -86,16 +86,16 @@ public class ResourceDeduper extends RdfProcessor {
         Map<String, BfResourceDeduper> dedupers = 
                 new HashMap<String, BfResourceDeduper>();
         
-        for (Map.Entry<OntType, Class<?>> entry : 
+        for (Map.Entry<BfType, Class<?>> entry : 
                 DEDUPERS_BY_TYPE.entrySet()) {
-            OntType type = entry.getKey();
+            BfType type = entry.getKey();
             String basename = type.filename();
 
             Class<?> deduperClass = entry.getValue();
 
             try {
                 BfResourceDeduper deduper = (BfResourceDeduper) deduperClass
-                        .getConstructor(OntType.class).newInstance(type);
+                        .getConstructor(BfType.class).newInstance(type);
                 dedupers.put(basename,  deduper);      
             } catch (Exception e) {
                 LOGGER.info("No deduper created for type " + type);
@@ -107,7 +107,7 @@ public class ResourceDeduper extends RdfProcessor {
         return dedupers;
     }
     
-    protected static List<OntType> getTypesToDedupe() {
+    protected static List<BfType> getTypesToDedupe() {
         return TYPES_TO_DEDUPE;
     }
     
@@ -146,7 +146,7 @@ public class ResourceDeduper extends RdfProcessor {
          * case there are dependencies. Iterating on files is easier, however,
          * so implementing that for now. 
          */
-//      for ( OntType type : TYPES_TO_DEDUPE ) {
+//      for ( BfType type : TYPES_TO_DEDUPE ) {
 //      BfResourceDeduper deduper = 
 //              DeduperFactory.createBfResourceDeduper(type, inputDir);
 //      if (deduper == null) {
@@ -230,7 +230,7 @@ public class ResourceDeduper extends RdfProcessor {
              * Map<String, Model> models = writeModelsToFiles(models) or
              * Map<Model, String> models = writeModelsToFiles(models)
              * OR if the dedupers don't know anything about filenames, just 
-             * have them return a map from Model to OntType (or the reverse),
+             * have them return a map from Model to BfType (or the reverse),
              * and we transform that here to a map from Model to filename (or
              * the reverse.
              * 
@@ -247,7 +247,7 @@ public class ResourceDeduper extends RdfProcessor {
              *    LOGGER.info("No deduper found for file " + filename);
              *   appendModelToFile(model, basename);
              * } else {
-             *    Map<OntType, Model> modelsByType = 
+             *    Map<BfType, Model> modelsByType = 
              *           deduper.getModelsByType(model);
              *   appendModelsToFiles(modelsByType);            
              * }
@@ -268,10 +268,10 @@ public class ResourceDeduper extends RdfProcessor {
     }
   
 // Use for second round of type splitting. See comments above.
-//    private void appendModelsToFiles(Map<OntType, Model> modelsByType) {
+//    private void appendModelsToFiles(Map<BfType, Model> modelsByType) {
 //        
-//        for (Map.Entry<OntType, Model> entry : modelsByType.entrySet()) {
-//            OntType type = entry.getKey();
+//        for (Map.Entry<BfType, Model> entry : modelsByType.entrySet()) {
+//            BfType type = entry.getKey();
 //            Model model = entry.getValue();
 //            String basename = type.filename();
 //            appendModelToFile(model, basename);

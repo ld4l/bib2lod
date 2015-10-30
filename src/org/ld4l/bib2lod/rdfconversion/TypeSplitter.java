@@ -23,7 +23,7 @@ public class TypeSplitter extends RdfProcessor {
     
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES; 
     
-    private static final List<OntType> TYPES_TO_SPLIT = 
+    private static final List<BfType> TYPES_TO_SPLIT = 
             ResourceDeduper.getTypesToDedupe();
     
     private static final String REMAINDER_FILENAME = 
@@ -64,7 +64,7 @@ public class TypeSplitter extends RdfProcessor {
         
         Map<String, File> outputFilesByType = new HashMap<String, File>();
         
-        for (OntType type : TYPES_TO_SPLIT) {
+        for (BfType type : TYPES_TO_SPLIT) {
             outputFilesByType.put(type.uri(), 
                     createOutputFileForType(outputDir, type));
         }
@@ -78,7 +78,7 @@ public class TypeSplitter extends RdfProcessor {
         return outputFilesByType;
     }
 
-    private File createOutputFileForType(String outputDir, OntType type) {
+    private File createOutputFileForType(String outputDir, BfType type) {
         
         String basename = type.filename();
         return new File(outputDir, getOutputFilename(basename));
@@ -95,7 +95,7 @@ public class TypeSplitter extends RdfProcessor {
    
         // For each Bibframe type to split on, retrive from the input model the
         // statements to add to the output file for that type.
-        for (OntType type : TYPES_TO_SPLIT) {       
+        for (BfType type : TYPES_TO_SPLIT) {       
             Model modelForType = modelsByType.get(type.uri());
             addStatementsForType(type, modelForType, inputModel);
         }
@@ -115,7 +115,7 @@ public class TypeSplitter extends RdfProcessor {
         Map<String, Model> modelsByType = 
                 new HashMap<String, Model>();
 
-        for (OntType type: TYPES_TO_SPLIT) {
+        for (BfType type: TYPES_TO_SPLIT) {
             modelsByType.put(type.uri(), 
                     ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
@@ -125,7 +125,7 @@ public class TypeSplitter extends RdfProcessor {
         return modelsByType;
     }
 
-    private void addStatementsForType(OntType type, Model modelForType,
+    private void addStatementsForType(BfType type, Model modelForType,
             Model inputModel) {
 
         Query query = getQueryForType(type);
@@ -152,7 +152,7 @@ public class TypeSplitter extends RdfProcessor {
         inputModel.remove(constructModel);        
     }
     
-    private Query getQueryForType(OntType type) {
+    private Query getQueryForType(BfType type) {
         
         // Type-specific queries
         // Could create separate subclasses, as for dedupers and converters,
@@ -160,13 +160,13 @@ public class TypeSplitter extends RdfProcessor {
         
         ParameterizedSparqlString pss = null;
         
-        if (type == OntType.BF_TOPIC) {          
+        if (type == BfType.BF_TOPIC) {          
             pss = getBfTopicSparql();
-        } else if (OntType.authorities().contains(type)) {
+        } else if (BfType.authorities().contains(type)) {
             pss = getBfAuthoritySparql();
-        } else if (type == OntType.BF_INSTANCE) {       
+        } else if (type == BfType.BF_INSTANCE) {       
             pss = getBfInstanceSparql();
-        } else if (type == OntType.BF_WORK) {
+        } else if (type == BfType.BF_WORK) {
             pss = getBfWorkSparql();
         } else {
             pss = getDefaultSparql();
@@ -191,15 +191,15 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "} UNION { "
-                + "?s1 " + OntProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
+                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed() 
+                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed()                 
+                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()                 
                 + "} }"                
         );
         
@@ -218,10 +218,10 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "} UNION { "
-                + "?s1 " + OntProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
+                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + OntType.MADSRDF_AUTHORITY.prefixed()               
+                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed()               
                 + "} }"                
         );
         
@@ -242,35 +242,35 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
+                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_TITLE.prefixed()
+                + "?o1 a " + BfType.BF_TITLE.prefixed()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_PROVIDER.prefixed() 
+                + "?o1 a " + BfType.BF_PROVIDER.prefixed() 
                 + "} UNION { "
-                + "?s1 " + OntProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
+                + "?s1 " + BfProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
+                + "?o1 a " + BfType.BF_ANNOTATION.prefixed() 
                 + "} UNION { "
                 // LC converter typically generates 
                 // :anno bf:annotates :resource rather than
                 // :resource bf:hasAnnotation :anno
-                + "?o1 " + OntProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
+                + "?o1 " + BfProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
                 + "?s1 a ?type . " 
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
+                + "?o1 a " + BfType.BF_ANNOTATION.prefixed()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
+                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()                 
                 + "} }"                
         );
         
@@ -291,30 +291,30 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_IDENTIFIER.prefixed() 
+                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed() 
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_TITLE.prefixed()
+                + "?o1 a " + BfType.BF_TITLE.prefixed()
                 + "} UNION { "
-                + "?s1 " + OntProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
+                + "?s1 " + BfProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed() 
+                + "?o1 a " + BfType.BF_ANNOTATION.prefixed() 
                 + "} UNION { "
                 // LC converter typically generates 
                 // :anno bf:annotates :resource rather than
                 // :resource bf:hasAnnotation :anno
-                + "?o1 " + OntProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
+                + "?o1 " + BfProperty.BF_ANNOTATES.prefixed() +  " ?s1 . "
                 + "?s1 a ?type . " 
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_ANNOTATION.prefixed()
+                + "?o1 a " + BfType.BF_ANNOTATION.prefixed()
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + OntType.BF_CLASSIFICATION.prefixed()                 
+                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()                 
                 + "} }"                
         );
         

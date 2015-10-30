@@ -14,15 +14,16 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfPersonConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPersonConverter.class);
     
-    private static final OntType NEW_TYPE = OntType.PERSON;
+    private static final Ld4lType NEW_TYPE = Ld4lType.PERSON;
     
     private static final Pattern BF_PERSON_LABEL = 
             //* Which date patterns can occur? Look at more data.
@@ -31,16 +32,16 @@ public class BfPersonConverter extends BfResourceConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
     
-    private static final Map<OntProperty, OntProperty> PROPERTY_MAP =
-            new HashMap<OntProperty, OntProperty>();
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
+            new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(OntProperty.BF_HAS_AUTHORITY, 
-                OntProperty.MADSRDF_IS_IDENTIFIED_BY_AUTHORITY);
+        PROPERTY_MAP.put(BfProperty.BF_HAS_AUTHORITY, 
+                Ld4lProperty.RWO_TO_AUTHORITY);
     }
     
-    private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
+    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
-                    OntProperty.BF_AUTHORIZED_ACCESS_POINT
+                    BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
     public BfPersonConverter(Resource subject) {
@@ -66,15 +67,15 @@ public class BfPersonConverter extends BfResourceConverter {
     private void convertBfLabel() {
         
         Model model = subject.getModel();
-        Property property = createProperty(OntProperty.BF_LABEL, model);
+        Property property = createProperty(BfProperty.BF_LABEL, model);
         Statement stmt = subject.getProperty(property);
         if (stmt != null) {
             Literal literal = stmt.getLiteral();
             String label = literal.getLexicalForm();
-            Map<OntProperty, String> labelProps = parseLabel(label);
-            for (Map.Entry<OntProperty, String> entry 
+            Map<Ld4lProperty, String> labelProps = parseLabel(label);
+            for (Map.Entry<Ld4lProperty, String> entry 
                     : labelProps.entrySet()) {
-                OntProperty key = entry.getKey();
+                Ld4lProperty key = entry.getKey();
                 String value = entry.getValue();
                 if (value != null) {
                     subject.addLiteral(createProperty(key, model), value);
@@ -90,9 +91,9 @@ public class BfPersonConverter extends BfResourceConverter {
      * @param label
      * @return
      */
-    Map<OntProperty, String> parseLabel(String label) {
+    Map<Ld4lProperty, String> parseLabel(String label) {
 
-        Map<OntProperty, String> props = new HashMap<OntProperty, String>();
+        Map<Ld4lProperty, String> props = new HashMap<Ld4lProperty, String>();
         
         String name = null;
         String birthyear = null;
@@ -107,9 +108,9 @@ public class BfPersonConverter extends BfResourceConverter {
             LOGGER.debug(name + " | " + birthyear + " | " + deathyear);
         }             
         
-        props.put(OntProperty.NAME, name);
-        props.put(OntProperty.BIRTHDATE, birthyear);
-        props.put(OntProperty.DEATHDATE, deathyear);
+        props.put(Ld4lProperty.NAME, name);
+        props.put(Ld4lProperty.BIRTHDATE, birthyear);
+        props.put(Ld4lProperty.DEATHDATE, deathyear);
         
         return props;   
     }
@@ -117,17 +118,17 @@ public class BfPersonConverter extends BfResourceConverter {
 
     
     @Override
-    protected OntType getNewType() {
+    protected Ld4lType getNewType() {
         return NEW_TYPE;
     }
 
     @Override
-    protected Map<OntProperty, OntProperty> getPropertyMap() {
+    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
         return PROPERTY_MAP;
     }
     
     @Override
-    protected List<OntProperty> getPropertiesToRetract() {
+    protected List<BfProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }
 }

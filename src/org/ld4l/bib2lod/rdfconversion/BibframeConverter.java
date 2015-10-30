@@ -33,32 +33,32 @@ public class BibframeConverter extends RdfProcessor {
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
       
-    private static final Map<OntType, Class<?>> CONVERTERS_BY_TYPE =
-            new HashMap<OntType, Class<?>>();
+    private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
+            new HashMap<BfType, Class<?>>();
     static {
-//        CONVERTERS_BY_TYPE.put(OntType.BF_ANNOTATION, 
+//        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
 //                BfResourceConverter.class);            
-        CONVERTERS_BY_TYPE.put(OntType.BF_EVENT, BfEventConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_FAMILY, BfFamilyConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_HELD_ITEM, 
+        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfFamilyConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_IDENTIFIER, 
+//        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
 //                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_INSTANCE, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_JURISDICTION,  
+//        CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
 //                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_MEETING, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_ORGANIZATION, 
+//        CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_ORGANIZATION, 
                 BfOrganizationConverter.class);        
-        CONVERTERS_BY_TYPE.put(OntType.BF_PERSON, BfPersonConverter.class);
-        CONVERTERS_BY_TYPE.put(OntType.BF_PLACE, BfPlaceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_PROVIDER, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_TITLE, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_TOPIC, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.BF_WORK,  BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_AUTHORITY, 
+        CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfPlaceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfResourceConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
 //                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(OntType.MADSRDF_COMPLEX_SUBJECT,  
+//        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
 //                BfResourceConverter.class); 
     }
     
@@ -179,10 +179,10 @@ public class BibframeConverter extends RdfProcessor {
             
         // Loop through types to find one that is the subject's type.
         // Will need modification if ordering of types is crucial.
-        for (Map.Entry<OntType, Class<?>> entry : 
+        for (Map.Entry<BfType, Class<?>> entry : 
                 CONVERTERS_BY_TYPE.entrySet()) {
             
-            OntType type = entry.getKey();
+            BfType type = entry.getKey();
             Resource ontClass = model.createResource(type.uri());
 
             if (model.contains(null, RDF.type, ontClass)) {
@@ -197,7 +197,7 @@ public class BibframeConverter extends RdfProcessor {
     }
 
     private BfResourceConverter createConverter(
-            OntType type, Class<?> converterClass, Resource subject) {
+            BfType type, Class<?> converterClass, Resource subject) {
         
         // NB Currently a new converter is created for each subject resource,
         // so the subject can be assigned to an instance variable. If we 

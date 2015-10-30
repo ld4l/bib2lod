@@ -9,27 +9,26 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfHeldItemConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);
     
-    private static final OntType NEW_TYPE = OntType.ITEM;
+    private static final Ld4lType NEW_TYPE = Ld4lType.ITEM;
     
-    private static final Map<OntProperty, OntProperty> PROPERTY_MAP = 
-            new HashMap<OntProperty, OntProperty>();
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
+            new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(OntProperty.BF_HOLDING_FOR, 
-                OntProperty.IS_HOLDING_FOR)
-            ;
+        PROPERTY_MAP.put(BfProperty.BF_HOLDING_FOR, Ld4lProperty.HOLDING_FOR);
     }
 
-    private static final List<OntProperty> PROPERTIES_TO_RETRACT = 
+    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
-                    OntProperty.BF_LABEL
+                    BfProperty.BF_LABEL
             );
             
     
@@ -46,17 +45,17 @@ public class BfHeldItemConverter extends BfResourceConverter {
     }
     
     @Override
-    protected OntType getNewType() {
+    protected Ld4lType getNewType() {
         return NEW_TYPE;
     }
 
     @Override
-    protected Map<OntProperty, OntProperty> getPropertyMap() {
+    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
         return PROPERTY_MAP;
     }
 
     @Override
-    protected List<OntProperty> getPropertiesToRetract() {
+    protected List<BfProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }
     

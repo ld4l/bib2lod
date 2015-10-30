@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 
 /* TODO Much of this code is repeated in DeduperFactory. Combine if possible.
@@ -19,19 +19,19 @@ public class DeduperFactory {
     private static final Logger LOGGER = 
             LogManager.getLogger(DeduperFactory.class);
     
-    private static final Map<OntType, Class<?>> RESOURCE_DEDUPERS =
-            new HashMap<OntType, Class<?>>();
+    private static final Map<BfType, Class<?>> RESOURCE_DEDUPERS =
+            new HashMap<BfType, Class<?>>();
     static {
-        RESOURCE_DEDUPERS.put(OntType.BF_EVENT, BfResourceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_FAMILY, BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_INSTANCE, BfInstanceDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_JURISDICTION,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_MEETING,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
-        RESOURCE_DEDUPERS.put(OntType.BF_PERSON,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_PLACE,  BfAuthorityDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_TOPIC,  BfTopicDeduper.class);
-        RESOURCE_DEDUPERS.put(OntType.BF_WORK,  BfWorkDeduper.class);            
+        RESOURCE_DEDUPERS.put(BfType.BF_EVENT, BfResourceDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_FAMILY, BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_INSTANCE, BfInstanceDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_JURISDICTION,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_MEETING,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
+        RESOURCE_DEDUPERS.put(BfType.BF_PERSON,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_PLACE,  BfAuthorityDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_TOPIC,  BfTopicDeduper.class);
+        RESOURCE_DEDUPERS.put(BfType.BF_WORK,  BfWorkDeduper.class);            
     }
 
     public static BfResourceDeduper createBfResourceDeduper(File inputFile) {
@@ -46,7 +46,7 @@ public class DeduperFactory {
         LOGGER.debug("Creating deduper for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.typeForFilename(basename);
+        BfType type = BfType.typeForFilename(basename);
         if (type == null) {
             LOGGER.debug("Can't create deduper: no type defined for file "
                    + basename);
@@ -61,7 +61,7 @@ public class DeduperFactory {
         }
  
         try {
-            Constructor<?> c = deduperClass.getConstructor(OntType.class);
+            Constructor<?> c = deduperClass.getConstructor(BfType.class);
             LOGGER.debug("Constructor is: " + c.getName());
             BfResourceDeduper deduper = (BfResourceDeduper) c.newInstance(type);
             return deduper;
@@ -75,7 +75,7 @@ public class DeduperFactory {
     // If we want to turn the iteration around in ResourceDeduper and iterate
     // over types rather than files, implement this.
     public static BfResourceDeduper createBfResourceDeduper(
-            OntType type, String inputDir) {
+            BfType type, String inputDir) {
         // Get file basename from type (return null if null)
         // Get deduper class from TYPE_DEDUPERS (return null if null)
         // Read input file into model

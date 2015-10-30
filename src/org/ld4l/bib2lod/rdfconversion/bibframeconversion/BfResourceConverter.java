@@ -11,8 +11,9 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public abstract class BfResourceConverter {
 
@@ -65,7 +66,7 @@ public abstract class BfResourceConverter {
      */
     protected void assignType() {
         
-        OntType newType = getNewType();
+        Ld4lType newType = getNewType();
         if (newType != null) {
             subject.removeAll(RDF.type);                   
             Resource ontClass = createResource(newType, subject.getModel());
@@ -73,12 +74,12 @@ public abstract class BfResourceConverter {
         }
     }
 
-    protected abstract OntType getNewType();
+    protected abstract Ld4lType getNewType();
     
     
     protected void convertProperties() {
         
-        Map<OntProperty, OntProperty> propertyMap = getPropertyMap();
+        Map<BfProperty, Ld4lProperty> propertyMap = getPropertyMap();
 
         // We may want to add a generic map of properties to convert for
         // all types. Then individual classes don't need to list these; e.g.
@@ -86,14 +87,14 @@ public abstract class BfResourceConverter {
         // propertyMap.addAll(UNIVERSAL_PROPERTY_MAP);
         
         if (propertyMap != null) {        
-            for (Map.Entry<OntProperty, OntProperty> entry 
+            for (Map.Entry<BfProperty, Ld4lProperty> entry 
                     : propertyMap.entrySet()) {      
                 convertProperty(entry.getKey(), entry.getValue());  
             }
         }
     }
     
-    protected abstract Map<OntProperty, OntProperty> getPropertyMap();
+    protected abstract Map<BfProperty, Ld4lProperty> getPropertyMap();
 
     /** 
      * Add a new statement based on a Bibframe statement, using the object of
@@ -105,7 +106,7 @@ public abstract class BfResourceConverter {
      * @param newProp
      * @return
      */
-    protected void convertProperty(OntProperty oldProp, OntProperty newProp) {
+    protected void convertProperty(BfProperty oldProp, Ld4lProperty newProp) {
                     
         Model model = subject.getModel();
         Property oldProperty = createProperty(oldProp, model);
@@ -124,7 +125,7 @@ public abstract class BfResourceConverter {
      */
     protected void retractProperties() {
         
-        List<OntProperty> propertiesToRetract = getPropertiesToRetract();
+        List<BfProperty> propertiesToRetract = getPropertiesToRetract();
         
         // We may want to add a generic set of properties to retract from
         // all types. Then individual classes don't need to list these; e.g.
@@ -133,45 +134,50 @@ public abstract class BfResourceConverter {
         
         if (propertiesToRetract != null) {
             Model model = subject.getModel();
-            for (OntProperty prop : propertiesToRetract) {
+            for (BfProperty prop : propertiesToRetract) {
                 LOGGER.debug("Removing property " + prop.uri());
                 subject.removeAll(createProperty(prop, model));
             }
         }
     }
 
-    protected abstract List<OntProperty> getPropertiesToRetract();
+    protected abstract List<BfProperty> getPropertiesToRetract();
 
     
-    protected Resource createResource(OntType type, Model model) {
+    protected Resource createResource(Ld4lType type, Model model) {
         return model.createResource(type.uri());
     }
     
     /**
-     * Create a Jena property from an OntProperty
-     * @param property - the OntProperty
+     * Create a Jena property from an BfProperty
+     * @param newProp - the BfProperty
      * @param model - the model to create the property in
      * @return a Jena property
      */
-    protected Property createProperty(OntProperty property, Model model) {
-        return model.createProperty(property.namespaceUri(), 
-                property.localname());
+    protected Property createProperty(Ld4lProperty prop, Model model) {
+        return model.createProperty(prop.namespaceUri(), 
+                prop.localname());
     }
- 
-//    protected Property createProperty(OntProperty property, Resource subject) {
+
+    protected Property createProperty(BfProperty prop, Model model) {
+        return model.createProperty(prop.namespaceUri(), 
+                prop.localname());
+    }
+    
+//    protected Property createProperty(BfProperty property, Resource subject) {
 //        return createProperty(property, subject.getModel());
 //    }
     
 
     
-//    protected void addStatement(String subjectUri, OntProperty ontProp, 
+//    protected void addStatement(String subjectUri, BfProperty ontProp, 
 //            Resource object, Model model) {
 //        
 //        Resource subject = model.createResource(subjectUri);
 //        addStatement(subject, ontProp, object, model);
 //    }
      
-//    protected void addStatement(Resource subject, OntProperty ontProp, 
+//    protected void addStatement(Resource subject, BfProperty ontProp, 
 //            Resource object, Model model) {
 //        Property property = model.createProperty(ontProp.namespaceUri(), 
 //                ontProp.localname());
@@ -179,7 +185,7 @@ public abstract class BfResourceConverter {
 //    }
 
     
-//    protected Literal getLiteral(OntProperty ontProp) {
+//    protected Literal getLiteral(BfProperty ontProp) {
 //        Property property = subject.getModel().getProperty(ontProp.uri());
 //        Statement stmt = subject.getProperty(property);
 //        if (stmt != null) {
@@ -188,7 +194,7 @@ public abstract class BfResourceConverter {
 //        return null;
 //    }
 //    
-//    protected String getLiteralValue(OntProperty ontProp) {
+//    protected String getLiteralValue(BfProperty ontProp) {
 //        
 //        Literal literal = getLiteral(ontProp);
 //        if (literal != null) {

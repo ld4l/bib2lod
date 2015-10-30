@@ -14,8 +14,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
 /**
@@ -31,9 +31,9 @@ public class BfResourceDeduper {
             LogManager.getLogger(BfResourceDeduper.class);
     
     protected Model newAssertions;
-    protected OntType type;
+    protected BfType type;
     
-    public BfResourceDeduper(OntType type) {
+    public BfResourceDeduper(BfType type) {
         LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
         newAssertions = ModelFactory.createDefaultModel();
@@ -108,7 +108,7 @@ public class BfResourceDeduper {
         return uniqueUris;        
     }
     
-    protected Query getQuery(OntType type) {
+    protected Query getQuery(BfType type) {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
@@ -117,10 +117,10 @@ public class BfResourceDeduper {
                 + "WHERE { "
                 + "?resource a ?type . "
                 + "OPTIONAL { ?resource "
-                + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
+                + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
                 + "?authAccessPoint . } "
                 + "OPTIONAL { ?resource  " 
-                + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
+                + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
 
         pss.setCommandText(commandText);
@@ -161,8 +161,8 @@ public class BfResourceDeduper {
         return newAssertions;
     }
     
-    public Map<OntType, Model> getModelsByType(Model model) {
-        Map<OntType, Model> models = new HashMap<OntType, Model>();
+    public Map<BfType, Model> getModelsByType(Model model) {
+        Map<BfType, Model> models = new HashMap<BfType, Model>();
         models.put(type, model);
         return models;
     } 

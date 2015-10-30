@@ -8,7 +8,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 
 
 /* TODO Much of this code is repeated in converterFactory. Combine if possible.
@@ -20,21 +20,21 @@ public class BibframeConverterFactory {
             LogManager.getLogger(BibframeConverterFactory.class);
     
 
-    private static final Map<OntType, Class<?>> BF_CONVERTERS =
-            new HashMap<OntType, Class<?>>();
+    private static final Map<BfType, Class<?>> BF_CONVERTERS =
+            new HashMap<BfType, Class<?>>();
     static {
         // Assign temporarily to BfResourceConverter till start implementing
         // type-specific class
-        BF_CONVERTERS.put(OntType.BF_EVENT, BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_FAMILY, BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_INSTANCE, BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_JURISDICTION,  BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_MEETING,  BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_ORGANIZATION,  BfResourceConverter.class);        
-        BF_CONVERTERS.put(OntType.BF_PERSON,  BfPersonConverter.class);
-        BF_CONVERTERS.put(OntType.BF_PLACE,  BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_TOPIC,  BfResourceConverter.class);
-        BF_CONVERTERS.put(OntType.BF_WORK,  BfResourceConverter.class);            
+        BF_CONVERTERS.put(BfType.BF_EVENT, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_FAMILY, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_INSTANCE, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_JURISDICTION,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_MEETING,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_ORGANIZATION,  BfResourceConverter.class);        
+        BF_CONVERTERS.put(BfType.BF_PERSON,  BfPersonConverter.class);
+        BF_CONVERTERS.put(BfType.BF_PLACE,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_TOPIC,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_WORK,  BfResourceConverter.class);            
     }
     
     public static BfResourceConverter createBfResourceConverter(File inputFile) {
@@ -49,7 +49,7 @@ public class BibframeConverterFactory {
         LOGGER.info("Creating converter for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.typeForFilename(basename);
+        BfType type = BfType.typeForFilename(basename);
         if (type == null) {
             LOGGER.info("Can't create converter: no type defined for file "
                    + basename);
@@ -64,7 +64,7 @@ public class BibframeConverterFactory {
         }
  
         try {
-            Constructor<?> c = converterClass.getConstructor(OntType.class);
+            Constructor<?> c = converterClass.getConstructor(BfType.class);
             BfResourceConverter converter = (BfResourceConverter) c.newInstance(type);
             return converter;
         } catch (Exception e) {
@@ -77,7 +77,7 @@ public class BibframeConverterFactory {
 // If we want to turn the iteration around in ResourceConverter and iterate
 // over types rather than files, implement this.
 //    public static BfResourceConverter createBfResourceConverter(
-//            OntType type, String inputDir) {
+//            BfType type, String inputDir) {
 //        // Get file basename from type (return null if null)
 //        // Get converter class from TYPE_converterS (return null if null)
 //        // Read input file into model

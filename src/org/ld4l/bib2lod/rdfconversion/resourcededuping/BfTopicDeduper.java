@@ -16,8 +16,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 import org.ld4l.bib2lod.rdfconversion.naco.NacoNormalizer;
 
@@ -32,7 +32,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
         SCHEMES.put("(OCoLC)fst", Vocabulary.FAST);
     }
     
-    public BfTopicDeduper(OntType type) {
+    public BfTopicDeduper(BfType type) {
         super(type);
     } 
  
@@ -171,29 +171,29 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 // "SELECT ?topic ?id ?authAccessPt ?label ?auth ?authLabel "
                 "SELECT ?topic ?authAccessPoint ?label ?auth  ?scheme ?id "
                 + "WHERE { "
-                + "?topic a " + OntType.BF_TOPIC.sparqlUri() + " . "
+                + "?topic a " + BfType.BF_TOPIC.sparqlUri() + " . "
                 + "OPTIONAL { ?topic "
-                + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri()
+                + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri()
                 + " ?authAccessPoint . } "
                 + "OPTIONAL { ?topic " 
-                + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
+                + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?topic " 
-                + OntProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
+                + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
                 // The authority seems to always have a scheme, but make it
                 // optional just in case.
                 + "OPTIONAL { ?auth " 
-                + OntProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri() 
+                + BfProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri() 
                 + " ?scheme . } " 
                 // + "?auth " 
                 // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
                 // + " ?authLabel . "
                 + "} "
                 + "OPTIONAL { ?topic "
-                + OntProperty.BF_SYSTEM_NUMBER.sparqlUri()
+                + BfProperty.BF_SYSTEM_NUMBER.sparqlUri()
                 + " ?identifier . "
                 + "?identifier a " 
-                + OntType.BF_IDENTIFIER.sparqlUri() + " ; " 
-                + OntProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " ?id . "
+                + BfType.BF_IDENTIFIER.sparqlUri() + " ; " 
+                + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " ?id . "
                 + "} }";
 
         LOGGER.debug("QUERY: " + queryString);

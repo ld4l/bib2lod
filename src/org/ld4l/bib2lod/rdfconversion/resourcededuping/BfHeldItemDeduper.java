@@ -13,15 +13,15 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 
 public class BfHeldItemDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfHeldItemDeduper.class);
 
-    public BfHeldItemDeduper(OntType type) {
+    public BfHeldItemDeduper(BfType type) {
         super(type);
     }  
     
@@ -113,22 +113,22 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
                  * the query will become extremely complex. We manage the
                  * constraint in processing of the query result instead.
                  */
-                + "?item a " + OntType.BF_HELD_ITEM.sparqlUri() + " . "
+                + "?item a " + BfType.BF_HELD_ITEM.sparqlUri() + " . "
                 + "OPTIONAL { ?item "
-                + OntProperty.BF_SHELF_MARK_LCC.sparqlUri() + " ?lcc . } "
+                + BfProperty.BF_SHELF_MARK_LCC.sparqlUri() + " ?lcc . } "
                 + "OPTIONAL { ?item " 
-                + OntProperty.BF_SHELF_MARK_DDC.sparqlUri() + " ?ddc . } "
+                + BfProperty.BF_SHELF_MARK_DDC.sparqlUri() + " ?ddc . } "
                 + "OPTIONAL { ?item "
-                + OntProperty.BF_SHELF_MARK_NLM.sparqlUri() + " ?nlm . } "
+                + BfProperty.BF_SHELF_MARK_NLM.sparqlUri() + " ?nlm . } "
                 + "OPTIONAL { ?item " 
-                + OntProperty.BF_SHELF_MARK_UDC.sparqlUri() + " ?udc . } "
+                + BfProperty.BF_SHELF_MARK_UDC.sparqlUri() + " ?udc . } "
                 + "OPTIONAL { ?item " 
-                + OntProperty.BF_BARCODE.sparqlUri() + " ?barcode . } "
+                + BfProperty.BF_BARCODE.sparqlUri() + " ?barcode . } "
                 + "OPTIONAL { ?item " 
-                + OntProperty.BF_ITEM_ID.sparqlUri() + " ?id . } "
+                + BfProperty.BF_ITEM_ID.sparqlUri() + " ?id . } "
                 + "OPTIONAL { ?item " 
-                + OntProperty.BF_SHELF_MARK.sparqlUri() + " ?shelfMark ; "
-                + OntProperty.BF_SHELF_MARK_SCHEME.sparqlUri() + " ?scheme . } "        
+                + BfProperty.BF_SHELF_MARK.sparqlUri() + " ?shelfMark ; "
+                + BfProperty.BF_SHELF_MARK_SCHEME.sparqlUri() + " ?scheme . } "        
                 + "}";
         
         LOGGER.debug("BF_HELD_ITEM QUERY: " + queryString);

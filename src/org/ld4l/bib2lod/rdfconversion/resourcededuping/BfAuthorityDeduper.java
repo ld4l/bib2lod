@@ -13,8 +13,8 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 
 /**
  * Default deduper for bf:Authority subclasses. Use to dedupe bf:Authorities
@@ -25,7 +25,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfAuthorityDeduper.class);
 
-    public BfAuthorityDeduper(OntType type) {
+    public BfAuthorityDeduper(BfType type) {
         super(type);
     }  
     
@@ -148,7 +148,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         return uniqueUris;        
     }
     
-    protected Query getQuery(OntType type) {
+    protected Query getQuery(BfType type) {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
@@ -165,12 +165,12 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 + "WHERE { "
                 + "?localAuth a ?type . "
                 + "OPTIONAL { ?localAuth "
-                + OntProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
+                + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
                 + "?authAccessPoint . } "
                 + "OPTIONAL { ?localAuth  " 
-                + OntProperty.BF_LABEL.sparqlUri() + " ?label . } "
+                + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?localAuth " 
-                + OntProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?extAuth . "
+                + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?extAuth . "
                 // + "?externalAuth " 
                 // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
                 // + " ?extAuthLabel . "

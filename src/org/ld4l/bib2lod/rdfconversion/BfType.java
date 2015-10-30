@@ -7,39 +7,33 @@ import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 
-public enum OntType {
+/**
+ * Defines classes used by Bibframe in the RDF input to the conversion process.
+ */
+public enum BfType {
 
     // Maybe create different type enums, one for bibframe, one for madsrdf
     // or miscellaneous, etc.? For now, no need.
     
-    BF_ANNOTATION(OntNamespace.BIBFRAME, "Annotation"),
-    BF_CLASSIFICATION(OntNamespace.BIBFRAME, "Classification"),
-    BF_EVENT(OntNamespace.BIBFRAME, "Event"),
-    BF_FAMILY(OntNamespace.BIBFRAME, "Family"),
-    BF_HELD_ITEM(OntNamespace.BIBFRAME, "HeldItem"),
-    BF_IDENTIFIER(OntNamespace.BIBFRAME, "Identifier"),
-    BF_INSTANCE(OntNamespace.BIBFRAME, "Instance"),    
-    BF_JURISDICTION(OntNamespace.BIBFRAME, "Jurisdiction"),            
-    BF_MEETING(OntNamespace.BIBFRAME, "Meeting"),
-    BF_ORGANIZATION(OntNamespace.BIBFRAME, "Organization"),                        
-    BF_PERSON(OntNamespace.BIBFRAME, "Person"),
-    BF_PROVIDER(OntNamespace.BIBFRAME, "Provider"),
-    BF_PLACE(OntNamespace.BIBFRAME, "Place"),
-    BF_TITLE(OntNamespace.BIBFRAME, "Title"),
-    BF_TOPIC(OntNamespace.BIBFRAME, "Topic"),  
-    BF_WORK(OntNamespace.BIBFRAME, "Work"),
+    BF_ANNOTATION("Annotation"),
+    BF_CLASSIFICATION("Classification"),
+    BF_EVENT("Event"),
+    BF_FAMILY("Family"),
+    BF_HELD_ITEM("HeldItem"),
+    BF_IDENTIFIER("Identifier"),
+    BF_INSTANCE("Instance"),    
+    BF_JURISDICTION("Jurisdiction"),            
+    BF_MEETING("Meeting"),
+    BF_ORGANIZATION("Organization"),                        
+    BF_PERSON("Person"),
+    BF_PROVIDER("Provider"),
+    BF_PLACE("Place"),
+    BF_TITLE("Title"),
+    BF_TOPIC("Topic"),  
+    BF_WORK("Work"),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
-    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
-    
-    // The OntType names below don't indicate ontology, to abstract away from 
-    // the particular ontology and class used.
-    EVENT(OntNamespace.SCHEMA, "Event"),
-    FAMILY(OntNamespace.LD4L, "Family"),
-    ITEM(OntNamespace.LD4L, "Item"),
-    ORGANIZATION(OntNamespace.FOAF, "Organization"),
-    PERSON(OntNamespace.FOAF, "Person"),
-    PLACE(OntNamespace.PROV, "Location");
+    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject");
     
 
     private final OntNamespace namespace;
@@ -48,8 +42,13 @@ public enum OntType {
     private final String filename;
     private final String prefixed;
     private final String sparqlUri;
+
+    BfType(String localname) {
+        // Default namespace for this enum type
+        this(OntNamespace.BIBFRAME, localname);
+    }
     
-    OntType(OntNamespace namespace, String localname) {
+    BfType(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
         
@@ -91,21 +90,21 @@ public enum OntType {
         return sparqlUri;
     }
    
-    private static final Map<String, OntType> LOOKUP_BY_FILENAME = 
-            new HashMap<String, OntType>();
+    private static final Map<String, BfType> LOOKUP_BY_FILENAME = 
+            new HashMap<String, BfType>();
     
     static {
-        for (OntType type : OntType.values()) {
+        for (BfType type : BfType.values()) {
             LOOKUP_BY_FILENAME.put(type.filename, type);
         }
     }
     
-    public static OntType typeForFilename(String filename) {
+    public static BfType typeForFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
     }
     
-    public static List<OntType> authorities() {
+    public static List<BfType> authorities() {
         return Arrays.asList(
             BF_FAMILY,
             BF_JURISDICTION,

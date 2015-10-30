@@ -17,8 +17,8 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntProperty;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 
 /*
  * NB Possibly we only need to dedupe Instance URIs within a single bib record,
@@ -33,7 +33,7 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         
     private static final String WORLDCAT_NS = "http://www.worldcat.org/oclc/";
 
-    public BfInstanceDeduper(OntType type) {
+    public BfInstanceDeduper(BfType type) {
         super(type);
     } 
    
@@ -134,19 +134,19 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                 + "SELECT ?instance ?worldcatId "
                 // + "?nonWorldCatId ?nonWorldCatIdScheme ?nonWorldCatIdValue "
                 + "WHERE { "
-                + "?instance a " + OntType.BF_INSTANCE.sparqlUri() + " . "
+                + "?instance a " + BfType.BF_INSTANCE.sparqlUri() + " . "
                 + "OPTIONAL { ?instance "
-                + OntProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+                + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
                 + "?worldcatId .  "
                 + "FILTER ( fn:starts-with(str(?worldcatId), "
                 + "\"" + WORLDCAT_NS + "\"  ) ) } "
                 // + "OPTIONAL { ?instance "
-                // + OntProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+                // + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
                 // + "?nonWorldCatId . "
                 // + "?nonWorldCatId " 
-                // + OntProperty.BF_IDENTIFIER_SCHEME.sparqlUri() + " "
+                // + BfProperty.BF_IDENTIFIER_SCHEME.sparqlUri() + " "
                 // + "?nonWorldCatIdScheme ; " 
-                // + OntProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
+                // + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
                 // + " ?nonWorldCatIdValue ; "
                 // + "FILTER ( ! fn:starts-with(str(?nonWorldCatId), "
                 // + "\"" + WORLDCAT_NS + "\"  ) ) } "
@@ -157,7 +157,7 @@ public class BfInstanceDeduper extends BfResourceDeduper {
 //        + "?s1 ?p1 ?o1 . "
 //        + "?s1 a ?type . "
 //        + "?o1 ?p2 ?o2 . "
-//        + "?o1 a " + OntType.BF_TITLE.sparqlUri()
+//        + "?o1 a " + BfType.BF_TITLE.sparqlUri()
         
         
         LOGGER.debug("QUERY: " + queryString);

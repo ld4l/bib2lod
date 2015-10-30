@@ -6,7 +6,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.OntType;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class ProcessorFactory {
 
@@ -15,7 +15,7 @@ public class ProcessorFactory {
 
     @SuppressWarnings("unchecked")
     public static <T> T createProcessor(File inputFile, 
-            Map<OntType, Class<?>> typeToProcessorClass) {
+            Map<Ld4lType, Class<?>> typeToProcessorClass) {
 
         // This case shouldn't occur, since the file comes from an iteration on 
         // files in the input directory.
@@ -27,7 +27,7 @@ public class ProcessorFactory {
         LOGGER.debug("Creating processor for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
-        OntType type = OntType.typeForFilename(basename);
+        Ld4lType type = Ld4lType.typeForFilename(basename);
         if (type == null) {
             LOGGER.debug("Can't create processor: no type defined for file "
                    + basename);
@@ -43,7 +43,7 @@ public class ProcessorFactory {
  
         try {
             return (T) processorClass.getConstructor(
-                    OntType.class).newInstance(type);
+                    Ld4lType.class).newInstance(type);
         } catch (Exception e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
@@ -54,7 +54,7 @@ public class ProcessorFactory {
     // If we want to turn the iteration around in ResourceDeduper and iterate
     // over types rather than files, implement this.
     public static <T> T createProcessor(
-            OntType type, String inputDir, Map<OntType, Class<?>> typeToProcessorClass) {
+            Ld4lType type, String inputDir, Map<Ld4lType, Class<?>> typeToProcessorClass) {
         // Get file basename from type (return null if null)
         // Get deduper class from TYPE_DEDUPERS (return null if null)
         // Read input file into model
