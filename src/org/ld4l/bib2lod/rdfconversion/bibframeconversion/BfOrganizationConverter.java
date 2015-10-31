@@ -24,7 +24,7 @@ public class BfOrganizationConverter extends BfResourceConverter {
     static {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
         PROPERTY_MAP.put(BfProperty.BF_HAS_AUTHORITY, 
-                Ld4lProperty.RWO_TO_AUTHORITY);
+                Ld4lProperty.IDENTIFIED_BY_AUTHORITY);
     }
 
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 

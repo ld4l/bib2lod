@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -16,14 +14,17 @@ import org.apache.commons.io.FilenameUtils;
  */
 public enum Ld4lType {
     
-    // The Ld4lType names below don't indicate ontology, to abstract away from 
-    // the particular ontology and class used.
+    CLASSIFICATION("Classification"),
+    DDC_CLASSIFICATION("DdcClassification"),
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY("Family"),
     ITEM("Item"),
+    LCC_CLASSIFICATION("LccClassification"),
+    NLM_CLASSIFICATION("NlmClassification"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PERSON(OntNamespace.FOAF, "Person"),
-    PLACE(OntNamespace.PROV, "Location");
+    PLACE(OntNamespace.PROV, "Location"),
+    UDC_CLASSIFICATION("UdcClassification");
     
 
     private final OntNamespace namespace;

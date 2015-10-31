@@ -36,7 +36,7 @@ public class BfPersonConverter extends BfResourceConverter {
             new HashMap<BfProperty, Ld4lProperty>();
     static {
         PROPERTY_MAP.put(BfProperty.BF_HAS_AUTHORITY, 
-                Ld4lProperty.RWO_TO_AUTHORITY);
+                Ld4lProperty.IDENTIFIED_BY_AUTHORITY);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 

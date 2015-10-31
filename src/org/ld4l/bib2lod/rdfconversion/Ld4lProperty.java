@@ -11,12 +11,14 @@ package org.ld4l.bib2lod.rdfconversion;
  */
 public enum Ld4lProperty {
 
+    BARCODE("barcode"),
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
-    RWO_TO_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
-    AUTHORITY_TO_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
-    HOLDING_FOR("isHoldingFor"),
-    LOCATION(OntNamespace.PROV, "atLocation"),
+    IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
+    IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
+    IS_HOLDING_FOR("isHoldingFor"),
+    HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
+    HAS_LOCATION(OntNamespace.PROV, "atLocation"),
     NAME(OntNamespace.FOAF, "name");
     
 
