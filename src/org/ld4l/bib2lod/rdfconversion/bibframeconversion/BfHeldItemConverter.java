@@ -116,7 +116,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
         for (Map.Entry<BfProperty, Ld4lType> entry 
                 : SHELF_MARK_PROP_TO_SUBCLASS.entrySet()) {
             BfProperty bfProp = entry.getKey();
-            Property property = bfProp.property(model);
+            Property property = bfProp.property();
             Statement stmt = subject.getProperty(property);
 
             if (stmt != null ) {
@@ -126,13 +126,13 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 // bf:shelfMarkScheme statement to define the type of shelfMark.
                 if (bfProp.equals(BfProperty.BF_SHELF_MARK)) {
                     bfProp = getBfPropertyFromScheme(bfProp, model);                           
-                    property = bfProp.property(model);
+                    property = bfProp.property();
                 }
                 String shelfMarkUri = mintShelfMarkUri(bfProp, literal);
                 Resource shelfMark = model.createResource(shelfMarkUri);
                 subject.addProperty(property, shelfMark);                
                 Ld4lType ld4lType = entry.getValue();
-                model.add(shelfMark, RDF.type, ld4lType.resource(subject));
+                model.add(shelfMark, RDF.type, ld4lType.resource());
                 // Not sure if this should be an rdfs:label or some other 
                 // property.
                 shelfMark.addLiteral(RDFS.label, literal);                
@@ -155,7 +155,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
     private BfProperty getBfPropertyFromScheme(BfProperty bfProp, Model model) {
     
         Statement schemeStmt = subject.getProperty(
-                BfProperty.BF_SHELF_MARK_SCHEME.property(model));
+                BfProperty.BF_SHELF_MARK_SCHEME.property());
         if (schemeStmt != null) {
             Literal schemeLiteral = schemeStmt.getLiteral();
             String schemeValue = schemeLiteral.getLexicalForm();

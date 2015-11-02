@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 
 
 /**
@@ -30,6 +31,7 @@ public enum Ld4lProperty {
     private final String localname;
     private final String uri;
     private final String prefixed;
+    private final Property property;
     
     Ld4lProperty(String localname) {
         // Default namespace for this enum type.
@@ -44,6 +46,11 @@ public enum Ld4lProperty {
         
         String prefix = this.namespace.prefix();
         this.prefixed = prefix + ":" + this.localname;
+        
+        // Create the Jena property in the constructor to avoid repeated
+        // entity creation; presumably a performance optimization, but should
+        // test.
+        this.property = ResourceFactory.createProperty(uri);
     }
     
     public OntNamespace namespace() {
@@ -70,11 +77,7 @@ public enum Ld4lProperty {
         return "<" + uri + ">";
     }
     
-    public Property property(Model model) {
-        return model.createProperty(namespace.uri(), localname); 
-     }
-     
-     public Property property(Resource subject) {
-         return property(subject.getModel());
+    public Property property() {
+        return property;
      }
 }

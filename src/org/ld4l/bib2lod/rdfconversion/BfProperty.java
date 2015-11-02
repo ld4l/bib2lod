@@ -1,8 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion;
 
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 
 /**
  * Defines properties used by Bibframe in the RDF input to the conversion
@@ -41,6 +41,7 @@ public enum BfProperty {
     private final String localname;
     private final String uri;
     private final String prefixed;
+    private final Property property;
     
 
     BfProperty(String localname) {
@@ -56,6 +57,11 @@ public enum BfProperty {
         
         String prefix = this.namespace.prefix();
         this.prefixed = prefix + ":" + this.localname;
+        
+        // Create the Jena property in the constructor to avoid repeated
+        // entity creation; presumably a performance optimization, but should
+        // test.
+        this.property = ResourceFactory.createProperty(uri);
     }
     
     public OntNamespace namespace() {
@@ -82,12 +88,8 @@ public enum BfProperty {
         return "<" + uri + ">";
     }
     
-    public Property property(Model model) {
-       return model.createProperty(namespace.uri(), localname); 
+    public Property property() {
+       return property;
     }
     
-    public Property property(Resource subject) {
-        return property(subject.getModel());
-    }
-
 }

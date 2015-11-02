@@ -66,7 +66,7 @@ public class BfPersonConverter extends BfResourceConverter {
      */
     private void convertBfLabel() {
         
-        Property property = BfProperty.BF_LABEL.property(subject);
+        Property property = BfProperty.BF_LABEL.property();
         Statement stmt = subject.getProperty(property);
         if (stmt != null) {
             Literal literal = stmt.getLiteral();
@@ -77,7 +77,7 @@ public class BfPersonConverter extends BfResourceConverter {
                 Ld4lProperty key = entry.getKey();
                 String value = entry.getValue();
                 if (value != null) {
-                    subject.addLiteral(key.property(subject), value);
+                    subject.addLiteral(key.property(), value);
                 }
             }
         }

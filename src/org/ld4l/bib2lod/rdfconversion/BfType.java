@@ -6,8 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 
 /**
  * Defines classes used by Bibframe in the RDF input to the conversion process.
@@ -44,6 +44,7 @@ public enum BfType {
     private final String filename;
     private final String prefixed;
     private final String sparqlUri;
+    private final Resource resource;
 
     BfType(String localname) {
         // Default namespace for this enum type
@@ -61,6 +62,11 @@ public enum BfType {
         String prefix = this.namespace.prefix();
         this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
+
+        // Create the Jena resource in the constructor to avoid repeated
+        // entity creation; presumably a performance optimization, but should
+        // test.
+        this.resource = ResourceFactory.createResource(this.uri);
 
     }
 
@@ -117,14 +123,8 @@ public enum BfType {
             BF_TOPIC);
     }
     
-    // Could have other methods to return an OntClass if the model is an 
-    // OntModel.
-    public Resource resource(Model model) {
-        return model.createResource(uri);
+    public Resource resource() {
+        return resource;
     }
     
-    public Resource resource(Resource subject) {
-        return resource(subject.getModel());
-    }
-
 }

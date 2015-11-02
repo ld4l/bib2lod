@@ -69,7 +69,7 @@ public abstract class BfResourceConverter {
         Ld4lType newType = getNewType();
         if (newType != null) {
             subject.removeAll(RDF.type);                   
-            Resource ontClass = newType.resource(subject);
+            Resource ontClass = newType.resource();
             subject.addProperty(RDF.type,  ontClass);
         }
     }
@@ -108,12 +108,12 @@ public abstract class BfResourceConverter {
      */
     protected void convertProperty(BfProperty oldProp, Ld4lProperty newProp) {
                     
-        Property oldProperty = oldProp.property(subject);
+        Property oldProperty = oldProp.property();
         Statement stmt = subject.getProperty(oldProperty);
                 
         if (stmt != null) {
             RDFNode object = stmt.getObject();
-            Property newProperty = newProp.property(subject);
+            Property newProperty = newProp.property();
             subject.addProperty(newProperty, object);
             subject.removeAll(oldProperty);
         }
@@ -135,7 +135,7 @@ public abstract class BfResourceConverter {
             Model model = subject.getModel();
             for (BfProperty prop : propertiesToRetract) {
                 LOGGER.debug("Removing property " + prop.uri());
-                subject.removeAll(prop.property(model));
+                subject.removeAll(prop.property());
             }
         }
     }
