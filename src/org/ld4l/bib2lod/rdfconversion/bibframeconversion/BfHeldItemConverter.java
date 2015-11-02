@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
@@ -99,73 +100,90 @@ public class BfHeldItemConverter extends BfResourceConverter {
     private void convertShelfMark() {
         
         Model model = subject.getModel();
+        Property newProp = Ld4lProperty.HAS_SHELF_MARK.property();
         
         // Figure out which shelf mark prop is being used
         // Get the string from the shelf mark prop
         // Mint a url for the shelf mark - what namespace? what localname?
         // Assertions:
-        // :item hasShelfMark/hasLocator/locatedAt :shelfMark
+        // :item hasShelfMark :shelfMark
         // :shelfMark a ClassificationLcc / etc
         // :shelfMark rdfs:label "original string value"
         
         // If bf:shelfMark is used, structure is more complex: need
         // to get type from shelfMarkScheme
 
-        for (Map.Entry<BfProperty, Ld4lType> entry 
-                : SHELF_MARK_PROP_TO_SUBCLASS.entrySet()) {
-            BfProperty bfProp = entry.getKey();
-            Property property = bfProp.property();
-            Statement stmt = subject.getProperty(property);
+        // Iterate through the Bibframe shelf mark properties
+        for (BfProperty bfShelfMarkProp 
+                : SHELF_MARK_PROP_TO_SUBCLASS.keySet()) {
+           
+            Property oldProp = bfShelfMarkProp.property();
+            Statement stmt = subject.getProperty(oldProp);
 
+            // If there's a statement using this property
             if (stmt != null ) {
-                Literal literal = stmt.getLiteral();
+                
+                // Get the object of the statement
+                Literal shelfMarkLiteral = stmt.getLiteral();
 
                 // If the general bf:shelfMark property is used, look for a
                 // bf:shelfMarkScheme statement to define the type of shelfMark.
-                if (bfProp.equals(BfProperty.BF_SHELF_MARK)) {
-                    bfProp = getBfPropertyFromScheme(bfProp, model);                           
-                    property = bfProp.property();
+                if (bfShelfMarkProp.equals(BfProperty.BF_SHELF_MARK)) {
+                    // Use the property corresponding to that type of shelf 
+                    // mark instead of the generic property.
+                    bfShelfMarkProp = 
+                            getBfPropertyFromScheme(bfShelfMarkProp);  
                 }
-                String shelfMarkUri = mintShelfMarkUri(bfProp, literal);
-                Resource shelfMark = model.createResource(shelfMarkUri);
-                subject.addProperty(property, shelfMark);                
-                Ld4lType ld4lType = entry.getValue();
-                model.add(shelfMark, RDF.type, ld4lType.resource());
-                // Not sure if this should be an rdfs:label or some other 
-                // property.
-                shelfMark.addLiteral(RDFS.label, literal);                
-                subject.removeAll(property);
+                // If no shelf mark scheme was found, we still have the generic
+                // shelf mark property. Just keep the literal value. (This 
+                // would be an anomalous record, since a shelf mark literal 
+                // with no scheme specification makes no sense.
+                if (bfShelfMarkProp.equals(BfProperty.BF_SHELF_MARK)) {
+                    subject.addProperty(newProp, shelfMarkLiteral);
+                } else {
+                    String shelfMarkUri = 
+                            mintShelfMarkUri(bfShelfMarkProp, shelfMarkLiteral);
+                    Resource shelfMark = model.createResource(shelfMarkUri);
+                    subject.addProperty(newProp, shelfMark);                                        
+                    Ld4lType shelfMarkType = 
+                            SHELF_MARK_PROP_TO_SUBCLASS.get(bfShelfMarkProp);
+                    model.add(shelfMark, RDF.type, shelfMarkType.resource());
+                    // Not sure if this should be an rdfs:label or some other 
+                    // property.
+                    shelfMark.addLiteral(RDFS.label, shelfMarkLiteral);
+                }
+                
+                subject.removeAll(oldProp);
             }
         }        
     }
 
     /**
-     * For bf:shelfMark statement, look for a bf:shelfMarkScheme assertion from
-     * which to determine the type of shelf mark. If it exists and is one of
-     * the identified schemes, return the corresponding bfProperty; otherwise,
-     * return the original bf:shelfMark property.
-     * @param statement
-     * @param bfProp
-     * @param literal
-     * @param model
-     * @return
+     * For a generic bf:shelfMark statement, look for a bf:shelfMarkScheme 
+     * assertion from which to determine the type of shelf mark. If it exists 
+     * and is one of the identified schemes, return the corresponding 
+     * bfProperty; otherwise, return the original bf:shelfMark property.
      */
-    private BfProperty getBfPropertyFromScheme(BfProperty bfProp, Model model) {
+    private BfProperty getBfPropertyFromScheme(BfProperty shelfMarkProp) {
     
-        Statement schemeStmt = subject.getProperty(
-                BfProperty.BF_SHELF_MARK_SCHEME.property());
+        Property shelfMarkSchemeProp = 
+                BfProperty.BF_SHELF_MARK_SCHEME.property();
+        Statement schemeStmt = subject.getProperty(shelfMarkSchemeProp);
         if (schemeStmt != null) {
-            Literal schemeLiteral = schemeStmt.getLiteral();
-            String schemeValue = schemeLiteral.getLexicalForm();
+            String schemeValue = schemeStmt.getLiteral().getLexicalForm();
             for (Map.Entry<BfProperty, Vocabulary> vocabEntry 
                     : SHELF_MARK_VOCABS.entrySet()) {
-                    if (schemeValue.contains(vocabEntry.getValue().label())) {
-                        bfProp = vocabEntry.getKey();
-                        break;
-                    }                            
+                // Placeholder code: we don't know what the scheme strings will
+                // look like.
+                if (StringUtils.containsIgnoreCase(schemeValue, 
+                        vocabEntry.getValue().label())) {
+                    shelfMarkProp = vocabEntry.getKey();
+                    break;
+                }                            
             }
-        }           
-        return bfProp;
+            subject.removeAll(shelfMarkSchemeProp);
+        }
+        return shelfMarkProp;
         
     }
     
@@ -174,11 +192,13 @@ public class BfHeldItemConverter extends BfResourceConverter {
      * plus an arbitrary label constructed from the shelf mark string value.
      * This localname is intended to be temporary! Are the shelf mark values
      * institution-specific or common to all instances of a holding?
-     * @param prop
+     * @param shelfMarkProp
      * @return
      */
-    private String mintShelfMarkUri(BfProperty prop, Literal shelfMark) {       
-        String namespace = SHELF_MARK_VOCABS.get(prop).uri();
+    private String mintShelfMarkUri(BfProperty shelfMarkProp, 
+            Literal shelfMark) {       
+        
+        String namespace = SHELF_MARK_VOCABS.get(shelfMarkProp).uri();
         String localname = shelfMark.getLexicalForm().replace(" ", "_");
         LOGGER.debug("Minted new shelf mark URI: " + namespace + localname);
         return namespace + localname;

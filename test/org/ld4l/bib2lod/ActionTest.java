@@ -9,8 +9,7 @@ import org.junit.Test;
 public class ActionTest {
    
     @Test
-    public void testPrereqs() {
-        
+    public void testPrereqs() {        
         Set<Action> actions = EnumSet.of(Action.DEDUPE_RESOURCES);
         Action a = Action.CONVERT_BIBFRAME;       
         Set<Action> prereqs = a.prereqs();           
