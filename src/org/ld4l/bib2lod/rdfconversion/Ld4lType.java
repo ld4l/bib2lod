@@ -96,7 +96,9 @@ public enum Ld4lType {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
     }
-    
+
+    // Could have other methods to return an OntClass if the model is an 
+    // OntModel.
     public Resource resource(Model model) {
         return model.createResource(uri);
     }

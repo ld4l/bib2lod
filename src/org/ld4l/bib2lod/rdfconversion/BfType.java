@@ -117,6 +117,8 @@ public enum BfType {
             BF_TOPIC);
     }
     
+    // Could have other methods to return an OntClass if the model is an 
+    // OntModel.
     public Resource resource(Model model) {
         return model.createResource(uri);
     }
