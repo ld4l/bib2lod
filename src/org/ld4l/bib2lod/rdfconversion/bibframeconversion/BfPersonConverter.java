@@ -90,7 +90,7 @@ public class BfPersonConverter extends BfResourceConverter {
      * @param label
      * @return
      */
-    Map<Ld4lProperty, String> parseLabel(String label) {
+    static Map<Ld4lProperty, String> parseLabel(String label) {
 
         Map<Ld4lProperty, String> props = new HashMap<Ld4lProperty, String>();
         
