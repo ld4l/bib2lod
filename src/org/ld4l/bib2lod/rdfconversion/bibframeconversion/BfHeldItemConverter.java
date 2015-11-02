@@ -109,10 +109,10 @@ public class BfHeldItemConverter extends BfResourceConverter {
         Map<BfProperty, Property> shelfMarkProps = 
                 new HashMap<BfProperty, Property>();
         for (BfProperty bfProp : SHELF_MARK_MAP.keySet()) {
-            shelfMarkProps.put(bfProp, createProperty(bfProp));
+            shelfMarkProps.put(bfProp, bfProp.property(model));
         }
         
-        Property hasShelfMarkProp = createProperty(Ld4lProperty.HAS_SHELF_MARK);
+        Property hasShelfMarkProp = Ld4lProperty.HAS_SHELF_MARK.property(model);
         
         // TODO - handle shelfMark and shelfMarkScheme props. Add former
         // to maps
@@ -131,7 +131,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 subject.addProperty(hasShelfMarkProp, shelfMark);
                 
                 Ld4lType ld4lType = SHELF_MARK_MAP.get(bfProp);
-                model.add(shelfMark, RDF.type, createResource(ld4lType));
+                model.add(shelfMark, RDF.type, ld4lType.resource(subject));
                         
                 shelfMark.addLiteral(RDFS.label, object);
                 

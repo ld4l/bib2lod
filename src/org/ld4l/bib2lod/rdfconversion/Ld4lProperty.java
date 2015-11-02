@@ -1,5 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+
 
 /**
  * Define properties used by LD4L in the RDF output of the conversion process.
@@ -65,4 +69,12 @@ public enum Ld4lProperty {
     public String sparqlUri() {
         return "<" + uri + ">";
     }
+    
+    public Property property(Model model) {
+        return model.createProperty(namespace.uri(), localname); 
+     }
+     
+     public Property property(Resource subject) {
+         return property(subject.getModel());
+     }
 }

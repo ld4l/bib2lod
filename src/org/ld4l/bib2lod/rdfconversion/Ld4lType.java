@@ -4,6 +4,8 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
 
 /**
  * Defines classes used by LD4L in the RDF output of the conversion process.
@@ -93,6 +95,14 @@ public enum Ld4lType {
     public static Ld4lType typeForFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
+    }
+    
+    public Resource resource(Model model) {
+        return model.createResource(uri);
+    }
+    
+    public Resource resource(Resource subject) {
+        return resource(subject.getModel());
     }
    
 

@@ -69,7 +69,7 @@ public abstract class BfResourceConverter {
         Ld4lType newType = getNewType();
         if (newType != null) {
             subject.removeAll(RDF.type);                   
-            Resource ontClass = createResource(newType, subject.getModel());
+            Resource ontClass = newType.resource(subject);
             subject.addProperty(RDF.type,  ontClass);
         }
     }
@@ -108,13 +108,12 @@ public abstract class BfResourceConverter {
      */
     protected void convertProperty(BfProperty oldProp, Ld4lProperty newProp) {
                     
-        Model model = subject.getModel();
-        Property oldProperty = createProperty(oldProp, model);
+        Property oldProperty = oldProp.property(subject);
         Statement stmt = subject.getProperty(oldProperty);
                 
         if (stmt != null) {
             RDFNode object = stmt.getObject();
-            Property newProperty = createProperty(newProp, model);
+            Property newProperty = newProp.property(subject);
             subject.addProperty(newProperty, object);
             subject.removeAll(oldProperty);
         }
@@ -136,7 +135,7 @@ public abstract class BfResourceConverter {
             Model model = subject.getModel();
             for (BfProperty prop : propertiesToRetract) {
                 LOGGER.debug("Removing property " + prop.uri());
-                subject.removeAll(createProperty(prop, model));
+                subject.removeAll(prop.property(model));
             }
         }
     }
@@ -153,58 +152,7 @@ public abstract class BfResourceConverter {
         return model.createResource(type.uri());
     }
 
-    /**
-     * Create a Jena resource from an Ld4lType in this the current subject's 
-     * model
-     * @param newProp - the Ld4lType
-     * @return a Jena property
-     */ 
-    protected Resource createResource(Ld4lType type) {
-        return createResource(type, subject.getModel());
-    }
-    
-    /**
-     * Create a Jena property from an Ld4lProperty
-     * @param newProp - the Ld4lProperty
-     * @param model - the model to create the property in
-     * @return a Jena property
-     */
-    protected Property createProperty(Ld4lProperty prop, Model model) {
-        return model.createProperty(prop.namespaceUri(), 
-                prop.localname());
-    }
 
-    /**
-     * Create a Jena property from an Ld4lProperty in the current subject's
-     *  model
-     * @param newProp - the Ld4lProperty
-     * @return a Jena property
-     */
-    protected Property createProperty(Ld4lProperty prop) {
-        return createProperty(prop, subject.getModel());
-    }
-
-    /**
-     * Create a Jena property from a BfProperty
-     * @param newProp - the BfProperty
-     * @param model - the model to create the property in
-     * @return a Jena property
-     */
-    protected Property createProperty(BfProperty prop, Model model) {
-        return model.createProperty(prop.namespaceUri(), 
-                prop.localname());
-    }
-
-    /**
-     * Create a Jena property from a Ld4lProperty in the current subject's model
-     * @param newProp - the Ld4lProperty
-     * @return a Jena property
-     */
-    protected Property createProperty(BfProperty prop) {
-        return createProperty(prop, subject.getModel());
-    }
-    
-    
 //    protected void addStatement(String subjectUri, BfProperty ontProp, 
 //            Resource object, Model model) {
 //        

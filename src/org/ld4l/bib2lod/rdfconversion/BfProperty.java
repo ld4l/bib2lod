@@ -1,5 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+
 /**
  * Defines properties used by Bibframe in the RDF input to the conversion
  * process.
@@ -77,4 +81,13 @@ public enum BfProperty {
     public String sparqlUri() {
         return "<" + uri + ">";
     }
+    
+    public Property property(Model model) {
+       return model.createProperty(namespace.uri(), localname); 
+    }
+    
+    public Property property(Resource subject) {
+        return property(subject.getModel());
+    }
+
 }

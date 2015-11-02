@@ -6,6 +6,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Resource;
 
 /**
  * Defines classes used by Bibframe in the RDF input to the conversion process.
@@ -113,6 +115,14 @@ public enum BfType {
             BF_PERSON,
             BF_PLACE,
             BF_TOPIC);
+    }
+    
+    public Resource resource(Model model) {
+        return model.createResource(uri);
+    }
+    
+    public Resource resource(Resource subject) {
+        return resource(subject.getModel());
     }
 
 }
