@@ -21,8 +21,6 @@ public abstract class BfResourceConverter {
             LogManager.getLogger(BfResourceConverter.class);
     
     protected Resource subject;
-    // private String uriPostfix;
-
     
     public BfResourceConverter(Resource subject) {
         LOGGER.debug("In constructor for " + this.getClass().getName());
@@ -40,8 +38,6 @@ public abstract class BfResourceConverter {
         // to the constructor so that we know what new type should be 
         // assigned. 
         // this.type = type;
-        
-        // uriPostfix = type.namespace().prefix() + type.localname();
     }
 
     /* 
@@ -132,7 +128,6 @@ public abstract class BfResourceConverter {
         // propertiesToRetract.addAll(UNIVERSAL_PROPERTIES_TO_RETRACT);
         
         if (propertiesToRetract != null) {
-            Model model = subject.getModel();
             for (BfProperty prop : propertiesToRetract) {
                 LOGGER.debug("Removing property " + prop.uri());
                 subject.removeAll(prop.property());
@@ -141,59 +136,5 @@ public abstract class BfResourceConverter {
     }
 
     protected abstract List<BfProperty> getPropertiesToRetract();
-
-    /**
-     * Create a Jena resource from an Ld4lType
-     * @param newProp - the Ld4lType
-     * @param model - the model to create the property in
-     * @return a Jena property
-     */   
-    protected Resource createResource(Ld4lType type, Model model) {
-        return model.createResource(type.uri());
-    }
-
-
-//    protected void addStatement(String subjectUri, BfProperty ontProp, 
-//            Resource object, Model model) {
-//        
-//        Resource subject = model.createResource(subjectUri);
-//        addStatement(subject, ontProp, object, model);
-//    }
-     
-//    protected void addStatement(Resource subject, BfProperty ontProp, 
-//            Resource object, Model model) {
-//        Property property = model.createProperty(ontProp.namespaceUri(), 
-//                ontProp.localname());
-//        model.add(subject, property, object);
-//    }
-
-    
-//    protected Literal getLiteral(BfProperty ontProp) {
-//        Property property = subject.getModel().getProperty(ontProp.uri());
-//        Statement stmt = subject.getProperty(property);
-//        if (stmt != null) {
-//            return stmt.getLiteral();
-//        }   
-//        return null;
-//    }
-//    
-//    protected String getLiteralValue(BfProperty ontProp) {
-//        
-//        Literal literal = getLiteral(ontProp);
-//        if (literal != null) {
-//            return literal.getLexicalForm();
-//        }
-//        return null;
-//    }
-    
-//  protected String mintUri(Resource resource) {
-//      return mintUri(resource.getURI());
-//  }
-//  
-//  protected String mintUri(String uri) {
-//      return uri + uriPostfix;
-//  }
-  
-
 
 }
