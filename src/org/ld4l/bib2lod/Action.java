@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
 
 public enum Action {
 

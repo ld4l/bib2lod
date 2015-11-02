@@ -4,8 +4,6 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 
-import javax.security.auth.login.Configuration;
-
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -17,8 +15,6 @@ import org.apache.jena.riot.RDFDataMgr;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.apache.logging.log4j.core.config.LoggerConfig;
-import org.apache.logging.log4j.spi.LoggerContext;
 import org.ld4l.bib2lod.Format;
 import org.ld4l.bib2lod.Processor;
 

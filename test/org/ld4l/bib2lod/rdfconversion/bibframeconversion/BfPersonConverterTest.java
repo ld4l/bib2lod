@@ -4,7 +4,6 @@ import java.util.Map;
 
 import org.junit.Assert;
 import org.junit.Test;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
 public class BfPersonConverterTest {

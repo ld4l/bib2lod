@@ -22,7 +22,6 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
