@@ -17,16 +17,17 @@ import org.apache.jena.rdf.model.Resource;
 public enum Ld4lType {
     
     CLASSIFICATION("Classification"),
-    DDC_CLASSIFICATION("DdcClassification"),
+    DDC_SHELF_MARK("DdcShelfMark"),
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY("Family"),
     ITEM("Item"),
-    LCC_CLASSIFICATION("LccClassification"),
-    NLM_CLASSIFICATION("NlmClassification"),
+    LCC_SHELF_MARK("LccShelfMark"),
+    NLM_SHELF_MARK("NlmShelfMark"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location"),
-    UDC_CLASSIFICATION("UdcClassification");
+    SHELF_MARK("ShelfMark"),
+    UDC_SHELF_MARK("UdcShelfMark");
     
 
     private final OntNamespace namespace;
