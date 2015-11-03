@@ -4,16 +4,19 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 
 public abstract class BfResourceConverter {
 
@@ -136,5 +139,35 @@ public abstract class BfResourceConverter {
     }
 
     protected abstract List<BfProperty> getPropertiesToRetract();
-
+    
+    /**
+     * After all specific conversions, change namespace of all remaining
+     * properties from Bibframe to LD4L. 
+     * TODO Do we need to do this with classes too??
+     */
+    protected void changePropertyNamespaces() {
+        
+        String bfNamespace = OntNamespace.BIBFRAME.uri();
+        String ld4lNamespace = OntNamespace.LD4L.uri();
+        
+        Model assertions = ModelFactory.createDefaultModel();
+        Model retractions = ModelFactory.createDefaultModel();
+        
+        Model model = subject.getModel();
+        StmtIterator stmts = model.listStatements();
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.nextStatement();
+            Property prop = stmt.getPredicate();
+            String namespace = prop.getNameSpace();
+            if (namespace.equals(bfNamespace)) {
+                Property newProp = model.createProperty(
+                        ld4lNamespace, prop.getLocalName());
+                assertions.add(stmt.getSubject(), newProp, stmt.getObject());
+                retractions.add(stmt);
+            }
+        }
+        
+        model.add(assertions);
+        model.remove(retractions);
+    }
 }

@@ -32,7 +32,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
     static {
         PROPERTY_MAP.put(BfProperty.BF_HOLDING_FOR, 
                 Ld4lProperty.IS_HOLDING_FOR);
-        PROPERTY_MAP.put(BfProperty.BF_BARCODE, Ld4lProperty.BARCODE);
     }
 
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
@@ -79,6 +78,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
         convertShelfMark();
         convertProperties();
         retractProperties();
+        changePropertyNamespaces();
         return subject.getModel();
     }
     

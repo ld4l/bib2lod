@@ -14,7 +14,6 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lProperty {
 
-    BARCODE("barcode"),
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
     IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
