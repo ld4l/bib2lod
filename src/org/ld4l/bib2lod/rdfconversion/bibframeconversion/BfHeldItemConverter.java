@@ -150,7 +150,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
                     model.add(shelfMark, RDF.type, shelfMarkType.resource());
                     // Not sure if this should be an rdfs:label or some other 
                     // property.
-                    shelfMark.addLiteral(RDFS.label, shelfMarkLiteral);
+                    shelfMark.addLiteral(RDF.value, shelfMarkLiteral);
                 }
                 
                 subject.removeAll(oldProp);
