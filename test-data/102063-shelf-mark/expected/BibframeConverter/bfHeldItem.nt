@@ -1,0 +1,40 @@
+<http://ld4l.library.cornell.edu/102063helditem35> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://ld4l.library.cornell.edu/102063helditem35> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem35> <http://ld4l.org/ontology/bib/hasShelfMark> <http://id.loc.gov/lcc/RC941_.C6> .
+<http://id.loc.gov/lcc/RC941_.C6> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/LccShelfMark> .
+<http://id.loc.gov/lcc/RC941_.C6> <http://www.w3.org/2000/01/rdf-schema#label> "RC941 .C6" .
+
+<http://ld4l.library.cornell.edu/102063helditem36> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://ld4l.library.cornell.edu/102063helditem36> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem36> <http://ld4l.org/ontology/bib/hasShelfMark> <http://id.loc.gov/ddc/abcdef> .
+<http://id.loc.gov/ddc/abcdef> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/DdcShelfMark> .
+<http://id.loc.gov/ddc/abcdef> <http://www.w3.org/2000/01/rdf-schema#label> "abcdef" .
+
+<http://ld4l.library.cornell.edu/102063helditem37> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://ld4l.library.cornell.edu/102063helditem37> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem37> <http://ld4l.org/ontology/bib/hasShelfMark> <http://id.loc.gov/nlm/ghijkl> .
+<http://id.loc.gov/nlm/ghijkl> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/NlmShelfMark> .
+<http://id.loc.gov/nlm/ghijkl> <http://www.w3.org/2000/01/rdf-schema#label> "ghijkl" .
+
+<http://ld4l.library.cornell.edu/102063helditem38> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://ld4l.library.cornell.edu/102063helditem38> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem38> <http://ld4l.org/ontology/bib/hasShelfMark> <http://id.loc.gov/udc/mnopq> .
+<http://id.loc.gov/udc/mnopq> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/UdcShelfMark> .
+<http://id.loc.gov/udc/mnopq> <http://www.w3.org/2000/01/rdf-schema#label> "mnopq" .
+
+<http://ld4l.library.cornell.edu/102063helditem39> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://ld4l.library.cornell.edu/102063helditem39> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem39> <http://ld4l.org/ontology/bib/hasShelfMark> "rstuv" .
+
+<http://ld4l.library.cornell.edu/102063helditem40> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/Item> .
+<http://ld4l.library.cornell.edu/102063helditem40> <http://ld4l.org/ontology/bib/hasShelfMark> <http://id.loc.gov/lcc/wxyz> .
+<http://ld4l.library.cornell.edu/102063helditem40> <http://ld4l.org/ontology/bib/isHoldingFor> <http://ld4l.library.cornell.edu/102063instance16> .
+<http://id.loc.gov/lcc/wxyz> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://ld4l.org/ontology/bib/LccShelfMark> .
+<http://id.loc.gov/lcc/wxyz> <http://www.w3.org/2000/01/rdf-schema#label> "wxyz" .
+
+
+
+
+
+
+
