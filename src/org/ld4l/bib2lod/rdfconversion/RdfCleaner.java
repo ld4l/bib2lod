@@ -60,7 +60,7 @@ public class RdfCleaner extends RdfProcessor {
     @Override
     public String process() {
         
-        LOGGER.info("Start RdfCleaner process");
+        LOGGER.info("Start RDF cleanup.");
         String outputDir = getOutputDir();
         
         for ( File file : new File(inputDir).listFiles() ) {
@@ -79,7 +79,7 @@ public class RdfCleaner extends RdfProcessor {
             LOGGER.trace("Start processing file " + filename);
             replaceLinesInFile(file, outputDir); 
         }
-        LOGGER.info("End RdfCleaner process");
+        LOGGER.info("End RDF cleanup.");
         return outputDir;
     }
 

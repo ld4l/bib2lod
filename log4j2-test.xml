@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Status = level of internal log4j events to log to console. Set status to "trace" to troubleshoot log4j2 -->
+<Configuration status="warn">
+    <CustomLevels>
+        <!-- 
+            Between DEBUG and INFO - use for development.
+            Declaring in config is not too convenient, since we have to call it
+            in code as LOGGER.log(Level.getLevel("DEV"), "message"). Better to
+            define in code with a method LOGGER.dev();
+        -->
+        <CustomLevel name="DEV" intLevel="450" />
+    </CustomLevels>  
+    <Appenders>   
+        <RollingFile name="RollingFile" fileName="log/bib2lod.log"
+            filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} line %L - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+            </Policies>
+        </RollingFile> 
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} line %L - %msg%n"/>
+        </Console>
+    </Appenders>
+    <Loggers>
+        <Root level="info">
+            <AppenderRef ref="RollingFile"/>          
+        </Root>
+        <Logger name="org.ld4l.bib2lod.Bib2Lod" level="trace">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.BibframeConverter" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.BibframeConverter" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        -->
+    </Loggers>
+</Configuration>
+

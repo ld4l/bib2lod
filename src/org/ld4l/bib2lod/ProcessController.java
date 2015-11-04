@@ -58,6 +58,7 @@ public class ProcessController {
     
     public String processAll(Set<Action> selectedActions) {
         
+        LOGGER.info("Processing input files in " + this.inputDir + ".");
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.

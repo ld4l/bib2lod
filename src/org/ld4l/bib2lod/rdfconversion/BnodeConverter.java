@@ -31,7 +31,7 @@ public class BnodeConverter extends RdfProcessor {
     @Override
     public String process() {        
         
-        LOGGER.info("Start BnodeConverter process");
+        LOGGER.info("Start converting blank nodes to URIs.");
         String outputDir = getOutputDir();
 
         int fileCount = 0;
@@ -46,7 +46,7 @@ public class BnodeConverter extends RdfProcessor {
             LOGGER.trace("Done processing file " + filename);
         }   
         
-        LOGGER.info("End BnodeConverter process");
+        LOGGER.info("End converting blank nodes to URIs.");
         return outputDir;
     }
     

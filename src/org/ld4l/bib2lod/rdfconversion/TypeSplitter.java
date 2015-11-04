@@ -37,7 +37,7 @@ public class TypeSplitter extends RdfProcessor {
     @Override
     public String process() {
         
-        LOGGER.info("Start Typesplitter process");
+        LOGGER.info("Start splitting triples into files by subject type.");
         String outputDir = getOutputDir();
 
         //ParameterizedSparqlString pss = getParameterizedSparqlString();
@@ -56,7 +56,7 @@ public class TypeSplitter extends RdfProcessor {
             LOGGER.trace("Done processing file " + filename);
         }
            
-        LOGGER.info("End Typesplitter process");
+        LOGGER.info("End splitting triples into files by subject type.");
         return outputDir;                                                                                                                               
     }
 

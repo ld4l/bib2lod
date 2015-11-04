@@ -82,13 +82,13 @@ public class BibframeConverter extends RdfProcessor {
     @Override
     public String process() {
 
-        LOGGER.info("Start Bibframe conversion process");
+        LOGGER.info("Start Bibframe RDF conversion.");
         
         String outputDir = getOutputDir();  
 
         convertFiles(inputDir, outputDir);
 
-        LOGGER.info("End Bibframe conversion process");
+        LOGGER.info("End Bibframe RDF conversion.");
         return outputDir;        
     }
     

@@ -116,7 +116,7 @@ public class ResourceDeduper extends RdfProcessor {
     
     @Override
     public String process() {
-        LOGGER.info("Start ResourceDeduper process");
+        LOGGER.info("Start local URI deduping.");
         
         String outputDir = getOutputDir();    
 
@@ -127,7 +127,7 @@ public class ResourceDeduper extends RdfProcessor {
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
 
-        LOGGER.info("End ResourceDeduper process");
+        LOGGER.info("End local URI deduping.");
         return outputDir;
     }
 

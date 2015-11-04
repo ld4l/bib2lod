@@ -61,8 +61,7 @@ public class Bib2Lod {
             }
         }
 
-        String absInputDir = getAbsoluteInputDir(
-                cmd.getOptionValue("indir"));
+        String absInputDir = getAbsoluteInputDir(cmd.getOptionValue("indir"));                
         if (absInputDir == null) {
             return;
         }
@@ -257,7 +256,7 @@ public class Bib2Lod {
                 .hasArg()
                 .desc("Processing action. Valid actions: " 
                         + StringUtils.join(VALID_ACTIONS, ", ") + ". Can be "
-                        + "invoked multiple times.")
+                        + "invoked more than once to specify multiple actions.")
                 .argName("action")
                 .build());
         
@@ -277,7 +276,8 @@ public class Bib2Lod {
                 .required()
                 .hasArg()
                 .argName("input_directory")
-                .desc("Absolute or relative path to input files.")
+                .desc("Absolute or relative path to directory containing " 
+                        + "input files.")
                 .build());
 
         options.addOption(Option.builder("n")
