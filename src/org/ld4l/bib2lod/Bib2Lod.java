@@ -50,7 +50,7 @@ public class Bib2Lod {
             return;
         }
         
-        Set<Action> actions = getValidActions(cmd.getOptionValues("actions"));
+        Set<Action> actions = getValidActions(cmd.getOptionValues("action"));
         if (actions == null) {
             LOGGER.debug("No valid actions specified.");
             return;
@@ -252,11 +252,12 @@ public class Bib2Lod {
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
         options.addOption(Option.builder("a")
-                .longOpt("actions")
+                .longOpt("action")
                 .required()
                 .hasArg()
-                .desc("Processing actions. Valid actions: " 
-                        + StringUtils.join(VALID_ACTIONS, ", ") + ".")
+                .desc("Processing action. Valid actions: " 
+                        + StringUtils.join(VALID_ACTIONS, ", ") + ". Can be "
+                        + "invoked multiple times.")
                 .argName("action")
                 .build());
         
