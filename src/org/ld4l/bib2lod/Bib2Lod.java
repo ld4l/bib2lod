@@ -252,14 +252,12 @@ public class Bib2Lod {
         // For now the only defined action is "dedupe". Will add others later:
         // conversion to ld4l ontology, entity resolution, etc.
         options.addOption(Option.builder("a")
-                .longOpt("action")
+                .longOpt("actions")
                 .required()
                 .hasArg()
-                .desc("Processing action. Valid actions: " 
-                        + StringUtils.join(VALID_ACTIONS, ", ") + ". Multiple "
-                        + "actions can be invoked by repeating the option.")
+                .desc("Processing actions. Valid actions: " 
+                        + StringUtils.join(VALID_ACTIONS, ", ") + ".")
                 .argName("action")
-                .required()
                 .build());
         
 //        options.addOption(Option.builder("f")
@@ -279,7 +277,6 @@ public class Bib2Lod {
                 .hasArg()
                 .argName("input_directory")
                 .desc("Absolute or relative path to input files.")
-                .required()
                 .build());
 
         options.addOption(Option.builder("n")
@@ -290,7 +287,6 @@ public class Bib2Lod {
                 // Should namespace used in deduping?? Do we want to dedupe only 
                 // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
-                .required()
                 .build()); 
         
         options.addOption(Option.builder("o")
@@ -300,7 +296,6 @@ public class Bib2Lod {
                 .argName("output_directory")
                 .desc("Absolute or relative path to output directory. "
                         + "Will be created if it doesn't exist.")
-                .required()
                 .build());
  
         return options;
