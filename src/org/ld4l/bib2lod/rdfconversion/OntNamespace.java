@@ -10,6 +10,7 @@ public enum OntNamespace {
     // anything significant about the ontologies themselves.
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
     LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
+    LEGACY("http://ld4l.org/ontology/bib/legacy", "legacy"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
     MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
