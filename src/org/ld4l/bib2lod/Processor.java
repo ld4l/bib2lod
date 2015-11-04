@@ -24,7 +24,7 @@ public abstract class Processor {
 
     public Processor(String inputDir, String mainOutputDir) {
             
-        LOGGER.info("In constructor for " + this.getClass().toString());            
+        LOGGER.trace("In constructor for " + this.getClass().toString());            
         this.inputDir = inputDir;
         this.mainOutputDir = mainOutputDir;
         this.outputDir = createOutputDir();              

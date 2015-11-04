@@ -112,7 +112,6 @@ public class ProcessController {
             if (selectedActions.contains(a)) {
                 Processor processor;
                 Constructor<?> constructor; 
-                LOGGER.info("newInputDir = " + newInputDir);
                 try {
                     constructor = c.getConstructor(
                             OntModel.class, String.class, String.class, 
@@ -134,18 +133,12 @@ public class ProcessController {
                     e.printStackTrace();
                     return null;
                 }
-                LOGGER.info("STARTING PROCESS " + c.getName());
-                LOGGER.info("newInputDir = " + newInputDir);
                 outputDir = processor.process();
-                newInputDir = outputDir;
-                LOGGER.info("DONE WITH PROCESS " + c.getName());
-                LOGGER.info("Output dir = " + outputDir);                
+                newInputDir = outputDir;              
             }
         }
         */
         
-        // Return path to final results.
-        LOGGER.info("Done with processAll()!");
         return outputDir;
 
 

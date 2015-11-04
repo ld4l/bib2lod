@@ -97,7 +97,7 @@ public class ResourceDeduper extends RdfProcessor {
                         .getConstructor(BfType.class).newInstance(type);
                 dedupers.put(basename,  deduper);      
             } catch (Exception e) {
-                LOGGER.info("No deduper created for type " + type);
+                LOGGER.trace("No deduper created for type " + type);
                 // TODO Auto-generated catch block
                 e.printStackTrace();
             }              
@@ -116,7 +116,7 @@ public class ResourceDeduper extends RdfProcessor {
     
     @Override
     public String process() {
-        LOGGER.info("Start process");
+        LOGGER.info("Start ResourceDeduper process");
         
         String outputDir = getOutputDir();    
 
@@ -127,7 +127,7 @@ public class ResourceDeduper extends RdfProcessor {
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
 
-        LOGGER.info("End process");
+        LOGGER.info("End ResourceDeduper process");
         return outputDir;
     }
 
@@ -165,11 +165,11 @@ public class ResourceDeduper extends RdfProcessor {
         
         for ( File file : inputFiles ) {
             String filename = file.getName();
-            LOGGER.info("Deduping file " + filename);
+            LOGGER.trace("Deduping file " + filename);
             String basename = FilenameUtils.getBaseName(file.toString());
             BfResourceDeduper deduper = dedupers.get(basename);
             if (deduper == null) {
-                LOGGER.info("No deduper found for file " + filename);
+                LOGGER.trace("No deduper found for file " + filename);
                 continue;
             }
             Model model = readModelFromFile(file);
@@ -203,7 +203,7 @@ public class ResourceDeduper extends RdfProcessor {
                 // Instead of this test, we may want to simply leave entries 
                 // where key and value are the same out of the map.
                 if (! newUri.equals(originalUri)) {
-                    LOGGER.info("Replacing " + originalUri + " with " + newUri);                           
+                    LOGGER.trace("Replacing " + originalUri + " with " + newUri);                           
                     Resource resource = model.getResource(originalUri);
                     ResourceUtils.renameResource(resource, newUri);                          
                 }
@@ -243,7 +243,7 @@ public class ResourceDeduper extends RdfProcessor {
              * 
              * BfResourceDeduper deduper = dedupers.get(basename);
              * if (deduper == null) {
-             *    LOGGER.info("No deduper found for file " + filename);
+             *    LOGGER.trace("No deduper found for file " + filename);
              *   appendModelToFile(model, basename);
              * } else {
              *    Map<BfType, Model> modelsByType = 
@@ -255,7 +255,7 @@ public class ResourceDeduper extends RdfProcessor {
 
             // Write out new model to file. Duplicate statements are 
             // automatically removed.
-            LOGGER.info("Writing model for file " + file.getName());
+            LOGGER.trace("Writing model for file " + file.getName());
             writeModelToFile(model, basename);    
         }        
     }

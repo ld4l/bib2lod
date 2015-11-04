@@ -42,16 +42,16 @@ public class BibframeConverterFactory {
         // This case shouldn't occur since the file comes from an iteration on 
         // files in the input directory.
         if (inputFile == null) {
-            LOGGER.info("Can't create converter: input file is null.");
+            LOGGER.trace("Can't create converter: input file is null.");
             return null;
         }
         
-        LOGGER.info("Creating converter for input file " + inputFile.getName());
+        LOGGER.trace("Creating converter for input file " + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
         BfType type = BfType.typeForFilename(basename);
         if (type == null) {
-            LOGGER.info("Can't create converter: no type defined for file "
+            LOGGER.trace("Can't create converter: no type defined for file "
                    + basename);
             return null;
         }
@@ -59,7 +59,7 @@ public class BibframeConverterFactory {
         // Could use if-thens instead of reflection
         Class<?> converterClass = BF_CONVERTERS.get(type);
         if (converterClass == null) {
-            LOGGER.info("No converter class defined for type " + type);
+            LOGGER.trace("No converter class defined for type " + type);
             return null;
         }
  

@@ -150,7 +150,7 @@ public class BibframeConverter extends RdfProcessor {
                     getConverter(subject, subjectModel);
             
             if (converter == null) {
-                LOGGER.info("No converter found for subject " 
+                LOGGER.trace("No converter found for subject " 
                         + subject.getURI());
                 outputModel.add(subjectModel);
             } else {
@@ -216,7 +216,7 @@ public class BibframeConverter extends RdfProcessor {
                     .newInstance(subject);   
             return converter;      
         } catch (Exception e) {
-            LOGGER.info("No converter created for class " 
+            LOGGER.trace("No converter created for class " 
                     + converterClass.getName());
             e.printStackTrace();
         }    

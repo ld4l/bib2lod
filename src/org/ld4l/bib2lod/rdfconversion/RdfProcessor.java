@@ -60,7 +60,7 @@ public abstract class RdfProcessor extends Processor {
     public RdfProcessor(String localNamespace, String inputDir, 
             String mainOutputDir) {
         super(inputDir, mainOutputDir);
-        LOGGER.info("In constructor for " + this.getClass().toString());        
+        LOGGER.trace("In constructor for " + this.getClass().toString());        
         this.localNamespace = localNamespace;                      
     }
     

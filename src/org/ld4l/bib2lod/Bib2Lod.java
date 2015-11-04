@@ -77,7 +77,7 @@ public class Bib2Lod {
                 absInputDir, absTopLevelOutputDir); 
         String absFinalOutputDir = processController.processAll(actions);
         if (absFinalOutputDir == null) {
-            LOGGER.info("Processing failed.");
+            LOGGER.error("Processing failed.");
         } else {
             LOGGER.info("Done! Results in " + absFinalOutputDir);
         }
@@ -113,10 +113,8 @@ public class Bib2Lod {
         for (Action action : actions) {
             boolean addedNewActions = 
                     allActions.addAll(action.recursivePrereqs());
-            // addedNewActions can be set from false to true, but once true it
-            // should not be set back to false
-            if (LOGGER.isDebugEnabled() && addedNewActions) {
-                LOGGER.debug("Added prerequisites to requested action " 
+            if (LOGGER.isTraceEnabled() && addedNewActions) {
+                LOGGER.trace("Added prerequisites to requested action " 
                         + action.label());
             }    
         }
@@ -213,7 +211,7 @@ public class Bib2Lod {
         
         HelpFormatter formatter = new HelpFormatter();
         formatter.setWidth(80);
-        formatter.printHelp("bib2lod", options, true);
+        formatter.printHelp("java -jar Bib2Lod.jar", options, true);
     }
 
 
@@ -259,7 +257,7 @@ public class Bib2Lod {
                 .hasArg()
                 .desc("Processing actions. Valid actions: " 
                         + StringUtils.join(VALID_ACTIONS, ", ") + ".")
-                .argName("dedupe")
+                .argName("action")
                 .build());
         
 //        options.addOption(Option.builder("f")
@@ -277,6 +275,7 @@ public class Bib2Lod {
                 .longOpt("indir")
                 .required()
                 .hasArg()
+                .argName("input_directory")
                 .desc("Absolute or relative path to input files.")
                 .build());
 
@@ -284,6 +283,7 @@ public class Bib2Lod {
                 .longOpt("namespace")
                 .required()
                 .hasArg()
+                .argName("local_namespace")
                 // Should namespace used in deduping?? Do we want to dedupe only 
                 // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
@@ -293,7 +293,9 @@ public class Bib2Lod {
                 .longOpt("outdir")
                 .required()
                 .hasArg()
-                .desc("Absolute or relative path to output directory.")
+                .argName("output_directory")
+                .desc("Absolute or relative path to output directory. "
+                        + "Will be created if it doesn't exist.")
                 .build());
  
         return options;
