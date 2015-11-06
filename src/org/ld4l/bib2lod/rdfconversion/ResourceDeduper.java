@@ -178,10 +178,15 @@ public class ResourceDeduper extends RdfProcessor {
                 uniqueUris.putAll(dedupedUris);
             }
             
-            // If deduping has generated any new assertions (e.g., Instance
-            // deduping asserts owl:sameAs between a local Instance URI and the
-            // corresponding WorldCat URI), write these out to a file. Do per
-            // input file, so we don't have to hold all in memory.
+
+            /*
+             * If deduping has generated any new assertions (e.g., Instance
+             * deduping asserts owl:sameAs between a local Instance URI and the
+             * corresponding WorldCat URI), write these out to a file. Do per
+             *  input file, so we don't have to hold all in memory. Add to a
+             * separate model (file) rather than the original model so that
+             * these statements don't receive any further processing.
+             */
             writeNewAssertions(deduper.getNewAssertions());
         }         
     }
@@ -203,7 +208,8 @@ public class ResourceDeduper extends RdfProcessor {
                 // Instead of this test, we may want to simply leave entries 
                 // where key and value are the same out of the map.
                 if (! newUri.equals(originalUri)) {
-                    LOGGER.trace("Replacing " + originalUri + " with " + newUri);                           
+                    LOGGER.trace("Replacing " + originalUri + " with " 
+                            + newUri);                           
                     Resource resource = model.getResource(originalUri);
                     ResourceUtils.renameResource(resource, newUri);                          
                 }

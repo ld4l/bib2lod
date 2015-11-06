@@ -36,6 +36,13 @@ public class BfResourceDeduper {
     public BfResourceDeduper(BfType type) {
         LOGGER.debug("In constructor for " + this.getClass().getName());
         this.type = type;
+        
+        /*
+         * New assertions made during deduping (e.g., sameAs assertions between
+         * an Instance and its WorldCat URI are stored in a separate model -
+         * and written out to a separate file - because they don't need any
+         * further processing.
+         */
         newAssertions = ModelFactory.createDefaultModel();
     }
     
@@ -80,7 +87,8 @@ public class BfResourceDeduper {
                 String uniqueResourceUri = uniqueResources.get(key);
                 LOGGER.debug("Found matching value for key " + key 
                         + " and resource URI " + resourceUri);
-                LOGGER.debug("Adding: " + resourceUri + " => " + uniqueResourceUri);                
+                LOGGER.debug("Adding: " + resourceUri + " => " 
+                        + uniqueResourceUri);                
                 // This local Resource URI will be replaced by the unique 
                 // Resource URI throughout the data
                 uniqueUris.put(resourceUri, uniqueResourceUri);
