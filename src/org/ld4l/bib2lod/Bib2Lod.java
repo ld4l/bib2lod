@@ -248,8 +248,6 @@ public class Bib2Lod {
         
         Options options = new Options();
 
-        // For now the only defined action is "dedupe". Will add others later:
-        // conversion to ld4l ontology, entity resolution, etc.
         options.addOption(Option.builder("a")
                 .longOpt("action")
                 .required()
