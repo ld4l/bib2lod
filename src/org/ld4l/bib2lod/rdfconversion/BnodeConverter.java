@@ -121,18 +121,19 @@ public class BnodeConverter extends RdfProcessor {
             uriResource = idToUriResource.get(id);  
             LOGGER.debug("Found hash key " + id);
         } else {
-            uriResource = assertions.createResource(convertLabelToUri(id));
-            //uriResource = assertions.createResource(mintUri(localNamespace));
+            // Use Java UUID to mint new URIs
+            // uriResource = assertions.createResource(convertLabelToUri(id));
+            uriResource = assertions.createResource(mintUri(localNamespace));
             idToUriResource.put(id, uriResource);
             LOGGER.debug("Creating new hash entry for id " + id);
         }
         return uriResource;
     }
     
-    private String convertLabelToUri(String id) {
-        String localName = id.replaceAll("\\W", "");
-        return localNamespace + localName;
-    }
+//    private String convertLabelToUri(String id) {
+//        String localName = id.replaceAll("\\W", "");
+//        return localNamespace + localName;
+//    }
 
 
 }
