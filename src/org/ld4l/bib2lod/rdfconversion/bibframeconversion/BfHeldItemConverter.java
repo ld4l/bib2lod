@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfHeldItemConverter extends BfResourceConverter {
@@ -100,17 +101,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
         
         Model model = subject.getModel();
         Property newProp = Ld4lProperty.HAS_SHELF_MARK.property();
-        
-        // Figure out which shelf mark prop is being used
-        // Get the string from the shelf mark prop
-        // Mint a url for the shelf mark - what namespace? what localname?
-        // Assertions:
-        // :item hasShelfMark :shelfMark
-        // :shelfMark a ClassificationLcc / etc
-        // :shelfMark rdfs:label "original string value"
-        
-        // If bf:shelfMark is used, structure is more complex: need
-        // to get type from shelfMarkScheme
 
         // Iterate through the Bibframe shelf mark properties
         for (BfProperty bfShelfMarkProp 
@@ -140,15 +130,12 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 if (bfShelfMarkProp.equals(BfProperty.BF_SHELF_MARK)) {
                     subject.addProperty(newProp, shelfMarkLiteral);
                 } else {
-                    String shelfMarkUri = 
-                            mintShelfMarkUri(bfShelfMarkProp, shelfMarkLiteral);
+                    String shelfMarkUri = mintShelfMarkUri(bfShelfMarkProp);                           
                     Resource shelfMark = model.createResource(shelfMarkUri);
                     subject.addProperty(newProp, shelfMark);                                        
                     Ld4lType shelfMarkType = 
                             SHELF_MARK_PROP_TO_SUBCLASS.get(bfShelfMarkProp);
                     model.add(shelfMark, RDF.type, shelfMarkType.resource());
-                    // Not sure if this should be an rdfs:label or some other 
-                    // property.
                     shelfMark.addLiteral(RDF.value, shelfMarkLiteral);
                 }
                 
@@ -194,13 +181,10 @@ public class BfHeldItemConverter extends BfResourceConverter {
      * @param shelfMarkProp
      * @return
      */
-    private String mintShelfMarkUri(BfProperty shelfMarkProp, 
-            Literal shelfMark) {       
+    private String mintShelfMarkUri(BfProperty shelfMarkProp) {
         
         String namespace = SHELF_MARK_VOCABS.get(shelfMarkProp).uri();
-        String localname = shelfMark.getLexicalForm().replace(" ", "_");
-        LOGGER.debug("Minted new shelf mark URI: " + namespace + localname);
-        return namespace + localname;
+        return RdfProcessor.mintUri(namespace);
     }
     
 }

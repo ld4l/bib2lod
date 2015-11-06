@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.util.UUID;
 
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -171,6 +172,10 @@ public abstract class RdfProcessor extends Processor {
             // Logger.setLevel() method like log4j. 
             LOGGER.log(level, statement.toString());
         }     
+    }
+    
+    public static String mintUri(String namespace) {       
+        return namespace + UUID.randomUUID().toString();
     }
     
 
