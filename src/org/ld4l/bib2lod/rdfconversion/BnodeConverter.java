@@ -68,7 +68,8 @@ public class BnodeConverter extends RdfProcessor {
         if (LOGGER.isDebugEnabled()) {
             for (Map.Entry<String, Resource> entry : 
                     bnodeIdToUriResource.entrySet()) {
-                LOGGER.debug(entry.getKey() + ": " + entry.getValue().toString());
+                LOGGER.debug(entry.getKey() + ": " 
+                        + entry.getValue().toString());
             }
         }
         return inputModel;
@@ -121,6 +122,7 @@ public class BnodeConverter extends RdfProcessor {
             LOGGER.debug("Found hash key " + id);
         } else {
             uriResource = assertions.createResource(convertLabelToUri(id));
+            //uriResource = assertions.createResource(mintUri(localNamespace));
             idToUriResource.put(id, uriResource);
             LOGGER.debug("Creating new hash entry for id " + id);
         }
