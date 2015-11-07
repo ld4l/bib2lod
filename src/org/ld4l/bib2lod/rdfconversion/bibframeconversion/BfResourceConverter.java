@@ -147,7 +147,11 @@ public abstract class BfResourceConverter {
     /**
      * After all specific conversions, change namespace of all remaining
      * properties from Bibframe to LD4L. 
+     * 
      * TODO Do we need to do this with classes too??
+     * 
+     * TODO Does this need to be called from subclass convert() methods?
+     * Check the output to see if there are any bibframe terms remaining.
      */
     protected void changePropertyNamespaces() {
         

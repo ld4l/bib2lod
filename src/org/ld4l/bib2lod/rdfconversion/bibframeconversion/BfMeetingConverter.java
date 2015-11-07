@@ -8,19 +8,16 @@ import java.util.Map;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfMeetingConverter extends BfResourceConverter {
 
@@ -70,29 +67,14 @@ public class BfMeetingConverter extends BfResourceConverter {
     @Override
     public Model convert() {  
 
-/*
-:meeting http://bibframe.org/vocab/authoritySource "http://id.loc.gov/vocabulary/subjectSchemes/fast"
-:meeting http://bibframe.org/vocab/authorizedAccessPoint full-name-place-datetime-etc
-:meeting http://bibframe.org/vocab/hasAuthority :madsAuth
-:meeting http://bibframe.org/vocab/label same-as-authorized-access-point
-:meeting http://bibframe.org/vocab/systemNumber 
-:madsAuth http://www.w3.org/1999/02/22-rdf-syntax-ns#type mads:Authority
-:madsAuth mads:authoritativeLabel same-as-label-etc
-specific type: ConferenceName - keep
- 
-*/
-        
-        StmtIterator stmts = subject.getModel().listStatements();
-        while (stmts.hasNext()) {
-            Statement statement = stmts.nextStatement();
-            LOGGER.debug(statement.toString());
-        }
         assignType();  
         // NB May move to BfResourceConverter
         convertSystemNumber();
         convertConferenceName();
         convertProperties();
-        retractProperties();    
+        retractProperties(); 
+        // Doesn't seem to be needed here
+        changePropertyNamespaces();
         return subject.getModel();
     }
     
@@ -115,10 +97,8 @@ specific type: ConferenceName - keep
     }
     
     private void convertConferenceName() {
-        
-        Model model = subject.getModel();
 
-        StmtIterator stmts = model.listStatements(null, RDF.type, 
+        StmtIterator stmts = subject.getModel().listStatements(null, RDF.type, 
                 BfType.MADSRDF_CONFERENCE_NAME.ontClass());
         if (stmts.hasNext()) { 
             subject.addProperty(RDF.type, Ld4lType.CONFERENCE.ontClass());
