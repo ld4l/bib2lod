@@ -5,19 +5,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
+import org.apache.jena.graph.Node;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
@@ -37,7 +39,7 @@ public class BibframeConverter extends RdfProcessor {
             new HashMap<BfType, Class<?>>();
     static {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
-//                BfResourceConverter.class);            
+//                BfResourceConverter.class);    
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfFamilyConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
@@ -47,7 +49,7 @@ public class BibframeConverter extends RdfProcessor {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
 //                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfMeetingConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_ORGANIZATION, 
                 BfOrganizationConverter.class);        
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
@@ -132,27 +134,43 @@ public class BibframeConverter extends RdfProcessor {
         while (subjects.hasNext()) {
 
             Resource inputSubject = subjects.nextResource();
-
-            // Create a model consisting of just those statements of which this
-            // subject is the subject
-            StmtIterator statements = 
+            
+            // Create a model of statements related to this subject
+            Model modelForSubject = ModelFactory.createDefaultModel();
+            
+            // Start with statements of which this subject is the subject
+            modelForSubject.add(
                     inputModel.listStatements(inputSubject, null, 
-                            (RDFNode) null);
-            Model subjectModel = ModelFactory.createDefaultModel();
-            subjectModel.add(statements);
+                            (RDFNode) null));
+            
+            // Now add statements with the object of the previous statements as
+            // subject.
+            NodeIterator nodes = modelForSubject.listObjects();
+            while (nodes.hasNext()) {
+                RDFNode node = nodes.nextNode();
+                // NB We don't need node.isResource(), which includes bnodes as
+                // well, since all nodes have been converted to URI resources.
+                if (node.isURIResource()) {
+                    modelForSubject.add(inputModel.listStatements(
+                            (Resource) node, null, (RDFNode) null));
+                }
+            }
+
             
             // NB At this point, subject.getModel() is the inputModel, not the
-            // subjectModel. Get the subject of the subjectModel instead.            
-            Resource subject = subjectModel.getResource(inputSubject.getURI());
+            // modelForSubject. Get the subject of the subjectModel instead.            
+            Resource subject = 
+                    modelForSubject.getResource(inputSubject.getURI());
             
             // Get the converter according to the type of the subject
+            // *** TODO Don't need to pass in model - get from subject
             BfResourceConverter converter = 
-                    getConverter(subject, subjectModel);
+                    getConverter(subject, modelForSubject);
             
             if (converter == null) {
                 LOGGER.trace("No converter found for subject " 
                         + subject.getURI());
-                outputModel.add(subjectModel);
+                outputModel.add(modelForSubject);
             } else {
                 outputModel.add(converter.convert());
             }
@@ -186,7 +204,7 @@ public class BibframeConverter extends RdfProcessor {
             Resource ontClass = model.createResource(type.uri());
 
             if (model.contains(null, RDF.type, ontClass)) {
-                LOGGER.trace("Found converter class for subject " 
+                LOGGER.debug("Found converter class for subject " 
                         + subject.getURI() + " of type " + type.uri());                        
                 return createConverter(type, entry.getValue(), subject);
             }

@@ -17,11 +17,14 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public enum Ld4lType {
     
     CLASSIFICATION("Classification"),
+    CONFERENCE("Conference"),
     DDC_SHELF_MARK("DdcShelfMark"),
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY("Family"),
+    IDENTIFIER("Identifier"),
     ITEM("Item"),
     LCC_SHELF_MARK("LccShelfMark"),
+    MEETING("Meeting"),
     NLM_SHELF_MARK("NlmShelfMark"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PERSON(OntNamespace.FOAF, "Person"),
@@ -36,7 +39,7 @@ public enum Ld4lType {
     private final String filename;
     private final String prefixed;
     private final String sparqlUri;
-    private final Resource resource;
+    private final Resource ontClass;
 
     Ld4lType(String localname) {
         // Default namespace for this enum type
@@ -55,10 +58,10 @@ public enum Ld4lType {
         this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
 
-        // Create the Jena resource in the constructor to avoid repeated
+        // Create the Jena ontClass in the constructor to avoid repeated
         // entity creation; presumably a performance optimization, but should
         // test.
-        this.resource = ResourceFactory.createResource(uri);
+        this.ontClass = ResourceFactory.createResource(uri);
 
     }
 
@@ -104,8 +107,8 @@ public enum Ld4lType {
         return LOOKUP_BY_FILENAME.get(basename);
     }
 
-    public Resource resource() {
-        return resource;
+    public Resource ontClass() {
+        return ontClass;
     }
     
 }

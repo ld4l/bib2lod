@@ -16,11 +16,13 @@ public enum Ld4lProperty {
 
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
+    HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
+    HAS_LOCATION(OntNamespace.PROV, "atLocation"),
+    IDENTIFIED_BY("identifiedBy"),
     IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
     IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     IS_HOLDING_FOR("isHoldingFor"),
-    HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
-    HAS_LOCATION(OntNamespace.PROV, "atLocation"),
+    LABEL(OntNamespace.RDFS, "label"),
     NAME(OntNamespace.FOAF, "name");
     
 

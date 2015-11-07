@@ -12,6 +12,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
 public enum BfProperty {
 
     BF_ANNOTATES("annotates"),
+    BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
     BF_EVENT_PLACE("eventPlace"),
@@ -32,7 +33,6 @@ public enum BfProperty {
     BF_SYSTEM_NUMBER("systemNumber"),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
- 
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme");
 

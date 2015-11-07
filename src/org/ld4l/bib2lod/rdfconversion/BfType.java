@@ -35,7 +35,8 @@ public enum BfType {
     BF_WORK("Work"),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
-    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject");
+    MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
+    MADSRDF_CONFERENCE_NAME(OntNamespace.MADSRDF, "ConferenceName");
     
 
     private final OntNamespace namespace;
@@ -44,7 +45,7 @@ public enum BfType {
     private final String filename;
     private final String prefixed;
     private final String sparqlUri;
-    private final Resource resource;
+    private final Resource ontClass;
 
     BfType(String localname) {
         // Default namespace for this enum type
@@ -63,10 +64,10 @@ public enum BfType {
         this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
 
-        // Create the Jena resource in the constructor to avoid repeated
+        // Create the Jena ontClass in the constructor to avoid repeated
         // entity creation; presumably a performance optimization, but should
         // test.
-        this.resource = ResourceFactory.createResource(this.uri);
+        this.ontClass = ResourceFactory.createResource(this.uri);
 
     }
 
@@ -123,8 +124,8 @@ public enum BfType {
             BF_TOPIC);
     }
     
-    public Resource resource() {
-        return resource;
+    public Resource ontClass() {
+        return ontClass;
     }
     
 }
