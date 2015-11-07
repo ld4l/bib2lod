@@ -64,10 +64,8 @@ public class BibframeConverter extends RdfProcessor {
 //                BfResourceConverter.class); 
     }
     
-//    private static final String IN_PROGRESS_DIR = "inProgress";
     private static final String NEW_ASSERTIONS_FILENAME = 
             ResourceDeduper.getNewAssertionsFilename();
-    
     
     public BibframeConverter(OntModel bfOntModelInf,        
             String localNamespace, String inputDir, String mainOutputDir) {
@@ -78,7 +76,6 @@ public class BibframeConverter extends RdfProcessor {
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
     }
-
 
     
     @Override
