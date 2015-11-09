@@ -23,6 +23,7 @@ public enum Ld4lType {
     FAMILY("Family"),
     IDENTIFIER("Identifier"),
     ITEM("Item"),
+    LANGUAGE(OntNamespace.LINGVO, "Lingvo"),
     LCC_SHELF_MARK("LccShelfMark"),
     MEETING("Meeting"),
     NLM_SHELF_MARK("NlmShelfMark"),
