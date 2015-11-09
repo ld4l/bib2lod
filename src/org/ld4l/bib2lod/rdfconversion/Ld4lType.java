@@ -31,6 +31,7 @@ public enum Ld4lType {
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location"),
     SHELF_MARK("ShelfMark"),
+    TIME(OntNamespace.TIME, "TemporalEntity"),
     UDC_SHELF_MARK("UdcShelfMark");
     
 

@@ -19,7 +19,8 @@ public enum OntNamespace {
     PROV("http://www.w3.org/ns/prov#", "prov"),
     RDFS("http://http://www.w3.org/2000/01/rdf-schema#", "rdfs"),
     RELATORS("http://id.loc.gov/vocabulary/relators/", "marcrel"), // needed?
-    SCHEMA("http://schema.org/", "schema");
+    SCHEMA("http://schema.org/", "schema"),
+    TIME("http://www.w3.org/TR/owl-time/", "time");
 
     private final String uri;
     private final String prefix;

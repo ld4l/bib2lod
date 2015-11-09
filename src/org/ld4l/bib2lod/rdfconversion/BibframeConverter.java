@@ -24,6 +24,7 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTemporalConverter;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
@@ -55,7 +56,8 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfPlaceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfTemporalConverter.class);
+//      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 

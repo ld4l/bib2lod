@@ -23,7 +23,8 @@ public enum Ld4lProperty {
     IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     IS_HOLDING_FOR("isHoldingFor"),
     LABEL(OntNamespace.RDFS, "label"),
-    NAME(OntNamespace.FOAF, "name");
+    NAME(OntNamespace.FOAF, "name"),
+    SUBJECT(OntNamespace.DCTERMS, "subject");
     
 
     private final OntNamespace namespace;
