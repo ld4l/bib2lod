@@ -41,9 +41,8 @@ public class BfTopicDeduper extends BfResourceDeduper {
         LOGGER.debug("Deduping type " + type.toString());
 
         // Maps local URIs in the Bibframe RDF to deduped URIs (single, unique
-        // URI per bf:Agent or madsrdf:Authority). This map will be used to
-        // replace duplicate URIs for the same individual with a single, unique
-        // URI.
+        // URI per Topic). This map will be used to replace duplicate URIs for
+        // the same individual with a single, unique URI.
         Map<String, String> uniqueUris = new HashMap<String, String>();
         
         // Maps keys for Topic identity matching to the unique Topic URIs.         
@@ -63,7 +62,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
             
             QuerySolution soln = results.next();
 
-            String topicUri = soln.getResource("topic").getURI();
+            String localTopicUri = soln.getResource("topic").getURI();
             
             // Get an external URI for this Topic, if there is one. We will 
             // replace local topic URIs with it throughout the data. In the case 
@@ -76,13 +75,14 @@ public class BfTopicDeduper extends BfResourceDeduper {
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
-                LOGGER.debug("No key for " + topicUri + "; can't dedupe");
+                LOGGER.debug("No key for " + localTopicUri + "; can't dedupe");
                 continue;
             }
             
-            // The external Topic URI will the the replacement URI.      
+            // The external Topic URI, if there is one,  will be the replacement 
+            // URI.      
             String replacementUri = 
-                    externalTopicUri != null ? externalTopicUri : topicUri;
+                    externalTopicUri != null ? externalTopicUri : localTopicUri;
 
             Resource auth = soln.getResource("auth");
             String authUri = auth != null ? auth.getURI() : null;
@@ -92,11 +92,12 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 // We've seen this Topic before
                 String uniqueTopicUri = uniqueTopics.get(key);
                 LOGGER.debug("Found matching value for key " + key 
-                        + " and topic URI " + topicUri);
-                LOGGER.debug("Adding: " + topicUri + " => " + uniqueTopicUri);                
+                        + " and topic URI " + localTopicUri);
+                LOGGER.debug(
+                        "Adding: " + localTopicUri + " => " + uniqueTopicUri);                
                 // This local Topic URI will be replaced by the unique Topic URI
                 // throughout the data
-                uniqueUris.put(topicUri, uniqueTopicUri);
+                uniqueUris.put(localTopicUri, uniqueTopicUri);
                 
                 // NB The algorithm assumes the topic key and the authority
                 // key will always be identical. If not, we should normalize
@@ -128,10 +129,10 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 
             } else {
                 // We haven't seen this Topic before
-                LOGGER.debug("New topic: " + topicUri);
+                LOGGER.debug("New topic: " + localTopicUri);
                 // For Topics, we're substituting the local URI with an
                 // external URI, if it exists.
-                uniqueUris.put(topicUri, replacementUri);
+                uniqueUris.put(localTopicUri, replacementUri);
                 uniqueTopics.put(key, replacementUri);
                 if (authUri != null) {
                     LOGGER.debug("New auth: " + authUri);
@@ -244,21 +245,19 @@ public class BfTopicDeduper extends BfResourceDeduper {
         
         // First get the default key from the authorizedAccessPoint or label
         // values.
-        String key = getKey(soln);
-        if (key == null) {
-            return null;
-        }
+        String key = super.getKey(soln);
+        if (key != null) {
        
-        // If there's a scheme, prepend it to the label, since deduping is done 
-        // only relative to a scheme: we don't want to match labels in 
-        // different schemes.
-        Resource scheme = soln.getResource("scheme");
-        if (scheme != null) {
-            key = scheme.getURI() + key;
+            // If there's a scheme, prepend it to the label, since deduping is  
+            // done only relative to a scheme: we don't want to match labels in 
+            // different schemes.
+            Resource scheme = soln.getResource("scheme");
+            if (scheme != null) {
+                key = scheme.getURI() + key;
+            }
         }
         
         return key;
     }
     
-
 }
