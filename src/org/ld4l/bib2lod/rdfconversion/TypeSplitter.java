@@ -298,6 +298,15 @@ public class TypeSplitter extends RdfProcessor {
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + BfType.BF_TITLE.prefixed()
                 + "} UNION { "
+                // Need to put Language statements with Works rather than in a
+                // separate file, in order to capture statements
+                // :language bf:resourcePart <string literal>
+                // which designate the relationship of the Language to the Work.
+                + "?s1 " + BfProperty.BF_LANGUAGE.prefixed() + " ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + BfType.BF_LANGUAGE.prefixed()                
+                + "} UNION { "
                 + "?s1 " + BfProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
