@@ -41,6 +41,7 @@ public class BfPersonConverter extends BfResourceConverter {
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
+                    BfProperty.BF_AUTHORITY_SOURCE,
                     BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
