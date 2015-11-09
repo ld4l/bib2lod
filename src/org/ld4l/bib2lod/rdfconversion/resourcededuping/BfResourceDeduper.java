@@ -140,6 +140,7 @@ public class BfResourceDeduper {
     }
 
     protected String getKey(QuerySolution soln) {
+        
         // NB It's assumed that bf:authorizedAccessPoint and bf:label values 
         // are identical when both exist. If that turns out to be wrong, we 
         // need some way of resolving discrepancies.

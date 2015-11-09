@@ -31,6 +31,7 @@ public enum BfType {
     BF_PERSON("Person"),
     BF_PROVIDER("Provider"),
     BF_PLACE("Place"),
+    BF_TEMPORAL("Temporal"),
     BF_TITLE("Title"),
     BF_TOPIC("Topic"),  
     BF_WORK("Work"),

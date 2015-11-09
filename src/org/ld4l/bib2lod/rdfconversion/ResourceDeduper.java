@@ -51,6 +51,7 @@ public class ResourceDeduper extends RdfProcessor {
         DEDUPERS_BY_TYPE.put(BfType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
         DEDUPERS_BY_TYPE.put(BfType.BF_PERSON,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_PLACE,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_TEMPORAL,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_TOPIC,  BfTopicDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkDeduper.class); 
         
