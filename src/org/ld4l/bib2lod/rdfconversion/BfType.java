@@ -123,6 +123,7 @@ public enum BfType {
             BF_ORGANIZATION,
             BF_PERSON,
             BF_PLACE,
+            BF_TEMPORAL,
             BF_TOPIC);
     }
     

@@ -160,6 +160,7 @@ public class TypeSplitter extends RdfProcessor {
         
         ParameterizedSparqlString pss = null;
         
+        // NB Topic is an Authority, so ordering is crucial
         if (type == BfType.BF_TOPIC) {          
             pss = getBfTopicSparql();
         } else if (BfType.authorities().contains(type)) {
