@@ -20,6 +20,12 @@
             <AppenderRef ref="RollingFile"/>
             <AppenderRef ref="Console"/>
         </Root>
+        <!-- Set additivity to false since the Root logger also writes to the console - prevents
+            repeat logging -->
+        <Logger name="org.ld4l.bib2lod.rdfconversion.RdfProcessor" additivity="false" level="debug">
+            <AppenderRef ref="Console"/>
+        </Logger>
+        --> 
     </Loggers>
 </Configuration>
 
