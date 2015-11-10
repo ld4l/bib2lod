@@ -128,7 +128,7 @@ public class BibframeConverter extends RdfProcessor {
         Model inputModel = readModelFromFile(file);  
         Model outputModel = ModelFactory.createDefaultModel();
         
-        //BfType typeForFile = BfType.typeForFilename(filename);
+        BfType typeForFile = BfType.typeForFilename(filename);
         
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
@@ -136,43 +136,47 @@ public class BibframeConverter extends RdfProcessor {
 
             Resource inputSubject = subjects.nextResource();
 
-            //StmtIterator typeStmts = inputSubject.listProperties(RDF.type); 
-            
-            // Create a model of statements related to this subject
-            Model modelForSubject = ModelFactory.createDefaultModel();
-            
-            // Start with statements of which this subject is the subject
-            modelForSubject.add(inputSubject.listProperties());
+            if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
 
-            // Now add statements with the object of the previous statements as
-            // subject.
-            NodeIterator nodes = modelForSubject.listObjects();
-            while (nodes.hasNext()) {
-                RDFNode node = nodes.nextNode();
-                // NB We don't need node.isResource(), which includes bnodes as
-                // well, since all nodes have been converted to URI resources.
-                if (node.isURIResource()) {
-                    modelForSubject.add(inputModel.listStatements(
-                            (Resource) node, null, (RDFNode) null));
+                // Create a model of statements related to this subject
+                Model modelForSubject = ModelFactory.createDefaultModel();
+                
+                // Start with statements of which this subject is the subject
+                modelForSubject.add(inputSubject.listProperties());
+    
+                // Now add statements with the object of the previous statements as
+                // subject.
+                NodeIterator nodes = modelForSubject.listObjects();
+                while (nodes.hasNext()) {
+                    RDFNode node = nodes.nextNode();
+                    // NB We don't need node.isResource(), which includes bnodes as
+                    // well, since all nodes have been converted to URI resources.
+                    if (node.isURIResource()) {
+                        modelForSubject.add(inputModel.listStatements(
+                                (Resource) node, null, (RDFNode) null));
+                    }
                 }
-            }
-       
-            // NB At this point, subject.getModel() is the inputModel, not the
-            // modelForSubject. Get the subject of the subjectModel instead.            
-            Resource subject = 
-                    modelForSubject.getResource(inputSubject.getURI());
-            
-            // Get the converter according to the type of the subject
-            // *** TODO Don't need to pass in model - get from subject
-            BfResourceConverter converter = 
-                    getConverter(subject, modelForSubject);
-            
-            if (converter == null) {
-                LOGGER.trace("No converter found for subject " 
-                        + subject.getURI());
-                outputModel.add(modelForSubject);
+           
+                // NB At this point, subject.getModel() is the inputModel, not the
+                // modelForSubject. Get the subject of the subjectModel instead.            
+                Resource subject = 
+                        modelForSubject.getResource(inputSubject.getURI());
+                
+                // Get the converter according to the type of the subject
+                // *** TODO Don't need to pass in model - get from subject
+                BfResourceConverter converter = 
+                        getConverter(subject, modelForSubject);
+                
+                if (converter == null) {
+                    LOGGER.trace("No converter found for subject " 
+                            + subject.getURI());
+                    outputModel.add(modelForSubject);
+                } else {
+                    outputModel.add(converter.convert());
+                }
             } else {
-                outputModel.add(converter.convert());
+                LOGGER.debug("Not iterating over subject " + inputSubject.getURI()
+                        + " since it's not of type " + typeForFile);
             }
         }
 
