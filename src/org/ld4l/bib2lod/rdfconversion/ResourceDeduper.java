@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfLanguageDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
@@ -42,6 +43,10 @@ public class ResourceDeduper extends RdfProcessor {
     private static final List<BfType> TYPES_TO_DEDUPE = 
             new ArrayList<BfType>();
     static {
+        // NB Language type-splitting should precede Work type-splitting, to 
+        // get :work bf:language :language statements into the Language file.
+        // Otherwise need a filter in the Work query.
+        DEDUPERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_HELD_ITEM, BfHeldItemDeduper.class);

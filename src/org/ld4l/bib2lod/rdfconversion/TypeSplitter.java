@@ -93,7 +93,7 @@ public class TypeSplitter extends RdfProcessor {
         // Map each Bibframe type to a model
         Map<String, Model> modelsByType = createModelsByType();
    
-        // For each Bibframe type to split on, retrive from the input model the
+        // For each Bibframe type to split on, retrieve from the input model the
         // statements to add to the output file for that type.
         for (BfType type : TYPES_TO_SPLIT) {       
             Model modelForType = modelsByType.get(type.uri());
@@ -169,6 +169,8 @@ public class TypeSplitter extends RdfProcessor {
             pss = getBfInstanceSparql();
         } else if (type == BfType.BF_WORK) {
             pss = getBfWorkSparql();
+        } else if (type == BfType.BF_LANGUAGE) {
+            pss = getBfLanguageSparql();
         } else {
             pss = getDefaultSparql();
         }
@@ -178,6 +180,39 @@ public class TypeSplitter extends RdfProcessor {
         pss.setIri("type", type.uri());
         return pss.asQuery();
         
+    }
+
+    private ParameterizedSparqlString getBfLanguageSparql() {
+        
+        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+
+        pss.setCommandText(
+                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+                + "?work ?p2 ?s1 . } "
+                + "WHERE {  { " 
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?work ?p2 ?s1 . " 
+                + "?work a " + BfType.BF_WORK.prefixed() + " . "
+                + "} UNION { "
+                // This returns :work bf:language <external-lang-resource>
+                // E.g., :work bf:language 
+                // <http://id.loc.gov/vocabulary/languages/eng> .
+                // May not be needed now, since we don't do anything with those
+                // statements; however, if/when we do lookups against a
+                // vocabulary like lingvo, it may be useful to have then all in
+                // a single file.
+                + "?work ?p2 ?s1 . "
+                + "?work a " + BfType.BF_WORK.prefixed() + " . "
+                + "?work " + BfProperty.BF_LANGUAGE.prefixed() + " ?s1 . " 
+                + "} }"                
+        );
+        
+        return pss;
     }
 
     private ParameterizedSparqlString getBfTopicSparql() {
@@ -204,6 +239,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "} }"                
         );
         
+        LOGGER.debug(pss.toString());
         return pss;
     }
     
@@ -298,15 +334,15 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + BfType.BF_TITLE.prefixed()
-                + "} UNION { "
-                // Need to put Language statements with Works rather than in a
-                // separate file, in order to capture statements
-                // :language bf:resourcePart <string literal>
-                // which designate the relationship of the Language to the Work.
-                + "?s1 " + BfProperty.BF_LANGUAGE.prefixed() + " ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_LANGUAGE.prefixed()                
+//                + "} UNION { "
+//                // Need to put Language statements with Works rather than in a
+//                // separate file, in order to capture statements
+//                // :language bf:resourcePart <string literal>
+//                // which designate the relationship of the Language to the Work.
+//                + "?s1 " + BfProperty.BF_LANGUAGE.prefixed() + " ?o1 . "
+//                + "?s1 a ?type . "
+//                + "?o1 ?p2 ?o2 . "
+//                + "?o1 a " + BfType.BF_LANGUAGE.prefixed()                
                 + "} UNION { "
                 + "?s1 " + BfProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
