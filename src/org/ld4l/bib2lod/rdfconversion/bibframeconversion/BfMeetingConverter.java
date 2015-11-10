@@ -45,10 +45,7 @@ public class BfMeetingConverter extends BfResourceConverter {
             );
             
     
-    public BfMeetingConverter(Resource subject) {
-        super(subject);
-    }
-    
+
     @Override
     protected Ld4lType getNewType() {
         return NEW_TYPE;
@@ -73,7 +70,6 @@ public class BfMeetingConverter extends BfResourceConverter {
     
     private void convertSystemNumber() {
         
-        Model model = subject.getModel();
         Property prop = BfProperty.BF_SYSTEM_NUMBER.property();
         
         Model assertions = ModelFactory.createDefaultModel();
@@ -85,13 +81,13 @@ public class BfMeetingConverter extends BfResourceConverter {
             assertions.add(object, RDF.type, Ld4lType.IDENTIFIER.ontClass());
         }
         
-        model.add(assertions);
+        subject.getModel().add(assertions);
         
     }
     
     private void convertConferenceName() {
 
-        StmtIterator stmts = subject.getModel().listStatements(null, RDF.type, 
+        StmtIterator stmts = model.listStatements(null, RDF.type, 
                 BfType.MADSRDF_CONFERENCE_NAME.ontClass());
         if (stmts.hasNext()) { 
             subject.addProperty(RDF.type, Ld4lType.CONFERENCE.ontClass());

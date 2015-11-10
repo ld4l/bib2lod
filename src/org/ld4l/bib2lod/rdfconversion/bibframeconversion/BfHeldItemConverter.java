@@ -67,10 +67,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
     }
     
     
-    public BfHeldItemConverter(Resource subject) {
-        super(subject);
-    }
-
     @Override
     protected void convertProperties() {
         convertShelfMark();
@@ -94,7 +90,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
     
     private void convertShelfMark() {
         
-        Model model = subject.getModel();
         Property newProp = Ld4lProperty.HAS_SHELF_MARK.property();
 
         // Iterate through the Bibframe shelf mark properties
@@ -146,6 +141,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
      * bfProperty; otherwise, return the original bf:shelfMark property.
      */
     private BfProperty getBfPropertyFromScheme(BfProperty shelfMarkProp) {
+            
     
         Property shelfMarkSchemeProp = 
                 BfProperty.BF_SHELF_MARK_SCHEME.property();

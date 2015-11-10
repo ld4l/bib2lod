@@ -23,11 +23,7 @@ public class BfPlaceConverter extends BfResourceConverter {
     static {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
-    
-    public BfPlaceConverter(Resource subject) {
-        super(subject);
-    }
-    
+      
     @Override
     protected Ld4lType getNewType() {
         return NEW_TYPE;

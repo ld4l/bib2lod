@@ -45,10 +45,6 @@ public class BfPersonConverter extends BfResourceConverter {
                     BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
-    public BfPersonConverter(Resource subject) {
-        super(subject);        
-    }
-    
 
     @Override 
     protected void convertProperties() {

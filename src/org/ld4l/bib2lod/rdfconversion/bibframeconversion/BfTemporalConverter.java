@@ -33,10 +33,7 @@ public class BfTemporalConverter extends BfResourceConverter {
                     BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
     
-    public BfTemporalConverter(Resource subject) {
-        super(subject);
-    }
-    
+
     @Override
     protected Ld4lType getNewType() {
         return NEW_TYPE;

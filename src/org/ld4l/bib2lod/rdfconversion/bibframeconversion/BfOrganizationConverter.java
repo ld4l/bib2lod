@@ -33,11 +33,7 @@ public class BfOrganizationConverter extends BfResourceConverter {
                     BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
             
-    
-    public BfOrganizationConverter(Resource subject) {
-        super(subject);
-    }
-    
+
     @Override
     protected Ld4lType getNewType() {
         return NEW_TYPE;

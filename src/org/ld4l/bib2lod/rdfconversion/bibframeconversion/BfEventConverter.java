@@ -24,10 +24,6 @@ public class BfEventConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_EVENT_PLACE, Ld4lProperty.HAS_LOCATION);
     }
 
-
-    public BfEventConverter(Resource subject) {
-        super(subject);
-    }
     
     @Override
     protected Ld4lType getNewType() {

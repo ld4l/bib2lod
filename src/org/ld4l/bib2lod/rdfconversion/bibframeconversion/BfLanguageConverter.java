@@ -1,6 +1,5 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -26,15 +25,17 @@ public class BfLanguageConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LANGUAGE, Ld4lProperty.LANGUAGE);
     }
 
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            Arrays.asList(
-                    BfProperty.BF_LANGUAGE_OF_PART_URI
-            );
+//    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
+//            Arrays.asList(
+//                    BfProperty.BF_LANGUAGE_OF_PART_URI
+//            );
+
     
-    public BfLanguageConverter(Resource subject) {
-        super(subject);
+    @Override
+    protected void convert() {
+
+        LOGGER.debug(model);
     }
-    
 
     @Override
     protected void convertProperties() {
@@ -58,7 +59,7 @@ public class BfLanguageConverter extends BfResourceConverter {
 
     @Override
     protected List<BfProperty> getPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
+        return null; //PROPERTIES_TO_RETRACT;
     }
     
 }

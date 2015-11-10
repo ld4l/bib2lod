@@ -12,13 +12,13 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
@@ -50,6 +50,7 @@ public class BibframeConverter extends RdfProcessor {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
 //                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfMeetingConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_ORGANIZATION, 
                 BfOrganizationConverter.class);        
@@ -123,60 +124,75 @@ public class BibframeConverter extends RdfProcessor {
             return;
         }
 
-        LOGGER.trace("Processing file " + filename);
+        LOGGER.debug("Processing file " + filename);
         
         Model inputModel = readModelFromFile(file);  
+     
+        BfType typeForFile = BfType.typeForFilename(filename);
+        BfResourceConverter converter = getConverter(typeForFile);
+        
+        // If no converter for this type, write the input model as output and
+        // return
+        if (converter == null) {
+            writeModelToFile(inputModel, outputFile);
+            return;
+        }
+        
         Model outputModel = ModelFactory.createDefaultModel();
         
-        BfType typeForFile = BfType.typeForFilename(filename);
         
+        LOGGER.debug(inputModel.toString());
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
         while (subjects.hasNext()) {
 
             Resource inputSubject = subjects.nextResource();
+            
+            LOGGER.debug("Found subject " + inputSubject.getURI());
 
             if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
 
+                LOGGER.debug("Converting subject " + inputSubject.getURI());
+                
                 // Create a model of statements related to this subject
                 Model modelForSubject = ModelFactory.createDefaultModel();
                 
                 // Start with statements of which this subject is the subject
                 modelForSubject.add(inputSubject.listProperties());
     
-                // Now add statements with the object of the previous statements as
-                // subject.
+                // Now add statements with the object of the previous statements 
+                // as subject.
                 NodeIterator nodes = modelForSubject.listObjects();
                 while (nodes.hasNext()) {
                     RDFNode node = nodes.nextNode();
-                    // NB We don't need node.isResource(), which includes bnodes as
-                    // well, since all nodes have been converted to URI resources.
+                    // NB We don't need node.isResource(), which includes bnodes 
+                    // as well, since all nodes have been converted to URI 
+                    // resources.
                     if (node.isURIResource()) {
                         modelForSubject.add(inputModel.listStatements(
                                 (Resource) node, null, (RDFNode) null));
                     }
                 }
+                
+                // Finally, add statements with this subject as object.
+                // So far we only have these in bfLanguage.nt, where we get the
+                // :work bf:language :language statement.
+                modelForSubject.add(
+                        inputModel.listStatements(null, null, inputSubject));
            
-                // NB At this point, subject.getModel() is the inputModel, not the
-                // modelForSubject. Get the subject of the subjectModel instead.            
+                // NB At this point, subject.getModel() is the inputModel, not 
+                // the modelForSubject. Get the subject of the subjectModel 
+                // instead.            
                 Resource subject = 
                         modelForSubject.getResource(inputSubject.getURI());
+
+                outputModel.add(converter.convert(subject));
+
                 
-                // Get the converter according to the type of the subject
-                // *** TODO Don't need to pass in model - get from subject
-                BfResourceConverter converter = 
-                        getConverter(subject, modelForSubject);
-                
-                if (converter == null) {
-                    LOGGER.trace("No converter found for subject " 
-                            + subject.getURI());
-                    outputModel.add(modelForSubject);
-                } else {
-                    outputModel.add(converter.convert());
-                }
             } else {
-                LOGGER.debug("Not iterating over subject " + inputSubject.getURI()
+                LOGGER.debug("Skipping subject " + inputSubject.getURI()
                         + " since it's not of type " + typeForFile);
+                        
             }
         }
 
@@ -184,37 +200,24 @@ public class BibframeConverter extends RdfProcessor {
         
     }
     
-    /*
-     * If as the last step in ResourceDeduper we type-split again, separating 
-     * out all statements by subject type (i.e., put Titles into their own file
-     * rather than combined with bfWork or bfInstance, etc.), then we could
-     * derive the converter type from the filename, as for ResourceDeduper.
-     * (However, if there's still an other.nt file we'd have to deal with that
-     * as here.) Consider implementing this step.
-     * On the other hand, there's an advantage that in the current 
-     * implementation it doesn't matter how the input files are structured - we
-     * wouldn't even need the initial type-splitting or deduping, so the 
-     * processes are more independent. (We could eliminate the prerequisite on
-     * Bibframe conversion, though deduping still depends on type-splitting.)
-     */
-    private BfResourceConverter getConverter(Resource subject, Model model) {
-            
-        // Loop through types to find one that is the subject's type.
-        // Will need modification if ordering of types is crucial.
-        for (Map.Entry<BfType, Class<?>> entry : 
-                CONVERTERS_BY_TYPE.entrySet()) {
-            
-            BfType type = entry.getKey();
-            Resource ontClass = model.createResource(type.uri());
-
-            if (model.contains(null, RDF.type, ontClass)) {
-                LOGGER.debug("Found converter class for subject " 
-                        + subject.getURI() + " of type " + type.uri());                        
-                return createConverter(type, entry.getValue(), subject);
-            }
-        }
+    
+    private BfResourceConverter getConverter(BfType type) {
         
-        LOGGER.debug("No converter found for subject " + subject.getURI());
+        Class<?> converterClass = CONVERTERS_BY_TYPE.get(type);
+        if (converterClass != null) {
+            try {
+                BfResourceConverter converter = 
+                        (BfResourceConverter) converterClass.newInstance();
+                LOGGER.debug("Got converter for type " + type);
+                return converter;
+            } catch (Exception e) {
+                LOGGER.debug("Can't instantiate class " 
+                        + converterClass.getName());
+                e.printStackTrace();
+            } 
+        }
+
+        LOGGER.debug("No converter found for type " + type);
         return null;
     }
 

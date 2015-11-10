@@ -24,44 +24,30 @@ public abstract class BfResourceConverter {
             LogManager.getLogger(BfResourceConverter.class);
     
     protected Resource subject;
+    protected Model model;
     
-    public BfResourceConverter(Resource subject) {
-        LOGGER.debug("In constructor for " + this.getClass().getName());
-        
-        // NB Currently a new converter is created for each subject resource,
-        // so the subject can be assigned to an instance variable. If we 
-        // change the flow so that a converter is created for an entire model of
-        // subjects of a certain type, the subject will have to be passed to the
-        // convert method rather than the constructor.
-        this.subject = subject;
 
-        // Possibly a converter could be shared by multiple types - e.g., 
-        // BfFamilyConverter and BfOrganizationConverter could both be
-        // BfAuthorityConverter. Then the original rdf:type must be passed
-        // to the constructor so that we know what new type should be 
-        // assigned. 
-        // this.type = type;
+    // Public interface method: initialize instance variables and convert.
+    public final Model convert(Resource subject) {    
+        
+        this.subject = subject;
+        this.model = subject.getModel();
+        convert();
+        return model;
     }
 
     /* 
      * Default conversion method. Subclasses may override. 
      */
-    public Model convert() {       
+    protected void convert() {
         
-        assignType();        
+        assignType();                      
         convertProperties();
         retractProperties();  
-        changePropertyNamespaces();
-        return subject.getModel();
+        changePropertyNamespaces();       
     }
 
-    
-    /* -------------------------------------------------------------------------
-     * 
-     * Utilities bridging Bib2Lod objects and Jena objects and models
-     * 
-     * -----------------------------------------------------------------------*/
-    
+
     /**
      * Remove existing type assertions and assign new type.
      */
@@ -109,7 +95,8 @@ public abstract class BfResourceConverter {
      * @param newProp
      * @return
      */
-    protected void convertProperty(BfProperty oldProp, Ld4lProperty newProp) {
+    protected void convertProperty(BfProperty oldProp, 
+            Ld4lProperty newProp) {
                     
         Property oldProperty = oldProp.property();
         Statement stmt = subject.getProperty(oldProperty);
@@ -163,7 +150,6 @@ public abstract class BfResourceConverter {
         Model assertions = ModelFactory.createDefaultModel();
         Model retractions = ModelFactory.createDefaultModel();
         
-        Model model = subject.getModel();
         StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
             Statement stmt = stmts.nextStatement();

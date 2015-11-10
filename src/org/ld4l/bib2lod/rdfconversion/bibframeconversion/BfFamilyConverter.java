@@ -32,11 +32,7 @@ public class BfFamilyConverter extends BfResourceConverter {
                     BfProperty.BF_AUTHORIZED_ACCESS_POINT
             );
             
-    
-    public BfFamilyConverter(Resource subject) {
-        super(subject);
-    }
-    
+
     @Override
     protected Ld4lType getNewType() {
         return NEW_TYPE;
