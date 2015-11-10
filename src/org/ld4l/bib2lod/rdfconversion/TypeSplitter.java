@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -15,6 +16,13 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfLanguageDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
 
 public class TypeSplitter extends RdfProcessor {
 
@@ -23,8 +31,23 @@ public class TypeSplitter extends RdfProcessor {
     
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES; 
     
-    private static final List<BfType> TYPES_TO_SPLIT = 
-            ResourceDeduper.getTypesToDedupe();
+    private static final List<BfType> TYPES_TO_SPLIT = Arrays.asList(
+            // NB bf:Language must precede bf:Work, since some statements with
+            // Work subjects are put in the bf:Language file instead.
+            BfType.BF_LANGUAGE,
+            BfType.BF_EVENT,
+            BfType.BF_FAMILY,
+            BfType.BF_HELD_ITEM,
+            BfType.BF_INSTANCE,
+            BfType.BF_JURISDICTION,
+            BfType.BF_MEETING,
+            BfType.BF_ORGANIZATION,
+            BfType.BF_PERSON,
+            BfType.BF_PLACE,
+            BfType.BF_TEMPORAL,
+            BfType.BF_TOPIC,
+            BfType.BF_WORK         
+    );
     
     private static final String REMAINDER_FILENAME = 
             ResourceDeduper.getRemainderFilename();

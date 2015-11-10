@@ -40,13 +40,7 @@ public class ResourceDeduper extends RdfProcessor {
     // Using LinkedHashMap in case order of processing becomes important
     private static final Map<BfType, Class<?>> DEDUPERS_BY_TYPE =
             new LinkedHashMap<BfType, Class<?>>();
-    private static final List<BfType> TYPES_TO_DEDUPE = 
-            new ArrayList<BfType>();
     static {
-        // NB Language type-splitting should precede Work type-splitting, to 
-        // get :work bf:language :language statements into the Language file.
-        // Otherwise need a filter in the Work query.
-        DEDUPERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_HELD_ITEM, BfHeldItemDeduper.class);
@@ -59,14 +53,6 @@ public class ResourceDeduper extends RdfProcessor {
         DEDUPERS_BY_TYPE.put(BfType.BF_TEMPORAL,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_TOPIC,  BfTopicDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkDeduper.class); 
-        
-        // Don't just return the keySet directly, since (1) it's backed by the
-        // map, and (2) since keySet() returns a Set, it's opaque to the caller
-        // that the set is ordered (and backed by the map).
-        Iterator<BfType> it = DEDUPERS_BY_TYPE.keySet().iterator();
-        while (it.hasNext()) {
-            TYPES_TO_DEDUPE.add(it.next());
-        }
     }
 
     private static final String REMAINDER_FILENAME = "other";
@@ -112,9 +98,6 @@ public class ResourceDeduper extends RdfProcessor {
         return dedupers;
     }
     
-    protected static List<BfType> getTypesToDedupe() {
-        return TYPES_TO_DEDUPE;
-    }
     
     protected static String getRemainderFilename() {
         return REMAINDER_FILENAME;
