@@ -52,25 +52,14 @@ public class BfLanguageDeduper extends BfResourceDeduper {
 
             String localLangUri = soln.getResource("lang").getURI();
             
-            // Get an external URI for this Language, if there is one. We will 
-            // replace local language URIs with it throughout the data. We will
-            // also use this external URI as the key for identity matching. If
-            // it doesn't exist, we use the literal object of bf:languageOfPart.
-            String externalLangUri = getExternalLangUri(soln);
-            
             // Get key for identity matching.
-            String key = getKey(externalLangUri, soln);
+            String key = getKey(soln);
             
             // Without a key there's nothing to dedupe on.
             if (key == null) {
                 LOGGER.debug("No key for " + localLangUri + "; can't dedupe");
                 continue;
             }
-            
-            // The external Language URI, if there is one,  will be the 
-            // replacement URI.      
-            String replacementUri = 
-                    externalLangUri != null ? externalLangUri : localLangUri;
 
             if (uniqueLangs.containsKey(key)) {
                 
@@ -85,12 +74,10 @@ public class BfLanguageDeduper extends BfResourceDeduper {
                 uniqueLangUris.put(localLangUri, uniqueLangUri);
 
             } else {
-                // We haven't seen this Topic before
+                // We haven't seen this Language before
                 LOGGER.debug("New topic: " + localLangUri);
-                // For Languages, we're substituting the local URI with an
-                // external URI, if it exists.
-                uniqueLangUris.put(localLangUri, replacementUri);
-                uniqueLangs.put(key, replacementUri);
+                uniqueLangUris.put(localLangUri, localLangUri);
+                uniqueLangs.put(key, localLangUri);
             }
         }
         
@@ -136,30 +123,21 @@ public class BfLanguageDeduper extends BfResourceDeduper {
 
     }
     
-    /**
-     * Return the Language URI. Construct the URI from an external source, if  
-     * there is one; otherwise use the local URI from the RDF.
-     * @param soln
-     * @return Language URI string
-     */   
-    private String getExternalLangUri(QuerySolution soln) {
-     
+    
+    @Override
+    protected String getKey(QuerySolution soln) {
+        
+        // If there's a URI as the object of bf:languageOfPartUri, use it as
+        // the key.
+        // NB We don't replace the local lang URI with the external one, as for
+        // topics, because then we lose the link between the Work and the 
+        // Language. The replacement will occur during Bibframe conversion
+        // instead.
         Resource externalLang = soln.getResource("externalLang");
         if (externalLang != null) {
             return externalLang.getURI();
         }
         
-        LOGGER.debug("No external Language URI found");
-        return null;
-    }
-    
-    private String getKey(String externalLangUri, QuerySolution soln) {
-        
-        // If there's an external Language URI, use that as the key.
-        if (externalLangUri != null) {
-            return externalLangUri;
-        }
-
         // Otherwise derive the key from the literal value of bf:languageOfPart 
         Literal langLiteral = soln.getLiteral("langName");
         if (langLiteral != null) {
