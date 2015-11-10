@@ -1,11 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -17,7 +14,6 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfLanguageDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;

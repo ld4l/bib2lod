@@ -16,13 +16,6 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfLanguageDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
-import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
 
 public class TypeSplitter extends RdfProcessor {
 
