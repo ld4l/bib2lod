@@ -18,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
@@ -25,6 +26,8 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTemporalConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
@@ -47,7 +50,7 @@ public class BibframeConverter extends RdfProcessor {
                 BfHeldItemConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
 //                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
 //                BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageConverter.class);
@@ -59,8 +62,8 @@ public class BibframeConverter extends RdfProcessor {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfTemporalConverter.class);
 //      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
 //                BfResourceConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
