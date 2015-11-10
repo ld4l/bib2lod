@@ -26,6 +26,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             new HashMap<BfProperty, Ld4lProperty>();
     static {
         PROPERTY_MAP.put(BfProperty.BF_LANGUAGE, Ld4lProperty.LANGUAGE);
+        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE_OF_PART, Ld4lProperty.LABEL);
     }
 
 //    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
@@ -74,8 +75,8 @@ public class BfLanguageConverter extends BfResourceConverter {
         Property resourcePartProp = BfProperty.BF_RESOURCE_PART.property();
         Statement resourcePartStmt = subject.getProperty(resourcePartProp);
         if (resourcePartStmt != null) {  
-            if (resourcePartStmt.getLiteral().getLexicalForm()
-                    .equals("original")) {
+            String value = resourcePartStmt.getLiteral().getLexicalForm();
+            if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
                 StmtIterator langStmts = 
                         model.listStatements(null, langProp, subject);
@@ -91,6 +92,10 @@ public class BfLanguageConverter extends BfResourceConverter {
                     model.add(work, originalLangProp, subject);
                     model.remove(langStmt);
                 }      
+            } else {
+                // Not sure what values other than "original" could occur; for 
+                // now log them and remove them.  
+                LOGGER.info("Found value of bf:resourcePart " + value);
             }
             model.remove(resourcePartStmt);
         }
