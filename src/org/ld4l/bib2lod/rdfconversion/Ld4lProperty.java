@@ -23,7 +23,9 @@ public enum Ld4lProperty {
     IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     IS_HOLDING_FOR("isHoldingFor"),
     LABEL(OntNamespace.RDFS, "label"),
+    LANGUAGE(OntNamespace.DCTERMS, "language"),
     NAME(OntNamespace.FOAF, "name"),
+    ORIGINAL_LANGUAGE("hasOriginalLanguage"),
     SUBJECT(OntNamespace.DCTERMS, "subject");
     
 

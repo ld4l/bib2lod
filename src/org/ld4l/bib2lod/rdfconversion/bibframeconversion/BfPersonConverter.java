@@ -49,13 +49,11 @@ public class BfPersonConverter extends BfResourceConverter {
         super(subject);        
     }
     
-    @Override
-    public Model convert() {       
-        assignType();         
+
+    @Override 
+    protected void convertProperties() {
         convertBfLabel();
-        convertProperties();
-        retractProperties();                   
-        return subject.getModel();
+        super.convertProperties();
     }
 
     /** 

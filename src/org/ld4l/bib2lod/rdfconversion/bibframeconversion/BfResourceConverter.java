@@ -47,9 +47,11 @@ public abstract class BfResourceConverter {
      * Default conversion method. Subclasses may override. 
      */
     public Model convert() {       
+        
         assignType();        
         convertProperties();
-        retractProperties();    
+        retractProperties();  
+        changePropertyNamespaces();
         return subject.getModel();
     }
 

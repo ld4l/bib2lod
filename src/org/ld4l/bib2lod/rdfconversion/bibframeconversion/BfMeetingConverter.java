@@ -63,19 +63,12 @@ public class BfMeetingConverter extends BfResourceConverter {
     protected List<BfProperty> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }
-
+    
     @Override
-    public Model convert() {  
-
-        assignType();  
-        // NB May move to BfResourceConverter
+    protected void convertProperties() {
         convertSystemNumber();
         convertConferenceName();
-        convertProperties();
-        retractProperties(); 
-        // Doesn't seem to be needed here
-        changePropertyNamespaces();
-        return subject.getModel();
+        super.convertProperties();        
     }
     
     private void convertSystemNumber() {

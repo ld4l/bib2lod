@@ -203,9 +203,9 @@ public class TypeSplitter extends RdfProcessor {
                 // E.g., :work bf:language 
                 // <http://id.loc.gov/vocabulary/languages/eng> .
                 // May not be needed now, since we don't do anything with those
-                // statements; however, if/when we do lookups against a
-                // vocabulary like lingvo, it may be useful to have then all in
-                // a single file.
+                // statements. However, if/when we do lookups against a
+                // different external vocabulary - ld4l recommends lingvo - 
+                // it may be useful to have them all together in a single file.
                 + "?work ?p2 ?s1 . "
                 + "?work a " + BfType.BF_WORK.prefixed() + " . "
                 + "?work " + BfProperty.BF_LANGUAGE.prefixed() + " ?s1 . " 

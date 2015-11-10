@@ -70,16 +70,11 @@ public class BfHeldItemConverter extends BfResourceConverter {
     public BfHeldItemConverter(Resource subject) {
         super(subject);
     }
-    
-    @Override 
-    public Model convert() {
 
-        assignType(); 
+    @Override
+    protected void convertProperties() {
         convertShelfMark();
-        convertProperties();
-        retractProperties();
-        changePropertyNamespaces();
-        return subject.getModel();
+        super.convertProperties();
     }
     
     @Override

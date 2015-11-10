@@ -1,9 +1,11 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,17 +18,32 @@ public class BfLanguageConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfLanguageConverter.class);
     
-    private static final Ld4lType NEW_TYPE = Ld4lType.EVENT;
+    private static final Ld4lType NEW_TYPE = Ld4lType.LANGUAGE;
     
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_EVENT_PLACE, Ld4lProperty.HAS_LOCATION);
+        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE, Ld4lProperty.LANGUAGE);
     }
 
-
+    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
+            Arrays.asList(
+                    BfProperty.BF_LANGUAGE_OF_PART_URI
+            );
+    
     public BfLanguageConverter(Resource subject) {
         super(subject);
+    }
+    
+
+    @Override
+    protected void convertProperties() {
+        convertResourcePart();
+        super.convertProperties();
+    }
+    
+    private void convertResourcePart() {
+        
     }
     
     @Override
@@ -41,7 +58,7 @@ public class BfLanguageConverter extends BfResourceConverter {
 
     @Override
     protected List<BfProperty> getPropertiesToRetract() {
-        return null;
+        return PROPERTIES_TO_RETRACT;
     }
     
 }
