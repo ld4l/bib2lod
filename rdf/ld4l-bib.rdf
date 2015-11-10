@@ -481,14 +481,6 @@
         <skos:scopeNote xml:lang="en-us">The domain and range restrictions ensure that a Work is related to a Work and a Title to a Title.</skos:scopeNote>
         <rdfs:comment xml:lang="en-us">Work or Title that is derived from this Work or Title.</rdfs:comment>
         <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/precedes"/>
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://ld4l.org/ontology/bib/Work"/>
-                    <rdf:Description rdf:about="&madsrdf;Title"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
         <rdfs:range>
             <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
@@ -497,6 +489,14 @@
                 </owl:unionOf>
             </owl:Class>
         </rdfs:range>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://ld4l.org/ontology/bib/Work"/>
+                    <rdf:Description rdf:about="&madsrdf;Title"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
     </owl:ObjectProperty>
     
 
@@ -627,6 +627,17 @@
         <rdfs:comment xml:lang="en-us">Place from which the creation of this Work originated.</rdfs:comment>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:range rdf:resource="&prov;Location"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://ld4l.org/ontology/bib/hasOriginalLanguage -->
+
+    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/hasOriginalLanguage">
+        <rdfs:label>has original language</rdfs:label>
+        <rdfs:comment>Designates the original language of a Resource. May be provisional: ultimately the relationship should most likely be between a Work and its translation.</rdfs:comment>
+        <vs:term_status>unstable</vs:term_status>
+        <rdfs:subPropertyOf rdf:resource="&dcterms;language"/>
     </owl:ObjectProperty>
     
 
@@ -2366,13 +2377,6 @@
     ///////////////////////////////////////////////////////////////////////////////////////
      -->
 
-
-    <!-- http://www.w3.org/TR/owl-time/TemporalEntity -->
-    
-    <owl:Class rdf:about="http://www.w3.org/TR/owl-time/TemporalEntity">
-        <rdfs:label xml:lang="en-us">Temporal entity</rdfs:label>
-        <rdfs:comment xml:lang="en-us">A temporal instant or interval.</rdfs:comment>
-    </owl:Class>
     
 
 
@@ -3518,13 +3522,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -3750,13 +3754,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -3835,6 +3839,15 @@
         <rdfs:label xml:lang="en-us">Content as text</rdfs:label>
         <rdfs:subClassOf rdf:resource="&cnt;Content"/>
         <rdfs:comment xml:lang="en-us">The text content of an Annotation.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://www.w3.org/TR/owl-time/TemporalEntity -->
+
+    <owl:Class rdf:about="http://www.w3.org/TR/owl-time/TemporalEntity">
+        <rdfs:label xml:lang="en-us">Temporal entity</rdfs:label>
+        <rdfs:comment xml:lang="en-us">A temporal instant or interval.</rdfs:comment>
     </owl:Class>
     
 
