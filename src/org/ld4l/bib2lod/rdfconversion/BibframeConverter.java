@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.graph.Node;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -13,6 +12,7 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -128,20 +128,22 @@ public class BibframeConverter extends RdfProcessor {
         Model inputModel = readModelFromFile(file);  
         Model outputModel = ModelFactory.createDefaultModel();
         
+        //BfType typeForFile = BfType.typeForFilename(filename);
+        
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
         while (subjects.hasNext()) {
 
             Resource inputSubject = subjects.nextResource();
+
+            //StmtIterator typeStmts = inputSubject.listProperties(RDF.type); 
             
             // Create a model of statements related to this subject
             Model modelForSubject = ModelFactory.createDefaultModel();
             
             // Start with statements of which this subject is the subject
-            modelForSubject.add(
-                    inputModel.listStatements(inputSubject, null, 
-                            (RDFNode) null));
-            
+            modelForSubject.add(inputSubject.listProperties());
+
             // Now add statements with the object of the previous statements as
             // subject.
             NodeIterator nodes = modelForSubject.listObjects();
@@ -154,8 +156,7 @@ public class BibframeConverter extends RdfProcessor {
                             (Resource) node, null, (RDFNode) null));
                 }
             }
-
-            
+       
             // NB At this point, subject.getModel() is the inputModel, not the
             // modelForSubject. Get the subject of the subjectModel instead.            
             Resource subject = 
