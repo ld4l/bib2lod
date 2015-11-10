@@ -41,7 +41,7 @@ public abstract class BfResourceConverter {
      */
     protected void convert() {
         
-        assignType();                      
+        assignType();   
         convertProperties();
         retractProperties();  
         changePropertyNamespaces();       

@@ -27,6 +27,7 @@ public enum BfProperty {
     BF_LANGUAGE("language"),
     BF_LANGUAGE_OF_PART("languageOfPart"), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
+    BF_RESOURCE_PART("resourcePart"),
     BF_SHELF_MARK("shelfMark"),
     BF_SHELF_MARK_DDC("shelfMarkDdc"),
     BF_SHELF_MARK_LCC("shelfMarkLcc"),

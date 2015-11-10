@@ -152,7 +152,8 @@ public class BibframeConverter extends RdfProcessor {
 
             if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
 
-                LOGGER.debug("Converting subject " + inputSubject.getURI());
+                LOGGER.debug("Converting " + typeForFile + " subject " 
+                        + inputSubject.getURI());
                 
                 // Create a model of statements related to this subject
                 Model modelForSubject = ModelFactory.createDefaultModel();

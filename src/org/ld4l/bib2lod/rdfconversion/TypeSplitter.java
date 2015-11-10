@@ -205,7 +205,8 @@ public class TypeSplitter extends RdfProcessor {
 
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
-                + "?work ?p2 ?s1 . } "
+                + "?work ?p2 ?s1 . "
+                + "?work ?p2 ?s2 . } "
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -222,9 +223,9 @@ public class TypeSplitter extends RdfProcessor {
                 // statements. However, if/when we do lookups against a
                 // different external vocabulary - ld4l recommends lingvo - 
                 // it may be useful to have them all together in a single file.
-                + "?work ?p2 ?s1 . "
-                + "?work a " + BfType.BF_WORK.prefixed() + " . "
-                + "?work " + BfProperty.BF_LANGUAGE.prefixed() + " ?s1 . " 
+//                + "?work ?p2 ?s2 . "
+//                + "?work a " + BfType.BF_WORK.prefixed() + " . "
+//                + "?work " + BfProperty.BF_LANGUAGE.prefixed() + " ?s2 . " 
                 + "} }"                
         );
         
@@ -349,16 +350,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_TITLE.prefixed()
-//                + "} UNION { "
-//                // Need to put Language statements with Works rather than in a
-//                // separate file, in order to capture statements
-//                // :language bf:resourcePart <string literal>
-//                // which designate the relationship of the Language to the Work.
-//                + "?s1 " + BfProperty.BF_LANGUAGE.prefixed() + " ?o1 . "
-//                + "?s1 a ?type . "
-//                + "?o1 ?p2 ?o2 . "
-//                + "?o1 a " + BfType.BF_LANGUAGE.prefixed()                
+                + "?o1 a " + BfType.BF_TITLE.prefixed()              
                 + "} UNION { "
                 + "?s1 " + BfProperty.BF_HAS_ANNOTATION.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
