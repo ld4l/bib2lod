@@ -40,7 +40,9 @@ public class ProcessController {
         loadOntModels();
     }
     
-    // TODO So far these are not used. Delete if never used.
+    // TODO So far these are not used. Why aren't we using this instead of the
+    // enums for ontology types and properties? That might be a more stream-
+    // lined solution.
     private void loadOntModels() {
 
         OntDocumentManager mgr = new OntDocumentManager();
