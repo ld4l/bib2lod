@@ -41,7 +41,7 @@ public class BfLanguageConverter extends BfResourceConverter {
         convertProperties();
         retractProperties();  
         assignExternalUri();
-        changePropertyNamespaces();   
+        changeNamespace();   
         LOGGER.debug(model);
     }
 
