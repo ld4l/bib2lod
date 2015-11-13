@@ -17,24 +17,24 @@ public enum BfType {
     // Maybe create different type enums, one for bibframe, one for madsrdf
     // or miscellaneous, etc.? For now, no need.
     
-    BF_ANNOTATION("Annotation"),
-    BF_CLASSIFICATION("Classification"),
-    BF_EVENT("Event"),
-    BF_FAMILY("Family"),
-    BF_HELD_ITEM("HeldItem"),
-    BF_IDENTIFIER("Identifier"),
-    BF_INSTANCE("Instance"),    
-    BF_JURISDICTION("Jurisdiction"),  
-    BF_LANGUAGE("Language"),
-    BF_MEETING("Meeting"),
-    BF_ORGANIZATION("Organization"),                        
-    BF_PERSON("Person"),
+    BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
+    BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
+    BF_EVENT("Event", Ld4lType.EVENT),
+    BF_FAMILY("Family", Ld4lType.FAMILY),
+    BF_HELD_ITEM("HeldItem", Ld4lType.ITEM),
+    BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER),    
+    BF_INSTANCE("Instance", Ld4lType.INSTANCE),    
+    BF_JURISDICTION("Jurisdiction", Ld4lType.JURISDICTION),  
+    BF_LANGUAGE("Language", Ld4lType.LANGUAGE),
+    BF_MEETING("Meeting", Ld4lType.MEETING),
+    BF_ORGANIZATION("Organization", Ld4lType.ORGANIZATION),                        
+    BF_PERSON("Person", Ld4lType.PERSON),
     BF_PROVIDER("Provider"),
-    BF_PLACE("Place"),
-    BF_TEMPORAL("Temporal"),
-    BF_TITLE("Title"),
-    BF_TOPIC("Topic"),  
-    BF_WORK("Work"),
+    BF_PLACE("Place", Ld4lType.PLACE),
+    BF_TEMPORAL("Temporal", Ld4lType.TIME),
+    BF_TITLE("Title", Ld4lType.TITLE),
+    BF_TOPIC("Topic", Ld4lType.TOPIC),  
+    BF_WORK("Work", Ld4lType.WORK),
     
     MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
     MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
@@ -48,15 +48,28 @@ public enum BfType {
     private final String prefixed;
     private final String sparqlUri;
     private final Resource ontClass;
+    private final Ld4lType ld4lType;
 
     BfType(String localname) {
-        // Default namespace for this enum type
-        this(OntNamespace.BIBFRAME, localname);
+        // Assign default namespace to this enum value
+        // No corresponding Ld4lType for this enum value
+        this(OntNamespace.BIBFRAME, localname, null);
     }
     
     BfType(OntNamespace namespace, String localname) {
+        // No corresponding Ld4lType for this enum value
+        this(namespace, localname, null);
+    }
+    
+    BfType(String localname, Ld4lType ld4lType) {
+        // Assign default namespace to this enum value
+        this(OntNamespace.BIBFRAME, localname, ld4lType);
+    }
+    
+    BfType(OntNamespace namespace, String localname, Ld4lType ld4lType) {
         this.namespace = namespace;
         this.localname = localname;
+        this.ld4lType = ld4lType;
         
         // Save as instance variables so don't recompute on each call.
         this.uri = namespace.uri() + localname;
@@ -103,10 +116,15 @@ public enum BfType {
    
     private static final Map<String, BfType> LOOKUP_BY_FILENAME = 
             new HashMap<String, BfType>();
+    private static final Map<BfType, Ld4lType> TYPE_MAP = 
+            new HashMap<BfType, Ld4lType>();
     
     static {
-        for (BfType type : BfType.values()) {
-            LOOKUP_BY_FILENAME.put(type.filename, type);
+        for (BfType bfType : BfType.values()) {
+            LOOKUP_BY_FILENAME.put(bfType.filename, bfType);
+            if (bfType.ld4lType != null) {
+                TYPE_MAP.put(bfType, bfType.ld4lType);
+            }
         }
     }
     
@@ -129,6 +147,14 @@ public enum BfType {
     
     public Resource ontClass() {
         return ontClass;
+    }
+    
+    public Ld4lType ld4lType() {
+        return ld4lType;
+    }
+    
+    public static Map<BfType, Ld4lType> typeMap() {
+        return TYPE_MAP;
     }
     
 }

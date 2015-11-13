@@ -17,36 +17,18 @@ public class BfTemporalConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTemporalConverter.class);
     
-    private static final Ld4lType NEW_TYPE = Ld4lType.TIME;
     
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_HAS_AUTHORITY, 
-                Ld4lProperty.IDENTIFIED_BY_AUTHORITY);
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.LABEL);
     }
 
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            Arrays.asList(
-                    BfProperty.BF_AUTHORITY_SOURCE,
-                    BfProperty.BF_AUTHORIZED_ACCESS_POINT
-            );
-    
-
-    @Override
-    protected Ld4lType getNewType() {
-        return NEW_TYPE;
-    }
 
     @Override
     protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
         return PROPERTY_MAP;
     }
     
-    @Override
-    protected List<BfProperty> getPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
-    }
 
 }

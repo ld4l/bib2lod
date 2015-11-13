@@ -13,6 +13,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 /* TODO Much of this code is repeated in DeduperFactory. Combine if possible.
  * Maybe implement an abstract parent class?
  */
+//////////////////// NOT USED //////////////////////////////////////////////////
 public class DeduperFactory {
 
     private static final Logger LOGGER = 

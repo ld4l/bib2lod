@@ -8,6 +8,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
@@ -16,7 +17,7 @@ public class BfPlaceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPlaceConverter.class);
     
-    private static final Ld4lType NEW_TYPE = Ld4lType.PLACE;
+
     
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
@@ -24,19 +25,11 @@ public class BfPlaceConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
       
-    @Override
-    protected Ld4lType getNewType() {
-        return NEW_TYPE;
-    }
 
     @Override
     protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
         return PROPERTY_MAP;
     }
-    
-    @Override
-    protected List<BfProperty> getPropertiesToRetract() {
-        return null;
-    }
+
 
 }

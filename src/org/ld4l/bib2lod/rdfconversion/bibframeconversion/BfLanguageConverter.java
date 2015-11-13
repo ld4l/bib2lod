@@ -12,6 +12,7 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
@@ -20,29 +21,21 @@ public class BfLanguageConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfLanguageConverter.class);
     
-    private static final Ld4lType NEW_TYPE = Ld4lType.LANGUAGE;
-    
+
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE, Ld4lProperty.LANGUAGE);
         PROPERTY_MAP.put(BfProperty.BF_LANGUAGE_OF_PART, Ld4lProperty.LABEL);
     }
-
-//    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-//            Arrays.asList(
-//                    BfProperty.BF_LANGUAGE_OF_PART_URI
-//            );
-
+ 
     
     @Override
-    protected void convert() {
-        assignType(); 
-        convertProperties();
+    protected void convertProperties() {
+        convertOriginalLanguage();
+        mapProperties();
         retractProperties();  
         assignExternalUri();
-        changeNamespace();   
-        LOGGER.debug(model);
+        convertNamespace();   
     }
 
     /**
@@ -64,11 +57,6 @@ public class BfLanguageConverter extends BfResourceConverter {
         LOGGER.debug(model);
     }
     
-    @Override
-    protected void convertProperties() {
-        convertOriginalLanguage();
-        super.convertProperties();
-    }
     
     private void convertOriginalLanguage() {
         
@@ -86,7 +74,7 @@ public class BfLanguageConverter extends BfResourceConverter {
                     Statement langStmt = langStmts.nextStatement();
                     Resource work = langStmt.getSubject();
                     Property originalLangProp = 
-                            Ld4lProperty.ORIGINAL_LANGUAGE.property();
+                            Ld4lProperty.HAS_ORIGINAL_LANGUAGE.property();
                     // OK to alter model here, since we're not continuing the 
                     // iteration
                     model.add(work, originalLangProp, subject);
@@ -101,19 +89,11 @@ public class BfLanguageConverter extends BfResourceConverter {
         }
     }
     
-    @Override
-    protected Ld4lType getNewType() {
-        return NEW_TYPE;
-    }
 
     @Override
     protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
         return PROPERTY_MAP;
     }
 
-    @Override
-    protected List<BfProperty> getPropertiesToRetract() {
-        return null; //PROPERTIES_TO_RETRACT;
-    }
     
 }

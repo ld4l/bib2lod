@@ -1,5 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
 
@@ -15,16 +18,16 @@ public enum BfProperty {
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
-    BF_EVENT_PLACE("eventPlace"),
-    BF_HAS_ANNOTATION("hasAnnotation"),
-    BF_HAS_AUTHORITY("hasAuthority"),
-    BF_HOLDING_FOR("holdingFor"),
+    BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
+    BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
+    BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
+    BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR),
     BF_IDENTIFIER("identifier"),
     BF_IDENTIFIER_SCHEME("identifierScheme"),
     BF_IDENTIFIER_VALUE("identifierValue"),
     BF_ITEM_ID("itemId"),
-    BF_LABEL("label"),
-    BF_LANGUAGE("language"),
+    BF_LABEL("label", Ld4lProperty.LABEL),
+    BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
     BF_LANGUAGE_OF_PART("languageOfPart"), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
     BF_RESOURCE_PART("resourcePart"),
@@ -34,6 +37,7 @@ public enum BfProperty {
     BF_SHELF_MARK_NLM("shelfMarkNlm"),
     BF_SHELF_MARK_SCHEME("shelfMarkScheme"),
     BF_SHELF_MARK_UDC("shelfMarkUdc"),
+    BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
     BF_SYSTEM_NUMBER("systemNumber"),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
@@ -45,17 +49,32 @@ public enum BfProperty {
     private final String uri;
     private final String prefixed;
     private final Property property;
+    private final Ld4lProperty ld4lProperty;
     
 
     BfProperty(String localname) {
-        // Default namespace for this enum type
-        this(OntNamespace.BIBFRAME, localname);
+        // Assign default namespace for this enum value
+        // No corresponding Ld4lProperty for this enum value
+        this(OntNamespace.BIBFRAME, localname, null);
+    }
+
+    BfProperty(OntNamespace namespace, String localname) {
+        // Assign default namespace to this enum value
+        // No corresponding Ld4lProperty for this enum value
+        this(namespace, localname, null);
     }
     
-    BfProperty(OntNamespace namespace, String localname) {
+    BfProperty(String localname, Ld4lProperty ld4lProperty) {
+        // Assign default namespace to this enum value
+        this(OntNamespace.BIBFRAME, localname, ld4lProperty);
+    }
+    
+    BfProperty(OntNamespace namespace, String localname, Ld4lProperty ld4lProperty) {
         // Or should this be a Namespace?
         this.namespace = namespace;
         this.localname = localname;
+        this.ld4lProperty = ld4lProperty;
+        
         this.uri = namespace.uri() + localname;
         
         String prefix = this.namespace.prefix();
@@ -93,6 +112,25 @@ public enum BfProperty {
     
     public Property property() {
        return property;
+    }
+    
+    public Ld4lProperty ld4lProperty() {
+        return ld4lProperty;
+    }
+    
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
+            new HashMap<BfProperty, Ld4lProperty>();
+    
+    static {
+        for (BfProperty bfProp : BfProperty.values()) {
+            if (bfProp.ld4lProperty != null) {
+                PROPERTY_MAP.put(bfProp, bfProp.ld4lProperty);
+            }
+        }
+    }
+    
+    public static Map<BfProperty, Ld4lProperty> propertyMap() {
+        return PROPERTY_MAP;
     }
     
 }

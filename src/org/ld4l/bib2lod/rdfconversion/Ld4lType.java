@@ -16,13 +16,16 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lType {
     
+    ANNOTATION(OntNamespace.OA, "Annotation"),
     CLASSIFICATION("Classification"),
     CONFERENCE("Conference"),
     DDC_SHELF_MARK("DdcShelfMark"),
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY("Family"),
     IDENTIFIER("Identifier"),
+    INSTANCE("Instance"),
     ITEM("Item"),
+    JURISDICTION("Jurisdiction"),
     LANGUAGE(OntNamespace.LINGVO, "Lingvo"),
     LCC_SHELF_MARK("LccShelfMark"),
     MEETING("Meeting"),
@@ -32,7 +35,10 @@ public enum Ld4lType {
     PLACE(OntNamespace.PROV, "Location"),
     SHELF_MARK("ShelfMark"),
     TIME(OntNamespace.TIME, "TemporalEntity"),
-    UDC_SHELF_MARK("UdcShelfMark");
+    TITLE(OntNamespace.MADSRDF, "Title"),
+    TOPIC("Topic"),
+    UDC_SHELF_MARK("UdcShelfMark"),
+    WORK("Work");
     
 
     private final OntNamespace namespace;

@@ -15,6 +15,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
@@ -25,14 +26,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);
     
-    private static final Ld4lType NEW_TYPE = Ld4lType.ITEM;
-    
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-        PROPERTY_MAP.put(BfProperty.BF_HOLDING_FOR, 
-                Ld4lProperty.IS_HOLDING_FOR);
-    }
 
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
@@ -73,15 +66,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
         super.convertProperties();
     }
     
-    @Override
-    protected Ld4lType getNewType() {
-        return NEW_TYPE;
-    }
-
-    @Override
-    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
-        return PROPERTY_MAP;
-    }
 
     @Override
     protected List<BfProperty> getPropertiesToRetract() {
@@ -141,8 +125,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
      * bfProperty; otherwise, return the original bf:shelfMark property.
      */
     private BfProperty getBfPropertyFromScheme(BfProperty shelfMarkProp) {
-            
-    
+             
         Property shelfMarkSchemeProp = 
                 BfProperty.BF_SHELF_MARK_SCHEME.property();
         Statement schemeStmt = subject.getProperty(shelfMarkSchemeProp);

@@ -8,6 +8,7 @@ public enum OntNamespace {
     // Assign prefixes here rather than getting from the models, since they may
     // not be provided. We're using these just to create filenames, not for
     // anything significant about the ontologies themselves.
+    OA("http://www.w3.org/ns/oa#", "oa"),
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
     LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
     LEGACY("http://ld4l.org/ontology/bib/legacy", "legacy"),

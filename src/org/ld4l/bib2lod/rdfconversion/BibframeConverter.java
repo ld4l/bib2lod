@@ -15,7 +15,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
@@ -44,7 +43,7 @@ public class BibframeConverter extends RdfProcessor {
     static {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
 //                BfResourceConverter.class);    
-        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfFamilyConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
@@ -142,9 +141,9 @@ public class BibframeConverter extends RdfProcessor {
         }
         
         Model outputModel = ModelFactory.createDefaultModel();
-        
-        
+              
         LOGGER.debug(inputModel.toString());
+        
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
         while (subjects.hasNext()) {
@@ -191,17 +190,14 @@ public class BibframeConverter extends RdfProcessor {
                         modelForSubject.getResource(inputSubject.getURI());
 
                 outputModel.add(converter.convert(subject));
-
                 
             } else {
                 LOGGER.debug("Skipping subject " + inputSubject.getURI()
-                        + " since it's not of type " + typeForFile);
-                        
+                        + " since it's not of type " + typeForFile);                        
             }
         }
 
-        writeModelToFile(outputModel, outputFile);
-        
+        writeModelToFile(outputModel, outputFile);       
     }
     
     
