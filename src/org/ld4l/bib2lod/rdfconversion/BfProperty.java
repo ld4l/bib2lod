@@ -69,8 +69,10 @@ public enum BfProperty {
         this(OntNamespace.BIBFRAME, localname, ld4lProperty);
     }
     
-    BfProperty(OntNamespace namespace, String localname, Ld4lProperty ld4lProperty) {
-        // Or should this be a Namespace?
+    BfProperty(OntNamespace namespace, String localname, 
+            Ld4lProperty ld4lProperty) {
+        
+        // Or use a Namespace?
         this.namespace = namespace;
         this.localname = localname;
         this.ld4lProperty = ld4lProperty;
