@@ -130,7 +130,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 BfProperty.BF_SHELF_MARK_SCHEME.property();
         Statement schemeStmt = subject.getProperty(shelfMarkSchemeProp);
         if (schemeStmt != null) {
-            String schemeValue = schemeStmt.getLiteral().getLexicalForm();
+            String schemeValue = schemeStmt.getString();
             for (Map.Entry<BfProperty, Vocabulary> vocabEntry 
                     : SHELF_MARK_VOCABS.entrySet()) {
                 // Placeholder code: we don't know what the scheme strings will

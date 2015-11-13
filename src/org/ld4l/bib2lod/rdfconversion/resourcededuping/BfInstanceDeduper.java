@@ -172,19 +172,6 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         }
         return null;
     }
-    
-//    private String getIdentifierKey(QuerySolution soln) {
-//        
-//        // Dedupe Instance Identifiers on scheme and value
-//        Resource id = soln.getResource("id");
-//        if (id != null) {
-//            Resource scheme = soln.getResource("idScheme");
-//            String schemeUri = scheme == null ? "" : scheme.getURI();
-//            Literal valueLiteral = soln.getLiteral("idValue");
-//            String value = valueLiteral == null ? "" : valueLiteral.getLexicalForm();
-//            return schemeUri + value;
-//        }
-//        return null;
-//    }
+
 
 }

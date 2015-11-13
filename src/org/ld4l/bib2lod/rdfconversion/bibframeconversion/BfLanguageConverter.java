@@ -63,7 +63,7 @@ public class BfLanguageConverter extends BfResourceConverter {
         Property resourcePartProp = BfProperty.BF_RESOURCE_PART.property();
         Statement resourcePartStmt = subject.getProperty(resourcePartProp);
         if (resourcePartStmt != null) {  
-            String value = resourcePartStmt.getLiteral().getLexicalForm();
+            String value = resourcePartStmt.getString();
             if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
                 StmtIterator langStmts = 

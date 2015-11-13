@@ -143,7 +143,8 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
         for (String k : keys) {
             Literal lit = soln.getLiteral(k);
             if (lit != null) {
-                LOGGER.debug("Deduping on key type " + k + " with value " + lit.getLexicalForm());          
+                LOGGER.debug("Deduping on key type " + k + " with value " 
+                        + lit.getLexicalForm());          
                 return lit.getLexicalForm();
             } else {
                 LOGGER.debug("No value for " + k);

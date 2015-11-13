@@ -50,8 +50,7 @@ public class BfPersonConverter extends BfResourceConverter {
         Property property = BfProperty.BF_LABEL.property();
         Statement stmt = subject.getProperty(property);
         if (stmt != null) {
-            Literal literal = stmt.getLiteral();
-            String label = literal.getLexicalForm();
+            String label = stmt.getString();
             Map<Ld4lProperty, String> labelProps = parseLabel(label);
             for (Map.Entry<Ld4lProperty, String> entry 
                     : labelProps.entrySet()) {
