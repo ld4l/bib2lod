@@ -45,26 +45,18 @@ public class BfLanguageConverter extends BfResourceConverter {
      */
     private void assignExternalUri() {
         
-        LOGGER.debug("In assignExternalUri()");
-        RdfProcessor.printModel(model, Level.DEBUG);
-        LOGGER.debug(subject.getURI());
         Property property = BfProperty.BF_LANGUAGE_OF_PART_URI.property();
         Resource object = subject.getPropertyResourceValue(property);
         if (object != null) {
-            LOGGER.debug(object.getURI());
             subject = ResourceUtils.renameResource(subject, object.getURI());
             subject.removeAll(property);
         }
 
-        LOGGER.debug("At end of assignExternalUri()");
-        RdfProcessor.printModel(model, Level.DEBUG);
     }
     
     
     private void convertOriginalLanguage() {
-        
-        LOGGER.debug("In convertOriginalLanguage");
-        RdfProcessor.printModel(model, Level.DEBUG);        
+      
         Property resourcePartProp = BfProperty.BF_RESOURCE_PART.property();
         Statement resourcePartStmt = subject.getProperty(resourcePartProp);
         if (resourcePartStmt != null) {  
