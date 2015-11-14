@@ -50,18 +50,15 @@ public class BfMeetingConverter extends BfResourceConverter {
     private void convertSystemNumber() {
         
         Property prop = BfProperty.BF_SYSTEM_NUMBER.property();
-        
-        Model assertions = ModelFactory.createDefaultModel();
-        
+              
         StmtIterator stmts = subject.listProperties(prop);
         while (stmts.hasNext()) {
             Statement statement = stmts.nextStatement();
             Resource object = statement.getResource();
+            // Add to assertions model rather than main model, so the
+            // statement doesn't get reprocessed.
             assertions.add(object, RDF.type, Ld4lType.IDENTIFIER.ontClass());
-        }
-        
-        subject.getModel().add(assertions);
-        
+        }        
     }
     
     private void convertConferenceName() {
@@ -69,7 +66,9 @@ public class BfMeetingConverter extends BfResourceConverter {
         StmtIterator stmts = model.listStatements(null, RDF.type, 
                 BfType.MADSRDF_CONFERENCE_NAME.ontClass());
         if (stmts.hasNext()) { 
-            subject.addProperty(RDF.type, Ld4lType.CONFERENCE.ontClass());
+            // Add to assertions model rather than main model, so the
+            // statement doesn't get reprocessed.
+            assertions.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
             // Not retracting the original statement or any other statements
             // about the madsrdf:Authority.
         }

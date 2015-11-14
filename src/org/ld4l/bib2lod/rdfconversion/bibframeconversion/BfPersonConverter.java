@@ -1,23 +1,16 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.Arrays;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfPersonConverter extends BfResourceConverter {
 
@@ -57,7 +50,9 @@ public class BfPersonConverter extends BfResourceConverter {
                 Ld4lProperty key = entry.getKey();
                 String value = entry.getValue();
                 if (value != null) {
-                    subject.addLiteral(key.property(), value);
+                    // Add to assertions model rather than main model, so the
+                    // statement doesn't get reprocessed.
+                    assertions.add(subject, key.property(), value);
                 }
             }
         }

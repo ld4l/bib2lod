@@ -56,6 +56,16 @@ public abstract class BfResourceConverter {
 
     /* 
      * Default conversion method. Subclasses may override.
+     * 
+     * The general strategy is to add new statements to the assertions model,
+     * which then get added to the model after processing all conversions. In
+     * some subclasses, new statements need to be added to the model immediately
+     * so that they can be reprocessed. For example, in BfLanguageConverter, 
+     * new statements must be reprocessed to replace local language URIs with
+     * external ones.  
+     * Retractions are removed immediately, so we don't need a retractions 
+     * model. (We could change this in order to make the strategy uniform, but
+     * the results will not be affected.)
      */
     protected void convert() {
         
