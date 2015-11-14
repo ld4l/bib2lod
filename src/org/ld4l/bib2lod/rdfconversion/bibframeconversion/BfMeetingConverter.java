@@ -25,27 +25,28 @@ public class BfMeetingConverter extends BfResourceConverter {
             LogManager.getLogger(BfMeetingConverter.class);
    
     
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
+    private static final Map<Property, Property> PROPERTY_MAP =
+            new HashMap<Property, Property>();
     static {
         // TODO Parse label into foaf:name, date, place; postponing due to
         // complexity.
-        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.LABEL);
-        PROPERTY_MAP.put(BfProperty.BF_SYSTEM_NUMBER, 
-                Ld4lProperty.IDENTIFIED_BY);
+        PROPERTY_MAP.put(BfProperty.BF_LABEL.property(), 
+                Ld4lProperty.LABEL.property());
+        PROPERTY_MAP.put(BfProperty.BF_SYSTEM_NUMBER.property(), 
+                Ld4lProperty.IDENTIFIED_BY.property());
     }
     
 
     @Override
-    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
+    protected Map<Property, Property> getPropertyMap() {
         return PROPERTY_MAP;
     }
 
     @Override
-    protected void convertProperties() {
+    protected void convert() {
         convertSystemNumber();
         convertConferenceName();
-        super.convertProperties();        
+        super.convert();        
     }
     
     private void convertSystemNumber() {

@@ -120,18 +120,19 @@ public enum BfProperty {
         return ld4lProperty;
     }
     
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
-            new HashMap<BfProperty, Ld4lProperty>();
+    private static final Map<Property, Property> PROPERTY_MAP = 
+            new HashMap<Property, Property>();
     
     static {
         for (BfProperty bfProp : BfProperty.values()) {
             if (bfProp.ld4lProperty != null) {
-                PROPERTY_MAP.put(bfProp, bfProp.ld4lProperty);
+                PROPERTY_MAP.put(bfProp.property, 
+                        bfProp.ld4lProperty.property());
             }
         }
     }
     
-    public static Map<BfProperty, Ld4lProperty> propertyMap() {
+    public static Map<Property, Property> propertyMap() {
         return PROPERTY_MAP;
     }
     

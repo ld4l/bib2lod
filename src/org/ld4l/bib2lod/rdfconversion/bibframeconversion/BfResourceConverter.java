@@ -30,12 +30,15 @@ public abstract class BfResourceConverter {
     
     protected Resource subject;
     protected Model model;
+    protected Model assertions;
+    // protected Model retractions;
     
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            new ArrayList<BfProperty>();
+    private static final List<Property> PROPERTIES_TO_RETRACT = 
+            new ArrayList<Property>();
     static {
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE.property());
+        PROPERTIES_TO_RETRACT.add(
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property());
     }
 
 
@@ -45,202 +48,88 @@ public abstract class BfResourceConverter {
         this.subject = subject;
         this.model = subject.getModel();
         
+        assertions = ModelFactory.createDefaultModel();
+        // retractions = ModelFactory.createDefaultModel();
+        
         convert();
+        
+        model.add(assertions);
+        // model.remove(retractions);
         
         return model;
     }
 
     /* 
      * Default conversion method. Subclasses may override.
-     * 
-     * NB If subclasses don't override convert() but only the methods it calls,
-     * combine this with the public convert() method.
-     * 
-     * TODO *** Consider whether it's better to do the conversions in one large
-     * iteration through the statements of the model, rather than broken down
-     * by property, class, etc.
      */
     protected void convert() {
-        mapTypes();  
-        convertProperties();  
-    }
-
-    /**
-     * Convert Bibframe type assertion to corresponding LD4L type
-     */
-    protected void mapTypes() {
         
-        /* 
-         * NB We have to apply assertions and retractions to the input model at
-         * each step of the conversion, rather than building up one large 
-         * assertions and one large retractions model. Otherwise, the assertions
-         * model will contain partially-converted statements that then get
-         * added to the input model.
-         */
-        Model assertions = ModelFactory.createDefaultModel();
-        // Model retractions = ModelFactory.createDefaultModel();
-
-        // Start with the default, non-context-specific mappings for each type 
-        // defined in BfType.
-        Map<BfType, Ld4lType> typeMap = BfType.typeMap();
+        // Map of Bibframe to LD4L types.
+        Map<Resource, Resource> typeMap = BfType.typeMap();
         
-        // If there are any type-specific (i.e., static) or resource-specific
-        // (i.e., instance) mappings, they override the default mappings.
-        // Currently we have none.
-//        Map<BfType, Ld4lType> typeSpecificMap = getTypeSpecificMap();
-//        if (typeSpecificMap != null) {
-//            typeMap.putAll(typeSpecificMap);
-//        }
-
-        for (Map.Entry<BfType, Ld4lType> entry : typeMap.entrySet()) {
-            Resource bfOntClass = entry.getKey().ontClass();
-            Resource ld4lOntClass = entry.getValue().ontClass();
-            StmtIterator typeStmts = model.listStatements(
-                    null, RDF.type, bfOntClass);
-            // retractions.add(typeStmts);
-            while (typeStmts.hasNext()) {
-                Statement stmt = typeStmts.nextStatement();
-                assertions.add(stmt.getSubject(), RDF.type, ld4lOntClass);
-                // retractions.add(stmt);
-                typeStmts.remove();
-            }   
-        }
-        
-        model.add(assertions);
-             // .remove(retractions);
-    }
-    
-    protected void convertProperties() {
-        // Call mapProperties() before retractProperties() in case a subclass
-        // overrides mapProperties(), but needs some of the information from
-        // statements with predicates to be retracted.
-        mapProperties();
-        retractProperties();
-        convertNamespace();   
-    }
-    
-    protected void mapProperties() {
-
-        Model assertions = ModelFactory.createDefaultModel();
-        // Model retractions = ModelFactory.createDefaultModel();
-      
-        // Start with the default, non-context-specific mappings for each
-        // property defined in BfProperty.
-        Map<BfProperty, Ld4lProperty> propertyMap = BfProperty.propertyMap();
-        // If there are any type-specific (i.e., static) or resource-specific
-        // (i.e., instance) mappings, they override the default mappings. E.g., 
-        // bf:label may be mapped to rdfs:label or foaf:name, depending on the
-        // subject type.
-        // Note: currently we define these only at the static level, for all 
-        // instances of a type. 
-        Map<BfProperty, Ld4lProperty> typeSpecificPropertyMap = 
+        // Map of Bibframe to LD4L properties.
+        // Start with the statically-defined, type-independent map.
+        Map<Property, Property> propertyMap = BfProperty.propertyMap();
+        // Override with any instance-level, type-specific mappings.
+        Map<Property, Property> typeSpecificPropertyMap = 
                 getPropertyMap();
         if (typeSpecificPropertyMap != null) {
             propertyMap.putAll(typeSpecificPropertyMap);
         }
-        
-        LOGGER.debug(propertyMap.toString());
-      
-        // Would it be more efficient to turn this around, and iterate over
-        // the statements and check if the property exists in the map? 
-        for (Map.Entry<BfProperty, Ld4lProperty> entry 
-                : propertyMap.entrySet()) {
-            Property bfProp = entry.getKey().property();
-            Property ld4lProp = entry.getValue().property();
-            StmtIterator stmts = model.listStatements(
-                    null, bfProp, (RDFNode) null);
-            // Oddly, this leaves stmts with no statements in it.
-            //retractions.add(stmts);
-            while (stmts.hasNext()) {
-                Statement stmt = stmts.nextStatement();
-                assertions.add(stmt.getSubject(), ld4lProp, stmt.getObject());
-                //retractions.add(stmt);
-                stmts.remove(); 
-            }   
-        } 
-        
-
-        model.add(assertions);
-             // .remove(retractions);
-    }
-
-    protected void retractProperties() {
-
-        List<BfProperty> propsToRetract = PROPERTIES_TO_RETRACT;
-        List<BfProperty> typeSpecificPropsToRetract = getPropertiesToRetract();
+ 
+        // List of Bibframe properties to retract.
+        // Start with the statically-defined, type-independent list.
+        List<Property> propsToRetract = PROPERTIES_TO_RETRACT;
+        // Override with any instance-level, type-specific items.
+        List<Property> typeSpecificPropsToRetract = getPropertiesToRetract();
         if (typeSpecificPropsToRetract != null) {
             propsToRetract.addAll(typeSpecificPropsToRetract);
         }
         
-        for (BfProperty bfProp : propsToRetract) {
-            StmtIterator stmts = model.listStatements(
-                    null, bfProp.property(), (RDFNode) null);
-            model.remove(stmts);
-        }
-
-    }
-    
-    /** 
-     * Add a new statement based on a Bibframe statement, using the object of
-     * the Bibframe statement as the object of the new statement. Remove the
-     * original statement.
-     * 
-     * @param subject
-     * @param oldProp
-     * @param newProp
-     * @return
-     */
-//    protected void convertProperty(BfProperty oldProp, 
-//            Ld4lProperty newProp) {
-//                    
-//        Property oldProperty = oldProp.property();
-//        Statement stmt = subject.getProperty(oldProperty);
-//                
-//        if (stmt != null) {
-//            RDFNode object = stmt.getObject();
-//            Property newProperty = newProp.property();
-//            subject.addProperty(newProperty, object);
-//            subject.removeAll(oldProperty);
-//        }
-//    }
-    
-    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
-        return null;
-    }
-    
-    protected List<BfProperty> getPropertiesToRetract() {
-        return null;
-    }
-    
-    /**
-     * Cleanup operation: after all specific conversions, change namespace of 
-     * all remaining Bibframe properties to LD4L. 
-     * 
-     * NB In this case, a renaming should be enough, since any semantics of the
-     * predicate should be carried over.
-     */
-    protected void convertNamespace() {
-
         String bfNamespace = OntNamespace.BIBFRAME.uri();
         String ld4lNamespace = OntNamespace.LD4L.uri();
-
-        Model assertions = ModelFactory.createDefaultModel();
-
+        
+        // Iterate through the statements in the model.
         StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
+            
             Statement stmt = stmts.nextStatement();
-
+            Resource subject = stmt.getSubject();
             Property predicate = stmt.getPredicate();
-            if (predicate.getNameSpace().equals(bfNamespace)) {
+            RDFNode object = stmt.getObject();
+            
+            if (predicate.equals(RDF.type)) {
+                Resource ontClass = object.asResource();
+                if (typeMap.containsKey(ontClass)) {
+                    assertions.add(subject, predicate, typeMap.get(ontClass));
+                    stmts.remove();
+                }      
+              
+            } else if (propertyMap.keySet().contains(predicate)) {
+                assertions.add(subject, propertyMap.get(predicate), object);
+                stmts.remove();
+                
+            } else if (propsToRetract.contains(predicate)) {
+                stmts.remove(); 
+              
+            // Change any remaining predicates in Bibframe namespace to LD4L
+            // namespace.
+            } else if (predicate.getNameSpace().equals(bfNamespace)) {
                 Property ld4lProp = model.createProperty(
                         ld4lNamespace, predicate.getLocalName());
-                assertions.add(stmt.getSubject(), ld4lProp, stmt.getObject());
-                stmts.remove();
-            }   
-        }
-        
-        model.add(assertions);    
+                assertions.add(subject, ld4lProp, object);
+                stmts.remove();               
+            }
+        } 
     }
 
 
+    protected Map<Property, Property> getPropertyMap() {
+        return null;
+    }
+    
+    protected List<Property> getPropertiesToRetract() {
+        return null;
+    }
+    
 }

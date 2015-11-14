@@ -27,9 +27,9 @@ public class BfHeldItemConverter extends BfResourceConverter {
             LogManager.getLogger(BfHeldItemConverter.class);
     
 
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
+    private static final List<Property> PROPERTIES_TO_RETRACT = 
             Arrays.asList(
-                    BfProperty.BF_LABEL
+                    BfProperty.BF_LABEL.property()
             );
             
     // Bibframe models shelf mark types with different properties; LD4L models
@@ -61,14 +61,14 @@ public class BfHeldItemConverter extends BfResourceConverter {
     
     
     @Override
-    protected void convertProperties() {
+    protected void convert() {
         convertShelfMark();
-        super.convertProperties();
+        super.convert();
     }
     
 
     @Override
-    protected List<BfProperty> getPropertiesToRetract() {
+    protected List<Property> getPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }
     

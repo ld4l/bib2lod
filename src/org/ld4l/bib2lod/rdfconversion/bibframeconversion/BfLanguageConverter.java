@@ -22,20 +22,19 @@ public class BfLanguageConverter extends BfResourceConverter {
             LogManager.getLogger(BfLanguageConverter.class);
     
 
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
-            new HashMap<BfProperty, Ld4lProperty>();
+    private static final Map<Property, Property> PROPERTY_MAP = 
+            new HashMap<Property, Property>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE_OF_PART, Ld4lProperty.LABEL);
+        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE_OF_PART.property(), 
+                Ld4lProperty.LABEL.property());
     }
  
     
     @Override
-    protected void convertProperties() {
+    protected void convert() {
         convertOriginalLanguage();
-        mapProperties();
-        retractProperties();  
         assignExternalUri();
-        convertNamespace();   
+        super.convert();  
     }
 
     /**
@@ -91,7 +90,7 @@ public class BfLanguageConverter extends BfResourceConverter {
     
 
     @Override
-    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
+    protected Map<Property, Property> getPropertyMap() {
         return PROPERTY_MAP;
     }
 

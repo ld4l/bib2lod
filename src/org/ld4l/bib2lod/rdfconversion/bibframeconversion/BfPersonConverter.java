@@ -33,9 +33,9 @@ public class BfPersonConverter extends BfResourceConverter {
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
     
     @Override 
-    protected void convertProperties() {
+    protected void convert() {
         convertBfLabel();
-        super.convertProperties();
+        super.convert();
     }
 
     /** 

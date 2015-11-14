@@ -116,14 +116,14 @@ public enum BfType {
    
     private static final Map<String, BfType> LOOKUP_BY_FILENAME = 
             new HashMap<String, BfType>();
-    private static final Map<BfType, Ld4lType> TYPE_MAP = 
-            new HashMap<BfType, Ld4lType>();
+    private static final Map<Resource, Resource> TYPE_MAP = 
+            new HashMap<Resource, Resource>();
     
     static {
         for (BfType bfType : BfType.values()) {
             LOOKUP_BY_FILENAME.put(bfType.filename, bfType);
             if (bfType.ld4lType != null) {
-                TYPE_MAP.put(bfType, bfType.ld4lType);
+                TYPE_MAP.put(bfType.ontClass, bfType.ld4lType.ontClass());
             }
         }
     }
@@ -153,7 +153,7 @@ public enum BfType {
         return ld4lType;
     }
     
-    public static Map<BfType, Ld4lType> typeMap() {
+    public static Map<Resource, Resource> typeMap() {
         return TYPE_MAP;
     }
     

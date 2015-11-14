@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -18,15 +19,16 @@ public class BfTemporalConverter extends BfResourceConverter {
             LogManager.getLogger(BfTemporalConverter.class);
     
     
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
-            new HashMap<BfProperty, Ld4lProperty>();
+    private static final Map<Property, Property> PROPERTY_MAP =
+            new HashMap<Property, Property>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.LABEL);
+        PROPERTY_MAP.put(BfProperty.BF_LABEL.property(), 
+                Ld4lProperty.LABEL.property());
     }
 
 
     @Override
-    protected Map<BfProperty, Ld4lProperty> getPropertyMap() {
+    protected Map<Property, Property> getPropertyMap() {
         return PROPERTY_MAP;
     }
     
