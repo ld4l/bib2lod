@@ -33,6 +33,10 @@ public class BfPersonConverter extends BfResourceConverter {
             // dddd-dddd
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
+
+    public BfPersonConverter(BfType bfType) {
+        super(bfType);
+    }
     
     @Override 
     protected void convert() {

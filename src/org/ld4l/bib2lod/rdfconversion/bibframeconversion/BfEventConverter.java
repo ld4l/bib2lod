@@ -24,6 +24,10 @@ public class BfEventConverter extends BfResourceConverter {
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_EVENT_PLACE);
     }
+
+    public BfEventConverter(BfType bfType) {
+        super(bfType);
+    }
     
     @Override
     protected List<BfType> getBfTypesToConvert() {

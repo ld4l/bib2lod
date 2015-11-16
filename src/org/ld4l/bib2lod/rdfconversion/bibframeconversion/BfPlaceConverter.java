@@ -30,6 +30,10 @@ public class BfPlaceConverter extends BfResourceConverter {
                 
     }
 
+    public BfPlaceConverter(BfType bfType) {
+        super(bfType);
+    }
+    
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;

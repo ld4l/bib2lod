@@ -47,7 +47,11 @@ public class BfMeetingConverter extends BfResourceConverter {
 
     }
 
-
+    public BfMeetingConverter(BfType bfType) {
+        super(bfType);
+    }
+    
+    
     @Override
     protected void convert() {
         convertSystemNumber();

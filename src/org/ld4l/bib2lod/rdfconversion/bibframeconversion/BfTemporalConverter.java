@@ -29,6 +29,10 @@ public class BfTemporalConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL,Ld4lProperty.LABEL);              
     }
 
+    public BfTemporalConverter(BfType bfType) {
+        super(bfType);
+    }
+    
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;

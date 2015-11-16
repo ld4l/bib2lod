@@ -40,6 +40,7 @@ public abstract class BfResourceConverter {
     
     protected Resource subject;
     protected Model model;
+    protected BfType bibframeType;
     protected Model assertions;
     // protected Model retractions;
     
@@ -52,11 +53,16 @@ public abstract class BfResourceConverter {
 //        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE.property());
 //    }
 
+    public BfResourceConverter(BfType bfType) {
+        LOGGER.debug("In constructor for converter type " 
+                + this.getClass().getSimpleName()
+                + "; converting Bibframe type " + bfType);  
+                 
+        this.bibframeType = bfType;
+    }
 
     // Public interface method: initialize instance variables and convert.
     public final Model convert(Resource subject) {    
-
-        LOGGER.debug("In converter " + this.getClass().getName());
         
         this.subject = subject;
         this.model = subject.getModel();

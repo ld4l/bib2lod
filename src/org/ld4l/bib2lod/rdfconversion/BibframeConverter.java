@@ -202,14 +202,16 @@ public class BibframeConverter extends RdfProcessor {
     }
     
     
-    private BfResourceConverter getConverter(BfType type) {
+    private BfResourceConverter getConverter(BfType bfType) {
         
-        Class<?> converterClass = CONVERTERS_BY_TYPE.get(type);
+        Class<?> converterClass = CONVERTERS_BY_TYPE.get(bfType);
         if (converterClass != null) {
             try {
                 BfResourceConverter converter = 
-                        (BfResourceConverter) converterClass.newInstance();
-                LOGGER.debug("Got converter for type " + type);
+                        (BfResourceConverter) converterClass
+                        .getConstructor(BfType.class)
+                        .newInstance(bfType);   
+                LOGGER.debug("Got converter for type " + bfType);
                 return converter;
             } catch (Exception e) {
                 LOGGER.debug("Can't instantiate class " 
@@ -218,38 +220,8 @@ public class BibframeConverter extends RdfProcessor {
             } 
         }
 
-        LOGGER.debug("No converter found for type " + type);
+        LOGGER.debug("No converter found for type " + bfType);
         return null;
     }
-
-    private BfResourceConverter createConverter(
-            BfType type, Class<?> converterClass, Resource subject) {
-        
-        // NB Currently a new converter is created for each subject resource,
-        // so the subject can be assigned to an instance variable. If we 
-        // change the flow so that a converter is created for an entire model of
-        // subjects of a certain type, the subject will have to be passed to the
-        // convert method rather than the constructor.
-        try {
-            // Possibly a converter could be shared by multiple types - e.g., 
-            // BfFamilyConverter and BfOrganizationConverter could both be
-            // BfAuthorityConverter. Then the original rdf:type must be passed
-            // to the constructor so that we know what new type should be 
-            // assigned.
-            BfResourceConverter converter = 
-                    (BfResourceConverter) converterClass
-                    .getConstructor(Resource.class)
-                    .newInstance(subject);   
-            return converter;      
-        } catch (Exception e) {
-            LOGGER.trace("No converter created for class " 
-                    + converterClass.getName());
-            e.printStackTrace();
-        }    
-        
-        return null;
-    }
-    
-
 
 }

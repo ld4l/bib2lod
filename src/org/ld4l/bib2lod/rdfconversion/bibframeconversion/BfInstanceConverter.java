@@ -41,6 +41,10 @@ public class BfInstanceConverter extends BfResourceConverter {
         
     }
 
+    public BfInstanceConverter(BfType bfType) {
+        super(bfType);
+    }
+    
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;

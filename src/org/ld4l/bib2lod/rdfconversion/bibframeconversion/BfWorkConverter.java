@@ -40,6 +40,10 @@ public class BfWorkConverter extends BfResourceConverter {
 
     }
 
+    public BfWorkConverter(BfType bfType) {
+        super(bfType);
+    }
+    
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;

@@ -28,7 +28,11 @@ public class BfFamilyConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
     
-
+    public BfFamilyConverter(BfType bfType) {
+        super(bfType);
+        // TODO Auto-generated constructor stub
+    }
+    
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;

@@ -27,6 +27,10 @@ public class BfOrganizationConverter extends BfResourceConverter {
     static {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);       
     }
+
+    public BfOrganizationConverter(BfType bfType) {
+        super(bfType);
+    }
     
     @Override 
     protected List<BfType> getBfTypesToConvert() {
