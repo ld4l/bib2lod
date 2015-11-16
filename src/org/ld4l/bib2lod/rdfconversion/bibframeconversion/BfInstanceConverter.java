@@ -53,8 +53,6 @@ public class BfInstanceConverter extends BfResourceConverter {
    
     @Override
     protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        LOGGER.debug(PROPERTY_MAP == null ? "propertyMap null" : "propertyMap not null");
-        LOGGER.debug(PROPERTY_MAP.keySet()== null ? "propertyMap.keySet() null" : "propertyMap.keySet() not null");
         return PROPERTY_MAP;
     }
 

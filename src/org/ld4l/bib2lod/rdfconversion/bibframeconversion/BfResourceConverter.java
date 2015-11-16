@@ -55,6 +55,8 @@ public abstract class BfResourceConverter {
 
     // Public interface method: initialize instance variables and convert.
     public final Model convert(Resource subject) {    
+
+        LOGGER.debug("In converter " + this.getClass().getName());
         
         this.subject = subject;
         this.model = subject.getModel();
@@ -85,7 +87,6 @@ public abstract class BfResourceConverter {
      */
     protected void convert() {
         
-        LOGGER.debug("In converter " + this.getClass().getName());
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = BfType.typeMap(getBfTypesToConvert());
                 
