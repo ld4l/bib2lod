@@ -15,6 +15,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
@@ -45,22 +46,22 @@ public class BibframeConverter extends RdfProcessor {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
 //                BfResourceConverter.class);    
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfFamilyConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
 //                BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
-//                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
+                BfAuthorityConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfMeetingConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_ORGANIZATION, 
-                BfOrganizationConverter.class);        
+                BfAuthorityConverter.class);        
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfPlaceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfTemporalConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfAuthorityConverter.class);
 //      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkConverter.class);
