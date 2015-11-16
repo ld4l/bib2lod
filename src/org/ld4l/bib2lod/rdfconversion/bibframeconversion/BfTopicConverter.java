@@ -17,12 +17,6 @@ public class BfTopicConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicConverter.class);
 
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_TOPIC);
-    }
-    
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
@@ -43,11 +37,6 @@ public class BfTopicConverter extends BfResourceConverter {
 
     public BfTopicConverter(BfType bfType) {
         super(bfType);
-    }
-    
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
     }
     
     @Override

@@ -95,6 +95,7 @@ public abstract class BfResourceConverter {
         
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = BfType.typeMap(getBfTypesToConvert());
+        LOGGER.debug(getBfTypesToConvert());
                 
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = BfProperty.propertyMap(
@@ -152,7 +153,9 @@ public abstract class BfResourceConverter {
     }   
 
     protected List<BfType> getBfTypesToConvert() {
-        return new ArrayList<BfType>();
+        List<BfType> typesToConvert = new ArrayList<BfType>();
+        typesToConvert.add(this.bibframeType);
+        return typesToConvert;
     }
  
     protected List<BfProperty> getBfPropertiesToConvert() {

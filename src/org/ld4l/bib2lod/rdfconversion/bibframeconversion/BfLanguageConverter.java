@@ -20,12 +20,6 @@ public class BfLanguageConverter extends BfResourceConverter {
             LogManager.getLogger(BfLanguageConverter.class);
     
 
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_LANGUAGE);
-    }
-    
     private static List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
@@ -96,12 +90,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             model.remove(resourcePartStmt);
         }
     }
-    
-    @Override
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
-    
+
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {
         return PROPERTIES_TO_CONVERT;

@@ -16,12 +16,6 @@ public class BfFamilyConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfFamilyConverter.class);
     
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_FAMILY);
-    }
-
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
             new HashMap<BfProperty, Ld4lProperty>();
     static {
@@ -31,11 +25,6 @@ public class BfFamilyConverter extends BfResourceConverter {
     public BfFamilyConverter(BfType bfType) {
         super(bfType);
         // TODO Auto-generated constructor stub
-    }
-    
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
     }
     
     @Override

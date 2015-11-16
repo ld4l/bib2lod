@@ -16,12 +16,7 @@ public class BfInstanceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceConverter.class);
     
-    
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_INSTANCE);
-    }
+   
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
@@ -44,11 +39,7 @@ public class BfInstanceConverter extends BfResourceConverter {
     public BfInstanceConverter(BfType bfType) {
         super(bfType);
     }
-    
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
+   
     
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {

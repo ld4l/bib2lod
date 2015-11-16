@@ -25,12 +25,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);
     
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_HELD_ITEM);
-    }
- 
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
@@ -174,11 +168,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
         
         String namespace = SHELF_MARK_VOCABS.get(shelfMarkProp).uri();
         return RdfProcessor.mintUri(namespace);
-    }
-
-    @Override
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
     }
 
     @Override

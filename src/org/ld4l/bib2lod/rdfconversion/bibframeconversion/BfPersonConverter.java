@@ -20,13 +20,6 @@ public class BfPersonConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPersonConverter.class);
     
-
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_PERSON);
-    }
-    
     private static final Pattern BF_PERSON_LABEL = 
             //* Which date patterns can occur? Look at more data.
             // dddd-
@@ -102,11 +95,6 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
 
-
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
     
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {

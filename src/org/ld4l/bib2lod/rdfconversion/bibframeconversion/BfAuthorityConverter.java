@@ -11,21 +11,24 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
-public class BfOrganizationConverter extends BfResourceConverter {
+public class BfAuthorityConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfOrganizationConverter.class);
+            LogManager.getLogger(BfPlaceConverter.class);
+    
     
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);       
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
+                
     }
 
-    public BfOrganizationConverter(BfType bfType) {
+    public BfAuthorityConverter(BfType bfType) {
         super(bfType);
     }
     
+
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {
         return getBfAuthPropertiesToConvert();

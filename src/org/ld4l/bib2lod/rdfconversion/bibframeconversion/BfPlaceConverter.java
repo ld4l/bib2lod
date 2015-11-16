@@ -16,13 +16,6 @@ public class BfPlaceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPlaceConverter.class);
     
-
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_PLACE);
-    }
-    
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
             new HashMap<BfProperty, Ld4lProperty>();
     static {
@@ -34,10 +27,6 @@ public class BfPlaceConverter extends BfResourceConverter {
         super(bfType);
     }
     
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
     
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {
