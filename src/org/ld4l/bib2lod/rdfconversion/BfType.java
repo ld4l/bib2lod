@@ -145,6 +145,10 @@ public enum BfType {
             BF_TOPIC);
     }
     
+    public boolean isAuthority() {
+        return authorities().contains(this);
+    }
+    
     public Resource ontClass() {
         return ontClass;
     }
@@ -155,6 +159,19 @@ public enum BfType {
     
     public static Map<Resource, Resource> typeMap() {
         return TYPE_MAP;
+    }
+    
+    public static Map<Resource, Resource> typeMap(List<BfType> bfTypes) {
+
+        Map<Resource, Resource> typeMap = new HashMap<Resource, Resource>();
+        
+        if (bfTypes != null) {
+            for (BfType type : bfTypes) {
+                typeMap.put(type.ontClass, type.ld4lType.ontClass());
+            }
+        }
+        
+        return typeMap;
     }
     
 }

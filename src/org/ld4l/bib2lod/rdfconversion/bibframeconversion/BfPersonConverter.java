@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -10,6 +12,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
 public class BfPersonConverter extends BfResourceConverter {
@@ -18,6 +21,12 @@ public class BfPersonConverter extends BfResourceConverter {
             LogManager.getLogger(BfPersonConverter.class);
     
 
+    private static final List<BfType> TYPES_TO_CONVERT = 
+            new ArrayList<BfType>();
+    static {
+        TYPES_TO_CONVERT.add(BfType.BF_PERSON);
+    }
+    
     private static final Pattern BF_PERSON_LABEL = 
             //* Which date patterns can occur? Look at more data.
             // dddd-
@@ -89,4 +98,19 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
 
+
+    @Override 
+    protected List<BfType> getBfTypesToConvert() {
+        return TYPES_TO_CONVERT;
+    }
+    
+    @Override
+    protected List<BfProperty> getBfPropertiesToConvert() {
+        return getBfAuthPropertiesToConvert();
+    }
+
+    @Override
+    protected List<BfProperty> getBfPropertiesToRetract() {
+        return getBfAuthPropertiesToRetract();
+    }
 }

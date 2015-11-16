@@ -1,6 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
@@ -28,7 +31,7 @@ public enum BfProperty {
     BF_ITEM_ID("itemId"),
     BF_LABEL("label", Ld4lProperty.LABEL),
     BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
-    BF_LANGUAGE_OF_PART("languageOfPart"), 
+    BF_LANGUAGE_OF_PART("languageOfPart", Ld4lProperty.LABEL), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
     BF_RESOURCE_PART("resourcePart"),
     BF_SHELF_MARK("shelfMark"),
@@ -38,7 +41,7 @@ public enum BfProperty {
     BF_SHELF_MARK_SCHEME("shelfMarkScheme"),
     BF_SHELF_MARK_UDC("shelfMarkUdc"),
     BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
-    BF_SYSTEM_NUMBER("systemNumber"),
+    BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
@@ -120,20 +123,89 @@ public enum BfProperty {
         return ld4lProperty;
     }
     
-    private static final Map<Property, Property> PROPERTY_MAP = 
-            new HashMap<Property, Property>();
+//    private static final Map<Property, Property> PROPERTY_MAP = 
+//            new HashMap<Property, Property>();
+//    
+//    static {
+//        for (BfProperty bfProp : BfProperty.values()) {
+//            if (bfProp.ld4lProperty != null) {
+//                PROPERTY_MAP.put(bfProp.property, 
+//                        bfProp.ld4lProperty.property());
+//            }
+//        }
+//    }
+//    
+//    public static Map<Property, Property> propertyMap() {
+//        return PROPERTY_MAP;
+//    }
     
-    static {
-        for (BfProperty bfProp : BfProperty.values()) {
-            if (bfProp.ld4lProperty != null) {
-                PROPERTY_MAP.put(bfProp.property, 
+    public static Map<Property, Property> propertyMap(
+            List<BfProperty> bfPropList,
+            Map<BfProperty, Ld4lProperty> bfPropertyMap) {
+        
+        Map<Property, Property> propertyMap = new HashMap<Property, Property>();
+        
+        // These properties use the default mappings defined by each type
+        propertyMap.putAll(propertyMap(bfPropList));
+        
+        // These properties use non-default mappings
+        propertyMap.putAll(propertyMap(bfPropertyMap));
+        
+        return propertyMap;
+
+    }
+    
+    public static Map<Property, Property> propertyMap(
+            Map<BfProperty, Ld4lProperty> map) {
+
+        Map<Property, Property> propertyMap = 
+                new HashMap<Property, Property>();
+        
+        if (map != null) {            
+            for (Map.Entry<BfProperty, Ld4lProperty> entry : map.entrySet()) {
+                propertyMap.put(entry.getKey().property, 
+                        entry.getValue().property());
+            }
+        }
+        
+        return propertyMap;
+    }
+    
+    public static Map<Property, Property> propertyMap(
+            List<BfProperty> bfProps) {
+        
+        Map<Property, Property> propertyMap = 
+                new HashMap<Property, Property>();
+        
+        if (bfProps != null) {
+            
+            for (BfProperty bfProp : bfProps) {
+                propertyMap.put(bfProp.property, 
                         bfProp.ld4lProperty.property());
             }
         }
+        
+        return propertyMap;
     }
     
-    public static Map<Property, Property> propertyMap() {
-        return PROPERTY_MAP;
+    public static List<Property> propertyList(List<BfProperty> bfProps) {
+        
+        List<Property> props = new ArrayList<Property>();
+        
+        if (bfProps != null) {
+            for (BfProperty bfProp : bfProps) {
+                props.add(bfProp.property);
+            }
+        }
+        return props;
+    }
+    
+    public static List<BfProperty> authorityProperties() {
+        return Arrays.asList(
+                BfProperty.BF_AUTHORITY_SOURCE,
+                BfProperty.BF_HAS_AUTHORITY,
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT
+                );        
     }
     
 }

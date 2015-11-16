@@ -1,6 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -14,6 +14,7 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
@@ -24,11 +25,24 @@ public class BfHeldItemConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);
     
+    private static final List<BfType> TYPES_TO_CONVERT = 
+            new ArrayList<BfType>();
+    static {
+        TYPES_TO_CONVERT.add(BfType.BF_HELD_ITEM);
+    }
+ 
+    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_HOLDING_FOR);
+    }
 
-    private static final List<Property> PROPERTIES_TO_RETRACT = 
-            Arrays.asList(
-                    BfProperty.BF_LABEL.property()
-            );
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
+            new HashMap<BfProperty, Ld4lProperty>();
+    static {
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
+    }
+    
             
     // Bibframe models shelf mark types with different properties; LD4L models
     // them with subclasses of Classification. Map the Bibframe property to the
@@ -64,11 +78,6 @@ public class BfHeldItemConverter extends BfResourceConverter {
         super.convert();
     }
     
-
-    @Override
-    protected List<Property> getPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
-    }
     
     private void convertShelfMark() {
         
@@ -163,5 +172,19 @@ public class BfHeldItemConverter extends BfResourceConverter {
         String namespace = SHELF_MARK_VOCABS.get(shelfMarkProp).uri();
         return RdfProcessor.mintUri(namespace);
     }
-    
+
+    @Override
+    protected List<BfType> getBfTypesToConvert() {
+        return TYPES_TO_CONVERT;
+    }
+
+    @Override
+    protected List<BfProperty> getBfPropertiesToConvert() {
+        return PROPERTIES_TO_CONVERT;
+    }
+   
+    @Override
+    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
+        return PROPERTY_MAP;
+    }
 }

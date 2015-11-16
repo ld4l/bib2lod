@@ -15,6 +15,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
@@ -43,7 +44,7 @@ public class BibframeConverter extends RdfProcessor {
     static {
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
 //                BfResourceConverter.class);    
-        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfFamilyConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);

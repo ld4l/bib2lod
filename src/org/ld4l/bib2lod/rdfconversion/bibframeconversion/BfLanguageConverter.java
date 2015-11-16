@@ -1,19 +1,18 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.HashMap;
-import java.util.Map;
+import java.util.ArrayList;
+import java.util.List;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.ResourceUtils;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfLanguageConverter extends BfResourceConverter {
 
@@ -21,14 +20,20 @@ public class BfLanguageConverter extends BfResourceConverter {
             LogManager.getLogger(BfLanguageConverter.class);
     
 
-    private static final Map<Property, Property> PROPERTY_MAP = 
-            new HashMap<Property, Property>();
+    private static final List<BfType> TYPES_TO_CONVERT = 
+            new ArrayList<BfType>();
     static {
-        PROPERTY_MAP.put(BfProperty.BF_LANGUAGE_OF_PART.property(), 
-                Ld4lProperty.LABEL.property());
+        TYPES_TO_CONVERT.add(BfType.BF_LANGUAGE);
     }
- 
     
+    private static List<BfProperty> PROPERTIES_TO_CONVERT = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE_OF_PART);
+    }
+    
+
     @Override
     protected void convert() {
         convertOriginalLanguage();
@@ -89,10 +94,14 @@ public class BfLanguageConverter extends BfResourceConverter {
         }
     }
     
-
     @Override
-    protected Map<Property, Property> getPropertyMap() {
-        return PROPERTY_MAP;
+    protected List<BfType> getBfTypesToConvert() {
+        return TYPES_TO_CONVERT;
+    }
+    
+    @Override
+    protected List<BfProperty> getBfPropertiesToConvert() {
+        return PROPERTIES_TO_CONVERT;
     }
 
     
