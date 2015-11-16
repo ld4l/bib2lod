@@ -26,7 +26,7 @@ public class BfMeetingConverter extends BfResourceConverter {
     private static final List<BfType> TYPES_TO_CONVERT = 
             new ArrayList<BfType>();
     static {
- 
+        TYPES_TO_CONVERT.add(BfType.BF_MEETING);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
@@ -38,7 +38,7 @@ public class BfMeetingConverter extends BfResourceConverter {
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
@@ -90,9 +90,9 @@ public class BfMeetingConverter extends BfResourceConverter {
     
     @Override
     protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
+        return getBfAuthPropertiesToConvert();
     }
-   
+    
     @Override
     protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
         return PROPERTY_MAP;
@@ -100,7 +100,7 @@ public class BfMeetingConverter extends BfResourceConverter {
 
     @Override
     protected List<BfProperty> getBfPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
+        return getBfAuthPropertiesToRetract();
     }
 
 }

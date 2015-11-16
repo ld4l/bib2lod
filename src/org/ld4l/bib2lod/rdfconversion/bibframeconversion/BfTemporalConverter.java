@@ -33,11 +33,19 @@ public class BfTemporalConverter extends BfResourceConverter {
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;
     }
+
+    @Override
+    protected List<BfProperty> getBfPropertiesToConvert() {
+        return getBfAuthPropertiesToConvert();
+    }
     
     @Override
     protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
         return PROPERTY_MAP;
     }
     
-
+    @Override
+    protected List<BfProperty> getBfPropertiesToRetract() {
+        return getBfAuthPropertiesToRetract();
+    }
 }
