@@ -22,7 +22,7 @@ import org.apache.logging.log4j.Logger;
 public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
-    private static final Pattern URI_PATTERN = 
+    private static final Pattern URIS_TO_REPLACE = 
             /*
              * Matches:
              * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
@@ -48,7 +48,9 @@ public class RdfCleaner extends RdfProcessor {
              * cannot contain internal brackets or quotes. A quoted uri in 
              * rdfxml escapes an actual quote as &#34;
              */
-            Pattern.compile("(?<=<)http://[^>]+(?=>)|(?<!<)http://[^\"><]+(?!>)");
+            Pattern.compile(
+                    "(?<=<)http://[^>]+(?=>)|(?<!<)http://[^\"><]+(?!>)");
+    
     
 //    private static final Pattern DEC_CODE_PATTERN = 
 //            Pattern.compile("&#(\\d+);");
@@ -83,16 +85,72 @@ public class RdfCleaner extends RdfProcessor {
         return outputDir;
     }
 
-    private String processLine(String line) {
-        line = encodeUris(line);
-        // Any other operations go here
-        return line;
+    protected void replaceLinesInFile(File file, String outputDir) {
+        BufferedReader reader;
+        try {
+            String filename = file.getName();
+            LOGGER.trace("Start replacing lines in file " + filename);
+            reader = Files.newBufferedReader(file.toPath());
+            String outputFilename =
+                    FilenameUtils.getName(file.toString()); 
+            File outputFile = new File(outputDir, outputFilename);
+            PrintWriter writer = new PrintWriter(new BufferedWriter(
+                    new FileWriter(outputFile, true)));               
+            LineIterator iterator = new LineIterator(reader);
+            while (iterator.hasNext()) {
+                String line = iterator.nextLine();
+                // Remove empty lines
+//                if (line.length() == 0) {
+//                    LOGGER.trace("Removing empty line");
+//                    continue;
+//                }
+                LOGGER.debug(line);
+                String processedLine = processLine(line);
+                if (LOGGER.isDebugEnabled()) {
+                    // append newline before comparing lines?
+                    if (!line.equals(processedLine)) {
+                        LOGGER.debug("Original: " + line);
+                        LOGGER.debug("New: " + processedLine);
+                    }
+                }
+                writer.append(processedLine + "\n");
+                if (processedLine.contains("<>")) {
+                    LOGGER.debug("Writing out: " + processedLine);
+                }
+            }
+            reader.close();
+            writer.close();
+            LOGGER.trace("Done replacing lines in file " + file);                
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }       
+    }
     
+    private String processLine(String line) {
+        line = removeStatementWithEmptyObject(line);
+        if (! line.trim().isEmpty()) {
+            line = encodeUris(line);
+            
+            // Any other operations go here
+            
+        } 
+        
+        return line;    
+    }
+    
+    private String removeStatementWithEmptyObject(String line) {
+        // *** TODO But what happens on RDFXML input?
+        if (line.contains("<>")) {
+            LOGGER.debug("Found line with empty object: " + line);
+            line = "";
+        }
+        return line;
     }
     
     private String encodeUris(String line) {    
         StringBuilder sb = new StringBuilder(line);       
-        Matcher m = URI_PATTERN.matcher(sb);
+        Matcher m = URIS_TO_REPLACE.matcher(sb);
         int matchPointer = 0;
         while (m.find(matchPointer)) { 
             try {
@@ -132,41 +190,5 @@ public class RdfCleaner extends RdfProcessor {
         return sb.toString();
     }
 
-    protected void replaceLinesInFile(File file, String outputDir) {
-        BufferedReader reader;
-        try {
-            String filename = file.getName();
-            LOGGER.trace("Start replacing lines in file " + filename);
-            reader = Files.newBufferedReader(file.toPath());
-            String outputFilename =
-                    FilenameUtils.getName(file.toString()); 
-            File outputFile = new File(outputDir, outputFilename);
-            PrintWriter writer = new PrintWriter(new BufferedWriter(
-                    new FileWriter(outputFile, true)));               
-            LineIterator iterator = new LineIterator(reader);
-            while (iterator.hasNext()) {
-                String line = iterator.nextLine();
-                // Remove empty lines
-                if (line.length() == 0) {
-                    LOGGER.trace("Removing empty line");
-                    continue;
-                }
-                String processedLine = processLine(line);
-                if (LOGGER.isDebugEnabled()) {
-                    // append newline before comparing lines?
-                    if (!line.equals(processedLine)) {
-                        LOGGER.trace("Original: " + line);
-                        LOGGER.trace("New: " + processedLine);
-                    }
-                }
-                writer.append(processedLine + "\n");
-            }
-            reader.close();
-            writer.close();
-            LOGGER.trace("Done replacing lines in file " + file);                
-        } catch (IOException e) {
-            // TODO Auto-generated catch block
-            e.printStackTrace();
-        }       
-    }
+
 }
