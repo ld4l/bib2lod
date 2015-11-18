@@ -85,6 +85,14 @@ public class RdfCleaner extends RdfProcessor {
         return outputDir;
     }
 
+    /*
+     * Done as string replacement, because the illegal RDF handled by 
+     * encodeURIs() can't be read into a Jena model without error.
+     * 
+     * However, removeStatementWithEmptyObject() could possibly be handled 
+     * better within Jena. See notes for method, below.
+     *
+     */
     protected void replaceLinesInFile(File file, String outputDir) {
         BufferedReader reader;
         try {
@@ -138,10 +146,108 @@ public class RdfCleaner extends RdfProcessor {
         
         return line;    
     }
-    
+  
+    /*
+     * Possibly could be handled better within Jena than as string search and
+     * replace. Could move to BnodeConverter - rename to UriConverter?.
+     * However, even within Jena different input serializations would have to
+     * be handled differently, unless we convert all input to n-triples first. 
+     * See sample input/output below. 
+     * 
+     * For now, just handling N-Triples and RDF/XML input as string 
+     * replacements. JSON-LD and Turtle input not supported; see notes on 
+     * problems with Turtle input below.
+     * 
+     * 
+     * Sample input/output for different serializations on test input RDF
+     * 
+     * JSON-LD
+     * 
+     * Input:
+     * 
+     * "<http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme>": 
+     *     [
+     *         { 
+     *             "value" : "",
+     *             "type" : "uri"
+     *         }
+     *     ], 
+     *   
+     *   
+     * Output: 
+     * 
+     * Syntax errors reported for the jsonld file; not sure how to correct.
+     * 
+     * =================================================
+     * 
+     * N-TRIPLES
+     * 
+     * Input:
+     * 
+     * _:bnode131cornell72 <http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme> <> . 
+     * 
+     * 
+     * Output: 
+     * 
+     * Statement: [79815984c4052867d88535f9530d8039, http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme, ]
+     * Object URI: 
+     * URI scheme: null
+     * 
+     * =================================================
+     * 
+     * RDF/XML
+     * 
+     * Input:
+     * 
+     * <madsrdf:Authority>
+     *     <rdf:type rdf:resource="http://www.loc.gov/mads/rdf/v1#Topic"/>
+     *     <madsrdf:authoritativeLabel>1894</madsrdf:authoritativeLabel>
+     *     <madsrdf:isMemberOfMADSScheme rdf:resource=""/>
+     * </madsrdf:Authority>
+     * 
+     * 
+     * Output:
+     * 
+     * Statement: [-22417409:1511b56f653:-7fff, http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme, file:///Users/rjy7/Workspace/jenatest/test-input/empty-object/72topic11.rdf]
+     * Object URI: file:///Users/rjy7/Workspace/jenatest/test-input/empty-object/72topic11.rdf
+     * URI scheme: file
+     * 
+     * =================================================
+     * 
+     * TURTLE
+     * 
+     * Input:
+     * 
+     * _:node1a4bq2o58x11 a madsrdf:Authority , madsrdf:Topic ;
+     *     madsrdf:authoritativeLabel "1894" ;
+     *     madsrdf:isMemberOfMADSScheme <unknown:namespace> .
+     *   
+     * 
+     * Output:
+     * 
+     * Statement: [12bcf3f71ffa4bfac39729bfdb2b0d22, http://www.loc.gov/mads/rdf/v1#isMemberOfMADSScheme, unknown:namespace]
+     * Resource object: unknown:namespace
+     * URI scheme: unknown
+     * 
+     * NB Simply removing a line creates invalid Turtle output due to the 
+     * resulting semi-colon rather than period at the end of the previous line:
+     * 
+     * _:node1a4bq2o58x11 a madsrdf:Authority , madsrdf:Topic ;
+           madsrdf:authoritativeLabel "1894" ;
+     *
+     * In this case a Jena model would be a better implementation. For now,
+     * don't support Turtle input.
+     * 
+     * =================================================
+     * 
+     */
     private String removeStatementWithEmptyObject(String line) {
-        // *** TODO But what happens on RDFXML input?
-        if (line.contains("<>")) {
+        // ntriple input
+        if (line.contains("<>") 
+                // rdfxml input
+                || line.contains("rdf:resource=\"\"")) {
+                // turtle input
+                // || line.contains("<unknown:namespace>")) {
             LOGGER.debug("Found line with empty object: " + line);
             line = "";
         }
