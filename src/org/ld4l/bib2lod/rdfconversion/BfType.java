@@ -14,9 +14,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum BfType {
 
-    // Maybe create different type enums, one for bibframe, one for madsrdf
-    // or miscellaneous, etc.? For now, no need.
-    
+    BF_AGENT("Agent", Ld4lType.AGENT),
     BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
     BF_AUTHORITY("Authority"),
     BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
@@ -169,7 +167,9 @@ public enum BfType {
         
         if (bfTypes != null) {
             for (BfType type : bfTypes) {
-                typeMap.put(type.ontClass, type.ld4lType.ontClass());
+                if (type.ld4lType != null) {
+                    typeMap.put(type.ontClass, type.ld4lType.ontClass());
+                }
             }
         }
         

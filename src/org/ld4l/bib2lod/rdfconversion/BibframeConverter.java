@@ -39,6 +39,7 @@ public class BibframeConverter extends RdfProcessor {
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
     static {
+        CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
 //                BfResourceConverter.class);    
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);

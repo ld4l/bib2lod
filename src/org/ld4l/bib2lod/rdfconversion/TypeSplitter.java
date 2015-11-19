@@ -39,7 +39,8 @@ public class TypeSplitter extends RdfProcessor {
             BfType.BF_PLACE,
             BfType.BF_TEMPORAL,
             BfType.BF_TOPIC,
-            BfType.BF_WORK         
+            BfType.BF_WORK,
+            BfType.BF_AGENT
     );
     
     private static final String REMAINDER_FILENAME = 

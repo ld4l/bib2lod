@@ -52,7 +52,6 @@ public class BfAuthorityConverter extends BfResourceConverter {
     protected List<BfType> getBfTypesToConvert() {
         List <BfType> typesToConvert = super.getBfTypesToConvert();
         typesToConvert.addAll(TYPES_TO_CONVERT);
-        TYPES_TO_CONVERT.addAll(super.getBfTypesToConvert());
         return typesToConvert;
     }
     

@@ -16,6 +16,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lType {
     
+    AGENT(OntNamespace.FOAF, "Agent"),
     ANNOTATION(OntNamespace.OA, "Annotation"),
     CLASSIFICATION("Classification"),
     CONFERENCE("Conference"),
