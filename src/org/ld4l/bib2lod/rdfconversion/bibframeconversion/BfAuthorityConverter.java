@@ -27,6 +27,7 @@ public class BfAuthorityConverter extends BfResourceConverter {
             new ArrayList<BfProperty>();
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_HAS_AUTHORITY);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_IDENTIFIER_VALUE);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_SYSTEM_NUMBER);
     }
     
