@@ -17,6 +17,7 @@ public enum BfType {
     BF_AGENT("Agent", Ld4lType.AGENT),
     BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
     BF_AUTHORITY("Authority"),
+    BF_CATEGORY("Category"),
     BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
     BF_EVENT("Event", Ld4lType.EVENT),
     BF_FAMILY("Family", Ld4lType.FAMILY),

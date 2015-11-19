@@ -330,7 +330,12 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()                 
+                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()  
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + BfType.BF_CATEGORY.prefixed() 
                 + "} }"                
         );
         
