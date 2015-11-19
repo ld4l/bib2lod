@@ -149,7 +149,29 @@ public abstract class BfResourceConverter {
         return new ArrayList<BfProperty>();
     }
 
-
+    /**
+     * If there is a statement in the model with a property in the list, remove
+     * the resource that is the object of the property from the model.
+     * @param props
+     */
+    protected void removeResources(List<BfProperty> props) {
+        for (BfProperty prop : props) {
+            Resource resource = 
+                    subject.getPropertyResourceValue(prop.property());
+            if (resource != null) {
+                removeResource(model, resource);
+            }
+        }
+    }
+    /**
+     * Convenience method to remove a resource from a Jena model. In Jena, this
+     * is accomplished by removing all statements in which the resource is the
+     * subject or the object.
+     */
+    protected void removeResource(Model model, Resource resource) {
+        model.removeAll(resource, null, null);
+        model.removeAll(null, null, resource);
+    }
     
 
 }
