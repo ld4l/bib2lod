@@ -27,7 +27,7 @@ public abstract class BfResourceConverter {
     
     protected Resource subject;
     protected Model model;
-    protected BfType bibframeType;
+    protected BfType bfType;
     protected Model assertions;
     // protected Model retractions;
 
@@ -37,7 +37,7 @@ public abstract class BfResourceConverter {
                 + this.getClass().getSimpleName()
                 + "; converting Bibframe type " + bfType);  
                  
-        this.bibframeType = bfType;
+        this.bfType = bfType;
     }
 
     // Public interface method: initialize instance variables and convert.
@@ -133,7 +133,7 @@ public abstract class BfResourceConverter {
 
     protected List<BfType> getBfTypesToConvert() {
         List<BfType> typesToConvert = new ArrayList<BfType>();
-        typesToConvert.add(this.bibframeType);
+        typesToConvert.add(this.bfType);
         return typesToConvert;
     }
     
