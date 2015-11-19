@@ -17,16 +17,12 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfFamilyConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfOrganizationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPlaceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTemporalConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
 
@@ -62,7 +58,8 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfAuthorityConverter.class);
-//      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);
+//      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
+        // Maybe can just use BfAuthorityConverter for Topics?
         CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 

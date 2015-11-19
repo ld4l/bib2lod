@@ -154,9 +154,8 @@ public class RdfCleaner extends RdfProcessor {
      * be handled differently, unless we convert all input to n-triples first. 
      * See sample input/output below. 
      * 
-     * For now, just handling N-Triples and RDF/XML input as string 
-     * replacements. JSON-LD and Turtle input not supported; see notes on 
-     * problems with Turtle input below.
+     * For now, just handling N-Triples, RDF/XML, and Turtle input as string 
+     * replacements. JSON-LD input not supported; see notes below.
      * 
      * 
      * Sample input/output for different serializations on test input RDF
@@ -235,8 +234,9 @@ public class RdfCleaner extends RdfProcessor {
      * _:node1a4bq2o58x11 a madsrdf:Authority , madsrdf:Topic ;
            madsrdf:authoritativeLabel "1894" ;
      *
-     * In this case a Jena model would be a better implementation. For now,
-     * don't support Turtle input.
+     * In this case a Jena model would be a better implementation. So in Turtle
+     * we don't modify this and let the <unknown:namespace> go through; it 
+     * causes no problems in later processing stages.
      * 
      * =================================================
      * 
@@ -246,7 +246,7 @@ public class RdfCleaner extends RdfProcessor {
         if (line.contains("<>") 
                 // rdfxml input
                 || line.contains("rdf:resource=\"\"")) {
-                // turtle input
+                // turtle input; this doesn't work - see above
                 // || line.contains("<unknown:namespace>")) {
             LOGGER.debug("Found line with empty object: " + line);
             line = "";

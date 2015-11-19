@@ -24,35 +24,14 @@ public abstract class BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
-
-    private static final List<BfProperty> AUTH_PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        AUTH_PROPERTIES_TO_CONVERT.add(BfProperty.BF_HAS_AUTHORITY);
-    }
-
-    private static final List<BfProperty> AUTH_PROPERTIES_TO_RETRACT = 
-            new ArrayList<BfProperty>();
-    static {
-        AUTH_PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE);
-        AUTH_PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
-    }
     
     protected Resource subject;
     protected Model model;
     protected BfType bibframeType;
     protected Model assertions;
     // protected Model retractions;
-    
-//    private static final List<Property> PROPERTIES_TO_RETRACT = 
-//            new ArrayList<Property>();
-//    static {
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE.property());
-//        PROPERTIES_TO_RETRACT.add(
-//                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property());
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE.property());
-//    }
 
+    // TODO Make abstract if not instantiated ***
     public BfResourceConverter(BfType bfType) {
         LOGGER.debug("In constructor for converter type " 
                 + this.getClass().getSimpleName()
@@ -94,8 +73,8 @@ public abstract class BfResourceConverter {
     protected void convert() {
         
         // Map of Bibframe to LD4L types.
-        Map<Resource, Resource> typeMap = BfType.typeMap(getBfTypesToConvert());
-        LOGGER.debug(getBfTypesToConvert());
+        Map<Resource, Resource> typeMap = 
+                BfType.typeMap(getBfTypesToConvert());
                 
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = BfProperty.propertyMap(
@@ -157,7 +136,7 @@ public abstract class BfResourceConverter {
         typesToConvert.add(this.bibframeType);
         return typesToConvert;
     }
- 
+    
     protected List<BfProperty> getBfPropertiesToConvert() {
         return new ArrayList<BfProperty>();
     }
@@ -170,12 +149,7 @@ public abstract class BfResourceConverter {
         return new ArrayList<BfProperty>();
     }
 
-    protected List<BfProperty> getBfAuthPropertiesToConvert() {
-        return AUTH_PROPERTIES_TO_CONVERT;
-    }
+
     
-    protected List<BfProperty> getBfAuthPropertiesToRetract() {
-        return AUTH_PROPERTIES_TO_RETRACT;
-    }
-  
+
 }

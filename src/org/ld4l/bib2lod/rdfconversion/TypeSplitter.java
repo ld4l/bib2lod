@@ -179,7 +179,7 @@ public class TypeSplitter extends RdfProcessor {
         // NB Topic is an Authority, so ordering is crucial
         if (type == BfType.BF_TOPIC) {          
             pss = getBfTopicSparql();
-        } else if (BfType.authorities().contains(type)) {
+        } else if (type.isAuthority()) {
             pss = getBfAuthoritySparql();
         } else if (type == BfType.BF_INSTANCE) {       
             pss = getBfInstanceSparql();

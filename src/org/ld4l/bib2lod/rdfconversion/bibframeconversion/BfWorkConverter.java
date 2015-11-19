@@ -19,7 +19,7 @@ public class BfWorkConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUBJECT);
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =

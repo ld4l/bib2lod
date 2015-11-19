@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.logging.log4j.LogManager;
@@ -11,7 +9,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
-public class BfTemporalConverter extends BfResourceConverter {
+public class BfTemporalConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTemporalConverter.class);
@@ -28,18 +26,14 @@ public class BfTemporalConverter extends BfResourceConverter {
     }
     
 
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return getBfAuthPropertiesToConvert();
-    }
     
     @Override
     protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
+        Map<BfProperty, Ld4lProperty> propertyMap = super.getBfPropertyMap();
+        // Converter-specific value overrides superclass value.
+        propertyMap.putAll(PROPERTY_MAP);
+        return propertyMap;
     }
     
-    @Override
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return getBfAuthPropertiesToRetract();
-    }
+
 }

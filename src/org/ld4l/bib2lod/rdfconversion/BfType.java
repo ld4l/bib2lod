@@ -18,6 +18,7 @@ public enum BfType {
     // or miscellaneous, etc.? For now, no need.
     
     BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
+    BF_AUTHORITY("Authority"),
     BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
     BF_EVENT("Event", Ld4lType.EVENT),
     BF_FAMILY("Family", Ld4lType.FAMILY),
@@ -135,6 +136,7 @@ public enum BfType {
     
     public static List<BfType> authorities() {
         return Arrays.asList(
+            BF_AUTHORITY,
             BF_FAMILY,
             BF_JURISDICTION,
             BF_MEETING,

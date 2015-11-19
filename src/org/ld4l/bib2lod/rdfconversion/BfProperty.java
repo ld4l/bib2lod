@@ -27,7 +27,7 @@ public enum BfProperty {
     BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR),
     BF_IDENTIFIER("identifier"),
     BF_IDENTIFIER_SCHEME("identifierScheme"),
-    BF_IDENTIFIER_VALUE("identifierValue"),
+    BF_IDENTIFIER_VALUE("identifierValue", Ld4lProperty.VALUE),
     BF_ITEM_ID("itemId"),
     BF_LABEL("label", Ld4lProperty.LABEL),
     BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),

@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -15,7 +13,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
-public class BfPersonConverter extends BfResourceConverter {
+public class BfPersonConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfPersonConverter.class);
@@ -95,14 +93,4 @@ public class BfPersonConverter extends BfResourceConverter {
         return props;   
     }
 
-    
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return getBfAuthPropertiesToConvert();
-    }
-
-    @Override
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return getBfAuthPropertiesToRetract();
-    }
 }
