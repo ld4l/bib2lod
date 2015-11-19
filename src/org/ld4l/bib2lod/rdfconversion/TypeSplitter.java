@@ -177,9 +177,9 @@ public class TypeSplitter extends RdfProcessor {
         ParameterizedSparqlString pss = null;
         
         // NB Topic is an Authority, so ordering is crucial
-        if (type == BfType.BF_TOPIC) {          
-            pss = getBfTopicSparql();
-        } else if (type.isAuthority()) {
+//        if (type == BfType.BF_TOPIC) {          
+//            pss = getBfTopicSparql();
+        if (type.isAuthority()) {
             pss = getBfAuthoritySparql();
         } else if (type == BfType.BF_INSTANCE) {       
             pss = getBfInstanceSparql();
@@ -232,33 +232,33 @@ public class TypeSplitter extends RdfProcessor {
         return pss;
     }
 
-    private ParameterizedSparqlString getBfTopicSparql() {
-
-        ParameterizedSparqlString pss = new ParameterizedSparqlString();
-        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
-
-        pss.setCommandText(
-                "CONSTRUCT { ?s1 ?p1 ?o1 . "
-                + "?o1 ?p2 ?o2 . } "
-                + "WHERE {  { " 
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "} UNION { "
-                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed() 
-                + "} UNION { "
-                + "?s1 ?p1 ?o1 . "
-                + "?s1 a ?type . "
-                + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()                 
-                + "} }"                
-        );
-        
-        LOGGER.debug(pss.toString());
-        return pss;
-    }
+//    private ParameterizedSparqlString getBfTopicSparql() {
+//
+//        ParameterizedSparqlString pss = new ParameterizedSparqlString();
+//        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+//
+//        pss.setCommandText(
+//                "CONSTRUCT { ?s1 ?p1 ?o1 . "
+//                + "?o1 ?p2 ?o2 . } "
+//                + "WHERE {  { " 
+//                + "?s1 ?p1 ?o1 . "
+//                + "?s1 a ?type . "
+//                + "} UNION { "
+//                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
+//                + "?s1 a ?type . "
+//                + "?o1 ?p2 ?o2 . " 
+//                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed() 
+//                + "} UNION { "
+//                + "?s1 ?p1 ?o1 . "
+//                + "?s1 a ?type . "
+//                + "?o1 ?p2 ?o2 . "
+//                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()                 
+//                + "} }"                
+//        );
+//        
+//        LOGGER.debug(pss.toString());
+//        return pss;
+//    }
     
     private ParameterizedSparqlString getBfAuthoritySparql() {
 
@@ -275,7 +275,12 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed()               
+                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed()  
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . "
+                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()     
                 + "} }"                
         );
         
