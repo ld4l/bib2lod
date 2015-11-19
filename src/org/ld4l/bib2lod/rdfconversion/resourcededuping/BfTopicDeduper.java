@@ -31,6 +31,12 @@ public class BfTopicDeduper extends BfResourceDeduper {
         SCHEMES.put("(OCoLC)fst", Vocabulary.FAST);
     }
     
+    private static final Map<String, String> SCHEME_PREFIXES = 
+            new HashMap<String, String>();
+    static {
+        SCHEME_PREFIXES.put("(OCoLC)fst", "fst");
+    }
+    
     public BfTopicDeduper(BfType type) {
         super(type);
     } 
@@ -215,12 +221,16 @@ public class BfTopicDeduper extends BfResourceDeduper {
             // Currently we have only FAST URIs, but later there may be other
             // schemes that provide dereferenceable URIs.
             for (Entry<String, Vocabulary> entry : SCHEMES.entrySet()) {
-                String prefix = entry.getKey();
-            
-                if (id.startsWith(prefix)) {
-                    String localName = id.substring(prefix.length() + 1);
-                    // Remove leading zeros from localName (though not required)
-                    localName = StringUtils.stripStart(localName, "0");
+                String vocabId = entry.getKey();           
+                if (id.startsWith(vocabId)) {
+                    // Valid XML local names don't start with a digit; see
+                    // http://www.w3.org/TR/xml11/#NT-NameStartChar. FAST URIs
+                    // with local name "fst" + FAST id resolve correctly, so 
+                    // use that form here.
+                    String prefix = SCHEME_PREFIXES.containsKey(vocabId) ?
+                            SCHEME_PREFIXES.get(vocabId) : "";
+                    String localName = prefix + id.substring(vocabId.length());
+                            
                     String externalUri = entry.getValue().uri() + localName; 
                     LOGGER.debug(
                             "Topic URI from external scheme: " + externalUri);
