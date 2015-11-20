@@ -16,21 +16,31 @@ public enum BfType {
 
     BF_AGENT("Agent", Ld4lType.AGENT),
     BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
+    BF_ARCHIVAL("Archival"),
     BF_AUTHORITY("Authority"),
     BF_CATEGORY("Category"),
     BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
+    BF_COLLECTION("Collection", Ld4lType.COLLECTION),
+    BF_ELECTRONIC("Electronic", Ld4lType.ELECTRONIC),
     BF_EVENT("Event", Ld4lType.EVENT),
     BF_FAMILY("Family", Ld4lType.FAMILY),
     BF_HELD_ITEM("HeldItem", Ld4lType.ITEM),
     BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER),    
     BF_INSTANCE("Instance", Ld4lType.INSTANCE),    
+    BF_INTEGRATING("Integrating", Ld4lType.INTEGRATING_RESOURCE), 
     BF_JURISDICTION("Jurisdiction", Ld4lType.JURISDICTION),  
     BF_LANGUAGE("Language", Ld4lType.LANGUAGE),
+    BF_MANUSCRIPT("Manuscript", Ld4lType.MANUSCRIPT),
     BF_MEETING("Meeting", Ld4lType.MEETING),
+    BF_MONOGRAPH("Monograph", Ld4lType.MONOGRAPH),
+    BF_MULTIPART_MONOGRAPH("MultipartMonograph", Ld4lType.MULTIPART_MONOGRAPH),
     BF_ORGANIZATION("Organization", Ld4lType.ORGANIZATION),                        
     BF_PERSON("Person", Ld4lType.PERSON),
     BF_PROVIDER("Provider"),
     BF_PLACE("Place", Ld4lType.PLACE),
+    BF_PRINT("Print", Ld4lType.PRINT),
+    BF_SERIAL("Print", Ld4lType.SERIAL),
+    BF_TACTILE("Print", Ld4lType.TACTILE),
     BF_TEMPORAL("Temporal", Ld4lType.TIME),
     BF_TITLE("Title", Ld4lType.TITLE),
     BF_TOPIC("Topic", Ld4lType.TOPIC),  
@@ -116,6 +126,8 @@ public enum BfType {
    
     private static final Map<String, BfType> LOOKUP_BY_FILENAME = 
             new HashMap<String, BfType>();
+    private static final Map<Resource, BfType> LOOKUP_BY_JENA_ONTCLASS = 
+            new HashMap<Resource, BfType>();
     private static final Map<Resource, Resource> TYPE_MAP = 
             new HashMap<Resource, Resource>();
     
@@ -125,12 +137,17 @@ public enum BfType {
             if (bfType.ld4lType != null) {
                 TYPE_MAP.put(bfType.ontClass, bfType.ld4lType.ontClass());
             }
+            LOOKUP_BY_JENA_ONTCLASS.put(bfType.ontClass, bfType);
         }
     }
     
     public static BfType typeForFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
+    }
+    
+    public static BfType typeForOntClass(Resource ontClass) {
+        return LOOKUP_BY_JENA_ONTCLASS.get(ontClass);
     }
     
     public static List<BfType> authorities() {

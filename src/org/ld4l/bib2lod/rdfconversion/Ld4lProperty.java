@@ -27,6 +27,7 @@ public enum Ld4lProperty {
     IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
     IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),
     IS_HOLDING_FOR("isHoldingFor"),
+    IS_INSTANCE_OF("isInstanceOf"),
     LABEL(OntNamespace.RDFS, "label"),
     NAME(OntNamespace.FOAF, "name"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),

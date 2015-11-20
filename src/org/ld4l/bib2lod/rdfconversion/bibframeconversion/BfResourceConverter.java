@@ -97,6 +97,8 @@ public abstract class BfResourceConverter {
             RDFNode object = stmt.getObject();
                        
             if (predicate.equals(RDF.type)) {
+                
+                // *** TODO PUT INTO A boolean METHOD - see BfInstanceConverter
                 Resource ontClass = object.asResource();
                 Resource newOntClass;
                 // If new type has been specified, use it
@@ -112,6 +114,7 @@ public abstract class BfResourceConverter {
                 }
                 assertions.add(subject, predicate, newOntClass);
                 stmts.remove();
+                // *** 
 
             } else if (propertyMap.containsKey(predicate)) {
                 assertions.add(subject, propertyMap.get(predicate), object);
