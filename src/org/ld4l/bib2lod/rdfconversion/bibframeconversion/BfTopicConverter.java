@@ -27,7 +27,7 @@ public class BfTopicConverter extends BfAuthorityConverter {
     }
     
     protected void convert() {
-        removeFastTopicStatements();
+        convertFastTopic();
         super.convert();
     }
 
@@ -37,7 +37,7 @@ public class BfTopicConverter extends BfAuthorityConverter {
      * They are also not authorities, so we remove the MADS Authority from the
      * model. 
      */
-    private void removeFastTopicStatements() {
+    private void convertFastTopic() {
         String namespace = subject.getNameSpace();
         if (namespace.equals(Vocabulary.FAST.uri())) {
             removeResources(PROPS_TO_REMOVE);  
