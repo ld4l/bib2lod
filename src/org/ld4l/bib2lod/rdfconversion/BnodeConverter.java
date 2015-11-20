@@ -117,7 +117,7 @@ public class BnodeConverter extends RdfProcessor {
          */
         String id = fileCount + "_" + node.getBlankNodeId().toString();
         Resource uriResource;
-        if (idToUriResource.keySet().contains(id)) {
+        if (idToUriResource.containsKey(id)) {
             uriResource = idToUriResource.get(id);  
             LOGGER.debug("Found hash key " + id);
         } else {

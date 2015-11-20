@@ -113,7 +113,7 @@ public abstract class BfResourceConverter {
                 assertions.add(subject, predicate, newOntClass);
                 stmts.remove();
 
-            } else if (propertyMap.keySet().contains(predicate)) {
+            } else if (propertyMap.containsKey(predicate)) {
                 assertions.add(subject, propertyMap.get(predicate), object);
                 stmts.remove();
                 
