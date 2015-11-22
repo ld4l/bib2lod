@@ -208,8 +208,8 @@ public class BibframeConverter extends RdfProcessor {
             try {
                 BfResourceConverter converter = 
                         (BfResourceConverter) converterClass
-                        .getConstructor(BfType.class)
-                        .newInstance(bfType);   
+                        .getConstructor(BfType.class, String.class)
+                        .newInstance(bfType, localNamespace);   
                 LOGGER.debug("Got converter for type " + bfType);
                 return converter;
             } catch (Exception e) {

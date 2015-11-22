@@ -11,26 +11,20 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceConverter.class);
     
-
-    private static final Map<Resource, Resource> TYPES_TO_CONVERT = 
-            BfType.typeMap(Arrays.asList(
-                BfType.BF_ELECTRONIC,
-                BfType.BF_INSTANCE,
-                BfType.BF_PRINT,
-                BfType.BF_TACTILE            
-            ));
-            
+ 
     private static final Map<Resource, Resource> NEW_WORK_TYPES = 
             BfType.typeMap(Arrays.asList(
                     BfType.BF_COLLECTION,
@@ -49,12 +43,11 @@ public class BfInstanceConverter extends BfResourceConverter {
             BfType.typeMap(Arrays.asList(
                     BfType.BF_MANUSCRIPT
             ));
-
-    
-    private static final List<Resource> TYPES_TO_RETRACT = 
-            new ArrayList<Resource>();
+   
+    private static final List<BfType> TYPES_TO_RETRACT = 
+            new ArrayList<BfType>();
     static {
-            TYPES_TO_RETRACT.add(BfType.BF_ARCHIVAL.ontClass());
+            TYPES_TO_RETRACT.add(BfType.BF_ARCHIVAL);
     }
    
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
@@ -72,62 +65,109 @@ public class BfInstanceConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_STATEMENT);
     }
 
-    public BfInstanceConverter(BfType bfType) {
-        super(bfType);
+    public BfInstanceConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override 
     protected void convert() {
-        convertInstanceTypes();
+        
+        convertInstance();
+        
+//        convertIdentifiers(); - create BfIdentifierConverter instance
+//        
+//        convertTitles(); - create BfTitleConverter instance
         
         super.convert();
+        
+
     }
-   
-    protected void convertInstanceTypes() {
         
-        // Get the associated Work
-        Statement instanceOf = 
-                subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
-        Resource relatedWork = instanceOf.getResource();
+    private void convertInstance() {
         
-        // Get the Instance's declared types
-        StmtIterator stmts = model.listStatements();               
+        StmtIterator stmts = subject.listProperties();
         while (stmts.hasNext()) {
+            
             Statement statement = stmts.nextStatement();
             Property predicate = statement.getPredicate();
+            
             if (predicate.equals(RDF.type)) {
-                if (convertInstanceType(statement.getResource(), relatedWork)) {
+                if (convertInstanceTypeToWorkType(statement.getResource())) {
                     stmts.remove();
                 }
                 
-
+                // Handle conversion to Item type here, when we know how...
+                
+            // TODO Do we ever get a providerStatement statement instead of a
+            // Provider object? If so, we need to parse the literal value to
+            // create the Provision and its associated properties.
+            } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
+                convertProvider(statement.getResource());
+                stmts.remove();
             }
-
-            
-
         }
     }
-    
-    private boolean convertInstanceType(Resource type, Resource relatedWork) {
-        // NB This could also be done in super.convert(), but more straight-
-        // forward to handle all RDF.type statements in one place. 
-        if (TYPES_TO_CONVERT.containsKey(type)) {
-            assertions.add(subject, RDF.type, TYPES_TO_CONVERT.get(type));
-        } else if (NEW_WORK_TYPES.containsKey(type)) {
+   
+
+    private boolean convertInstanceTypeToWorkType(Resource type) {
+
+        if (NEW_WORK_TYPES.containsKey(type)) {
+            
+            // Get the associated Work
+            Statement instanceOf = 
+                    subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
+            Resource relatedWork = instanceOf.getResource();
             assertions.add(relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
-        // Problematic, since we don't have the related items here. And if we did, how
-        // would we know which item(s) it applied to?
-        // } else if (NEW_ITEM_TYPES.containsKey(type)) {
-            
-        } else if (TYPES_TO_RETRACT.contains(type)) {
-            
-        } else {
-            return false;
+            return true;
         }
-        return true;
+ 
+        return false;
+    }
+    
+    // TODO Could also create a BfProviderConverter, but since it only occurs 
+    // with an Instance, may not be worth it. (Whereas Titles and Identifiers 
+    // are related to multiple types of other Resources.) On the other hand,
+    // would be a cleaner implementation.
+    private void convertProvider(Resource subject) {
+
+        StmtIterator stmts = subject.listProperties();
+        while (stmts.hasNext()) {
+            
+            Statement statement = stmts.nextStatement();
+            Property predicate = statement.getPredicate();
+          
+            if (predicate.equals(RDF.type)) {
+                assertions.add(subject, RDF.type, 
+                        Ld4lType.PUBLISHER_PROVISION.ontClass());
+                assertions.add(subject, RDFS.label, "Publisher");
+                
+            } else if (predicate.equals(
+                    BfProperty.BF_PROVIDER_NAME.property())) {
+                assertions.add(subject, Ld4lProperty.AGENT.property(), 
+                        statement.getResource());
+                
+            } else if (predicate.equals(
+                    BfProperty.BF_PROVIDER_PLACE.property())) {
+                assertions.add(subject, Ld4lProperty.AT_LOCATION.property(), 
+                        statement.getResource());
+            
+            } else if (predicate.equals(
+                    BfProperty.BF_PROVIDER_DATE.property())) {
+                assertions.add(subject, Ld4lProperty.DATE.property(), 
+                        statement.getLiteral());
+            }
+            
+            stmts.remove();
+        }
+
+    }
+    
+    @Override
+    protected List<BfType> getBfTypesToRetract() {
+        return TYPES_TO_RETRACT;
     }
     
 

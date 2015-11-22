@@ -180,6 +180,6 @@ public abstract class RdfProcessor extends Processor {
         // to the UUID.
         return namespace + "_" + UUID.randomUUID().toString();
     }
-    
+
 
 }

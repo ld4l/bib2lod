@@ -22,8 +22,8 @@ public class BfTopicConverter extends BfAuthorityConverter {
         PROPS_TO_REMOVE.add(BfProperty.BF_SYSTEM_NUMBER);
     }
 
-    public BfTopicConverter(BfType bfType) {
-        super(bfType);
+    public BfTopicConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     protected void convert() {

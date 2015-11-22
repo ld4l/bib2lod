@@ -41,6 +41,7 @@ public enum Ld4lType {
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location"),
+    PUBLISHER_PROVISION(OntNamespace.LD4L, "PublisherProvision"),
     PRINT("Print"),
     SERIAL("Serial"),
     SHELF_MARK("ShelfMark"),

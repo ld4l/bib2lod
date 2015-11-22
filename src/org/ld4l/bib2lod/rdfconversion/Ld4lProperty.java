@@ -14,7 +14,10 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lProperty {
 
+    AGENT(OntNamespace.PROV, "agent"),
+    AT_LOCATION(OntNamespace.PROV, "atLocation"),
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
+    DATE(OntNamespace.DCTERMS, "date"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
     HAS_ANNOTATION("hasAnnotation"),
     HAS_LANGUAGE(OntNamespace.DCTERMS, "language"),
@@ -31,6 +34,7 @@ public enum Ld4lProperty {
     LABEL(OntNamespace.RDFS, "label"),
     NAME(OntNamespace.FOAF, "name"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
+    SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
     VALUE(OntNamespace.RDF, "value");
     
 

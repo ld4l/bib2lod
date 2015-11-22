@@ -25,8 +25,8 @@ public class BfPersonConverter extends BfAuthorityConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
 
-    public BfPersonConverter(BfType bfType) {
-        super(bfType);
+    public BfPersonConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override 

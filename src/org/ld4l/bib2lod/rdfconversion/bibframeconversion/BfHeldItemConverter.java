@@ -65,8 +65,8 @@ public class BfHeldItemConverter extends BfResourceConverter {
         SHELF_MARK_VOCABS.put(BfProperty.BF_SHELF_MARK_UDC, Vocabulary.UDC);
     }
     
-    public BfHeldItemConverter(BfType bfType) {
-        super(bfType);
+    public BfHeldItemConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override

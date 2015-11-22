@@ -10,8 +10,8 @@ public class BfOrganizationConverter extends BfAuthorityConverter {
             LogManager.getLogger(BfOrganizationConverter.class);
     
 
-    public BfOrganizationConverter(BfType bfType) {
-        super(bfType);
+    public BfOrganizationConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
 
 }

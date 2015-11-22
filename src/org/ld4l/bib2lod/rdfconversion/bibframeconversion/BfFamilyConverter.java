@@ -14,8 +14,8 @@ public class BfFamilyConverter extends BfAuthorityConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfFamilyConverter.class);
     
-    public BfFamilyConverter(BfType bfType) {
-        super(bfType);
+    public BfFamilyConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
 }

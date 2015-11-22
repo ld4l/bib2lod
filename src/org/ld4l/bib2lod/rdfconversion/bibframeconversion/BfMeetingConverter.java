@@ -13,8 +13,8 @@ public class BfMeetingConverter extends BfAuthorityConverter {
             LogManager.getLogger(BfMeetingConverter.class);
 
     
-    public BfMeetingConverter(BfType bfType) {
-        super(bfType);
+    public BfMeetingConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     

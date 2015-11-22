@@ -19,8 +19,8 @@ public class BfEventConverter extends BfResourceConverter {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_EVENT_PLACE);
     }
 
-    public BfEventConverter(BfType bfType) {
-        super(bfType);
+    public BfEventConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override

@@ -34,8 +34,8 @@ public class BfWorkConverter extends BfResourceConverter {
 
     }
 
-    public BfWorkConverter(BfType bfType) {
-        super(bfType);
+    public BfWorkConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override

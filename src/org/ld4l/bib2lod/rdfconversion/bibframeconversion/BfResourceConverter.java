@@ -29,15 +29,17 @@ public abstract class BfResourceConverter {
     protected Model model;
     protected BfType bfType;
     protected Model assertions;
-    // protected Model retractions;
+    protected Model retractions;
+    protected String localNamespace;
 
     // TODO Make abstract if not instantiated ***
-    public BfResourceConverter(BfType bfType) {
+    public BfResourceConverter(BfType bfType, String localNamespace) {
         LOGGER.debug("In constructor for converter type " 
                 + this.getClass().getSimpleName()
                 + "; converting Bibframe type " + bfType);  
                  
         this.bfType = bfType;
+        this.localNamespace = localNamespace;
     }
 
     // Public interface method: initialize instance variables and convert.
@@ -47,12 +49,16 @@ public abstract class BfResourceConverter {
         this.model = subject.getModel();
         
         assertions = ModelFactory.createDefaultModel();
-        // retractions = ModelFactory.createDefaultModel();
+        
+        // So far we are not using the retractions model, using 
+        // StmtIterator.remove() instead, but declaring this gives added
+        // flexibility to the subclasses.
+        retractions = ModelFactory.createDefaultModel();
         
         convert();
         
-        model.add(assertions);
-        // model.remove(retractions);
+        model.add(assertions)
+             .remove(retractions);
         
         return model;
     }
@@ -75,7 +81,10 @@ public abstract class BfResourceConverter {
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = 
                 BfType.typeMap(getBfTypesToConvert());
-                
+        
+        List<Resource> typesToRetract = 
+                BfType.ontClasses(getBfTypesToRetract());
+                 
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = BfProperty.propertyMap(
                 getBfPropertiesToConvert(), getBfPropertyMap());
@@ -98,21 +107,29 @@ public abstract class BfResourceConverter {
                        
             if (predicate.equals(RDF.type)) {
 
-                Resource ontClass = object.asResource();
-                Resource newOntClass;
+                Resource type = object.asResource();
+                
                 // If new type has been specified, use it
-                if (typeMap.containsKey(ontClass)) {
-                    newOntClass = typeMap.get(ontClass);
-                // Otherwise change type namespace from Bibframe to LD4L
-                } else if (ontClass.getNameSpace().equals(bfNamespace)) {
-                    newOntClass = model.createResource(
-                            ld4lNamespace + ontClass.getLocalName());  
-                // Keep non-mapped types in non-Bibframe namespace
-                } else {
-                    continue;
+                if (typeMap.containsKey(type)) {
+                    assertions.add(subject, predicate, typeMap.get(type));
+                    stmts.remove();
+                    
+                } else if (typesToRetract.contains(type)) {
+                    stmts.remove();
+                
+                // Otherwise change type namespace from Bibframe to LD4L.
+                // Don't modify remaining types in non-Bibframe namespace.  
+                } else if (type.getNameSpace().equals(bfNamespace)) {
+                    Resource newType = model.createResource(
+                            ld4lNamespace + type.getLocalName()); 
+                    // Log to make sure we shouldn't have handled this resource
+                    // in a more specific way.
+                    LOGGER.info("Changing resource " + type.getURI()
+                            + " in Bibframe namespace to " 
+                            + newType.getURI() + " in LD4L namespace.");
+                    assertions.add(subject, predicate, newType);
+                    stmts.remove();
                 }
-                assertions.add(subject, predicate, newOntClass);
-                stmts.remove();
 
             } else if (propertyMap.containsKey(predicate)) {
                 assertions.add(subject, propertyMap.get(predicate), object);
@@ -126,16 +143,26 @@ public abstract class BfResourceConverter {
             } else if (predicate.getNameSpace().equals(bfNamespace)) {             
                 Property ld4lProp = model.createProperty(
                         ld4lNamespace, predicate.getLocalName());
+                // Log to make sure we shouldn't have handled this property in
+                // a more specific way.
+                LOGGER.info("Changing property " + predicate.getURI()
+                        + " in Bibframe namespace to " + ld4lProp.getURI()
+                        + " in LD4L namespace.");
                 assertions.add(subject, ld4lProp, object);
                 stmts.remove();               
             } 
         } 
     }   
 
+
     protected List<BfType> getBfTypesToConvert() {
         List<BfType> typesToConvert = new ArrayList<BfType>();
         typesToConvert.add(this.bfType);
         return typesToConvert;
+    }
+    
+    protected List<BfType> getBfTypesToRetract() {
+        return new ArrayList<BfType>();
     }
     
     protected List<BfProperty> getBfPropertiesToConvert() {
@@ -165,13 +192,17 @@ public abstract class BfResourceConverter {
         }
     }
     /**
-     * Convenience method to remove a resource from a Jena model. In Jena, this
+     * Convenience methods to remove a resource from a Jena model. In Jena, this
      * is accomplished by removing all statements in which the resource is the
      * subject or the object.
      */
     protected void removeResource(Model model, Resource resource) {
         model.removeAll(resource, null, null);
         model.removeAll(null, null, resource);
+    }
+    
+    protected void removeResource(Resource resource) {
+        removeResource(model, resource);
     }
     
 

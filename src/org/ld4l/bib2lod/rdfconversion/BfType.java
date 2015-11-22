@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -192,6 +193,17 @@ public enum BfType {
         }
         
         return typeMap;
+    }
+    
+    public static List<Resource> ontClasses(List<BfType> bfTypes) {
+        
+        List<Resource> resources = new ArrayList<Resource>();
+        for (BfType type : bfTypes) {
+            resources.add(type.ontClass);
+        }
+        
+        return resources;
+        
     }
     
 }

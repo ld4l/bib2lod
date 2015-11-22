@@ -21,8 +21,8 @@ public class BfTemporalConverter extends BfAuthorityConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL,Ld4lProperty.LABEL);              
     }
 
-    public BfTemporalConverter(BfType bfType) {
-        super(bfType);
+    public BfTemporalConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
 

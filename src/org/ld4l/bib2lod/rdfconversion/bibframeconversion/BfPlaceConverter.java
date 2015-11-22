@@ -10,8 +10,8 @@ public class BfPlaceConverter extends BfAuthorityConverter {
             LogManager.getLogger(BfPlaceConverter.class);
     
 
-    public BfPlaceConverter(BfType bfType) {
-        super(bfType);
+    public BfPlaceConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     

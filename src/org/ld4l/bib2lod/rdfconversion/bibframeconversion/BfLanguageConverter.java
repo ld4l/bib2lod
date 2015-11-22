@@ -27,8 +27,8 @@ public class BfLanguageConverter extends BfResourceConverter {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE_OF_PART);
     }
     
-    public BfLanguageConverter(BfType bfType) {
-        super(bfType);
+    public BfLanguageConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override

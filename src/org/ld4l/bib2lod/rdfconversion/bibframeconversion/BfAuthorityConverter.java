@@ -44,8 +44,8 @@ public class BfAuthorityConverter extends BfResourceConverter {
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
     }
 
-    public BfAuthorityConverter(BfType bfType) {
-        super(bfType);
+    public BfAuthorityConverter(BfType bfType, String localNamespace) {
+        super(bfType, localNamespace);
     }
     
     @Override
