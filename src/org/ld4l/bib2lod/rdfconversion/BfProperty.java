@@ -21,6 +21,7 @@ public enum BfProperty {
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
+    BF_DISTRIBUTION("distribution"),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
