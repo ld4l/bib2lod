@@ -20,9 +20,11 @@ public enum Ld4lProperty {
     DATE(OntNamespace.DCTERMS, "date"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
     HAS_ANNOTATION("hasAnnotation"),
+    HAS_CONTRIBUTION("hasContribution"),
     HAS_LANGUAGE(OntNamespace.DCTERMS, "language"),
     HAS_LOCATION(OntNamespace.PROV, "atLocation"),
     HAS_ORIGINAL_LANGUAGE("hasOriginalLanguage"),
+    HAS_PROVISION("hasProvision"),
     HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
     HAS_SUBJECT(OntNamespace.DCTERMS, "subject"),
     HAS_TARGET(OntNamespace.OA, "hasTarget"),
