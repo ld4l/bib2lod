@@ -8,6 +8,7 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.ld4l.bib2lod.Action;
 
 /**
  * Defines properties used by Bibframe in the RDF input to the conversion
@@ -21,7 +22,7 @@ public enum BfProperty {
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
-    BF_DISTRIBUTION("distribution"),
+    BF_DISTRIBUTION("distribution", Ld4lProperty.HAS_PROVISION),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
@@ -35,11 +36,15 @@ public enum BfProperty {
     BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
     BF_LANGUAGE_OF_PART("languageOfPart", Ld4lProperty.LABEL), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
-    BF_PROVIDER_DATE("providerDate"),
-    BF_PROVIDER_NAME("providerName"),
-    BF_PROVIDER_PLACE("providerPlace"),
-    BF_PROVIDER_STATEMENT("providerStatement"),
-    BF_PUBLICATION("publication"),
+    BF_MANUFACTURE("manufacture", Ld4lProperty.HAS_PROVISION),
+    BF_PROVIDER("provider", Ld4lProperty.HAS_PROVISION),
+    BF_PROVIDER_DATE("providerDate", Ld4lProperty.DATE),
+    BF_PROVIDER_NAME("providerName", Ld4lProperty.AGENT),
+    BF_PROVIDER_PLACE("providerPlace", Ld4lProperty.AT_LOCATION),
+    BF_PROVIDER_ROLE("providerRole"),
+    BF_PROVIDER_STATEMENT("providerStatement", Ld4lProperty.PROVIDER_STATEMENT),
+    BF_PRODUCTION("production", Ld4lProperty.HAS_PROVISION),
+    BF_PUBLICATION("publication", Ld4lProperty.HAS_PROVISION),
     BF_RESOURCE_PART("resourcePart"),
     BF_SHELF_MARK("shelfMark"),
     BF_SHELF_MARK_DDC("shelfMarkDdc"),
@@ -200,5 +205,21 @@ public enum BfProperty {
                 BfProperty.BF_AUTHORIZED_ACCESS_POINT
                 );        
     }
+    
+//    private static final Map<Property, BfProperty> LOOKUP_BY_JENA_PROP = 
+//            new HashMap<Property, BfProperty>();
+//    
+//    static {
+//        for (BfProperty bfProp : BfProperty.values()) {
+//            Property prop = bfProp.property;
+//            if (prop != null) {
+//                LOOKUP_BY_JENA_PROP.put(prop,  bfProp);
+//            }
+//        }
+//    }
+//    
+//    public BfProperty get(Property prop) {
+//        return LOOKUP_BY_JENA_PROP.get(prop);
+//    }
     
 }

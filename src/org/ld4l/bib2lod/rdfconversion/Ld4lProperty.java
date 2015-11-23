@@ -36,6 +36,7 @@ public enum Ld4lProperty {
     LABEL(OntNamespace.RDFS, "label"),
     NAME(OntNamespace.FOAF, "name"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
+    PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
     SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
     VALUE(OntNamespace.RDF, "value");
     
