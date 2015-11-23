@@ -162,6 +162,8 @@ public class BfInstanceConverter extends BfResourceConverter {
             
             stmts.remove();
         }
+        assertions.add(
+                this.subject, Ld4lProperty.HAS_PROVISION.property(), subject);
 
     }
     
