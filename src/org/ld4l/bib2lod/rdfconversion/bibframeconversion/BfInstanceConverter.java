@@ -106,6 +106,7 @@ public class BfInstanceConverter extends BfResourceConverter {
             // create the Provision and its associated properties.
             } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
                 convertProvider(statement.getResource());
+//                convertProvider(statement);
                 stmts.remove();
             }
         }
@@ -131,39 +132,45 @@ public class BfInstanceConverter extends BfResourceConverter {
     // with an Instance, may not be worth it. (Whereas Titles and Identifiers 
     // are related to multiple types of other Resources.) On the other hand,
     // would be a cleaner implementation.
-    private void convertProvider(Resource subject) {
+    private void convertProvider(Resource provider) { //Statement statement) {
 
-        StmtIterator stmts = subject.listProperties();
+        StmtIterator stmts = provider.listProperties();
         while (stmts.hasNext()) {
             
             Statement statement = stmts.nextStatement();
             Property predicate = statement.getPredicate();
           
             if (predicate.equals(RDF.type)) {
-                assertions.add(subject, RDF.type, 
+                assertions.add(provider, RDF.type, 
                         Ld4lType.PUBLISHER_PROVISION.ontClass());
-                assertions.add(subject, RDFS.label, "Publisher");
+                assertions.add(provider, RDFS.label, "Publisher");
                 
             } else if (predicate.equals(
                     BfProperty.BF_PROVIDER_NAME.property())) {
-                assertions.add(subject, Ld4lProperty.AGENT.property(), 
+                assertions.add(provider, Ld4lProperty.AGENT.property(), 
                         statement.getResource());
                 
             } else if (predicate.equals(
                     BfProperty.BF_PROVIDER_PLACE.property())) {
-                assertions.add(subject, Ld4lProperty.AT_LOCATION.property(), 
+                assertions.add(provider, Ld4lProperty.AT_LOCATION.property(), 
                         statement.getResource());
             
             } else if (predicate.equals(
                     BfProperty.BF_PROVIDER_DATE.property())) {
-                assertions.add(subject, Ld4lProperty.DATE.property(), 
+                assertions.add(provider, Ld4lProperty.DATE.property(), 
                         statement.getLiteral());
             }
             
             stmts.remove();
         }
+
+//        Resource provider = statement.getResource();        
         assertions.add(
-                this.subject, Ld4lProperty.HAS_PROVISION.property(), subject);
+                this.subject, Ld4lProperty.HAS_PROVISION.property(), provider);
+        
+//        BfResourceConverter converter = new BfProviderConverter(
+//                BfType.BF_PROVIDER, this.localNamespace);
+//        assertions.add(converter.convertSubject(provider));
 
     }
     
