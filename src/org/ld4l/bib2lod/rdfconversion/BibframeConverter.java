@@ -12,7 +12,9 @@ import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
@@ -141,8 +143,6 @@ public class BibframeConverter extends RdfProcessor {
         }
         
         Model outputModel = ModelFactory.createDefaultModel();
-              
-        LOGGER.debug(inputModel.toString());
         
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
@@ -157,38 +157,8 @@ public class BibframeConverter extends RdfProcessor {
                 LOGGER.debug("Converting " + typeForFile + " subject " 
                         + inputSubject.getURI());
                 
-                // Create a model of statements related to this subject
-                Model modelForSubject = ModelFactory.createDefaultModel();
+                Resource subject = getSubjectToConvert(inputSubject);
                 
-                // Start with statements of which this subject is the subject
-                modelForSubject.add(inputSubject.listProperties());
-    
-                // Now add statements with the object of the previous statements 
-                // as subject.
-                NodeIterator nodes = modelForSubject.listObjects();
-                while (nodes.hasNext()) {
-                    RDFNode node = nodes.nextNode();
-                    // NB We don't need node.isResource(), which includes bnodes 
-                    // as well, since all nodes have been converted to URI 
-                    // resources.
-                    if (node.isURIResource()) {
-                        modelForSubject.add(inputModel.listStatements(
-                                (Resource) node, null, (RDFNode) null));
-                    }
-                }
-                
-                // Finally, add statements with this subject as object.
-                // So far we only have these in bfLanguage.nt, where we get the
-                // :work bf:language :language statement.
-                modelForSubject.add(
-                        inputModel.listStatements(null, null, inputSubject));
-           
-                // NB At this point, subject.getModel() is the inputModel, not 
-                // the modelForSubject. Get the subject of the subjectModel 
-                // instead.            
-                Resource subject = 
-                        modelForSubject.getResource(inputSubject.getURI());
-
                 outputModel.add(converter.convert(subject));
                 
             } else {
@@ -198,6 +168,49 @@ public class BibframeConverter extends RdfProcessor {
         }
 
         writeModelToFile(outputModel, outputFile);       
+    }
+    
+    /**
+     * Create a subset of the input model that pertains to the specified 
+     * resource. This includes statements where the resource is the subject
+     * or the object.
+     */
+    public static Resource getSubjectToConvert(Resource resource) {
+        
+        Model inputModel = resource.getModel();
+        
+        // Create the new model of statements related to this subject
+        Model modelForSubject = ModelFactory.createDefaultModel();
+        
+        // Start with statements of which this subject is the subject
+        modelForSubject.add(resource.listProperties());
+
+        // Now add statements with the object of the previous statements 
+        // as subject. Which statements are included has been determined by
+        // the query for the resource type in TypeSplitter.
+        NodeIterator nodes = modelForSubject.listObjects();
+        while (nodes.hasNext()) {
+            RDFNode node = nodes.nextNode();
+            // NB We don't need node.isResource(), which includes bnodes 
+            // as well, since all nodes have been converted to URI 
+            // resources.
+            if (node.isURIResource()) {
+                modelForSubject.add(inputModel.listStatements(
+                        node.asResource(), null, (RDFNode) null));
+            }
+        }
+        
+        // Finally, add statements with the current resource as object.
+        // Examples:
+        // :work bf:language :language
+        // :annotation bf:annotates :work
+        modelForSubject.add(
+                inputModel.listStatements(null, null, resource));
+           
+        // NB At this point, resource.getModel() is the inputModel, not 
+        // the modelForSubject. Get the subject of the modelForSubject 
+        // instead.            
+        return modelForSubject.getResource(resource.getURI());               
     }
     
     
