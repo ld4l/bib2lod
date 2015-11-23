@@ -19,9 +19,9 @@ public class BfMeetingConverter extends BfAuthorityConverter {
     
     
     @Override
-    protected void convert() {
+    protected void convertModel() {
         convertConferenceName();
-        super.convert();        
+        super.convertModel();        
     }
    
     

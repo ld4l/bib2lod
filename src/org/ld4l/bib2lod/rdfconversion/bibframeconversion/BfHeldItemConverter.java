@@ -70,9 +70,9 @@ public class BfHeldItemConverter extends BfResourceConverter {
     }
     
     @Override
-    protected void convert() {
+    protected void convertModel() {
         convertShelfMark();
-        super.convert();
+        super.convertModel();
     }
     
     

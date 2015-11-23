@@ -41,9 +41,26 @@ public abstract class BfResourceConverter {
         this.bfType = bfType;
         this.localNamespace = localNamespace;
     }
+    
+    /*
+     * Public interface method. Defined so convertSubject() and convertModel() 
+     * can be protected, so that if subclasses override these methods they
+     * cannot be called from outside the package.
+     */
+    public final Model convert(Resource subject) {        
+        return convertSubject(subject);
+    }
 
-    // Public interface method: initialize instance variables and convert.
-    public final Model convert(Resource subject) {    
+    /*
+     * Top level method: initialize instance variables and convert.
+     * Subclasses may override: needed in the case where one converter calls
+     * another. The called converter must pass back a converted model, with
+     * assertions and retractions applied, to the caller. The subject of the
+     * called converter is also different from the caller's subject. Examples:
+     * Instance converter calls Provider, Title, and Identifier converters.
+     * Work converter calls Title converter.
+     */
+    protected Model convertSubject(Resource subject) {    
         
         this.subject = subject;
         this.model = subject.getModel();
@@ -55,7 +72,7 @@ public abstract class BfResourceConverter {
         // flexibility to the subclasses.
         retractions = ModelFactory.createDefaultModel();
         
-        convert();
+        convertModel();
         
         model.add(assertions)
              .remove(retractions);
@@ -74,9 +91,10 @@ public abstract class BfResourceConverter {
      * external ones.  
      * Retractions are removed immediately, so we don't need a retractions 
      * model. (We could change this in order to make the strategy uniform, but
-     * the results will not be affected.)
+     * the results will not be affected.) A retractions model has been defined
+     * anyway, to give the subclasses more flexibility.
      */
-    protected void convert() {
+    protected void convertModel() {
         
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = 

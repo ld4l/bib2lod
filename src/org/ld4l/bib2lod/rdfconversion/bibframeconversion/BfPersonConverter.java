@@ -30,9 +30,9 @@ public class BfPersonConverter extends BfAuthorityConverter {
     }
     
     @Override 
-    protected void convert() {
+    protected void convertModel() {
         convertBfLabel();
-        super.convert();
+        super.convertModel();
     }
 
     /** 

@@ -26,9 +26,9 @@ public class BfTopicConverter extends BfAuthorityConverter {
         super(bfType, localNamespace);
     }
     
-    protected void convert() {
+    protected void convertModel() {
         convertFastTopic();
-        super.convert();
+        super.convertModel();
     }
 
     /** 

@@ -38,7 +38,8 @@ public class BibframeConverterFactory {
         BF_CONVERTERS.put(BfType.BF_WORK,  BfResourceConverter.class);            
     }
     
-    public static BfResourceConverter createBfResourceConverter(File inputFile) {
+    public static BfResourceConverter createBfResourceConverter(
+            File inputFile) {
 
         // This case shouldn't occur since the file comes from an iteration on 
         // files in the input directory.
@@ -47,7 +48,8 @@ public class BibframeConverterFactory {
             return null;
         }
         
-        LOGGER.trace("Creating converter for input file " + inputFile.getName());
+        LOGGER.trace("Creating converter for input file " 
+                + inputFile.getName());
         
         String basename = FilenameUtils.getBaseName(inputFile.toString());
         BfType type = BfType.typeForFilename(basename);
@@ -66,7 +68,8 @@ public class BibframeConverterFactory {
  
         try {
             Constructor<?> c = converterClass.getConstructor(BfType.class);
-            BfResourceConverter converter = (BfResourceConverter) c.newInstance(type);
+            BfResourceConverter converter = 
+                    (BfResourceConverter) c.newInstance(type);
             return converter;
         } catch (Exception e) {
             // TODO Auto-generated catch block

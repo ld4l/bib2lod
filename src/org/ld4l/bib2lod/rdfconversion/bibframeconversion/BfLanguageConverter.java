@@ -32,10 +32,10 @@ public class BfLanguageConverter extends BfResourceConverter {
     }
     
     @Override
-    protected void convert() {
+    protected void convertModel() {
         convertOriginalLanguage();
         assignExternalUri();
-        super.convert();  
+        super.convertModel();  
     }
 
     /**
@@ -55,8 +55,7 @@ public class BfLanguageConverter extends BfResourceConverter {
         }
 
     }
-    
-    
+        
     private void convertOriginalLanguage() {
       
         Property resourcePartProp = BfProperty.BF_RESOURCE_PART.property();

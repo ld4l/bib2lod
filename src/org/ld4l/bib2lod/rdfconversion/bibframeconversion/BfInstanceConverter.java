@@ -73,7 +73,7 @@ public class BfInstanceConverter extends BfResourceConverter {
     }
     
     @Override 
-    protected void convert() {
+    protected void convertModel() {
         
         convertInstance();
         
@@ -81,7 +81,7 @@ public class BfInstanceConverter extends BfResourceConverter {
 //        
 //        convertTitles(); - create BfTitleConverter instance
         
-        super.convert();
+        super.convertModel();
         
 
     }
