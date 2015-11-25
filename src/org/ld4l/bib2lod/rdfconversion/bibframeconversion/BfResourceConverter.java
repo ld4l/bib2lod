@@ -89,6 +89,12 @@ public abstract class BfResourceConverter {
      * anyway, to give the subclasses more flexibility.
      */
     protected void convertModel() {
+        
+        // If this method is called from a subclass method which neglected to
+        // apply retractions to the model, apply them now, so that they are not
+        // reprocessed here.
+        model.remove(retractions);
+        retractions.removeAll();
                     
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = 
@@ -148,9 +154,6 @@ public abstract class BfResourceConverter {
         }
         
         model.add(assertions);
-        // In this method we are not building the retractions model, but using 
-        // the iterator to remove statements from the model.
-        // model.remove(retractions);
  
     }   
     

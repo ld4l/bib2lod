@@ -6,7 +6,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -55,12 +54,12 @@ public class BfProviderConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_ROLE);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DISTRIBUTION);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_MANUFACTURE);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PRODUCTION);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER);
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PUBLICATION);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_ROLE);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DISTRIBUTION);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_MANUFACTURE);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PRODUCTION);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER);
+//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PUBLICATION);
     }
 
     private Statement providerStatement;

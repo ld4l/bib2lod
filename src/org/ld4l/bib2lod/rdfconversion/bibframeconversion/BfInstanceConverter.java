@@ -12,14 +12,12 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
@@ -88,17 +86,26 @@ public class BfInstanceConverter extends BfResourceConverter {
     @Override 
     protected void convertModel() {
         
-        convertProviders();
-      
+        List<Property> providerProps = 
+                BfProperty.propertyList(PROVIDER_PROPERTIES);
+
+        List<Statement> statements = new ArrayList<Statement>();        
         StmtIterator stmts = model.listStatements();
-        while (stmts.hasNext()) {
-            
-            Statement statement = stmts.nextStatement();
+        
+        // Copy statements to a list and loop through the list rather than
+        // using the iterator. This allows us to modify the model inside the
+        // loop, since the list itself is not being modified, whereas using an
+        // iterator does not allow us to remove the current statement from the
+        // model outside the iterator.
+        stmts.forEachRemaining(statements::add);
+        
+        for (Statement statement : statements) {
+
             Property predicate = statement.getPredicate();
             
             if (predicate.equals(RDF.type)) {
                 if (convertInstanceTypeToWorkType(statement.getResource())) {
-                    stmts.remove();
+                    retractions.add(statement);
                 }
                 
                 // Handle conversion to Item type here, when we know how...
@@ -106,13 +113,15 @@ public class BfInstanceConverter extends BfResourceConverter {
             // TODO Do we ever get a providerStatement statement instead of a
             // Provider object? If so, we need to parse the literal value to
             // create the Provision and its associated properties.
-            // } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
-                // convertProvider(statement);
-                //stmts.remove();
+            } else if (providerProps.contains(predicate)) {
+                convertProvider(statement);
+ 
             
             } //else convertIdentifier()
               // else convertTitle()
         }
+        
+        model.remove(retractions);
         
         super.convertModel();
     }
@@ -131,34 +140,6 @@ public class BfInstanceConverter extends BfResourceConverter {
         }
  
         return false;
-    }
-    
-    private void convertProviders() {
-        
-        List<Property> providerProps = 
-                BfProperty.propertyList(PROVIDER_PROPERTIES);
-        
-        List<Statement> providerStmts = new ArrayList<Statement>();
-        
-        for (Property prop : providerProps) {
-            StmtIterator stmts = 
-                    model.listStatements(subject, prop, (RDFNode) null);
-            stmts.forEachRemaining(providerStmts::add);
-            
-            // NB This version generates a ConcurrentModificationException when
-            // we delete stmt from the model in BfProviderConverter. The 
-            // version with the for-loop does not, because, though we are 
-            // altering the model, we are not altering the object we're looping
-            // through.
-            while (stmts.hasNext()) {
-                Statement stmt = stmts.nextStatement();
-                convertProvider(stmt);
-            }
-        }
-        
-        for (Statement stmt : providerStmts) {
-            convertProvider(stmt);
-        }                   
     }
     
     private void convertProvider(Statement statement) {
