@@ -21,6 +21,7 @@ public enum BfProperty {
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
+    BF_DERIVED_FROM("derivedFrom"),
     BF_DISTRIBUTION("distribution", Ld4lProperty.HAS_PROVISION),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
@@ -36,12 +37,13 @@ public enum BfProperty {
     BF_LANGUAGE_OF_PART("languageOfPart", Ld4lProperty.LABEL), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
     BF_MANUFACTURE("manufacture", Ld4lProperty.HAS_PROVISION),
+    BF_MODE_OF_ISSUANCE("modeOfIssuance"),
     BF_PROVIDER("provider", Ld4lProperty.HAS_PROVISION),
     BF_PROVIDER_DATE("providerDate", Ld4lProperty.DATE),
     BF_PROVIDER_NAME("providerName", Ld4lProperty.AGENT),
     BF_PROVIDER_PLACE("providerPlace", Ld4lProperty.AT_LOCATION),
-    BF_PROVIDER_ROLE("providerRole"),
-    BF_PROVIDER_STATEMENT("providerStatement", Ld4lProperty.PROVIDER_STATEMENT),
+    BF_PROVIDER_ROLE("providerRole", Ld4lProperty.LEGACY_PROVIDER_ROLE),
+    BF_PROVIDER_STATEMENT("providerStatement", Ld4lProperty.LEGACY_PROVIDER_STATEMENT),
     BF_PRODUCTION("production", Ld4lProperty.HAS_PROVISION),
     BF_PUBLICATION("publication", Ld4lProperty.HAS_PROVISION),
     BF_RESOURCE_PART("resourcePart"),
@@ -52,8 +54,8 @@ public enum BfProperty {
     BF_SHELF_MARK_SCHEME("shelfMarkScheme"),
     BF_SHELF_MARK_UDC("shelfMarkUdc"),
     BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
-    BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNode", 
-            Ld4lProperty.SUPPLEMENTARY_CONTENT_NOTE),
+    BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
+            Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
@@ -205,20 +207,20 @@ public enum BfProperty {
                 );        
     }
     
-//    private static final Map<Property, BfProperty> LOOKUP_BY_JENA_PROP = 
-//            new HashMap<Property, BfProperty>();
-//    
-//    static {
-//        for (BfProperty bfProp : BfProperty.values()) {
-//            Property prop = bfProp.property;
-//            if (prop != null) {
-//                LOOKUP_BY_JENA_PROP.put(prop,  bfProp);
-//            }
-//        }
-//    }
-//    
-//    public BfProperty get(Property prop) {
-//        return LOOKUP_BY_JENA_PROP.get(prop);
-//    }
+    private static final Map<Property, BfProperty> LOOKUP_BY_JENA_PROP = 
+            new HashMap<Property, BfProperty>();
+    
+    static {
+        for (BfProperty bfProp : BfProperty.values()) {
+            Property prop = bfProp.property;
+            if (prop != null) {
+                LOOKUP_BY_JENA_PROP.put(prop,  bfProp);
+            }
+        }
+    }
+    
+    public static BfProperty get(Property prop) {
+        return LOOKUP_BY_JENA_PROP.get(prop);
+    }
     
 }

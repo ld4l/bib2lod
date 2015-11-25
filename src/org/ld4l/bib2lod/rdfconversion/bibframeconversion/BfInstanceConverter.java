@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -18,6 +17,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
@@ -53,6 +53,9 @@ public class BfInstanceConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_ROLE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUPPLEMENTARY_CONTENT_NOTE);
 
     }
 
@@ -77,8 +80,11 @@ public class BfInstanceConverter extends BfResourceConverter {
     static {
         // These get removed in BfProviderConverter
         // PROPERTIES_TO_RETRACT.addAll(PROVIDER_PROPERTIES);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DERIVED_FROM);
     }
-
+    
+    private Resource relatedWork;
+    
     public BfInstanceConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
@@ -86,8 +92,11 @@ public class BfInstanceConverter extends BfResourceConverter {
     @Override 
     protected void convertModel() {
         
-        List<Property> providerProps = 
-                BfProperty.propertyList(PROVIDER_PROPERTIES);
+        // Get the associated Work
+        Statement instanceOf = 
+                subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
+        // Probably can't be null
+        relatedWork = instanceOf != null ? instanceOf.getResource() : null;
 
         List<Statement> statements = new ArrayList<Statement>();        
         StmtIterator stmts = model.listStatements();
@@ -100,25 +109,48 @@ public class BfInstanceConverter extends BfResourceConverter {
         stmts.forEachRemaining(statements::add);
         
         for (Statement statement : statements) {
-
-            Property predicate = statement.getPredicate();
             
+            Property predicate = statement.getPredicate();
+    
             if (predicate.equals(RDF.type)) {
                 if (convertInstanceTypeToWorkType(statement.getResource())) {
                     retractions.add(statement);
                 }
                 
                 // Handle conversion to Item type here, when we know how...
+              
+            } else {
                 
-            // TODO Do we ever get a providerStatement statement instead of a
-            // Provider object? If so, we need to parse the literal value to
-            // create the Provision and its associated properties.
-            } else if (providerProps.contains(predicate)) {
-                convertProvider(statement);
- 
-            
-            } //else convertIdentifier()
-              // else convertTitle()
+                BfProperty bfProp = BfProperty.get(predicate);
+                
+                if (bfProp == null) {
+                    // Review logs to make sure nothing has escaped.
+                    LOGGER.info("No specific handling defined for property " 
+                            + predicate.getURI()
+                            + "; falling through to default case.");
+                    continue;
+                                 
+                // TODO Do we ever get a providerStatement statement instead of a
+                // Provider object? If so, we need to parse the literal value to
+                // create the Provision and its associated properties.
+                } else if (PROVIDER_PROPERTIES.contains(bfProp)) {
+                    convertProvider(statement);
+                             
+                } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
+                    if (relatedWork != null) {
+                        // Probably also added from conversion of statement
+                        // :instance a Monograph
+                        assertions.add(relatedWork, RDF.type, 
+                                Ld4lType.MONOGRAPH.ontClass());
+                        retractions.add(statement);
+                    }
+                    
+                }
+                
+                //else convertIdentifier()
+                  // else convertTitle()
+            }
+           
         }
         
         model.remove(retractions);
@@ -130,12 +162,9 @@ public class BfInstanceConverter extends BfResourceConverter {
     private boolean convertInstanceTypeToWorkType(Resource type) {
 
         if (NEW_WORK_TYPES.containsKey(type)) {
-            
-            // Get the associated Work
-            Statement instanceOf = 
-                    subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
-            Resource relatedWork = instanceOf.getResource();
-            assertions.add(relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
+            if (relatedWork != null) {
+                assertions.add(relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
+            }
             return true;
         }
  

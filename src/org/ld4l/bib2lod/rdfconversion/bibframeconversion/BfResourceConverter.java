@@ -139,6 +139,16 @@ public abstract class BfResourceConverter {
                 } // else: external namespace (e.g., madsrdf); don't modify
 
             } else if (propertyMap.containsKey(predicate)) {
+                
+                if (LOGGER.isInfoEnabled()) {
+                    if (BfProperty.get(predicate).namespace().equals
+                            (OntNamespace.LEGACY)) {
+                        // Review logs to determine what legacy properties are
+                        // being used, to inform future development.
+                        LOGGER.info("Adding statement with property in legacy "
+                                + "namespace: " + predicate.getURI());
+                    }
+                }
                 assertions.add(subject, propertyMap.get(predicate), object);
                 stmts.remove();
                 

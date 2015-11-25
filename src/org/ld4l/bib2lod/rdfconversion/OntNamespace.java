@@ -8,14 +8,14 @@ public enum OntNamespace {
     // Assign prefixes here rather than getting from the models, since they may
     // not be provided. We're using these just to create filenames, not for
     // anything significant about the ontologies themselves.
-    OA("http://www.w3.org/ns/oa#", "oa"),
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
-    LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
-    LEGACY("http://ld4l.org/ontology/bib/legacy", "legacy"),
-    DCTERMS("http://purl.org/dc/terms/", "dcterms"),
+    DCTERMS("http://purl.org/dc/terms/", "dcterms"),    
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
-    MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
+    LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
+    LEGACY("http://ld4l.org/ontology/bib/legacy/", "legacy"),
     LINGVO("http://www.lingvoj.org/ontology#", "lingvo"),
+    MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
+    OA("http://www.w3.org/ns/oa#", "oa"),
     OWL("http://www.w3.org/2002/07/owl#", "owl"),
     PROV("http://www.w3.org/ns/prov#", "prov"),
     RDF("http://www.w3.org/1999/02/22-rdf-syntax-ns#", "rdf"),
