@@ -69,18 +69,11 @@ public abstract class BfResourceConverter {
         this.model = subject.getModel();
 
         convertModel();
-
-        model.add(assertions)
-             .remove(retractions);
-       
+        
         return model;
-    }
 
-    // Used by subclasses
-    protected Model convertSubject(Resource subject, Statement statement) {
-        return convertSubject(subject);
     }
-    
+ 
     /* 
      * Default conversion method. Subclasses may override.
      * 
@@ -112,9 +105,6 @@ public abstract class BfResourceConverter {
         List<Property> propsToRetract = 
                 BfProperty.propertyList(getBfPropertiesToRetract());
 
-        String bfNamespace = OntNamespace.BIBFRAME.uri();
-        String ld4lNamespace = OntNamespace.LD4L.uri();
-        
         // Iterate through the statements in the model.
         StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
@@ -136,21 +126,11 @@ public abstract class BfResourceConverter {
                 } else if (typesToRetract.contains(type)) {
                     stmts.remove();
                 
-                // Otherwise change type namespace from Bibframe to LD4L.
-                // Don't modify remaining types in non-Bibframe namespace.  
-                } else if (type.getNameSpace().equals(bfNamespace)) {
-                    
-                    // if in list, change; else discard
-                    Resource newType = model.createResource(
-                            ld4lNamespace + type.getLocalName()); 
-                    // Log to make sure we shouldn't have handled this resource
-                    // in a more specific way.
-                    LOGGER.info("Changing resource " + type.getURI()
-                            + " in Bibframe namespace to " 
-                            + newType.getURI() + " in LD4L namespace.");
-                    assertions.add(subject, predicate, newType);
+                // Otherwise change type namespace from Bibframe to LD4L.  
+                } else if (convertBfTypeNamespace(type)) {
                     stmts.remove();
-                } // else: put into outputModel - nonbf-ns
+                    
+                } // else: external namespace (e.g., madsrdf); don't modify
 
             } else if (propertyMap.containsKey(predicate)) {
                 assertions.add(subject, propertyMap.get(predicate), object);
@@ -161,19 +141,79 @@ public abstract class BfResourceConverter {
               
             // Change any remaining predicates in Bibframe namespace to LD4L
             // namespace.
-            } else if (predicate.getNameSpace().equals(bfNamespace)) {             
-                Property ld4lProp = model.createProperty(
-                        ld4lNamespace, predicate.getLocalName());
-                // Log to make sure we shouldn't have handled this property in
-                // a more specific way.
-                LOGGER.info("Changing property " + predicate.getURI()
-                        + " in Bibframe namespace to " + ld4lProp.getURI()
-                        + " in LD4L namespace.");
-                assertions.add(subject, ld4lProp, object);
-                stmts.remove();               
-            } 
-        } 
+            } else if (convertBfPropertyNamespace(predicate, object)) {
+                stmts.remove();    
+                
+            } // else: external namespace (e.g., madsrdf); don't modify
+        }
+        
+        model.add(assertions);
+        // In this method we are not building the retractions model, but using 
+        // the iterator to remove statements from the model.
+        // model.remove(retractions);
+ 
     }   
+    
+    /*
+     * Fall-through case: change namespace from Bibframe to LD4L. Don't modify
+     * statements in external namespace (e.g., madsrdf).
+     * 
+     * Possibly we should reverse the default: change namespace if in a 
+     * list of types, else discard. 
+     */
+    protected boolean convertBfTypeNamespace(Resource type) {
+        
+        String bfNamespace = OntNamespace.BIBFRAME.uri();
+        String ld4lNamespace = OntNamespace.LD4L.uri();
+
+        if (type.getNameSpace().equals(bfNamespace)) {
+            
+            Resource newType = model.createResource(
+                    ld4lNamespace + type.getLocalName());
+            
+            // Log for dev purposes, to make sure we shouldn't have handled 
+            // this type in a more specific way.
+            LOGGER.info("Changing resource " + type.getURI()
+                    + " in Bibframe namespace to " 
+                    + newType.getURI() + " in LD4L namespace.");
+             
+            assertions.add(subject, RDF.type, newType);
+            
+            return true;
+        }
+        
+        return false;
+    }
+
+    /*
+     * Fall-through case: change namespace from Bibframe to LD4L. Don't modify
+     * statements in external namespace (e.g., madsrdf).
+     * 
+     * Possibly we should reverse the default: change namespace if in a 
+     * list of properties, else discard. 
+     */
+    protected boolean convertBfPropertyNamespace(
+            Property predicate, RDFNode object) {
+        
+        String bfNamespace = OntNamespace.BIBFRAME.uri();
+        String ld4lNamespace = OntNamespace.LD4L.uri();
+        
+        if (predicate.getNameSpace().equals(bfNamespace)) {  
+            
+            Property ld4lProp = model.createProperty(
+                    ld4lNamespace, predicate.getLocalName());
+            
+            // Log for dev purposes, to make sure we shouldn't have handled 
+            // this type in a more specific way.
+            LOGGER.info("Changing property " + predicate.getURI()
+                    + " in Bibframe namespace to " + ld4lProp.getURI()
+                    + " in LD4L namespace.");
+            assertions.add(subject, ld4lProp, object);
+            return true;
+        }
+        
+        return false;
+    }
 
     protected List<BfType> getBfTypesToConvert() {
         List<BfType> typesToConvert = new ArrayList<BfType>();

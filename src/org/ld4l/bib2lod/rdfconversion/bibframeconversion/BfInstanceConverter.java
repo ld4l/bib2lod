@@ -6,7 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -157,18 +156,18 @@ public class BfInstanceConverter extends BfResourceConverter {
 //            stmts.remove();
 //        }
         
-        BfResourceConverter converter = new BfProviderConverter(
+        // Type converter as BfProviderConverter rather than 
+        // BfResourceConverter, else we must add a vacuous 
+        // convertSubject(Resource, Statement) method to BfResourceConverter.
+        BfProviderConverter converter = new BfProviderConverter(
               BfType.BF_PROVIDER, this.localNamespace);
-//        BfResourceConverter converter = new BfProviderConverter(
-//                BfType.BF_PROVIDER, this.localNamespace, statement);
         
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
         Resource provider = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
                 
-        Model provisionModel = converter.convertSubject(provider, statement);
-        assertions.add(provisionModel);
+        assertions.add(converter.convertSubject(provider, statement));
     }
     
     @Override

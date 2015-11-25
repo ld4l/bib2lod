@@ -64,7 +64,7 @@ public class BfProviderConverter extends BfResourceConverter {
         super(bfType, localNamespace);
     }
     
-    @Override
+
     protected Model convertSubject(Resource subject, Statement statement) {
         
         this.subject = subject;
