@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -62,11 +63,22 @@ public class BfInstanceConverter extends BfResourceConverter {
     static {
 
     }
+
+    private static final List<BfProperty> PROVIDER_PROPERTIES = 
+            new ArrayList<BfProperty>();
+    static {
+        PROVIDER_PROPERTIES.add(BfProperty.BF_DISTRIBUTION);
+        PROVIDER_PROPERTIES.add(BfProperty.BF_MANUFACTURE);
+        PROVIDER_PROPERTIES.add(BfProperty.BF_PRODUCTION);
+        PROVIDER_PROPERTIES.add(BfProperty.BF_PROVIDER);
+        PROVIDER_PROPERTIES.add(BfProperty.BF_PUBLICATION);
+    }
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_STATEMENT);
+        // These get removed in BfProviderConverter
+        // PROPERTIES_TO_RETRACT.addAll(PROVIDER_PROPERTIES);
     }
 
     public BfInstanceConverter(BfType bfType, String localNamespace) {
@@ -75,8 +87,12 @@ public class BfInstanceConverter extends BfResourceConverter {
     
     @Override 
     protected void convertModel() {
+        
+        LOGGER.debug("before convert providers: " + model.size());
+        convertProviders();
+        LOGGER.debug("after convert providers: " + model.size());
       
-        RdfProcessor.printModel(model,  Level.DEBUG);
+        // RdfProcessor.printModel(model,  Level.DEBUG);
         StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
             
@@ -93,7 +109,7 @@ public class BfInstanceConverter extends BfResourceConverter {
             // TODO Do we ever get a providerStatement statement instead of a
             // Provider object? If so, we need to parse the literal value to
             // create the Provision and its associated properties.
-            } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
+            // } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
                 // convertProvider(statement);
                 //stmts.remove();
             
@@ -120,10 +136,25 @@ public class BfInstanceConverter extends BfResourceConverter {
         return false;
     }
     
-    // TODO Could also create a BfProviderConverter, but since it only occurs 
-    // with an Instance, may not be worth it. (Whereas Titles and Identifiers 
-    // are related to multiple types of other Resources.) On the other hand,
-    // would be a cleaner implementation.
+    private void convertProviders() {
+        
+        List<Property> providerProps = 
+                BfProperty.propertyList(PROVIDER_PROPERTIES);
+        
+        List<Statement> providerStmts = new ArrayList<Statement>();
+        
+        for (Property prop : providerProps) {
+            StmtIterator stmts = 
+                    model.listStatements(subject, prop, (RDFNode) null);
+            stmts.forEachRemaining(providerStmts::add);
+        }
+        
+        for (Statement stmt : providerStmts) {
+            convertProvider(stmt);
+        }
+                   
+    }
+    
     private void convertProvider(Statement statement) {
 
 //        StmtIterator stmts = provider.listProperties();

@@ -120,19 +120,22 @@ public class BibframeConverter extends RdfProcessor {
         String filename = file.getName();
         String outputFile = FilenameUtils.getBaseName(file.toString());
         
-        // No need to convert new statements that have been added during
-        // processing.
-        if (outputFile.equals(NEW_ASSERTIONS_FILENAME)) {
-            LOGGER.debug("Copying file " + filename);
+        LOGGER.debug("Processing file " + filename);
+
+        BfType typeForFile = BfType.typeForFilename(filename);
+        
+        // Includes newAssertions.nt, other.nt
+        if (typeForFile == null) {
+            LOGGER.debug("No type for file " + filename);
             copyFile(file);
             return;
         }
 
-        LOGGER.debug("Processing file " + filename);
+        Model inputModel = readModelFromFile(file); 
         
-        Model inputModel = readModelFromFile(file);  
-     
-        BfType typeForFile = BfType.typeForFilename(filename);
+        LOGGER.debug("Got model of size : " + inputModel.size() 
+                + " for type " + typeForFile);
+        
         BfResourceConverter converter = getConverter(typeForFile);
         
         // If no converter for this type, write the input model as output and
@@ -211,7 +214,10 @@ public class BibframeConverter extends RdfProcessor {
         // be returned by the converter. Other converters will not need to 
         // process these statements, so they can be removed from the input 
         // model.
+        LOGGER.debug(resource.getURI());
+        LOGGER.debug("before removing modelForSubject: " + inputModel.size());
         inputModel.remove(modelForSubject);
+        LOGGER.debug("after removing modelForSubject: " + inputModel.size());
            
         // NB At this point, resource.getModel() is the inputModel, not 
         // the modelForSubject. Get the subject of the modelForSubject 
