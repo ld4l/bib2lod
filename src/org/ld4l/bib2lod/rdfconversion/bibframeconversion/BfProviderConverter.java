@@ -54,12 +54,7 @@ public class BfProviderConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_ROLE);
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DISTRIBUTION);
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_MANUFACTURE);
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PRODUCTION);
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER);
-//        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PUBLICATION);
+
     }
 
     private Statement providerStatement;
@@ -70,9 +65,9 @@ public class BfProviderConverter extends BfResourceConverter {
     
 
     protected Model convertSubject(
-            // providerStatement is the statement linking the subject (the
-            // provider) to the subject of the caller (the instance) using
-            // the property bf:provider or one of its subproperties.
+            // providerStatement links the subject (the provider) to the 
+            // caller's subject (the instance) using the property bf:provider 
+            // or one of its subproperties.
             Resource subject, Statement providerStatement) {
         
         this.subject = subject;
