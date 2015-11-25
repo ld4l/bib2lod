@@ -39,7 +39,7 @@ public class BfTitleConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_TITLE_VALUE);
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =

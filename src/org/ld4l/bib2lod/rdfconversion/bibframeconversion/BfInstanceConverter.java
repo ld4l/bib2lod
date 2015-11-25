@@ -161,6 +161,7 @@ public class BfInstanceConverter extends BfResourceConverter {
         super.convertModel();
     }
  
+    // TODO This method is also used by BfWorkConverter. Need to combine.
     private void convertTitles() {
 
         List<Statement> titleStmts = new ArrayList<Statement>();
@@ -180,6 +181,7 @@ public class BfInstanceConverter extends BfResourceConverter {
                  
     }
 
+    // TODO This method is also used by BfWorkConverter. Need to combine.
     private void convertTitle(Statement statement) {
 
         // Type the converter as BfProviderConverter rather than 
