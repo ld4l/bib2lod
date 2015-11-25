@@ -8,7 +8,6 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.ld4l.bib2lod.Action;
 
 /**
  * Defines properties used by Bibframe in the RDF input to the conversion
