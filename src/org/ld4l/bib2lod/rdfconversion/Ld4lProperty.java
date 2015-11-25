@@ -24,10 +24,12 @@ public enum Ld4lProperty {
     HAS_LANGUAGE(OntNamespace.DCTERMS, "language"),
     HAS_LOCATION(OntNamespace.PROV, "atLocation"),
     HAS_ORIGINAL_LANGUAGE("hasOriginalLanguage"),
+    HAS_PREFERRED_TITLE("hasPreferredTitle"),
     HAS_PROVISION("hasProvision"),
     HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
     HAS_SUBJECT(OntNamespace.DCTERMS, "subject"),
     HAS_TARGET(OntNamespace.OA, "hasTarget"),
+    HAS_TITLE("hasTitle"),
     IDENTIFIED_BY("identifiedBy"),
     IDENTIFIED_BY_AUTHORITY(OntNamespace.MADSRDF, "isIdentifiedByAuthority"),           
     IDENTIFIES_RWO(OntNamespace.MADSRDF, "identifiesRWO"),

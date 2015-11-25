@@ -31,6 +31,7 @@ public enum BfProperty {
     BF_IDENTIFIER_SCHEME("identifierScheme"),
     BF_IDENTIFIER_VALUE("identifierValue", Ld4lProperty.VALUE),
     BF_INSTANCE_OF("instanceOf", Ld4lProperty.IS_INSTANCE_OF),
+    BF_INSTANCE_TITLE("instanceTitle", Ld4lProperty.HAS_TITLE),
     BF_ITEM_ID("itemId"),
     BF_LABEL("label", Ld4lProperty.LABEL),
     BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
@@ -57,6 +58,7 @@ public enum BfProperty {
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
+    BF_WORK_TITLE("workTitle", Ld4lProperty.HAS_TITLE),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(

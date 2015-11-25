@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -161,9 +162,42 @@ public class BfInstanceConverter extends BfResourceConverter {
     }
  
     private void convertTitles() {
+
+        List<Statement> titleStmts = new ArrayList<Statement>();
+        StmtIterator stmts = model.listStatements(subject, 
+                BfProperty.BF_INSTANCE_TITLE.property(), (RDFNode) null);
+        stmts.forEachRemaining(titleStmts::add);
+
+        // Use a list rather than an iterator so that we can modify the model
+        // within the loop.
+        for (Statement stmt : titleStmts) {
+            convertTitle(stmt);           
+        }
         
+        // Now process datatype property titleStatement statements. Try to
+        // match to an existing Title object and remove. If none exists,
+        // construct a new Title object.
+                 
     }
 
+    private void convertTitle(Statement statement) {
+
+        // Type the converter as BfProviderConverter rather than 
+        // BfResourceConverter, else we must add a vacuous 
+        // convertSubject(Resource, Statement) method to BfResourceConverter.
+        BfTitleConverter converter = new BfTitleConverter(
+              BfType.BF_TITLE, this.localNamespace);
+        
+        // Identify the provider resource and build its associated model (i.e.,
+        // statements in which it is the subject or object).
+        Resource title = BibframeConverter.getSubjectModelToConvert(
+                statement.getResource());
+                
+        assertions.add(converter.convertSubject(title, statement));
+        
+    }
+    
+    
     private boolean convertInstanceTypeToWorkType(Resource type) {
 
         if (NEW_WORK_TYPES.containsKey(type)) {

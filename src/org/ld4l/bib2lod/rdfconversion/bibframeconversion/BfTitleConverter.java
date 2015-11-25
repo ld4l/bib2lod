@@ -65,11 +65,11 @@ public class BfTitleConverter extends BfResourceConverter {
             // titleStatement links the subject (the provider) to the 
             // caller's subject (the instance) using the property bf:provider 
             // or one of its subproperties.
-            Resource subject, Statement providerStatement) {
+            Resource subject, Statement titleStatement) {
         
         this.subject = subject;
         this.model = subject.getModel();
-        this.titleStatement = providerStatement;
+        this.titleStatement = titleStatement;
         
         convertModel();
         
@@ -81,7 +81,15 @@ public class BfTitleConverter extends BfResourceConverter {
     @Override
     protected void convertModel() {
         
-      convertTitle();
+
+
+      Resource relatedResource = titleStatement.getSubject();
+      assertions.add(
+              relatedResource, Ld4lProperty.HAS_TITLE.property(), subject);
+
+      // BULK OF METHOD GOES HERE
+      
+      
       model.remove(titleStatement);
       
       // If there were retractions, we should apply them to the model here,
@@ -90,12 +98,6 @@ public class BfTitleConverter extends BfResourceConverter {
       super.convertModel();
     }
 
-    private void convertTitle() {
-        
-        Resource relatedInstance = titleStatement.getSubject();
-        Property titleProp = titleStatement.getPredicate();
-
-    }
     
     @Override 
     protected List<BfType> getBfTypesToConvert() {
