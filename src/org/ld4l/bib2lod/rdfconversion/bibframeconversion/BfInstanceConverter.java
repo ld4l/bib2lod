@@ -6,18 +6,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
@@ -74,21 +76,9 @@ public class BfInstanceConverter extends BfResourceConverter {
     
     @Override 
     protected void convertModel() {
-        
-        convertInstance();
-        
-//        convertIdentifiers(); - create BfIdentifierConverter instance
-//        
-//        convertTitles(); - create BfTitleConverter instance
-        
-        super.convertModel();
-        
-
-    }
-        
-    private void convertInstance() {
-        
-        StmtIterator stmts = subject.listProperties();
+      
+        RdfProcessor.printModel(model,  Level.DEBUG);
+        StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
             
             Statement statement = stmts.nextStatement();
@@ -105,11 +95,14 @@ public class BfInstanceConverter extends BfResourceConverter {
             // Provider object? If so, we need to parse the literal value to
             // create the Provision and its associated properties.
             } else if (predicate.equals(BfProperty.BF_PUBLICATION.property())) {
-                convertProvider(statement.getResource());
-//                convertProvider(statement);
-                stmts.remove();
-            }
+                // convertProvider(statement);
+                //stmts.remove();
+            
+            } //else convertIdentifier()
+              // else convertTitle()
         }
+        
+        super.convertModel();
     }
    
 
@@ -132,46 +125,50 @@ public class BfInstanceConverter extends BfResourceConverter {
     // with an Instance, may not be worth it. (Whereas Titles and Identifiers 
     // are related to multiple types of other Resources.) On the other hand,
     // would be a cleaner implementation.
-    private void convertProvider(Resource provider) { //Statement statement) {
+    private void convertProvider(Statement statement) {
 
-        StmtIterator stmts = provider.listProperties();
-        while (stmts.hasNext()) {
-            
-            Statement statement = stmts.nextStatement();
-            Property predicate = statement.getPredicate();
-          
-            if (predicate.equals(RDF.type)) {
-                assertions.add(provider, RDF.type, 
-                        Ld4lType.PUBLISHER_PROVISION.ontClass());
-                assertions.add(provider, RDFS.label, "Publisher");
-                
-            } else if (predicate.equals(
-                    BfProperty.BF_PROVIDER_NAME.property())) {
-                assertions.add(provider, Ld4lProperty.AGENT.property(), 
-                        statement.getResource());
-                
-            } else if (predicate.equals(
-                    BfProperty.BF_PROVIDER_PLACE.property())) {
-                assertions.add(provider, Ld4lProperty.AT_LOCATION.property(), 
-                        statement.getResource());
-            
-            } else if (predicate.equals(
-                    BfProperty.BF_PROVIDER_DATE.property())) {
-                assertions.add(provider, Ld4lProperty.DATE.property(), 
-                        statement.getLiteral());
-            }
-            
-            stmts.remove();
-        }
-
-//        Resource provider = statement.getResource();        
-        assertions.add(
-                this.subject, Ld4lProperty.HAS_PROVISION.property(), provider);
+//        StmtIterator stmts = provider.listProperties();
+//        while (stmts.hasNext()) {
+//            
+//            Statement statement = stmts.nextStatement();
+//            Property predicate = statement.getPredicate();
+//          
+//            if (predicate.equals(RDF.type)) {
+//                assertions.add(provider, RDF.type, 
+//                        Ld4lType.PUBLISHER_PROVISION.ontClass());
+//                assertions.add(provider, RDFS.label, "Publisher");
+//                
+//            } else if (predicate.equals(
+//                    BfProperty.BF_PROVIDER_NAME.property())) {
+//                assertions.add(provider, Ld4lProperty.AGENT.property(), 
+//                        statement.getResource());
+//                
+//            } else if (predicate.equals(
+//                    BfProperty.BF_PROVIDER_PLACE.property())) {
+//                assertions.add(provider, Ld4lProperty.AT_LOCATION.property(), 
+//                        statement.getResource());
+//            
+//            } else if (predicate.equals(
+//                    BfProperty.BF_PROVIDER_DATE.property())) {
+//                assertions.add(provider, Ld4lProperty.DATE.property(), 
+//                        statement.getLiteral());
+//            }
+//            
+//            stmts.remove();
+//        }
         
+        BfResourceConverter converter = new BfProviderConverter(
+              BfType.BF_PROVIDER, this.localNamespace);
 //        BfResourceConverter converter = new BfProviderConverter(
-//                BfType.BF_PROVIDER, this.localNamespace);
-//        assertions.add(converter.convertSubject(provider));
-
+//                BfType.BF_PROVIDER, this.localNamespace, statement);
+        
+        // Identify the provider resource and build its associated model (i.e.,
+        // statements in which it is the subject or object).
+        Resource provider = BibframeConverter.getSubjectModelToConvert(
+                statement.getResource());
+                
+        Model provisionModel = converter.convertSubject(provider, statement);
+        assertions.add(provisionModel);
     }
     
     @Override

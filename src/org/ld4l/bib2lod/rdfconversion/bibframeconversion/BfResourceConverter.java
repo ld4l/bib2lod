@@ -40,6 +40,9 @@ public abstract class BfResourceConverter {
                  
         this.bfType = bfType;
         this.localNamespace = localNamespace;
+        
+        this.assertions = ModelFactory.createDefaultModel();
+        this.retractions = ModelFactory.createDefaultModel();
     }
     
     /*
@@ -64,21 +67,20 @@ public abstract class BfResourceConverter {
         
         this.subject = subject;
         this.model = subject.getModel();
-        
-        assertions = ModelFactory.createDefaultModel();
-        
-        // So far we are not using the retractions model, using 
-        // StmtIterator.remove() instead, but declaring this gives added
-        // flexibility to the subclasses.
-        retractions = ModelFactory.createDefaultModel();
-        
+
         convertModel();
-        
-        model.add(assertions);
-        
+
+        model.add(assertions)
+             .remove(retractions);
+       
         return model;
     }
 
+    // Used by subclasses
+    protected Model convertSubject(Resource subject, Statement statement) {
+        return convertSubject(subject);
+    }
+    
     /* 
      * Default conversion method. Subclasses may override.
      * 
@@ -94,11 +96,7 @@ public abstract class BfResourceConverter {
      * anyway, to give the subclasses more flexibility.
      */
     protected void convertModel() {
-        
-        // If subclasses have specified any retractions, remove them before
-        // iterating through the remaining statements.
-        model.remove(retractions);
-        
+                    
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = 
                 BfType.typeMap(getBfTypesToConvert());
@@ -141,6 +139,8 @@ public abstract class BfResourceConverter {
                 // Otherwise change type namespace from Bibframe to LD4L.
                 // Don't modify remaining types in non-Bibframe namespace.  
                 } else if (type.getNameSpace().equals(bfNamespace)) {
+                    
+                    // if in list, change; else discard
                     Resource newType = model.createResource(
                             ld4lNamespace + type.getLocalName()); 
                     // Log to make sure we shouldn't have handled this resource
@@ -150,7 +150,7 @@ public abstract class BfResourceConverter {
                             + newType.getURI() + " in LD4L namespace.");
                     assertions.add(subject, predicate, newType);
                     stmts.remove();
-                }
+                } // else: put into outputModel - nonbf-ns
 
             } else if (propertyMap.containsKey(predicate)) {
                 assertions.add(subject, propertyMap.get(predicate), object);
@@ -174,7 +174,6 @@ public abstract class BfResourceConverter {
             } 
         } 
     }   
-
 
     protected List<BfType> getBfTypesToConvert() {
         List<BfType> typesToConvert = new ArrayList<BfType>();
@@ -225,6 +224,13 @@ public abstract class BfResourceConverter {
     protected void removeResource(Resource resource) {
         removeResource(model, resource);
     }
+
+    protected Model getAssertions() {
+        return assertions;
+    }
     
+    protected Model getRetractions() {
+        return retractions;
+    }
 
 }

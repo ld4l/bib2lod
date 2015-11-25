@@ -157,7 +157,7 @@ public class BibframeConverter extends RdfProcessor {
                 LOGGER.debug("Converting " + typeForFile + " subject " 
                         + inputSubject.getURI());
                 
-                Resource subject = getSubjectToConvert(inputSubject);
+                Resource subject = getSubjectModelToConvert(inputSubject);
                 
                 outputModel.add(converter.convert(subject));
                 
@@ -175,7 +175,7 @@ public class BibframeConverter extends RdfProcessor {
      * resource. This includes statements where the resource is the subject
      * or the object.
      */
-    public static Resource getSubjectToConvert(Resource resource) {
+    public static Resource getSubjectModelToConvert(Resource resource) {
         
         Model inputModel = resource.getModel();
         
@@ -206,13 +206,18 @@ public class BibframeConverter extends RdfProcessor {
         // :annotation bf:annotates :work
         modelForSubject.add(
                 inputModel.listStatements(null, null, resource));
+        
+        // The converted model, with assertions and retractions applied,  will 
+        // be returned by the converter. Other converters will not need to 
+        // process these statements, so they can be removed from the input 
+        // model.
+        inputModel.remove(modelForSubject);
            
         // NB At this point, resource.getModel() is the inputModel, not 
         // the modelForSubject. Get the subject of the modelForSubject 
         // instead.            
         return modelForSubject.getResource(resource.getURI());               
-    }
-    
+    } 
     
     private BfResourceConverter getConverter(BfType bfType) {
         

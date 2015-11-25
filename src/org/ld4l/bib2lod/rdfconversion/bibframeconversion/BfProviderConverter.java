@@ -10,17 +10,14 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfProviderConverter extends BfResourceConverter {
 
@@ -28,15 +25,6 @@ public class BfProviderConverter extends BfResourceConverter {
             LogManager.getLogger(BfProviderConverter.class);
 
     
-    private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE = 
-            new HashMap<BfProperty, Ld4lType>();
-    static {
-        PROPERTY_TO_TYPE.put(BfProperty.BF_PUBLICATION, 
-                Ld4lType.PUBLISHER_PROVISION);
-        PROPERTY_TO_TYPE.put(BfProperty.BF_DISTRIBUTION, 
-                Ld4lType.DISTRIBUTOR_PROVISION);
-    }
-
     private static final List<BfType> TYPES_TO_CONVERT = 
             new ArrayList<BfType>();
     static {
@@ -46,13 +34,16 @@ public class BfProviderConverter extends BfResourceConverter {
     private static final List<BfType> TYPES_TO_RETRACT = 
             new ArrayList<BfType>();
     static {
-        
+        TYPES_TO_RETRACT.add(BfType.BF_PROVIDER);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_DATE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_NAME);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_PLACE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
@@ -64,70 +55,100 @@ public class BfProviderConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_PROVIDER_ROLE);
     }
+
+    private Statement providerStatement;
 
     public BfProviderConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
     
     @Override
-    protected Model convertSubject(Resource subject) {
+    protected Model convertSubject(Resource subject, Statement statement) {
         
         this.subject = subject;
         this.model = subject.getModel();
-       
-        
-        assertions = ModelFactory.createDefaultModel();
-        
-        // So far we are not using the retractions model, using 
-        // StmtIterator.remove() instead, but declaring this gives added
-        // flexibility to the subclasses.
-        retractions = ModelFactory.createDefaultModel();
+        this.providerStatement = statement;
         
         convertModel();
         
         model.add(assertions)
              .remove(retractions);
         
-        return model;
-        
+        return model;        
     }
     
     @Override
     protected void convertModel() {
         
-      StmtIterator stmts = subject.listProperties();
-      while (stmts.hasNext()) {
-          
-          Statement statement = stmts.nextStatement();
-          Property predicate = statement.getPredicate();
-        
-          if (predicate.equals(RDF.type)) {
-              assertions.add(subject, RDF.type, 
-                      Ld4lType.PUBLISHER_PROVISION.ontClass());
-              assertions.add(subject, RDFS.label, "Publisher");
-              
-          } else if (predicate.equals(
-                  BfProperty.BF_PROVIDER_NAME.property())) {
-              assertions.add(subject, Ld4lProperty.AGENT.property(), 
-                      statement.getResource());
-              
-          } else if (predicate.equals(
-                  BfProperty.BF_PROVIDER_PLACE.property())) {
-              assertions.add(subject, Ld4lProperty.AT_LOCATION.property(), 
-                      statement.getResource());
-          
-          } else if (predicate.equals(
-                  BfProperty.BF_PROVIDER_DATE.property())) {
-              assertions.add(subject, Ld4lProperty.DATE.property(), 
-                      statement.getLiteral());
-          }
-          
-          stmts.remove();
-      }
+      createProvision();
+      model.remove(providerStatement);
+      
+      super.convertModel();
     }
 
+    private void createProvision() {
+        
+        Resource relatedInstance = providerStatement.getSubject();
+        Property providerProp = providerStatement.getPredicate();
+        
+        assertions.add(relatedInstance, Ld4lProperty.HAS_PROVISION.property(), 
+                subject);
+        
+        Ld4lType newType = null;
+        String label = null;
+        
+        // TODO Put these into some kind of data structure...
+        if (providerProp.equals(BfProperty.BF_PUBLICATION.property())) {
+            newType = Ld4lType.PUBLISHER_PROVISION;
+            label = "Publisher";
+        
+        } else if (providerProp.equals(BfProperty.BF_DISTRIBUTION.property())) {
+            newType = Ld4lType.DISTRIBUTOR_PROVISION;
+            label = "Distributor";           
+
+        } else if (providerProp.equals(BfProperty.BF_MANUFACTURE.property())) {
+            newType = Ld4lType.MANUFACTURER_PROVISION;
+            label = "Manufacturer";       
+
+        } else if (providerProp.equals(BfProperty.BF_PRODUCTION.property())) {
+            newType = Ld4lType.PRODUCER_PROVISION;
+            label = "Producer";       
+    
+        // add any additional Provision subtypes here
+    
+        // Generic provider property
+        } else {
+            newType = Ld4lType.PROVISION;
+            label = "Provider";
+        }
+        
+
+        /*
+         * TODO bf:providerRole
+         * If bf:providerRole is specified, this should be replaced with a
+         * specific Provision subtype. If it doesn't match any of the existing
+         * subtypes, convert to a label on the generic ld4l:Provision. Need to
+         * analyze what values, if any, are generated.
+         *
+         * TODO bf:providerStatement
+         * For now will move to legacy namespace. If the statement exists 
+         * without the provider and its object properties, should parse the 
+         * providerStatement to construct these. If it occurs alongside the 
+         * provider and object properties, and the data is the same, it should 
+         * be discarded.
+        */
+        
+        if (newType != null) {
+            assertions.add(subject, RDF.type, newType.ontClass());
+        }
+        
+        if (label != null) {
+            assertions.add(subject, RDFS.label, label);
+        }
+
+    }
     @Override 
     protected List<BfType> getBfTypesToConvert() {
         return TYPES_TO_CONVERT;
