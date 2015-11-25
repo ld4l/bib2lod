@@ -97,6 +97,8 @@ public class BfInstanceConverter extends BfResourceConverter {
                 subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
         // Probably can't be null
         relatedWork = instanceOf != null ? instanceOf.getResource() : null;
+        
+        convertTitles();
 
         List<Statement> statements = new ArrayList<Statement>();        
         StmtIterator stmts = model.listStatements();
@@ -135,6 +137,11 @@ public class BfInstanceConverter extends BfResourceConverter {
                 // create the Provision and its associated properties.
                 } else if (PROVIDER_PROPERTIES.contains(bfProp)) {
                     convertProvider(statement);
+                    
+                } else if (bfProp.equals(BfProperty.BF_IDENTIFIER) || 
+                        bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
+                    convertIdentifier(statement);
+                    
                              
                 } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
                     if (relatedWork != null) {
@@ -143,21 +150,19 @@ public class BfInstanceConverter extends BfResourceConverter {
                         assertions.add(relatedWork, RDF.type, 
                                 Ld4lType.MONOGRAPH.ontClass());
                         retractions.add(statement);
-                    }
-                    
+                    }                   
                 }
-                
-                //else convertIdentifier()
-                  // else convertTitle()
-            }
-           
+            }          
         }
         
         model.remove(retractions);
         
         super.convertModel();
     }
-   
+ 
+    private void convertTitles() {
+        
+    }
 
     private boolean convertInstanceTypeToWorkType(Resource type) {
 
@@ -185,6 +190,10 @@ public class BfInstanceConverter extends BfResourceConverter {
                 statement.getResource());
                 
         assertions.add(converter.convertSubject(provider, statement));
+    }
+    
+    private void convertIdentifier(Statement statement) {
+        
     }
     
     @Override
