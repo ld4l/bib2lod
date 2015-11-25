@@ -88,11 +88,8 @@ public class BfInstanceConverter extends BfResourceConverter {
     @Override 
     protected void convertModel() {
         
-        LOGGER.debug("before convert providers: " + model.size());
         convertProviders();
-        LOGGER.debug("after convert providers: " + model.size());
       
-        // RdfProcessor.printModel(model,  Level.DEBUG);
         StmtIterator stmts = model.listStatements();
         while (stmts.hasNext()) {
             
@@ -147,47 +144,26 @@ public class BfInstanceConverter extends BfResourceConverter {
             StmtIterator stmts = 
                     model.listStatements(subject, prop, (RDFNode) null);
             stmts.forEachRemaining(providerStmts::add);
+            
+            // NB This version generates a ConcurrentModificationException when
+            // we delete stmt from the model in BfProviderConverter. The 
+            // version with the for-loop does not, because, though we are 
+            // altering the model, we are not altering the object we're looping
+            // through.
+            while (stmts.hasNext()) {
+                Statement stmt = stmts.nextStatement();
+                convertProvider(stmt);
+            }
         }
         
         for (Statement stmt : providerStmts) {
             convertProvider(stmt);
-        }
-                   
+        }                   
     }
     
     private void convertProvider(Statement statement) {
-
-//        StmtIterator stmts = provider.listProperties();
-//        while (stmts.hasNext()) {
-//            
-//            Statement statement = stmts.nextStatement();
-//            Property predicate = statement.getPredicate();
-//          
-//            if (predicate.equals(RDF.type)) {
-//                assertions.add(provider, RDF.type, 
-//                        Ld4lType.PUBLISHER_PROVISION.ontClass());
-//                assertions.add(provider, RDFS.label, "Publisher");
-//                
-//            } else if (predicate.equals(
-//                    BfProperty.BF_PROVIDER_NAME.property())) {
-//                assertions.add(provider, Ld4lProperty.AGENT.property(), 
-//                        statement.getResource());
-//                
-//            } else if (predicate.equals(
-//                    BfProperty.BF_PROVIDER_PLACE.property())) {
-//                assertions.add(provider, Ld4lProperty.AT_LOCATION.property(), 
-//                        statement.getResource());
-//            
-//            } else if (predicate.equals(
-//                    BfProperty.BF_PROVIDER_DATE.property())) {
-//                assertions.add(provider, Ld4lProperty.DATE.property(), 
-//                        statement.getLiteral());
-//            }
-//            
-//            stmts.remove();
-//        }
         
-        // Type converter as BfProviderConverter rather than 
+        // Type the converter as BfProviderConverter rather than 
         // BfResourceConverter, else we must add a vacuous 
         // convertSubject(Resource, Statement) method to BfResourceConverter.
         BfProviderConverter converter = new BfProviderConverter(
