@@ -6,12 +6,15 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -19,6 +22,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
@@ -132,11 +136,13 @@ public class BfInstanceConverter extends BfResourceConverter {
                             + predicate.getURI()
                             + "; falling through to default case.");
                     continue;
-                                 
-                // TODO Do we ever get a providerStatement statement instead of a
-                // Provider object? If so, we need to parse the literal value to
-                // create the Provision and its associated properties.
-                } else if (PROVIDER_PROPERTIES.contains(bfProp)) {
+                }
+                
+                // TODO Do we ever get a providerStatement instead of a 
+                // Provider object? If so, we need to parse the literal value 
+                // to create the Provision and its associated properties (cf.
+                // titleStatement).
+                if (PROVIDER_PROPERTIES.contains(bfProp)) {
                     convertProvider(statement);
                     
                 } else if (bfProp.equals(BfProperty.BF_IDENTIFIER) || 
@@ -164,6 +170,15 @@ public class BfInstanceConverter extends BfResourceConverter {
     // TODO This method is also used by BfWorkConverter. Need to combine.
     private void convertTitles() {
 
+        // Get the value of the bf:titleStatement predicate, if one exists.
+        Statement titleStatement = model.getProperty(subject,  
+                BfProperty.BF_TITLE_STATEMENT.property());
+        String titleString = null;
+        if (titleStatement != null) {
+            retractions.add(titleStatement);
+            titleString = titleStatement.getString();            
+        }
+        
         List<Statement> titleStmts = new ArrayList<Statement>();
         StmtIterator stmts = model.listStatements(subject, 
                 BfProperty.BF_INSTANCE_TITLE.property(), (RDFNode) null);
@@ -172,17 +187,32 @@ public class BfInstanceConverter extends BfResourceConverter {
         // Use a list rather than an iterator so that we can modify the model
         // within the loop.
         for (Statement stmt : titleStmts) {
-            convertTitle(stmt);           
+            Resource title = convertTitle(stmt);
+ 
+            // Determine whether the titleString from the bf:titleStatement
+            // statement matches the rdfs:label of this title.
+            if (title != null && titleString != null) {
+                Statement titleLabel = title.getProperty(RDFS.label); 
+                if (titleLabel != null) {
+                   String label = titleLabel.getString(); 
+                   if (titleString.equals(label)) {
+                       // Once we've found a title that matches the 
+                       // titleStatement value, we can stop checking.
+                       titleString = null;
+                   }
+                }
+            }  
         }
-        
-        // Now process datatype property titleStatement statements. Try to
-        // match to an existing Title object and remove. If none exists,
-        // construct a new Title object.
-                 
+         
+        // If the titleStatement string hasn't been matched to an existing
+        // Title object, create a new Title object.
+        if (titleString != null) {
+            createTitle(titleString);
+        }              
     }
 
     // TODO This method is also used by BfWorkConverter. Need to combine.
-    private void convertTitle(Statement statement) {
+    private Resource convertTitle(Statement statement) {
 
         // Type the converter as BfProviderConverter rather than 
         // BfResourceConverter, else we must add a vacuous 
@@ -190,13 +220,26 @@ public class BfInstanceConverter extends BfResourceConverter {
         BfTitleConverter converter = new BfTitleConverter(
               BfType.BF_TITLE, this.localNamespace);
         
-        // Identify the provider resource and build its associated model (i.e.,
+        // Identify the title resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
         Resource title = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
                 
-        assertions.add(converter.convertSubject(title, statement));
+        Model titleModel = converter.convertSubject(title, statement); 
+        assertions.add(titleModel);  
+        // TODO Or can we just return Resource title? What is title.getModel()?
+        // If it's titleModel, okay to return it. Otherwise, must get the resource.
+        return titleModel.getResource(title.getURI()); 
+    }
+    
+    private void createTitle(String label) {
+        Resource title = 
+                assertions.createResource(RdfProcessor.mintUri(localNamespace));
+        assertions.add(title, RDF.type, Ld4lType.TITLE.ontClass());
+        assertions.add(title, RDFS.label, label);
         
+        // If we can parse the title string into sub-elements, do so here.
+        // E.g., if title starts with an article, create a NonSortTitleElement.
     }
     
     

@@ -27,7 +27,7 @@ public class BfTitleConverter extends BfResourceConverter {
     private static final List<BfType> TYPES_TO_CONVERT = 
             new ArrayList<BfType>();
     static {
- 
+        TYPES_TO_CONVERT.add(BfType.BF_TITLE);
     }
     
     private static final List<BfType> TYPES_TO_RETRACT = 
@@ -55,12 +55,12 @@ public class BfTitleConverter extends BfResourceConverter {
     }
 
     private Statement titleStatement;
-
+    
+    
     public BfTitleConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
     
-
     protected Model convertSubject(
             // titleStatement links the subject (the provider) to the 
             // caller's subject (the instance) using the property bf:provider 
@@ -80,8 +80,6 @@ public class BfTitleConverter extends BfResourceConverter {
     
     @Override
     protected void convertModel() {
-        
-
 
       Resource relatedResource = titleStatement.getSubject();
       assertions.add(
@@ -98,6 +96,10 @@ public class BfTitleConverter extends BfResourceConverter {
       super.convertModel();
     }
 
+    public BfTitleConverter create(String titleString) {
+        // TODO Auto-generated method stub
+        return null;
+    }
     
     @Override 
     protected List<BfType> getBfTypesToConvert() {
@@ -123,4 +125,7 @@ public class BfTitleConverter extends BfResourceConverter {
     protected List<BfProperty> getBfPropertiesToRetract() {
         return PROPERTIES_TO_RETRACT;
     }
+
+
+
 }

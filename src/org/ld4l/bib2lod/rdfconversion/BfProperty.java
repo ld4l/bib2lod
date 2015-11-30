@@ -58,6 +58,7 @@ public enum BfProperty {
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
+    BF_TITLE_STATEMENT("titleStatement"),
     BF_TITLE_VALUE("titleValue", Ld4lProperty.LABEL),
     BF_WORK_TITLE("workTitle", Ld4lProperty.HAS_TITLE),
        

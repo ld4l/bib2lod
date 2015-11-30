@@ -132,7 +132,8 @@ public abstract class BfResourceConverter {
                 } else if (typesToRetract.contains(type)) {
                     stmts.remove();
                 
-                // Otherwise change type namespace from Bibframe to LD4L.  
+                // Change any remaining types in Bibframe namespace to LD4L
+                // namespace.
                 } else if (convertBfTypeNamespace(type)) {
                     stmts.remove();
                     
