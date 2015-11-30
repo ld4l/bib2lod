@@ -40,9 +40,14 @@ public class BfProviderConverter extends BfResourceConverter {
             new ArrayList<BfProperty>();
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_DATE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_DISTRIBUTION);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_MANUFACTURE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PRODUCTION);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_NAME);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_PLACE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_ROLE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PUBLICATION);
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
@@ -63,11 +68,10 @@ public class BfProviderConverter extends BfResourceConverter {
         super(bfType, localNamespace);
     }
     
-
     protected Model convertSubject(
-            // providerStatement links the subject (the provider) to the 
-            // caller's subject (the instance) using the property bf:provider 
-            // or one of its subproperties.
+            // providerStatement links the caller's subject (the instance) to 
+            // this subject (the provider) using the property bf:provider or  
+            // one of its subproperties.
             Resource subject, Statement providerStatement) {
         
         this.subject = subject;
@@ -85,7 +89,6 @@ public class BfProviderConverter extends BfResourceConverter {
     protected void convertModel() {
         
       createProvision();
-      model.remove(providerStatement);
       
       // If there were retractions, we should apply them to the model here,
       // so that super.convertModel() doesn't reprocess them.
@@ -95,12 +98,8 @@ public class BfProviderConverter extends BfResourceConverter {
 
     private void createProvision() {
         
-        Resource relatedInstance = providerStatement.getSubject();
         Property providerProp = providerStatement.getPredicate();
-        
-        assertions.add(relatedInstance, Ld4lProperty.HAS_PROVISION.property(), 
-                subject);
-        
+        LOGGER.debug(providerProp.getURI());
         Ld4lType newType = null;
         String label = null;
         

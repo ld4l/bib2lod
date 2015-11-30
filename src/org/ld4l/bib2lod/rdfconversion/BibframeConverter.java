@@ -212,10 +212,7 @@ public class BibframeConverter extends RdfProcessor {
         // be returned by the converter. Other converters will not need to 
         // process these statements, so they can be removed from the input 
         // model.
-        LOGGER.debug(resource.getURI());
-        LOGGER.debug("before removing modelForSubject: " + inputModel.size());
         inputModel.remove(modelForSubject);
-        LOGGER.debug("after removing modelForSubject: " + inputModel.size());
            
         // NB At this point, resource.getModel() is the inputModel, not 
         // the modelForSubject. Get the subject of the modelForSubject 

@@ -144,8 +144,8 @@ public abstract class BfResourceConverter {
                 if (LOGGER.isInfoEnabled()) {
                     if (BfProperty.get(predicate).namespace().equals
                             (OntNamespace.LEGACY)) {
-                        // Review logs to determine what legacy properties are
-                        // being used, to inform future development.
+                        // Log for review, to determine what legacy properties 
+                        // are being used, to inform future development.
                         LOGGER.info("Adding statement with property in legacy "
                                 + "namespace: " + predicate.getURI());
                     }

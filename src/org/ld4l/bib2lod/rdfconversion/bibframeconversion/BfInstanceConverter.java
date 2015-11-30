@@ -6,8 +6,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -54,21 +52,6 @@ public class BfInstanceConverter extends BfResourceConverter {
     static {
             TYPES_TO_RETRACT.add(BfType.BF_ARCHIVAL);
     }
-   
-    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_ROLE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUPPLEMENTARY_CONTENT_NOTE);
-
-    }
-
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-
-    }
 
     private static final List<BfProperty> PROVIDER_PROPERTIES = 
             new ArrayList<BfProperty>();
@@ -80,15 +63,25 @@ public class BfInstanceConverter extends BfResourceConverter {
         PROVIDER_PROPERTIES.add(BfProperty.BF_PUBLICATION);
     }
     
+    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUPPLEMENTARY_CONTENT_NOTE);
+
+    }
+
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
+            new HashMap<BfProperty, Ld4lProperty>();
+    static {
+
+    }
+
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        // These get removed in BfProviderConverter
-        // PROPERTIES_TO_RETRACT.addAll(PROVIDER_PROPERTIES);
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_DERIVED_FROM);
     }
-    
-    private Resource relatedWork;
     
     public BfInstanceConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
@@ -101,9 +94,10 @@ public class BfInstanceConverter extends BfResourceConverter {
         Statement instanceOf = 
                 subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
         // Probably can't be null
-        relatedWork = instanceOf != null ? instanceOf.getResource() : null;
+        Resource relatedWork = 
+                instanceOf != null ? instanceOf.getResource() : null;
         
-        convertTitles();
+        // convertTitles();
 
         List<Statement> statements = new ArrayList<Statement>();        
         StmtIterator stmts = model.listStatements();
@@ -120,7 +114,8 @@ public class BfInstanceConverter extends BfResourceConverter {
             Property predicate = statement.getPredicate();
     
             if (predicate.equals(RDF.type)) {
-                if (convertInstanceTypeToWorkType(statement.getResource())) {
+                if (convertInstanceTypeToWorkType(
+                        statement.getResource(), relatedWork)) {
                     retractions.add(statement);
                 }
                 
@@ -131,7 +126,7 @@ public class BfInstanceConverter extends BfResourceConverter {
                 BfProperty bfProp = BfProperty.get(predicate);
                 
                 if (bfProp == null) {
-                    // Review logs to make sure nothing has escaped.
+                    // Log for review, to make sure nothing has escaped.
                     LOGGER.info("No specific handling defined for property " 
                             + predicate.getURI()
                             + "; falling through to default case.");
@@ -148,8 +143,7 @@ public class BfInstanceConverter extends BfResourceConverter {
                 } else if (bfProp.equals(BfProperty.BF_IDENTIFIER) || 
                         bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
                     convertIdentifier(statement);
-                    
-                             
+                                              
                 } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
                     if (relatedWork != null) {
                         // Probably also added from conversion of statement
@@ -225,11 +219,13 @@ public class BfInstanceConverter extends BfResourceConverter {
         Resource title = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
                 
-        Model titleModel = converter.convertSubject(title, statement); 
-        assertions.add(titleModel);  
-        // TODO Or can we just return Resource title? What is title.getModel()?
-        // If it's titleModel, okay to return it. Otherwise, must get the resource.
-        return titleModel.getResource(title.getURI()); 
+        LOGGER.debug(title.getModel());
+//        Model titleModel = converter.convertSubject(title, statement); 
+//        LOGGER.debug(titleModel);
+//        assertions.add(titleModel);  
+
+        
+        return title;
     }
     
     private void createTitle(String label) {
@@ -243,7 +239,8 @@ public class BfInstanceConverter extends BfResourceConverter {
     }
     
     
-    private boolean convertInstanceTypeToWorkType(Resource type) {
+    private boolean convertInstanceTypeToWorkType(
+            Resource type, Resource relatedWork) {
 
         if (NEW_WORK_TYPES.containsKey(type)) {
             if (relatedWork != null) {
