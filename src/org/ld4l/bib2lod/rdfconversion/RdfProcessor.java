@@ -175,10 +175,10 @@ public abstract class RdfProcessor extends Processor {
     }
     
     public static String mintUri(String namespace) {    
-        // NB A digit is not a legal initial character of a local name; see
-        // http://www.w3.org/TR/xml11/#NT-NameStartChar. Prefixing underscore
-        // to the UUID.
-        return namespace + "_" + UUID.randomUUID().toString();
+        // NB A digit is not a legal initial character of a local name in 
+        // RDF/XML; see http://www.w3.org/TR/xml11/#NT-NameStartChar, so 
+        // prefix a character to the UUID.
+        return namespace + "n" + UUID.randomUUID().toString();
     }
 
 
