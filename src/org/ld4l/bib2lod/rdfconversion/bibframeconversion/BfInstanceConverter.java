@@ -197,6 +197,10 @@ public class BfInstanceConverter extends BfResourceConverter {
          
         // Create a new title object for any titleStatement literals that 
         // haven't matched an existing title.
+        // NB We don't have to test each of these literals against one another,
+        // because if they're identical Jena will already have removed the 
+        // duplicates. If they're not identical (e.g., due to a language value),
+        // they should both be retained.
         for (Literal literal : titleLiterals) {
             LOGGER.debug("Creating new title with label " + literal.toString());
             createTitle(literal);            
@@ -225,7 +229,7 @@ public class BfInstanceConverter extends BfResourceConverter {
             LOGGER.debug(removed 
                     ? "Found a match for bf:titleStatement '" 
                     + label.toString() + "': removing"
-                    : "Didn't find a match for bf:titleStatement '" 
+                    : "No bf:titleStatement matching title '" 
                     + label.toString() + "'");
         }
     }
