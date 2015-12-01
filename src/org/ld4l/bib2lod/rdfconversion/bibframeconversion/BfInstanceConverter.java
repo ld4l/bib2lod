@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -20,7 +23,6 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfInstanceConverter extends BfResourceConverter {
 
@@ -97,7 +99,7 @@ public class BfInstanceConverter extends BfResourceConverter {
         Resource relatedWork = 
                 instanceOf != null ? instanceOf.getResource() : null;
         
-        // convertTitles();
+        convertTitles(BfProperty.BF_INSTANCE_TITLE);
 
         List<Statement> statements = new ArrayList<Statement>();        
         StmtIterator stmts = model.listStatements();
@@ -156,86 +158,83 @@ public class BfInstanceConverter extends BfResourceConverter {
             }          
         }
         
-        model.remove(retractions);
+        applyRetractions();
         
         super.convertModel();
     }
  
     // TODO This method is also used by BfWorkConverter. Need to combine.
-    private void convertTitles() {
+    // titleProp = bf:instanceTitle or bf:workTitle
+    private void convertTitles(BfProperty titleProp) {
 
-        // Get the value of the bf:titleStatement predicate, if one exists.
-        Statement titleStatement = model.getProperty(subject,  
+        // Get the value of any bf:titleStatement statements
+        StmtIterator titleStmtIterator = subject.listProperties(
                 BfProperty.BF_TITLE_STATEMENT.property());
-        String titleString = null;
-        if (titleStatement != null) {
-            retractions.add(titleStatement);
-            titleString = titleStatement.getString();            
+
+        // This empties out the iterator
+        // retractions.add(titleStmtIterator);
+        List<Literal> titleLiterals = new ArrayList<Literal>();
+        while (titleStmtIterator.hasNext()) {
+            Statement stmt = titleStmtIterator.nextStatement();
+            Literal literal = stmt.getLiteral();
+            // Normalize the title string for comparison to existing Title
+            // labels.
+            String value = BfTitleConverter.normalizeTitle(literal.getString());
+            LOGGER.debug("Adding literal with value '" + value + "' to list");
+            titleLiterals.add(
+                    model.createLiteral(value, literal.getLanguage()));
+            retractions.add(stmt);
         }
         
-        List<Statement> titleStmts = new ArrayList<Statement>();
-        StmtIterator stmts = model.listStatements(subject, 
-                BfProperty.BF_INSTANCE_TITLE.property(), (RDFNode) null);
-        stmts.forEachRemaining(titleStmts::add);
+        StmtIterator titleStmts = model.listStatements(subject, 
+                titleProp.property(), (RDFNode) null);
 
-        // Use a list rather than an iterator so that we can modify the model
-        // within the loop.
-        for (Statement stmt : titleStmts) {
-            Resource title = convertTitle(stmt);
- 
-            // Determine whether the titleString from the bf:titleStatement
-            // statement matches the rdfs:label of this title.
-            if (title != null && titleString != null) {
-                Statement titleLabel = title.getProperty(RDFS.label); 
-                if (titleLabel != null) {
-                   String label = titleLabel.getString(); 
-                   if (titleString.equals(label)) {
-                       // Once we've found a title that matches the 
-                       // titleStatement value, we can stop checking.
-                       titleString = null;
-                   }
-                }
-            }  
+        List<Statement> titles = new ArrayList<Statement>();
+        titleStmts.forEachRemaining(titles::add);
+        for (Statement stmt : titles) {
+            convertTitle(stmt, titleLiterals);
         }
          
-        // If the titleStatement string hasn't been matched to an existing
-        // Title object, create a new Title object.
-        if (titleString != null) {
-            createTitle(titleString);
-        }              
+        // Create a new title object for any titleStatement literals that 
+        // haven't matched an existing title.
+        for (Literal literal : titleLiterals) {
+            LOGGER.debug("Creating new title with label " + literal.toString());
+            createTitle(literal);            
+        }
+        
+        applyRetractions();           
     }
 
     // TODO This method is also used by BfWorkConverter. Need to combine.
-    private Resource convertTitle(Statement statement) {
+    private void convertTitle(Statement statement, 
+            List<Literal> titleLiterals) {
 
-        // Type the converter as BfProviderConverter rather than 
-        // BfResourceConverter, else we must add a vacuous 
-        // convertSubject(Resource, Statement) method to BfResourceConverter.
-        BfTitleConverter converter = new BfTitleConverter(
+        BfResourceConverter converter = new BfTitleConverter(
               BfType.BF_TITLE, this.localNamespace);
         
         // Identify the title resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
         Resource title = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
-                
-        LOGGER.debug(title.getModel());
-//        Model titleModel = converter.convertSubject(title, statement); 
-//        LOGGER.debug(titleModel);
-//        assertions.add(titleModel);  
 
+        assertions.add(converter.convertSubject(title));
         
-        return title;
+        Literal label = title.getProperty(RDFS.label).getLiteral();
+        if (label != null) {
+            boolean removed = titleLiterals.removeIf(i -> label.sameValueAs(i));
+            LOGGER.debug(removed 
+                    ? "Found a match for bf:titleStatement '" 
+                    + label.toString() + "': removing"
+                    : "Didn't find a match for bf:titleStatement '" 
+                    + label.toString() + "'");
+        }
     }
     
-    private void createTitle(String label) {
-        Resource title = 
-                assertions.createResource(RdfProcessor.mintUri(localNamespace));
-        assertions.add(title, RDF.type, Ld4lType.TITLE.ontClass());
-        assertions.add(title, RDFS.label, label);
+    private void createTitle(Literal label) {
         
-        // If we can parse the title string into sub-elements, do so here.
-        // E.g., if title starts with an article, create a NonSortTitleElement.
+        BfTitleConverter converter = new BfTitleConverter(
+                BfType.BF_TITLE, this.localNamespace);
+        assertions.add(converter.create(subject, label));
     }
     
     
@@ -264,7 +263,9 @@ public class BfInstanceConverter extends BfResourceConverter {
         // statements in which it is the subject or object).
         Resource provider = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
-                
+        
+        // Add BfProviderConverter model to this converter's assertions model,
+        // so they get added to the BibframeConverter output model.
         assertions.add(converter.convertSubject(provider, statement));
     }
     

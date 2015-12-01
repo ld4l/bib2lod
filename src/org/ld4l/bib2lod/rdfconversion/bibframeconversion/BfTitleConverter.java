@@ -5,8 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.graph.NodeFactory;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
@@ -17,6 +19,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfTitleConverter extends BfResourceConverter {
 
@@ -39,7 +42,9 @@ public class BfTitleConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_TITLE_VALUE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_INSTANCE_TITLE);
+        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_TITLE_VALUE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_WORK_TITLE);
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
@@ -53,52 +58,76 @@ public class BfTitleConverter extends BfResourceConverter {
     static {
 
     }
-
-    private Statement titleStatement;
     
     
     public BfTitleConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
     
-    protected Model convertSubject(
-            // titleStatement links the subject (the provider) to the 
-            // caller's subject (the instance) using the property bf:provider 
-            // or one of its subproperties.
-            Resource subject, Statement titleStatement) {
-        
-        this.subject = subject;
-        this.model = subject.getModel();
-        this.titleStatement = titleStatement;
-        
-        convertModel();
-        
-        model.add(assertions);
-        
-        return model;        
-    }
     
     @Override
     protected void convertModel() {
+        
+      convertTitleValue();
 
-      Resource relatedResource = titleStatement.getSubject();
-      assertions.add(
-              relatedResource, Ld4lProperty.HAS_TITLE.property(), subject);
+      model.remove(retractions);
 
-      // BULK OF METHOD GOES HERE
-      
-      
-      model.remove(titleStatement);
-      
-      // If there were retractions, we should apply them to the model here,
-      // so that super.convertModel() doesn't reprocess them.
-      
       super.convertModel();
     }
+    
+    private void convertTitleValue() {
+        
+        Statement statement = 
+                subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
+        if (statement != null) {
+            Literal literal = statement.getLiteral();
+            retractions.add(statement);
+            assertions.add(subject, RDFS.label, 
+                    normalizeTitle(literal));
+            // return literal?
+        }
+        
+        // TODO Parse label (titleValue) into madsrdf sub-elements insofar 
+        // as possible.
+        // assertions.add(createTitleElements());
+    }
+    
+    private Literal normalizeTitle(Literal literal) {
+        
+        if (literal == null) {
+            return null;
+        }
+        String language = literal.getLanguage();
+        String value = literal.getLexicalForm();
+        // OK if language is null or empty
+        return model.createLiteral(normalizeTitle(value), language);
+    }
+    
+    static String normalizeTitle(String title) {
+        // Should we use NacoNormalizer.normalize()?    
+        String normalizedTitle = title.replaceAll("\\.+\\s*$", "")
+                .replaceAll(";\\s*$", "")
+                .replaceAll("\\s*$", ""); 
+        return normalizedTitle;
+    }
 
-    public BfTitleConverter create(String titleString) {
-        // TODO Auto-generated method stub
-        return null;
+    public Model create(Resource subject, Literal label) {
+        
+        Model model = ModelFactory.createDefaultModel();
+        Resource title = 
+                model.createResource(RdfProcessor.mintUri(localNamespace));
+        model.add(title, RDF.type, Ld4lType.TITLE.ontClass());        
+        model.add(title, RDFS.label, label);
+        model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
+        // model.add(createTitleElements(label));
+        return model;
+    }
+    
+    private Model createTitleElements(Literal title) {
+        // If we can parse the title string into sub-elements, do so here.
+        // E.g., if title starts with an article, create a NonSortTitleElement.
+        Model model = ModelFactory.createDefaultModel();
+        return model;
     }
     
     @Override 

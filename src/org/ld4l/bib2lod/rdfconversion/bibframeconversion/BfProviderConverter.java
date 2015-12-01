@@ -79,9 +79,7 @@ public class BfProviderConverter extends BfResourceConverter {
         this.providerStatement = providerStatement;
         
         convertModel();
-        
-        model.add(assertions);
-        
+
         return model;        
     }
     

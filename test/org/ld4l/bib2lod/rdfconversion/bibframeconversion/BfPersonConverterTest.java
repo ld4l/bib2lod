@@ -15,8 +15,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee)";
         Map<Ld4lProperty, String> parsedLabel = 
                 BfPersonConverter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));
-        
+        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));       
     }
     
     @Test
@@ -26,8 +25,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), 1892-";
         Map<Ld4lProperty, String> parsedLabel = 
                 BfPersonConverter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));
-        
+        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));        
     }
     
     @Test
@@ -37,8 +35,7 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), 1892-1935";
         Map<Ld4lProperty, String> parsedLabel = 
                 BfPersonConverter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));
-        
+        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));        
     }
     
     @Test
@@ -48,7 +45,6 @@ public class BfPersonConverterTest {
         String label = "Gordon, Burgess L. (Burgess Lee), -1935";
         Map<Ld4lProperty, String> parsedLabel = 
                 BfPersonConverter.parseLabel(label);
-        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));
-        
+        Assert.assertEquals(name, parsedLabel.get(Ld4lProperty.NAME));        
     }
 }
