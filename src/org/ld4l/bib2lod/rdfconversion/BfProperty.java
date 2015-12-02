@@ -55,6 +55,7 @@ public enum BfProperty {
     BF_SHELF_MARK_SCHEME("shelfMarkScheme"),
     BF_SHELF_MARK_UDC("shelfMarkUdc"),
     BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
+    BF_SUBTITLE("subtitle"),
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),

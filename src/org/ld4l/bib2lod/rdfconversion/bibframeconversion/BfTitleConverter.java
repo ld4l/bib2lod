@@ -77,19 +77,73 @@ public class BfTitleConverter extends BfResourceConverter {
     
     private void convertTitleValue() {
         
-        Statement statement = 
+        Statement titleValueStmt = 
                 subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
-        if (statement != null) {
-            Literal literal = statement.getLiteral();
-            retractions.add(statement);
-            assertions.add(subject, RDFS.label, 
-                    normalizeTitle(literal));
-            // return literal?
+        if (titleValueStmt != null) {
+
+            retractions.add(titleValueStmt);
+            Literal titleValueLiteral = titleValueStmt.getLiteral();
+            
+            Statement subtitleStmt = 
+                    subject.getProperty(BfProperty.BF_SUBTITLE.property());            
+            if (subtitleStmt != null) {
+                retractions.add(subtitleStmt);
+                assertions.add(convertTitleValueAndSubtitle(titleValueLiteral, 
+                        subtitleStmt.getLiteral()));
+           
+            } else {
+            
+                assertions.add(subject, RDFS.label, 
+                        normalizeTitle(titleValueLiteral));
+            }
+
         }
         
-        // TODO Parse label (titleValue) into madsrdf sub-elements insofar 
+        // TODO Parse label into madsrdf sub-elements insofar 
         // as possible.
         // assertions.add(createTitleElements());
+    }
+
+    /*
+     * If there's a subtitle, the titleValue reflects only the main 
+     * title, not the entire title. Concatenate subtitle and titleValue
+     * to get rdfs:label, and create SubTitleElement and 
+     * MainTitleElement.
+     */
+    private Model convertTitleValueAndSubtitle(Literal titleValueLiteral, 
+            Literal subtitleLiteral) {
+        
+        Model model = ModelFactory.createDefaultModel();
+        
+        String mainTitle = titleValueLiteral.getString();
+        String subtitle = subtitleLiteral.getString();
+                
+        String label = normalizeTitle(mainTitle + " " + subtitle);
+        // Use the titleValue language as the full label language
+        model.add(subject, RDFS.label, label, 
+                titleValueLiteral.getLanguage());
+
+        model.add(createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
+                titleValueLiteral));
+        model.add(createTitleElement(Ld4lType.SUBTITLE_ELEMENT,
+                 subtitleLiteral)); 
+        
+        return model;
+    }
+    
+    private Model createTitleElement(Ld4lType titleElementType, 
+            Literal literal) {
+        
+        Model model = ModelFactory.createDefaultModel();
+        Resource titleElement = 
+                model.createResource(RdfProcessor.mintUri(localNamespace));
+        String normalizedString = normalizeTitle(literal.getLexicalForm());
+        model.add(subject, Ld4lProperty.HAS_PART.property(), titleElement);
+        model.add(titleElement, RDFS.label, normalizedString, 
+                literal.getLanguage());
+        model.add(titleElement, RDF.type, titleElementType.ontClass());
+        
+        return model;            
     }
     
     private Literal normalizeTitle(Literal literal) {
@@ -97,10 +151,13 @@ public class BfTitleConverter extends BfResourceConverter {
         if (literal == null) {
             return null;
         }
+        // Create a new literal with a normalized string value and the language
+        // of the original literal.
+        String value = normalizeTitle(literal.getLexicalForm());
+
         String language = literal.getLanguage();
-        String value = literal.getLexicalForm();
         // OK if language is null or empty
-        return model.createLiteral(normalizeTitle(value), language);
+        return literal.getModel().createLiteral(value, language); 
     }
     
     static String normalizeTitle(String title) {
@@ -126,6 +183,7 @@ public class BfTitleConverter extends BfResourceConverter {
     private Model createTitleElements(Literal title) {
         // If we can parse the title string into sub-elements, do so here.
         // E.g., if title starts with an article, create a NonSortTitleElement.
+        // Call createTitleElement for each piece of the title identified.
         Model model = ModelFactory.createDefaultModel();
         return model;
     }
