@@ -91,9 +91,11 @@ public class BfTitleConverter extends BfResourceConverter {
                         subtitleStmt.getLiteral()));
            
             } else {
-            
-                assertions.add(subject, RDFS.label, 
-                        normalizeTitle(titleValueLiteral));
+                Literal labelLiteral = normalizeTitle(titleValueLiteral);
+                assertions.add(subject, RDFS.label, labelLiteral);
+                Resource mainTitleElement = createTitleElement(
+                        Ld4lType.MAIN_TITLE_ELEMENT, labelLiteral);
+                assertions.add(mainTitleElement.getModel());
             }
 
         }
