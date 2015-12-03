@@ -104,6 +104,7 @@ public class BfTitleConverter extends BfResourceConverter {
             // string.
             String mainTitleString = titleValueString;
             
+            // TODO Combine with non-sort element code in create() method
             Resource nonSortElement = null;
             
             // Create non-sort element from initial definite/indefinite article
@@ -258,7 +259,7 @@ public class BfTitleConverter extends BfResourceConverter {
         // string.
         String mainTitleString = titleStatementString;
         
-        // TODO - combine with code in convertTitleValue().
+        // TODO - combine with non-sort element code in convertTitleValue().
         Resource nonSortElement = null;
         
         // Create non-sort element from initial definite/indefinite article
