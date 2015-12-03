@@ -5,7 +5,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.graph.NodeFactory;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -13,6 +12,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -167,20 +167,25 @@ public class BfTitleConverter extends BfResourceConverter {
         }
     }
 
+    private Resource createTitleElement(Ld4lType titleElementType, String value, 
+            String language) {
+        return createTitleElement(
+                titleElementType, value, language, subject, assertions);
+    }
     
     /*
      * String value should be sent in normalized or unnormalized, as needed by
      * the caller.
      */
     private Resource createTitleElement(
-            Ld4lType titleElementType, String value, String language) {
-        
+            Ld4lType titleElementType, String value, String language, 
+            Resource title, Model model) {
 
         Resource titleElement = 
-                assertions.createResource(RdfProcessor.mintUri(localNamespace));
-        assertions.add(subject, Ld4lProperty.HAS_PART.property(), titleElement);
-        assertions.add(titleElement, RDFS.label, value, language);
-        assertions.add(titleElement, RDF.type, titleElementType.ontClass());
+                model.createResource(RdfProcessor.mintUri(localNamespace));
+        model.add(title, Ld4lProperty.HAS_PART.property(), titleElement);
+        model.add(titleElement, RDFS.label, value, language);
+        model.add(titleElement, RDF.type, titleElementType.ontClass());
         
         return titleElement;                  
     }
@@ -232,15 +237,61 @@ public class BfTitleConverter extends BfResourceConverter {
 //  return literal.getModel().createLiteral(value, language); 
 //}
     
-    public Model create(Resource subject, Literal label) {
+    public Model create(Resource subject, Literal titleStatementLiteral) {
         
         Model model = ModelFactory.createDefaultModel();
         Resource title = 
                 model.createResource(RdfProcessor.mintUri(localNamespace));
         model.add(title, RDF.type, Ld4lType.TITLE.ontClass());        
-        model.add(title, RDFS.label, label);
         model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
-        // model.add(createTitleElements(label));
+        
+        String titleStatementString = 
+                normalizeTitle(titleStatementLiteral.getLexicalForm());
+        
+        String language = titleStatementLiteral.getLanguage();
+      
+        // The full bf:titleStatement string is the rdfs:label of the title
+        model.add(title, RDFS.label, titleStatementString);
+        
+        // This will be the rdfs:label value of the MainTitleElement. In
+        // the absence of other title elements, it's the full bf:titleValue
+        // string.
+        String mainTitleString = titleStatementString;
+        
+        // TODO - combine with code in convertTitleValue().
+        Resource nonSortElement = null;
+        
+        // Create non-sort element from initial definite/indefinite article
+        for (String nonSortString : NON_SORT_STRINGS) {
+            
+            if (titleStatementString.startsWith(nonSortString)) {
+                
+                nonSortElement = 
+                        createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
+                                nonSortString, language, title, model);
+
+                // Remove the non-sort string from the main title element 
+                // string 
+                mainTitleString = 
+                        mainTitleString.substring(nonSortString.length());
+                        
+                break;                 
+            } 
+        }
+        
+        // TODO Perhaps try to parse into subtitle and part name elements - but 
+        // seems very error-prone.
+           
+        Resource mainTitleElement = 
+                createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
+                        mainTitleString, language, title, model);
+        
+        // Non-sort element precedes main title element
+        if (nonSortElement != null) {
+            model.add(nonSortElement, Ld4lProperty.NEXT.property(), 
+                    mainTitleElement);
+        }
+
         return model;
     }
     
