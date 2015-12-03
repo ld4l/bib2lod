@@ -58,6 +58,14 @@ public class BfTitleConverter extends BfResourceConverter {
 
     }
     
+    private static final List<String> NON_SORT_STRINGS = 
+            new ArrayList<String>();
+    static {
+        NON_SORT_STRINGS.add("A ");
+        NON_SORT_STRINGS.add("The ");
+        // TODO Are there others?
+    }
+    
     
     public BfTitleConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
@@ -80,27 +88,54 @@ public class BfTitleConverter extends BfResourceConverter {
                 subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
         
         if (titleValueStmt != null) {
-            
-            // TODO NonSortElement
 
             retractions.add(titleValueStmt);
-            
-            Literal titleValueLiteral = titleValueStmt.getLiteral();
-            
-            // The rdfs:label value of the MainTitleElement
-            String mainTitleValue = normalizeTitle(titleValueStmt.getString());
-            
-            // The language of the MainTitleElement and rdfs:label of the Title
-            String mainTitleLanguage = titleValueStmt.getLanguage();
-            String fullTitleValue = mainTitleValue;
-            
-            Resource subtitleElement = null;
 
+            // bf:titleValue string and language
+            String titleValueString = 
+                    normalizeTitle(titleValueStmt.getString());
+            String titleValueLanguage = titleValueStmt.getLanguage();
+            
+            // This will be the rdfs:label of the Title
+            String fullTitleString = titleValueString;
+            
+            // This will be the rdfs:label value of the MainTitleElement. In
+            // the absence of other title elements, it's the full bf:titleValue
+            // string.
+            String mainTitleString = titleValueString;
+            
+            Resource nonSortElement = null;
+            
+            // Create non-sort element from initial definite/indefinite article
+            for (String nonSortString : NON_SORT_STRINGS) {
+                
+                if (titleValueString.startsWith(nonSortString)) {
+                    
+                    nonSortElement = 
+                            createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
+                                    nonSortString, titleValueLanguage);
+
+                    // Remove the non-sort string from the main title element 
+                    // string 
+                    mainTitleString = 
+                            mainTitleString.substring(nonSortString.length());
+                            
+                    break;                 
+                } 
+            }
+               
             Resource mainTitleElement = 
                     createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-                            mainTitleValue, mainTitleLanguage);
-                    
+                            mainTitleString, titleValueLanguage);
             
+            // Non-sort element precedes main title element
+            if (nonSortElement != null) {
+                assertions.add(nonSortElement, Ld4lProperty.NEXT.property(), 
+                        mainTitleElement);
+            }
+            
+            Resource subtitleElement = null;
+                         
             Statement subtitleStmt = 
                     subject.getProperty(BfProperty.BF_SUBTITLE.property());            
             if (subtitleStmt != null) {
@@ -116,7 +151,7 @@ public class BfTitleConverter extends BfResourceConverter {
                 // When there's a subtitle, the titleValue contains only the 
                 // main title, not the full title. The rdfs:label (full title)
                 // concatenates both main title and subtitle strings.
-                fullTitleValue += " " + subtitleValue;
+                fullTitleString += " " + subtitleValue;
                 
                 // Order the mainTitleElement and subtitleElement
                 assertions.add(mainTitleElement, Ld4lProperty.NEXT.property(), 
@@ -126,7 +161,7 @@ public class BfTitleConverter extends BfResourceConverter {
             
             // Add the rdfs:label of the Title
             assertions.add(
-                    subject, RDFS.label, fullTitleValue, mainTitleLanguage);
+                    subject, RDFS.label, fullTitleString, titleValueLanguage);
             
             // TODO Part name/number elements
         }
