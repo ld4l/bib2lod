@@ -11,7 +11,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
-public class BfWorkConverter extends BfResourceConverter {
+public class BfWorkConverter extends BfBibResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfWorkConverter.class);
