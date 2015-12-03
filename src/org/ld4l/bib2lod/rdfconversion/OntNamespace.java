@@ -11,6 +11,7 @@ public enum OntNamespace {
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),    
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
+    IANA("http://www.iana.org/assignments/relation/", "iana"),
     LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
     LEGACY("http://ld4l.org/ontology/bib/legacy/", "legacy"),
     LINGVO("http://www.lingvoj.org/ontology#", "lingvo"),

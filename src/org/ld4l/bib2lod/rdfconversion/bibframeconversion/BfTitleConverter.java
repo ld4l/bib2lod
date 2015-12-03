@@ -43,7 +43,6 @@ public class BfTitleConverter extends BfResourceConverter {
             new ArrayList<BfProperty>();
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_INSTANCE_TITLE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_TITLE_VALUE);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_WORK_TITLE);
     }
 
@@ -117,21 +116,30 @@ public class BfTitleConverter extends BfResourceConverter {
         
         String mainTitle = titleValueLiteral.getString();
         String subtitle = subtitleLiteral.getString();
-                
+         
+        // Concatenate the title elements before normalizing, so as not to 
+        // remove punctuation or spaces at the end of a non-final element.
         String label = normalizeTitle(mainTitle + " " + subtitle);
+        
         // Use the titleValue language as the full label language
         model.add(subject, RDFS.label, label, 
                 titleValueLiteral.getLanguage());
 
-        model.add(createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-                titleValueLiteral));
-        model.add(createTitleElement(Ld4lType.SUBTITLE_ELEMENT,
-                 subtitleLiteral)); 
+        Resource mainTitleElement = createTitleElement(
+                Ld4lType.MAIN_TITLE_ELEMENT, titleValueLiteral);
+                
+        Resource subtitleElement = createTitleElement(Ld4lType.SUBTITLE_ELEMENT,
+                 subtitleLiteral); 
+
+        model.add(mainTitleElement.getModel());
+        model.add(subtitleElement.getModel());
+        model.add(mainTitleElement, Ld4lProperty.NEXT.property(), 
+                subtitleElement);
         
         return model;
     }
     
-    private Model createTitleElement(Ld4lType titleElementType, 
+    private Resource createTitleElement(Ld4lType titleElementType, 
             Literal literal) {
         
         Model model = ModelFactory.createDefaultModel();
@@ -143,7 +151,7 @@ public class BfTitleConverter extends BfResourceConverter {
                 literal.getLanguage());
         model.add(titleElement, RDF.type, titleElementType.ontClass());
         
-        return model;            
+        return titleElement;            
     }
     
     private Literal normalizeTitle(Literal literal) {
