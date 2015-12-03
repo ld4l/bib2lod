@@ -12,7 +12,6 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -98,32 +97,16 @@ public class BfTitleConverter extends BfResourceConverter {
             
             // This will be the rdfs:label of the Title
             String fullTitleString = titleValueString;
-            
+       
+            Resource nonSortElement = createNonSortTitleElement(
+                    titleValueString, titleValueLanguage, subject, assertions);
+
             // This will be the rdfs:label value of the MainTitleElement. In
             // the absence of other title elements, it's the full bf:titleValue
-            // string.
-            String mainTitleString = titleValueString;
-            
-            // TODO Combine with non-sort element code in create() method
-            Resource nonSortElement = null;
-            
-            // Create non-sort element from initial definite/indefinite article
-            for (String nonSortString : NON_SORT_STRINGS) {
-                
-                if (titleValueString.startsWith(nonSortString)) {
-                    
-                    nonSortElement = 
-                            createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-                                    nonSortString, titleValueLanguage);
-
-                    // Remove the non-sort string from the main title element 
-                    // string 
-                    mainTitleString = 
-                            mainTitleString.substring(nonSortString.length());
-                            
-                    break;                 
-                } 
-            }
+            // string. If there's a non-sort element, remove it from the full title
+            // title string to get the main title element string.         
+            String mainTitleString = 
+                    removeNonSortString(titleValueString, nonSortElement);
                
             Resource mainTitleElement = 
                     createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
@@ -167,9 +150,31 @@ public class BfTitleConverter extends BfResourceConverter {
             // TODO Part name/number elements
         }
     }
+    
+    private Resource createNonSortTitleElement(String titleString, 
+            String titleLanguage, Resource title, Model model) {
+        
+        Resource nonSortElement = null;
+        
+        // Create non-sort element from initial definite/indefinite article
+        for (String nonSortString : NON_SORT_STRINGS) {
+            
+            if (titleString.startsWith(nonSortString)) {
+                
+                nonSortElement = 
+                        createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
+                                nonSortString, titleLanguage, title, model);
+      
+                break;                 
+            } 
+        }
+        
+        return nonSortElement;
+    }
 
     private Resource createTitleElement(Ld4lType titleElementType, String value, 
             String language) {
+        
         return createTitleElement(
                 titleElementType, value, language, subject, assertions);
     }
@@ -254,32 +259,17 @@ public class BfTitleConverter extends BfResourceConverter {
         // The full bf:titleStatement string is the rdfs:label of the title
         model.add(title, RDFS.label, titleStatementString);
         
-        // This will be the rdfs:label value of the MainTitleElement. In
-        // the absence of other title elements, it's the full bf:titleValue
-        // string.
-        String mainTitleString = titleStatementString;
-        
-        // TODO - combine with non-sort element code in convertTitleValue().
-        Resource nonSortElement = null;
-        
-        // Create non-sort element from initial definite/indefinite article
-        for (String nonSortString : NON_SORT_STRINGS) {
-            
-            if (titleStatementString.startsWith(nonSortString)) {
-                
-                nonSortElement = 
-                        createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-                                nonSortString, language, title, model);
+        Resource nonSortElement = 
+                createNonSortTitleElement(
+                        titleStatementString, language, title, model);
 
-                // Remove the non-sort string from the main title element 
-                // string 
-                mainTitleString = 
-                        mainTitleString.substring(nonSortString.length());
-                        
-                break;                 
-            } 
-        }
-        
+        // This will be the rdfs:label value of the MainTitleElement. In
+        // the absence of other title elements, it's the full bf:titleStatement
+        // string. If there's a non-sort element, remove it from the full title
+        // string to get the main title element string.
+        String mainTitleString = 
+                removeNonSortString(titleStatementString, nonSortElement);
+       
         // TODO Perhaps try to parse into subtitle and part name elements - but 
         // seems very error-prone.
            
@@ -294,6 +284,20 @@ public class BfTitleConverter extends BfResourceConverter {
         }
 
         return model;
+    }
+    
+    private String removeNonSortString(
+            String mainTitleString, Resource nonSortElement) {
+        
+        if (nonSortElement != null) {
+            // Remove the non-sort string from the full title string to get the 
+            // main title element string 
+            String nonSortString = 
+                    nonSortElement.getProperty(RDFS.label).getString();
+            mainTitleString = mainTitleString.substring(nonSortString.length());
+        }
+        
+        return mainTitleString;
     }
     
     @Override 
