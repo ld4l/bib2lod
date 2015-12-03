@@ -37,13 +37,14 @@ public enum Ld4lProperty {
     IS_HOLDING_FOR("isHoldingFor"),
     IS_INSTANCE_OF("isInstanceOf"),
     LABEL(OntNamespace.RDFS, "label"),
+    LEGACY_PROVIDER_ROLE(OntNamespace.LEGACY, "providerRole"),
+    LEGACY_PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
+    LEGACY_SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
     NAME(OntNamespace.FOAF, "name"),
     NEXT(OntNamespace.IANA, "next"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
     PREV(OntNamespace.IANA, "prev"),
-    LEGACY_PROVIDER_ROLE(OntNamespace.LEGACY, "providerRole"),
-    LEGACY_PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
-    LEGACY_SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
+    RANK(OntNamespace.VIVO, "rank"),
     VALUE(OntNamespace.RDF, "value");
     
 

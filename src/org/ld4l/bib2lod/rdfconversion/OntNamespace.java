@@ -24,7 +24,8 @@ public enum OntNamespace {
     RELATORS("http://id.loc.gov/vocabulary/relators/", "marcrel"), 
     SCHEMA("http://schema.org/", "schema"),
     SKOS("http://www.w3.org/2004/02/skos/core#", "skos"),
-    TIME("http://www.w3.org/TR/owl-time/", "time");
+    TIME("http://www.w3.org/TR/owl-time/", "time"), 
+    VIVO("http://vivoweb.org/ontology/core#", "vivo");
 
     private final String uri;
     private final String prefix;
