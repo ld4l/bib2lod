@@ -43,12 +43,12 @@ public class BfInstanceConverter extends BfResourceConverter {
      * This case is problematic, since, unlike the Work, we do not have links to
      * the Instance's Items here. Furthermore, how would we know which of the
      * Instance's Items are Manuscripts?
-     */
-    private static final Map<Resource, Resource> NEW_ITEM_TYPES =
+     private static final Map<Resource, Resource> NEW_ITEM_TYPES =
             BfType.typeMap(Arrays.asList(
                     BfType.BF_MANUSCRIPT
             ));
-   
+     */
+    
     private static final List<BfType> TYPES_TO_RETRACT = 
             new ArrayList<BfType>();
     static {
