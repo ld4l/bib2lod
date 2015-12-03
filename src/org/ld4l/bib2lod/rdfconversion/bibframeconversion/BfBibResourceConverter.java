@@ -38,6 +38,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         super(bfType, localNamespace);
     }
   
+    // titleProp is either workTitle or instanceTitle
     protected void convertTitles(BfProperty titleProp) {
 
         // Get the value of any bf:titleStatement statements

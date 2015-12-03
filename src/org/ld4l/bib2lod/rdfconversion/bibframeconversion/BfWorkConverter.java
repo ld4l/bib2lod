@@ -5,6 +5,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -36,6 +38,16 @@ public class BfWorkConverter extends BfBibResourceConverter {
 
     public BfWorkConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
+    }
+
+    @Override 
+    protected void convertModel() {
+        
+        convertTitles(BfProperty.BF_WORK_TITLE);
+
+        applyRetractions();
+        
+        super.convertModel();
     }
     
     @Override
