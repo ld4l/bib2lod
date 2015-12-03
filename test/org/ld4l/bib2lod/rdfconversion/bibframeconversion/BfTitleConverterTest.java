@@ -6,15 +6,23 @@ import org.junit.Test;
 public class BfTitleConverterTest {
 
     @Test
-    public void testTitleNormalization1() {
+    public void testTitleNormalizationPeriod() {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice.";
         Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
     }
-    
+
     @Test
-    public void testTitleNormalization2() {
+    public void testTitleNormalizationSpace() {
+        
+        String expected = "Pride and Prejudice";
+        String input = "Pride and Prejudice ";
+        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+    }
+       
+    @Test
+    public void testTitleNormalizationPeriodSpace() {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice. ";
@@ -22,7 +30,15 @@ public class BfTitleConverterTest {
     }
 
     @Test
-    public void testTitleNormalization3() {
+    public void testTitleNormalizationSpacePeriodSpace() {
+        
+        String expected = "Pride and Prejudice";
+        String input = "Pride and Prejudice . ";
+        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+    }
+    
+    @Test
+    public void testTitleNormalizationEllipsis() {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice...";
@@ -30,26 +46,27 @@ public class BfTitleConverterTest {
     }
     
     @Test
-    public void testTitleNormalization4() {
+    public void testTitleNormalizationEllipsisSpace() {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice... ";
         Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
     }
 
+
     @Test
-    public void testTitleNormalization5() {
+    public void testTitleNormalizationSpaceEllipsis() {
         
         String expected = "Pride and Prejudice";
-        String input = "Pride and Prejudice;";
+        String input = "Pride and Prejudice ...";
         Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
     }
-    
+
     @Test
-    public void testTitleNormalization6() {
+    public void testTitleNormalizationSpaceEllipsisSpace() {
         
         String expected = "Pride and Prejudice";
-        String input = "Pride and Prejudice;";
+        String input = "Pride and Prejudice ... ";
         Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
     }
     

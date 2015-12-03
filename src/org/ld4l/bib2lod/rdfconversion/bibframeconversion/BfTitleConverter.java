@@ -78,106 +78,125 @@ public class BfTitleConverter extends BfResourceConverter {
         
         Statement titleValueStmt = 
                 subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
+        
         if (titleValueStmt != null) {
+            
+            // TODO NonSortElement
 
             retractions.add(titleValueStmt);
+            
             Literal titleValueLiteral = titleValueStmt.getLiteral();
+            
+            // The rdfs:label value of the MainTitleElement
+            String mainTitleValue = normalizeTitle(titleValueStmt.getString());
+            
+            // The language of the MainTitleElement and rdfs:label of the Title
+            String mainTitleLanguage = titleValueStmt.getLanguage();
+            String fullTitleValue = mainTitleValue;
+            
+            Resource subtitleElement = null;
+
+            Resource mainTitleElement = 
+                    createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
+                            mainTitleValue, mainTitleLanguage);
+                    
             
             Statement subtitleStmt = 
                     subject.getProperty(BfProperty.BF_SUBTITLE.property());            
             if (subtitleStmt != null) {
-                retractions.add(subtitleStmt);
-                assertions.add(convertTitleValueAndSubtitle(titleValueLiteral, 
-                        subtitleStmt.getLiteral()));
-           
-            } else {
-                Literal labelLiteral = normalizeTitle(titleValueLiteral);
-                assertions.add(subject, RDFS.label, labelLiteral);
-                Resource mainTitleElement = createTitleElement(
-                        Ld4lType.MAIN_TITLE_ELEMENT, labelLiteral);
-                assertions.add(mainTitleElement.getModel());
-            }
-
-        }
-        
-        // TODO Parse label into madsrdf sub-elements insofar 
-        // as possible.
-        // assertions.add(createTitleElements());
-    }
-
-    /*
-     * If there's a subtitle, the titleValue reflects only the main 
-     * title, not the entire title. Concatenate subtitle and titleValue
-     * to get rdfs:label, and create SubTitleElement and 
-     * MainTitleElement.
-     */
-    private Model convertTitleValueAndSubtitle(Literal titleValueLiteral, 
-            Literal subtitleLiteral) {
-        
-        Model model = ModelFactory.createDefaultModel();
-        
-        String mainTitle = titleValueLiteral.getString();
-        String subtitle = subtitleLiteral.getString();
-         
-        // Concatenate the title elements before normalizing, so as not to 
-        // remove punctuation or spaces at the end of a non-final element.
-        String label = normalizeTitle(mainTitle + " " + subtitle);
-        
-        // Use the titleValue language as the full label language
-        model.add(subject, RDFS.label, label, 
-                titleValueLiteral.getLanguage());
-
-        Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, titleValueLiteral);
                 
-        Resource subtitleElement = createTitleElement(Ld4lType.SUBTITLE_ELEMENT,
-                 subtitleLiteral); 
-
-        model.add(mainTitleElement.getModel());
-        model.add(subtitleElement.getModel());
-        model.add(mainTitleElement, Ld4lProperty.NEXT.property(), 
-                subtitleElement);
-        
-        return model;
-    }
-    
-    private Resource createTitleElement(Ld4lType titleElementType, 
-            Literal literal) {
-        
-        Model model = ModelFactory.createDefaultModel();
-        Resource titleElement = 
-                model.createResource(RdfProcessor.mintUri(localNamespace));
-        String normalizedString = normalizeTitle(literal.getLexicalForm());
-        model.add(subject, Ld4lProperty.HAS_PART.property(), titleElement);
-        model.add(titleElement, RDFS.label, normalizedString, 
-                literal.getLanguage());
-        model.add(titleElement, RDF.type, titleElementType.ontClass());
-        
-        return titleElement;            
-    }
-    
-    private Literal normalizeTitle(Literal literal) {
-        
-        if (literal == null) {
-            return null;
+                retractions.add(subtitleStmt);
+                
+                // Create the subtitle element
+                String subtitleValue = normalizeTitle(subtitleStmt.getString());
+                String language = subtitleStmt.getLanguage();
+                subtitleElement = createTitleElement(
+                        Ld4lType.SUBTITLE_ELEMENT, subtitleValue, language);
+                
+                // When there's a subtitle, the titleValue contains only the 
+                // main title, not the full title. The rdfs:label (full title)
+                // concatenates both main title and subtitle strings.
+                fullTitleValue += " " + subtitleValue;
+                
+                // Order the mainTitleElement and subtitleElement
+                assertions.add(mainTitleElement, Ld4lProperty.NEXT.property(), 
+                        subtitleElement);
+          
+            } 
+            
+            // Add the rdfs:label of the Title
+            assertions.add(
+                    subject, RDFS.label, fullTitleValue, mainTitleLanguage);
+            
+            // TODO Part name/number elements
         }
-        // Create a new literal with a normalized string value and the language
-        // of the original literal.
-        String value = normalizeTitle(literal.getLexicalForm());
-
-        String language = literal.getLanguage();
-        // OK if language is null or empty
-        return literal.getModel().createLiteral(value, language); 
     }
+
+    
+    /*
+     * String value should be sent in normalized or unnormalized, as needed by
+     * the caller.
+     */
+    private Resource createTitleElement(
+            Ld4lType titleElementType, String value, String language) {
+        
+
+        Resource titleElement = 
+                assertions.createResource(RdfProcessor.mintUri(localNamespace));
+        assertions.add(subject, Ld4lProperty.HAS_PART.property(), titleElement);
+        assertions.add(titleElement, RDFS.label, value, language);
+        assertions.add(titleElement, RDF.type, titleElementType.ontClass());
+        
+        return titleElement;                  
+    }
+    
+//  private Resource createTitleElement(Ld4lType titleElementType, 
+//          Literal literal) {
+//      return createTitleElement(titleElementType, literal, false);
+//  }
+//  
+//  private Resource createTitleElement(Ld4lType titleElementType, 
+//          Literal literal, boolean normalize) {
+//
+//      String value = literal.getLexicalForm();
+//      if (normalize) {
+//          value = normalizeTitle(value);
+//      }
+//      return createTitleElement(titleElementType, value, 
+//              literal.getLanguage());        
+//  }
     
     static String normalizeTitle(String title) {
-        // Should we use NacoNormalizer.normalize()?    
-        String normalizedTitle = title.replaceAll("\\.+\\s*$", "")
-                .replaceAll(";\\s*$", "")
-                .replaceAll("\\s*$", ""); 
-        return normalizedTitle;
+        /*
+         * Remove final period, final spaces, final ellipsis
+         * Final ellipsis occurs in rare cases when the bf:label contains title 
+         * plus author, separated by ellipsis. The LC converter splits these 
+         * and retains the ellipsis in the titleValue.
+         * Examples:
+         <http://ld4l.library.cornell.edu/individual/2235title31> <http://bibframe.org/vocab/label> "Old Orange Houses ...  by Mildred Parker Seese." . 
+         <http://ld4l.library.cornell.edu/individual/2235title31> <http://bibframe.org/vocab/titleValue> "Old Orange Houses ..." . 
+        
+         <http://ld4l.library.cornell.edu/individual/2537title132> <http://bibframe.org/vocab/label> "A manual of veterinary sanitary science and police ... / by George Fleming." . 
+         <http://ld4l.library.cornell.edu/individual/2537title132> <http://bibframe.org/vocab/titleValue> "A manual of veterinary sanitary science and police ..." .               
+        */
+        return title.replaceAll("[\\s.]+$", "");
     }
 
+//  private Literal normalizeTitle(Literal literal) {
+//  
+//  if (literal == null) {
+//      return null;
+//  }
+//  // Create a new literal with a normalized string value and the language
+//  // of the original literal.
+//  String value = normalizeTitle(literal.getLexicalForm());
+//
+//  String language = literal.getLanguage();
+//  
+//  // OK if language is null or empty
+//  return literal.getModel().createLiteral(value, language); 
+//}
+    
     public Model create(Resource subject, Literal label) {
         
         Model model = ModelFactory.createDefaultModel();
@@ -187,14 +206,6 @@ public class BfTitleConverter extends BfResourceConverter {
         model.add(title, RDFS.label, label);
         model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
         // model.add(createTitleElements(label));
-        return model;
-    }
-    
-    private Model createTitleElements(Literal title) {
-        // If we can parse the title string into sub-elements, do so here.
-        // E.g., if title starts with an article, create a NonSortTitleElement.
-        // Call createTitleElement for each piece of the title identified.
-        Model model = ModelFactory.createDefaultModel();
         return model;
     }
     
