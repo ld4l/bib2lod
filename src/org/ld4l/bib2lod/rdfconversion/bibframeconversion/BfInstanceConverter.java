@@ -82,6 +82,9 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
+        // LD4L uses a derivedFrom predicate to relate Titles to Titles and
+        // Works to Works, but this is used to relate a Work or Instance to
+        // a marcxml record, so it should be removed.
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_DERIVED_FROM);
     }
     
