@@ -157,7 +157,7 @@ public abstract class BfResourceConverter {
               
             // Change any remaining predicates in Bibframe namespace to LD4L
             // namespace.
-            } else if (convertBfPropertyNamespace(predicate, object)) {
+            } else if (convertBfPropertyNamespace(subject, predicate, object)) {
                 stmts.remove();    
                 
             } // else: external namespace (e.g., madsrdf); don't modify
@@ -205,7 +205,7 @@ public abstract class BfResourceConverter {
      * Possibly we should reverse the default: change namespace if in a 
      * list of properties, else discard. 
      */
-    protected boolean convertBfPropertyNamespace(
+    protected boolean convertBfPropertyNamespace(Resource subject,
             Property predicate, RDFNode object) {
         
         String bfNamespace = OntNamespace.BIBFRAME.uri();
