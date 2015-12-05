@@ -5,9 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
@@ -19,6 +17,7 @@ import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfProviderConverter extends BfResourceConverter {
+
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfProviderConverter.class);
@@ -61,27 +60,25 @@ public class BfProviderConverter extends BfResourceConverter {
     static {
 
     }
-
-    private Statement providerStatement;
-
-    public BfProviderConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    
+    private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE = 
+            new HashMap<BfProperty, Ld4lType>();
+    static {
+        PROPERTY_TO_TYPE.put(
+                BfProperty.BF_DISTRIBUTION, Ld4lType.DISTRIBUTOR_PROVISION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.BF_MANUFACTURE, Ld4lType.MANUFACTURER_PROVISION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.BF_PRODUCTION, Ld4lType.PRODUCER_PROVISION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.BF_PROVIDER, Ld4lType.PROVISION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.BF_PUBLICATION, Ld4lType.PUBLISHER_PROVISION);
     }
     
-    protected Model convertSubject(
-            // providerStatement links the caller's subject (the instance) to 
-            // this subject (the provider) using the property bf:provider or  
-            // one of its subproperties.
-            Resource subject, Statement providerStatement) {
-        
-        this.subject = subject;
-        this.model = subject.getModel();
-        this.providerStatement = providerStatement;
-        
-        convertModel();
-
-        return model;        
-    }
+    protected BfProviderConverter(String localNamespace, Statement statement) {
+        super(localNamespace, statement);
+    }   
     
     @Override
     protected void convertModel() {
@@ -96,37 +93,14 @@ public class BfProviderConverter extends BfResourceConverter {
 
     private void createProvision() {
         
-        Property providerProp = providerStatement.getPredicate();
+        Property providerProp = linkingStatement.getPredicate();
         LOGGER.debug(providerProp.getURI());
         Ld4lType newType = null;
-        String label = null;
+        BfProperty bfProp = BfProperty.get(providerProp);
         
-        // TODO Put these into some kind of data structure...
-        if (providerProp.equals(BfProperty.BF_PUBLICATION.property())) {
-            newType = Ld4lType.PUBLISHER_PROVISION;
-            label = "Publisher";
-        
-        } else if (providerProp.equals(BfProperty.BF_DISTRIBUTION.property())) {
-            newType = Ld4lType.DISTRIBUTOR_PROVISION;
-            label = "Distributor";           
-
-        } else if (providerProp.equals(BfProperty.BF_MANUFACTURE.property())) {
-            newType = Ld4lType.MANUFACTURER_PROVISION;
-            label = "Manufacturer";       
-
-        } else if (providerProp.equals(BfProperty.BF_PRODUCTION.property())) {
-            newType = Ld4lType.PRODUCER_PROVISION;
-            label = "Producer";       
-    
-        // add any additional Provision subtypes here
-    
-        // Generic provider property
-        } else {
-            newType = Ld4lType.PROVISION;
-            label = "Provider";
-        }
-        
-
+        newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
+                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.PROVISION;
+   
         /*
          * TODO bf:providerRole
          * If bf:providerRole is specified, this should be replaced with a
@@ -146,9 +120,10 @@ public class BfProviderConverter extends BfResourceConverter {
             assertions.add(subject, RDF.type, newType.ontClass());
         }
         
-        if (label != null) {
-            assertions.add(subject, RDFS.label, label);
+        if (newType.label() != null) {
+            assertions.add(subject, RDFS.label, newType.label());
         }
+
 
     }
     @Override 

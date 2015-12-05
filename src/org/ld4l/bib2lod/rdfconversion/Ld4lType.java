@@ -18,16 +18,16 @@ public enum Ld4lType {
     
     AGENT(OntNamespace.FOAF, "Agent"),
     ANNOTATION(OntNamespace.OA, "Annotation"),
-    AUTHOR_CONTRIBUTION("AuthorContribution"),
+    AUTHOR_CONTRIBUTION("AuthorContribution", "Author"),
     CLASSIFICATION("Classification"),
     COLLECTION("Collection"),
-    COMPOSER_CONTRIBUTION("ComposerContribution"),
-    CONDUCTOR_CONTRIBUTION("ConductorContribution"),
+    COMPOSER_CONTRIBUTION("ComposerContribution", "Composer"),
+    CONDUCTOR_CONTRIBUTION("ConductorContribution", "Conductor"),
     CONFERENCE("Conference"),
-    CONTRIBUTION("Contribution"),
+    CONTRIBUTION("Contribution", "Contributor"),
     DDC_SHELF_MARK("DdcShelfMark"),
-    DISTRIBUTOR_PROVISION("DistributorProvision"),
-    EDITOR_CONTRIBUTION("EditorContribution"),
+    DISTRIBUTOR_PROVISION("DistributorProvision", "Distributor"),
+    EDITOR_CONTRIBUTION("EditorContribution", "Editor"),
     ELECTRONIC("Electronic"),
     EVENT(OntNamespace.SCHEMA, "Event"),
     FAMILY("Family"),
@@ -40,23 +40,23 @@ public enum Ld4lType {
     LOCAL_ILS_IDENTIFIER("LocalIlsIdentifier"),
     LCC_SHELF_MARK("LccShelfMark"),
     MAIN_TITLE_ELEMENT(OntNamespace.MADSRDF, "MainTitleElement"),
-    MANUFACTURER_PROVISION("ManufacturerProvision"),
+    MANUFACTURER_PROVISION("ManufacturerProvision", "Manufacturer"),
     MANUSCRIPT("Manuscript"),
     MEETING("Meeting"),
     MONOGRAPH("Monograph"),
     MULTIPART_MONOGRAPH("MultipartMonograph"),
-    NARRATOR_CONTRIBUTION("NarratorContribution"),
+    NARRATOR_CONTRIBUTION("NarratorContribution", "Narrator"),
     NLM_SHELF_MARK("NlmShelfMark"),
     NON_SORT_TITLE_ELEMENT(OntNamespace.MADSRDF, "NonSortElement"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PART_NAME_TITLE_ELEMENT(OntNamespace.MADSRDF, "PartNameElement"),
-    PERFORMER_CONTRIBUTION("PerformerContribution"),
+    PERFORMER_CONTRIBUTION("PerformerContribution", "Performer"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location"),
     PRINT("Print"),
-    PRODUCER_PROVISION("ProducerProvision"),
-    PUBLISHER_PROVISION("PublisherProvision"),
-    PROVISION("Provision"),
+    PRODUCER_PROVISION("ProducerProvision", "Producer"),
+    PROVISION("Provision", "Provider"),
+    PUBLISHER_PROVISION("PublisherProvision", "Publisher"),
     SERIAL("Serial"),
     SHELF_MARK("ShelfMark"),
     SUBTITLE_ELEMENT(OntNamespace.MADSRDF, "SubTitleElement"),
@@ -76,15 +76,22 @@ public enum Ld4lType {
     private final String prefixed;
     private final String sparqlUri;
     private final Resource ontClass;
+    private String label;
 
     Ld4lType(String localname) {
         // Default namespace for this enum type
         this(OntNamespace.LD4L, localname);
     }
     
+    Ld4lType(String localname, String label) {
+        this(OntNamespace.LD4L, localname);
+        this.label = label;
+    }
+    
     Ld4lType(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
+        this.label = null;
         
         // Save as instance variables so don't recompute on each call.
         this.uri = namespace.uri() + localname;
@@ -98,8 +105,8 @@ public enum Ld4lType {
         // entity creation; presumably a performance optimization, but should
         // test.
         this.ontClass = ResourceFactory.createResource(uri);
-
     }
+    
 
     public OntNamespace namespace() {
         return namespace;
@@ -111,6 +118,10 @@ public enum Ld4lType {
 
     public String localname() {
         return localname;
+    }
+    
+    public String label() {
+        return label;
     }
     
     public String uri() {
