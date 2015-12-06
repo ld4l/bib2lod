@@ -66,8 +66,8 @@ public class BfTitleConverter extends BfResourceConverter {
     }
     
     
-    public BfTitleConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    protected BfTitleConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     

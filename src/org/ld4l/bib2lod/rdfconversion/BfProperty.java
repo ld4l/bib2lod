@@ -43,10 +43,11 @@ public enum BfProperty {
     BF_MODE_OF_ISSUANCE("modeOfIssuance"),
     BF_PROVIDER("provider", Ld4lProperty.HAS_PROVISION),
     BF_PROVIDER_DATE("providerDate", Ld4lProperty.DATE),
-    BF_PROVIDER_NAME("providerName", Ld4lProperty.AGENT),
+    BF_PROVIDER_NAME("providerName", Ld4lProperty.HAS_AGENT),
     BF_PROVIDER_PLACE("providerPlace", Ld4lProperty.AT_LOCATION),
     BF_PROVIDER_ROLE("providerRole", Ld4lProperty.LEGACY_PROVIDER_ROLE),
-    BF_PROVIDER_STATEMENT("providerStatement", Ld4lProperty.LEGACY_PROVIDER_STATEMENT),
+    BF_PROVIDER_STATEMENT("providerStatement", 
+            Ld4lProperty.LEGACY_PROVIDER_STATEMENT),
     BF_PRODUCTION("production", Ld4lProperty.HAS_PROVISION),
     BF_PUBLICATION("publication", Ld4lProperty.HAS_PROVISION),
     BF_RELATOR("relator", Ld4lProperty.HAS_CONTRIBUTION),
@@ -68,7 +69,21 @@ public enum BfProperty {
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
-            OntNamespace.MADSRDF, "isMemberOfMADSScheme");
+            OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+
+    // Add others as appropriate
+    RELATORS_AUTHOR(
+            OntNamespace.RELATORS, "aut", Ld4lProperty.HAS_CONTRIBUTION), 
+    RELATORS_COMPOSER(
+            OntNamespace.RELATORS, "cmp", Ld4lProperty.HAS_CONTRIBUTION),  
+    RELATORS_CONDUCTOR(
+            OntNamespace.RELATORS, "cnd", Ld4lProperty.HAS_CONTRIBUTION),  
+    RELATORS_EDITOR(
+            OntNamespace.RELATORS, "edt", Ld4lProperty.HAS_CONTRIBUTION),  
+    RELATORS_NARRATOR(
+            OntNamespace.RELATORS, "nrt", Ld4lProperty.HAS_CONTRIBUTION),  
+    RELATORS_PERFORMER(
+            OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION); 
 
     private final OntNamespace namespace;
     private final String localname;

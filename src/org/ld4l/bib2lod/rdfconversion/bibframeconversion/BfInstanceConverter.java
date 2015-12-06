@@ -6,16 +6,12 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -23,6 +19,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfInstanceConverter extends BfBibResourceConverter {
 
@@ -41,8 +38,10 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                         
     /*
      * This case is problematic, since, unlike the Work, we do not have links to
-     * the Instance's Items here. Furthermore, how would we know which of the
-     * Instance's Items are Manuscripts?
+     * the Instance's Items here. However, in the TypeSplitter we could create
+     * the inverse assertions (Instance to Item) and add those to the Instance
+     * file. The real problem is: if the Instance has more than one Item, how 
+     * would we know which of the Instance's Items are Manuscripts? 
      private static final Map<Resource, Resource> NEW_ITEM_TYPES =
             BfType.typeMap(Arrays.asList(
                     BfType.BF_MANUSCRIPT
@@ -161,8 +160,6 @@ public class BfInstanceConverter extends BfBibResourceConverter {
             }          
         }
         
-        applyRetractions();
-        
         super.convertModel();
     }
   
@@ -181,12 +178,9 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     
     private void convertProvider(Statement statement) {
         
-        // Type the converter as BfProviderConverter rather than 
-        // BfResourceConverter, else we must add a vacuous 
-        // convertSubject(Resource, Statement) method to BfResourceConverter.
-        BfProviderConverter converter = new BfProviderConverter(
-              BfType.BF_PROVIDER, this.localNamespace);
-        
+        BfResourceConverter converter = new BfProviderConverter(
+                this.localNamespace, statement);
+     
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
         Resource provider = BibframeConverter.getSubjectModelToConvert(

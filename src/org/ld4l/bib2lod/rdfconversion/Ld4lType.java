@@ -25,6 +25,7 @@ public enum Ld4lType {
     CONDUCTOR_CONTRIBUTION("ConductorContribution", "Conductor"),
     CONFERENCE("Conference"),
     CONTRIBUTION("Contribution", "Contributor"),
+    CREATOR_CONTRIBUTION("CreatorContribution", "Creator"),
     DDC_SHELF_MARK("DdcShelfMark"),
     DISTRIBUTOR_PROVISION("DistributorProvision", "Distributor"),
     EDITOR_CONTRIBUTION("EditorContribution", "Editor"),

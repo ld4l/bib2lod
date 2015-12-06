@@ -16,13 +16,13 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
-public class BfProviderConverter extends BfResourceConverter {
-
+public class BfContributorConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfProviderConverter.class);
-
+            LogManager.getLogger(BfContributorConverter.class);
+    
     
     private static final List<BfType> TYPES_TO_CONVERT = 
             new ArrayList<BfType>();
@@ -33,37 +33,36 @@ public class BfProviderConverter extends BfResourceConverter {
     private static final List<BfType> TYPES_TO_RETRACT = 
             new ArrayList<BfType>();
     static {
-        TYPES_TO_RETRACT.add(BfType.BF_PROVIDER);
+
     }
 
     private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE = 
             new HashMap<BfProperty, Ld4lType>();
     static {
         PROPERTY_TO_TYPE.put(
-                BfProperty.BF_DISTRIBUTION, Ld4lType.DISTRIBUTOR_PROVISION);
+                BfProperty.BF_CREATOR, Ld4lType.CREATOR_CONTRIBUTION);
         PROPERTY_TO_TYPE.put(
-                BfProperty.BF_MANUFACTURE, Ld4lType.MANUFACTURER_PROVISION);
+                BfProperty.BF_CONTRIBUTOR, Ld4lType.CONTRIBUTION);
         PROPERTY_TO_TYPE.put(
-                BfProperty.BF_PRODUCTION, Ld4lType.PRODUCER_PROVISION);
+                BfProperty.BF_RELATOR, Ld4lType.CONTRIBUTION);
         PROPERTY_TO_TYPE.put(
-                BfProperty.BF_PROVIDER, Ld4lType.PROVISION);
+                BfProperty.RELATORS_AUTHOR, Ld4lType.AUTHOR_CONTRIBUTION);
         PROPERTY_TO_TYPE.put(
-                BfProperty.BF_PUBLICATION, Ld4lType.PUBLISHER_PROVISION);
+                BfProperty.RELATORS_COMPOSER, Ld4lType.COMPOSER_CONTRIBUTION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.RELATORS_CONDUCTOR, Ld4lType.CONDUCTOR_CONTRIBUTION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.RELATORS_EDITOR, Ld4lType.EDITOR_CONTRIBUTION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.RELATORS_NARRATOR, Ld4lType.NARRATOR_CONTRIBUTION);
+        PROPERTY_TO_TYPE.put(
+                BfProperty.RELATORS_PERFORMER, Ld4lType.PERFORMER_CONTRIBUTION);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_DATE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_DISTRIBUTION);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_MANUFACTURE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PRODUCTION);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_NAME);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_PLACE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_ROLE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PUBLICATION);
-        PROPERTIES_TO_CONVERT.addAll(PROPERTY_TO_TYPE.keySet());
+
     }
 
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
@@ -77,16 +76,16 @@ public class BfProviderConverter extends BfResourceConverter {
     static {
 
     }
-    
-  
-    protected BfProviderConverter(String localNamespace, Statement statement) {
+ 
+    protected BfContributorConverter(
+            String localNamespace, Statement statement) {
         super(localNamespace, statement);
-    }   
+    } 
     
     @Override
     protected void convertModel() {
         
-      createProvision();
+        createContribution();
       
       // If there were retractions, we should apply them to the model here,
       // so that super.convertModel() doesn't reprocess them.
@@ -94,42 +93,38 @@ public class BfProviderConverter extends BfResourceConverter {
       super.convertModel();
     }
 
-    private void createProvision() {
+    private void createContribution() {
         
-        Property providerProp = linkingStatement.getPredicate();
-        LOGGER.debug(providerProp.getURI());
-        BfProperty bfProp = BfProperty.get(providerProp);
-        Resource instance = linkingStatement.getSubject();
+        // Linking statement = :work <contributorPredicate> :agent
+        // where contributorPredicate is one of PROPERTY_TO_TYPE.keySet()
+        // and :agent is a bf:Agent type (bf:Person, bf:Organization, etc.)
+        Resource work = linkingStatement.getSubject();
+        Property contributorProp = linkingStatement.getPredicate();
+        Resource agent = linkingStatement.getResource();
         
+        LOGGER.debug(contributorProp.getURI());
+        BfProperty bfProp = BfProperty.get(contributorProp);
+
+        // TODO Generate a more specific creator type based on the type of 
+        // work. I.e., in :work bf:creator :agent 
+        // if :work is a bf:Text, then create an AuthorContribution; if
+        // :work is bf:NotatedMusic, create a ComposerContribution, etc.
         Ld4lType newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
-                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.PROVISION;
-   
-        /*
-         * TODO bf:providerRole
-         * If bf:providerRole is specified, this should be replaced with a
-         * specific Provision subtype. If it doesn't match any of the existing
-         * subtypes, convert to a label on the generic ld4l:Provision. Need to
-         * analyze what values, if any, are generated.
-         *
-         * TODO bf:providerStatement
-         * For now will move to legacy namespace. If the statement exists 
-         * without the provider and its object properties, should parse the 
-         * providerStatement to construct these. If it occurs alongside the 
-         * provider and object properties, and the data is the same, it should 
-         * be discarded.
-        */
-        
-        assertions.add(subject, RDF.type, newType.ontClass());
+                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.CONTRIBUTION;
+
+        Resource contribution = 
+                assertions.createResource(RdfProcessor.mintUri(localNamespace));
+        assertions.add(contribution, RDF.type, newType.ontClass());
         
         if (newType.label() != null) {
-            assertions.add(subject, RDFS.label, newType.label());
+            assertions.add(contribution, RDFS.label, newType.label());
         }
-
-        // Could also let these fall through to super.convertModel(), but might
-        // as well do it now.
-        assertions.add(instance, Ld4lProperty.HAS_PROVISION.property(), subject);
+        
+        assertions.add(contribution, Ld4lProperty.HAS_AGENT.property(), agent);
+        
+        assertions.add(
+                work, Ld4lProperty.HAS_CONTRIBUTION.property(), contribution);
         retractions.add(linkingStatement);
-
     }
     
     

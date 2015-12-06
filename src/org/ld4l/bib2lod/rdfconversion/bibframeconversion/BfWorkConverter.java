@@ -5,13 +5,20 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfWorkConverter extends BfBibResourceConverter {
 
@@ -29,6 +36,14 @@ public class BfWorkConverter extends BfBibResourceConverter {
             new HashMap<BfProperty, Ld4lProperty>();
     static {
 
+    }
+    
+    private static final List<BfProperty> CONTRIBUTOR_PROPERTIES = 
+            new ArrayList<BfProperty>();
+    static {
+        CONTRIBUTOR_PROPERTIES.add(BfProperty.BF_CONTRIBUTOR);
+        CONTRIBUTOR_PROPERTIES.add(BfProperty.BF_CREATOR);
+        CONTRIBUTOR_PROPERTIES.add(BfProperty.BF_RELATOR);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
@@ -50,9 +65,86 @@ public class BfWorkConverter extends BfBibResourceConverter {
         
         convertTitles(BfProperty.BF_WORK_TITLE);
 
-        applyRetractions();
+        List<Statement> statements = new ArrayList<Statement>();        
+        StmtIterator stmts = model.listStatements();
         
+        // Copy statements to a list and loop through the list rather than
+        // using the iterator. This allows us to modify the model inside the
+        // loop, since the list itself is not being modified, whereas using an
+        // iterator does not allow us to remove the current statement from the
+        // model outside the iterator.
+        stmts.forEachRemaining(statements::add);
+        
+        for (Statement statement : statements) {
+            
+            Property predicate = statement.getPredicate();
+    
+            if (predicate.equals(RDF.type)) {
+                
+                // needed, or fall through to superclass conversion?
+              
+            } else {
+                
+                BfProperty bfProp = BfProperty.get(predicate);
+                
+                if (bfProp == null) {
+                    // Log for review, to make sure nothing has escaped.
+                    LOGGER.info("No specific handling defined for property " 
+                            + predicate.getURI()
+                            + "; falling through to default case.");
+                    continue;
+                }
+                
+                if (CONTRIBUTOR_PROPERTIES.contains(bfProp) || 
+                        bfProp.namespace().equals(OntNamespace.RELATORS)) {
+                    convertContributor(statement);
+                    
+                 
+                } else if (bfProp.equals(BfProperty.BF_ANNOTATES)) {
+                    convertAnnotation(statement);
+                                              
+                } 
+            }          
+        }
+        //RdfProcessor.printModel(model, Level.DEBUG);
         super.convertModel();
+
+    }
+    
+    private void convertContributor(Statement statement) {
+        
+        BfResourceConverter converter = new BfContributorConverter(
+                this.localNamespace, statement);
+        
+        // Identify the provider resource and build its associated model (i.e.,
+        // statements in which it is the subject or object).
+        Resource contributor = BibframeConverter.getSubjectModelToConvert(
+                statement.getResource());
+        
+        // Add BfContributorConverter model to this converter's assertions 
+        // model, so they get added to the BibframeConverter output model.
+        assertions.add(converter.convertSubject(contributor, statement));
+    }
+    
+    private void convertAnnotation(Statement statement) {
+        
+        BfResourceConverter converter = 
+                new BfAnnotationConverter(localNamespace, statement);
+
+        // Identify the annotation resource and build its associated model (i.e.,
+        // statements in which it is the subject or object).
+        
+//        RdfProcessor.printModel(model, Level.DEBUG);
+//        LOGGER.debug("+++++++++++");
+//        RdfProcessor.printModel(statement.getSubject().getModel(), Level.DEBUG);
+        Resource annotation = BibframeConverter.getSubjectModelToConvert(
+                statement.getSubject(), false);
+                
+               
+        // Add BfAnnotationConverter model to this converter's assertions 
+        // model, so they get added to the BibframeConverter output model.
+        assertions.add(converter.convertSubject(annotation, statement));        
+        
     }
     
     @Override

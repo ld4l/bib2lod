@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
@@ -41,13 +42,17 @@ public class BibframeConverter extends RdfProcessor {
     static {
         CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
-//                BfResourceConverter.class);    
+//                BfAnnnotation.class);  
+//        CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, 
+//                BfCategoryConverter.class);
+//        CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
+//                BfClassificationConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
-//                BfResourceConverter.class);
+//                BfIdentifierConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
                 BfAuthorityConverter.class);
@@ -171,12 +176,17 @@ public class BibframeConverter extends RdfProcessor {
         writeModelToFile(outputModel, outputFile);       
     }
     
+    public static Resource getSubjectModelToConvert(Resource resource) {
+        return getSubjectModelToConvert(resource, true);
+    }
+    
     /**
      * Create a subset of the input model that pertains to the specified 
      * resource. This includes statements where the resource is the subject
      * or the object.
      */
-    public static Resource getSubjectModelToConvert(Resource resource) {
+    public static Resource getSubjectModelToConvert(
+            Resource resource, boolean includeObjectStatements) {
         
         Model inputModel = resource.getModel();
         
@@ -185,26 +195,45 @@ public class BibframeConverter extends RdfProcessor {
         
         // Start with statements of which this subject is the subject
         modelForSubject.add(resource.listProperties());
-
-        // Now add statements with the object of the previous statements 
-        // as subject. Which statements are included has been determined by
-        // the query for the resource type in TypeSplitter.
-        NodeIterator nodes = modelForSubject.listObjects();
-        while (nodes.hasNext()) {
-            RDFNode node = nodes.nextNode();
-            // NB We don't need node.isResource(), which includes bnodes 
-            // as well, since all nodes have been converted to URI 
-            // resources.
-            if (node.isURIResource()) {
-                modelForSubject.add(inputModel.listStatements(
-                        node.asResource(), null, (RDFNode) null));
+        
+        /* Now add statements with the object of the previous statements 
+         * as subject. Which statements are included has already been 
+         * determined by the query for the resource type in TypeSplitter.
+         * 
+         * If this method is called from another converter, and the resource is
+         * the SUBJECT of the statement linking the caller's subject with the
+         * called subject, do NOT include these statements. 
+         * 
+         * Example: :annotation bf:annotates :work
+         * BfWorkConverter calls BfAnnotationConverter. We want to get the
+         * statements where the Annotation is the subject, but NOT statements
+         * where the object (the Work) is the subject - which would be most of 
+         * the statements in the Work's model. Contrast this with
+         * :work bf:title :title
+         * where BfWorkConverter calls BfTitleConverter. Here the Title is the
+         * OBJECT of the linking statement, and we want to get statements where
+         * the Title is the subject.
+         * When called from BibframeConverter rather than another 
+         * BfResourceConverter, there is no linking statement.
+         */
+        if (includeObjectStatements) {
+            NodeIterator nodes = modelForSubject.listObjects();
+            while (nodes.hasNext()) {
+                RDFNode node = nodes.nextNode();
+                // NB We don't need node.isResource(), which includes bnodes 
+                // as well, since all nodes have been converted to URI 
+                // resources.
+                if (node.isURIResource()) {
+                    modelForSubject.add(inputModel.listStatements(
+                            node.asResource(), null, (RDFNode) null));
+                }
             }
         }
         
         // Finally, add statements with the current resource as object.
         // Examples:
-        // :work bf:language :language
-        // :annotation bf:annotates :work
+        // BfLanguageConverter: :work bf:language :language
+        // BfWorkConverter: :annotation bf:annotates :work
         modelForSubject.add(
                 inputModel.listStatements(null, null, resource));
         
@@ -219,6 +248,7 @@ public class BibframeConverter extends RdfProcessor {
         // instead.            
         return modelForSubject.getResource(resource.getURI());               
     } 
+    
     
     private BfResourceConverter getConverter(BfType bfType) {
         

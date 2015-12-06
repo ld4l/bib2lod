@@ -31,20 +31,43 @@ public abstract class BfResourceConverter {
     protected Model assertions;
     protected Model retractions;
     protected String localNamespace;
+    protected Statement linkingStatement;
 
-    // TODO Make abstract if not instantiated ***
     public BfResourceConverter(BfType bfType, String localNamespace) {
+        this(localNamespace);     
         LOGGER.debug("In constructor for converter type " 
                 + this.getClass().getSimpleName()
                 + "; converting Bibframe type " + bfType);  
-                 
+     
         this.bfType = bfType;
+    }
+    
+    protected BfResourceConverter(String localNamespace) {
+        LOGGER.debug("In constructor for converter type " 
+                + this.getClass().getSimpleName() 
+                + "; no Bibframe type specified.");
+
         this.localNamespace = localNamespace;
         
         this.assertions = ModelFactory.createDefaultModel();
         this.retractions = ModelFactory.createDefaultModel();
+        
     }
-    
+
+    /* 
+     * This constructor is used when a converter is called from another 
+     * converter. The statement parameter links the subject of the calling
+     * converter (e.g., BfInstanceConverter) to the subject of this converter
+     * (e.g., BfTitleConverter).
+     * So far the known use cases don't require a BfType parameter, since these
+     * converters handle only a single type. Can add the parameter, or another 
+     * constructor, if needed later.  
+     */
+    protected BfResourceConverter(String localNamespace, Statement statement) {
+        this(localNamespace);
+        this.linkingStatement = statement;
+    }
+
     /*
      * Public interface method. Defined so convertSubject() and convertModel() 
      * can be protected, so that if subclasses override these methods they
@@ -71,9 +94,26 @@ public abstract class BfResourceConverter {
         convertModel();
         
         return model;
-
     }
- 
+
+    protected Model convertSubject(
+            /* The linking statement is passed in when the converter is called
+             * by another converter: the linking statement is the statement 
+             * that relates the caller's subject to this subject. For example,
+             * the statement :instance bf:publication :provider links the 
+             * Instance to the Provider, when BfInstanceConverter calls
+             * BfProviderConverter.
+             */
+            Resource subject, Statement linkingStatement) {
+        
+        this.subject = subject;
+        this.model = subject.getModel();
+        this.linkingStatement = linkingStatement;
+        
+        convertModel();
+
+        return model;        
+    }
     /* 
      * Default conversion method. Subclasses may override.
      * 

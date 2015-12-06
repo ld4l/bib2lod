@@ -1,28 +1,19 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.apache.jena.rdf.model.Literal;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.NodeIterator;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
-import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 /*
  * Provides conversions shared by Works and Instances - e.g., Title conversion
@@ -87,8 +78,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
     private void convertTitle(Statement statement, 
             List<Literal> titleLiterals) {
 
-        BfResourceConverter converter = new BfTitleConverter(
-              BfType.BF_TITLE, this.localNamespace);
+        BfResourceConverter converter = 
+                new BfTitleConverter(this.localNamespace);
         
         // Identify the title resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
@@ -110,8 +101,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
     
     private void createTitle(Literal label) {
         
-        BfTitleConverter converter = new BfTitleConverter(
-                BfType.BF_TITLE, this.localNamespace);
+        BfTitleConverter converter = new BfTitleConverter(this.localNamespace);
         assertions.add(converter.create(subject, label));
     }
 }
