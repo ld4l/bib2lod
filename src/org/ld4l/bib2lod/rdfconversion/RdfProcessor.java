@@ -161,7 +161,11 @@ public abstract class RdfProcessor extends Processor {
     }
 
     // For development/debugging
-    public static void printModel(Model model, Level level) {
+    public static void printModel(Model model, Level level, String msg) {
+        
+        if (msg != null) {
+            LOGGER.log(level, msg);
+        }
         StmtIterator statements = model.listStatements();   
         while (statements.hasNext()) {
             Statement statement = statements.nextStatement();
@@ -172,6 +176,10 @@ public abstract class RdfProcessor extends Processor {
             // Logger.setLevel() method like log4j. 
             LOGGER.log(level, statement.toString());
         }     
+    }
+    
+    public static void printModel(Model model, Level level) {
+        printModel(model, level, null);
     }
     
     public static String mintUri(String namespace) {    

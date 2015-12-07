@@ -155,10 +155,23 @@ public abstract class BfResourceConverter {
         while (stmts.hasNext()) {
             
             Statement stmt = stmts.nextStatement();
-            Resource subject = stmt.getSubject();
             Property predicate = stmt.getPredicate();
             RDFNode object = stmt.getObject();
-                       
+            
+            // NB Normally stmt.getSubject() should be this.subject. However,
+            // the subjectModel may contain statements with other subjects.
+            // Normally these should have been converted by another converter
+            // called from this converter, and then removed from this.model, 
+            // but in case that hasn't been done, we can't assume the subject
+            // is this.subject. This should be logged for further investigation.
+            Resource subject = stmt.getSubject();
+            if (LOGGER.isInfoEnabled()) {
+                if (! subject.equals(this.subject)) {
+                    LOGGER.info("Found statement " + stmt.toString() 
+                            + " where subject is not " + this.subject.getURI());
+                }
+            }
+                      
             if (predicate.equals(RDF.type)) {
 
                 Resource type = object.asResource();
@@ -173,7 +186,7 @@ public abstract class BfResourceConverter {
                 
                 // Change any remaining types in Bibframe namespace to LD4L
                 // namespace.
-                } else if (convertBfTypeNamespace(type)) {
+                } else if (convertBfTypeNamespace(subject, type)) {
                     stmts.remove();
                     
                 } // else: external namespace (e.g., madsrdf); don't modify
@@ -214,7 +227,7 @@ public abstract class BfResourceConverter {
      * Possibly we should reverse the default: change namespace if in a 
      * list of types, else discard. 
      */
-    protected boolean convertBfTypeNamespace(Resource type) {
+    protected boolean convertBfTypeNamespace(Resource subject, Resource type) {
         
         String bfNamespace = OntNamespace.BIBFRAME.uri();
         String ld4lNamespace = OntNamespace.LD4L.uri();
