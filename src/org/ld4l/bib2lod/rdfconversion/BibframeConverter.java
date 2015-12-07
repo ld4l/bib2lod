@@ -217,7 +217,6 @@ public class BibframeConverter extends RdfProcessor {
         Model modelForSubject = ModelFactory.createDefaultModel();
         
         // Start with statements of which this subject is the subject
-        // StmtIterator resourceAsSubjectStmts = resource.listProperties();
         List<Statement> resourceAsSubjectStmts = 
                 resource.listProperties().toList();
         modelForSubject.add(resourceAsSubjectStmts);
@@ -271,9 +270,6 @@ public class BibframeConverter extends RdfProcessor {
         // process these statements, so they can be removed from the input 
         // model.
         inputModel.remove(modelForSubject);
-        
-        LOGGER.debug("modelForSubject size: " + modelForSubject.size());
-        //RdfProcessor.printModel(inputModel, Level.DEBUG);
            
         // NB At this point, resource.getModel() is the inputModel, not 
         // the modelForSubject. Get the subject of the modelForSubject 

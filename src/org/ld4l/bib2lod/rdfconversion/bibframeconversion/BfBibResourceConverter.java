@@ -50,12 +50,9 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
                     model.createLiteral(value, literal.getLanguage()));
             retractions.add(stmt);
         }
-        
-        StmtIterator titleStmts = model.listStatements(subject, 
-                titleProp.property(), (RDFNode) null);
 
-        List<Statement> titles = new ArrayList<Statement>();
-        titleStmts.forEachRemaining(titles::add);
+        List<Statement> titles = model.listStatements(subject, 
+                titleProp.property(), (RDFNode) null).toList();
         for (Statement stmt : titles) {
             convertTitle(stmt, titleLiterals);
         }

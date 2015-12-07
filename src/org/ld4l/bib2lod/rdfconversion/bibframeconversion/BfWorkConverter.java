@@ -65,15 +65,10 @@ public class BfWorkConverter extends BfBibResourceConverter {
         
         convertTitles(BfProperty.BF_WORK_TITLE);
 
-        List<Statement> statements = new ArrayList<Statement>();        
-        StmtIterator stmts = model.listStatements();
-        
         // Copy statements to a list and loop through the list rather than
         // using the iterator. This allows us to modify the model inside the
-        // loop, since the list itself is not being modified, whereas using an
-        // iterator does not allow us to remove the current statement from the
-        // model outside the iterator.
-        stmts.forEachRemaining(statements::add);
+        // loop.
+        List<Statement> statements = model.listStatements().toList();     
         
         for (Statement statement : statements) {
             
