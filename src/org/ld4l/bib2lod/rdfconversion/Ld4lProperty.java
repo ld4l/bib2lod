@@ -14,6 +14,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lProperty {
 
+    ANNOTATED_BY(OntNamespace.OA, "annotatedBy"),
     AT_LOCATION(OntNamespace.PROV, "atLocation"),
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
     DATE(OntNamespace.DCTERMS, "date"),

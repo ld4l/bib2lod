@@ -129,7 +129,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // Identify the annotation resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
         Resource annotation = BibframeConverter.getSubjectModelToConvert(
-                statement.getSubject());              
+                statement.getSubject()); 
+        
+        RdfProcessor.printModel(annotation.getModel(), Level.DEBUG);
                
         // Add BfAnnotationConverter model to this converter's assertions 
         // model, so they get added to the BibframeConverter output model.

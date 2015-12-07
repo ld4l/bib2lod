@@ -75,9 +75,6 @@ public class BfTitleConverter extends BfResourceConverter {
     protected void convertModel() {
         
       convertTitleValue();
-
-      model.remove(retractions);
-
       super.convertModel();
     }
     

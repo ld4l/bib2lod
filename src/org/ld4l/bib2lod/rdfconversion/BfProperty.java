@@ -17,15 +17,22 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum BfProperty {
 
-    BF_ANNOTATES("annotates"),
+
+    BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
+    BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
+            Ld4lProperty.ANNOTATED_BY),
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode"),
+    BF_CHANGE_DATE("changeDate"),
     BF_CONTRIBUTOR("contributor", Ld4lProperty.HAS_CONTRIBUTION),
     BF_CREATOR("creator", Ld4lProperty.HAS_CONTRIBUTION),
     BF_DERIVED_FROM("derivedFrom"),
+    BF_DESCRIPTION_CONVENTIONS("descriptionConventions"),
+    BF_DESCRIPTION_MODIFIER("descriptionModifier"),
     BF_DISTRIBUTION("distribution", Ld4lProperty.HAS_PROVISION),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
+    BF_GENERATION_PROCESS("generationProcess"),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
     BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR),

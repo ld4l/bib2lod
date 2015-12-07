@@ -143,9 +143,9 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                 if (PROVIDER_PROPERTIES.contains(bfProp)) {
                     convertProvider(statement);
                     
-//                } else if (bfProp.equals(BfProperty.BF_IDENTIFIER) || 
-//                        bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
-//                    convertIdentifier(statement);
+                } else if (bfProp.equals(BfProperty.BF_IDENTIFIER) || 
+                        bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
+                    convertIdentifier(statement);
                                               
                 } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
                     if (relatedWork != null) {
