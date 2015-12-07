@@ -119,6 +119,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // Add BfContributorConverter model to this converter's assertions 
         // model, so they get added to the BibframeConverter output model.
         assertions.add(converter.convertSubject(contributor, statement));
+        
+        // TODO Is there any data in the Bibframe RDF that would allow 
+        // assignment of vivo:rank to the Contributions?
     }
     
     private void convertAnnotation(Statement statement) {

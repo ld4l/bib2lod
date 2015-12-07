@@ -85,14 +85,19 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
 
         assertions.add(converter.convertSubject(title));
         
-        Literal label = title.getProperty(RDFS.label).getLiteral();
-        if (label != null) {
-            boolean removed = titleLiterals.removeIf(i -> label.sameValueAs(i));
-            LOGGER.debug(removed 
-                    ? "Found a match for bf:titleStatement '" 
-                    + label.toString() + "': removing"
-                    : "No bf:titleStatement matching title '" 
-                    + label.toString() + "'");
+        Statement labelStmt = title.getProperty(RDFS.label);
+        if (labelStmt != null) {
+            Literal label = labelStmt.getLiteral();
+
+            if (label != null) {
+                boolean removed = 
+                        titleLiterals.removeIf(i -> label.sameValueAs(i));
+                LOGGER.debug(removed 
+                        ? "Found a match for bf:titleStatement '" 
+                        + label.toString() + "': removing"
+                        : "No bf:titleStatement matching title '" 
+                        + label.toString() + "'");
+            }
         }
     }
     
