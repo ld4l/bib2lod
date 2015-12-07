@@ -1,7 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
@@ -24,6 +26,12 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfBibResourceConverter.class);
 
+    private static final List<BfProperty> TITLE_DATATYPE_PROPS = 
+            new ArrayList<BfProperty>();  
+    static {
+        TITLE_DATATYPE_PROPS.add(BfProperty.BF_TITLE);
+        TITLE_DATATYPE_PROPS.add(BfProperty.BF_TITLE_STATEMENT);
+    }
     
     public BfBibResourceConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
@@ -32,15 +40,27 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
     // titleProp is either workTitle or instanceTitle
     protected void convertTitles(BfProperty titleProp) {
 
-        // Get the value of any bf:titleStatement statements
-        StmtIterator titleStmtIterator = subject.listProperties(
-                BfProperty.BF_TITLE_STATEMENT.property());
+        // Get the value of any bf:titleStatement, bf:title, and bf:label 
+        // statements. These are datatype properties that need to be converted 
+        // to object property statements with a Title as the object.
+        List<Statement> titleDatatypeStmts = new ArrayList<Statement>();
+        for (BfProperty bfProp : TITLE_DATATYPE_PROPS) {
+            StmtIterator stmts = subject.listProperties(bfProp.property());
+            if (stmts.hasNext()) {
+                titleDatatypeStmts.addAll(stmts.toList());
+            }
 
-        // This empties out the iterator
-        // retractions.add(titleStmtIterator);
-        List<Literal> titleLiterals = new ArrayList<Literal>();
-        while (titleStmtIterator.hasNext()) {
-            Statement stmt = titleStmtIterator.nextStatement();
+        }
+        
+        retractions.add(titleDatatypeStmts);
+        
+        // Convert list to set to eliminate duplicates. Can't use a set above
+        // because a set can't be added to a model.
+        Set<Statement> uniqueTitleDatatypeStmts = 
+                new HashSet<Statement>(titleDatatypeStmts);
+ 
+        Set<Literal> titleLiterals = new HashSet<Literal>();
+        for (Statement stmt : uniqueTitleDatatypeStmts) {
             Literal literal = stmt.getLiteral();
             // Normalize the title string for comparison to existing Title
             // labels.
@@ -48,7 +68,6 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             LOGGER.debug("Adding literal with value '" + value + "' to list");
             titleLiterals.add(
                     model.createLiteral(value, literal.getLanguage()));
-            retractions.add(stmt);
         }
 
         List<Statement> titles = model.listStatements(subject, 
@@ -58,7 +77,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         }
          
         // Create a new title object for any titleStatement literals that 
-        // haven't matched an existing title.
+        // haven't matched an existing title and therefore been removed from
+        // the titleLiterals list.
         // NB We don't have to test each of these literals against one another,
         // because if they're identical Jena will already have removed the 
         // duplicates. If they're not identical (e.g., due to a language value),
@@ -73,7 +93,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
 
     // TODO This method is also used by BfWorkConverter. Need to combine.
     private void convertTitle(Statement statement, 
-            List<Literal> titleLiterals) {
+            Set<Literal> titleLiterals) {
 
         BfResourceConverter converter = 
                 new BfTitleConverter(this.localNamespace);

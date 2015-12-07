@@ -50,6 +50,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_DERIVED_FROM);
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_DESCRIPTION_CONVENTIONS);
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_DESCRIPTION_MODIFIER);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DESCRIPTION_SOURCE);
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_GENERATION_PROCESS);
     }
     protected BfAnnotationConverter(

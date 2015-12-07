@@ -41,6 +41,7 @@ public class BfTitleConverter extends BfResourceConverter {
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LABEL);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_INSTANCE_TITLE);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_WORK_TITLE);
     }
@@ -143,6 +144,15 @@ public class BfTitleConverter extends BfResourceConverter {
             // Add the rdfs:label of the Title
             assertions.add(
                     subject, RDFS.label, fullTitleString, titleValueLanguage);
+            
+            // NB Some Title objects have both a bf:titleValue and a bf:label, 
+            // with different strings. We'll end up assigning two rdfs:labels.
+            // Ideally we should not have two rdfs:labels, but it's not clear
+            // how to resolve this case. In at least some cases the bf:label
+            // has extraneous, non-title text, but it's not clear whether that's
+            // always the case. E.g., record 2083918 has
+            // title5 bf:label "Hans Bethe papers, [ca. 1931]-1992."
+            // title5 bf:titleValue "Hans Bethe papers,"
             
             // TODO Part name/number elements
         }
