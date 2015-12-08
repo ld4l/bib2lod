@@ -45,6 +45,14 @@ public class BfWorkConverter extends BfBibResourceConverter {
         CONTRIBUTOR_PROPERTIES.add(BfProperty.BF_CREATOR);
         CONTRIBUTOR_PROPERTIES.add(BfProperty.BF_RELATOR);
     }
+ 
+    private static final List<BfProperty> ANNOTATION_TARGET_PROPERTIES =
+            new ArrayList<BfProperty>();
+    static {
+        ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_ANNOTATES);
+        ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_REVIEW_OF);
+        ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_SUMMARY_OF);
+    }
     
     private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
@@ -94,10 +102,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
                         bfProp.namespace().equals(OntNamespace.RELATORS)) {
                     convertContributor(statement);
                     
-                 
-                } else if (bfProp.equals(BfProperty.BF_ANNOTATES)) {
+                } else if (ANNOTATION_TARGET_PROPERTIES.contains(bfProp)) {
                     convertAnnotation(statement);
-                                              
+                    
                 } 
             }          
         }

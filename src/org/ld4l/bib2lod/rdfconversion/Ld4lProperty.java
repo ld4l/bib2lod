@@ -14,13 +14,17 @@ import org.apache.jena.rdf.model.ResourceFactory;
  */
 public enum Ld4lProperty {
 
+    ANNOTATED_AT(OntNamespace.OA, "annotatedAt"),
     ANNOTATED_BY(OntNamespace.OA, "annotatedBy"),
     AT_LOCATION(OntNamespace.PROV, "atLocation"),
     BIRTHDATE(OntNamespace.SCHEMA, "birthDate"),
+    CHARS(OntNamespace.CONTENT, "chars"),
     DATE(OntNamespace.DCTERMS, "date"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
     HAS_AGENT(OntNamespace.PROV, "agent"),
     HAS_ANNOTATION("hasAnnotation"),
+    HAS_BODY(OntNamespace.OA, "hasBody"),
+    HAS_CREATOR(OntNamespace.DCTERMS, "creator"),
     HAS_CONTRIBUTION("hasContribution"),
     HAS_LANGUAGE(OntNamespace.DCTERMS, "language"),
     HAS_LOCATION(OntNamespace.PROV, "atLocation"),

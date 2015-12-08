@@ -9,6 +9,7 @@ public enum OntNamespace {
     // not be provided. We're using these just to create filenames, not for
     // anything significant about the ontologies themselves.
     BIBFRAME("http://bibframe.org/vocab/", "bf"),
+    CONTENT("http://www.w3.org/2011/content#", "cnt"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),    
     FOAF("http://http://xmlns.com/foaf/0.1/", "foaf"),
     IANA("http://www.iana.org/assignments/relation/", "iana"),

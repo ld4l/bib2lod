@@ -7,11 +7,13 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfAnnotationConverter extends BfResourceConverter {
 
@@ -35,8 +37,16 @@ public class BfAnnotationConverter extends BfResourceConverter {
             new ArrayList<BfProperty>();
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_ANNOTATES);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_ANNOTATION_ASSERTED_BY);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_ANNOTATION_BODY);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_ANNOTATION_SOURCE);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_ASSERTION_DATE); 
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_REVIEW);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_REVIEW_OF);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUMMARY);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUMMARY_OF);
     }
-
+    
     private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
             new HashMap<BfProperty, Ld4lProperty>();
     static {
@@ -64,7 +74,41 @@ public class BfAnnotationConverter extends BfResourceConverter {
         Resource relatedWork = linkingStatement.getResource();
         assertions.add(
                 relatedWork, Ld4lProperty.HAS_ANNOTATION.property(), subject);
+
+        convertAnnotationBody();
+        
+        // TODO: range of bf:assertionDate is a Literal, range of 
+        // oa:annotatedAt is a xsd:dateTimeStamp. Need to convert Literal
+        // text to xsd:dateTime format.
+        // convertAnnotationDate();
+        
         super.convertModel();
+    }
+    
+    private void convertAnnotationBody() {
+        
+        // only if linking stmt 
+        Statement bodyStmt = 
+                subject.getProperty(BfProperty.BF_ANNOTATION_BODY.property());
+        if (bodyStmt == null) {
+            return;
+        }
+        
+        Resource body = bodyStmt.getResource();
+        retractions.add(bodyStmt);
+        assertions.add(body, RDF.type, Ld4lType.TEXT_CONTENT.ontClass());
+        // It's not clear what predicate in Bibframe links the body Resource
+        // to the text content, so can't at this point find the content of the
+        // annotation.
+        // assertions.add(body, Ld4lProperty.CHARS.property(), "");
+        
+        // TODO
+        // coverArt => hasCoverArt, but need to fix domain and range -- domain 
+        // isInstance rather than Work. But which Instance? We've lost that 
+        // connection, would need to add a statement during type-splitting into
+        // the bfInstance file. 
+
+        // TODO Not tested - need to find data in Bibframe RDF.
     }
 
     @Override 

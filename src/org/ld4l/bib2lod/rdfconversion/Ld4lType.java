@@ -62,6 +62,7 @@ public enum Ld4lType {
     SHELF_MARK("ShelfMark"),
     SUBTITLE_ELEMENT(OntNamespace.MADSRDF, "SubTitleElement"),
     TACTILE("Tactile"),
+    TEXT_CONTENT(OntNamespace.CONTENT, "ContentAsText"),
     TIME(OntNamespace.TIME, "TemporalEntity"),
     TITLE(OntNamespace.MADSRDF, "Title"),
     TITLE_ELEMENT(OntNamespace.MADSRDF, "TitleElement"),
