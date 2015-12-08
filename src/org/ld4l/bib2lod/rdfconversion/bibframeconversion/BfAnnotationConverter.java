@@ -25,6 +25,8 @@ public class BfAnnotationConverter extends BfResourceConverter {
             new ArrayList<BfType>();
     static {
         TYPES_TO_CONVERT.add(BfType.BF_ANNOTATION);
+        TYPES_TO_CONVERT.add(BfType.BF_REVIEW);
+        TYPES_TO_CONVERT.add(BfType.BF_SUMMARY);
     }
     
     private static final List<BfType> TYPES_TO_RETRACT = 
@@ -77,11 +79,16 @@ public class BfAnnotationConverter extends BfResourceConverter {
 
         convertAnnotationBody();
         
+        // TODO Add motivations based on linkingStatement predicate
+        // addMotivation();
+        
         // TODO: range of bf:assertionDate is a Literal, range of 
         // oa:annotatedAt is a xsd:dateTimeStamp. Need to convert Literal
         // text to xsd:dateTime format.
         // convertAnnotationDate();
         
+        // TODO handle CoverArt, TableOfContents
+
         super.convertModel();
     }
     
@@ -103,12 +110,9 @@ public class BfAnnotationConverter extends BfResourceConverter {
         // assertions.add(body, Ld4lProperty.CHARS.property(), "");
         
         // TODO
-        // coverArt => hasCoverArt, but need to fix domain and range -- domain 
-        // isInstance rather than Work. But which Instance? We've lost that 
-        // connection, would need to add a statement during type-splitting into
-        // the bfInstance file. 
+        // coverArt => hasCoverArt - need to call from Instance converter too
 
-        // TODO Not tested - need to find data in Bibframe RDF.
+        // TODO Not tested - need to find relevant data in Bibframe RDF.
     }
 
     @Override 
