@@ -167,7 +167,7 @@ public abstract class BfResourceConverter {
             Resource subject = stmt.getSubject();
             if (LOGGER.isInfoEnabled()) {
                 if (! subject.equals(this.subject)) {
-                    LOGGER.info("Found statement " + stmt.toString() 
+                    LOGGER.debug("Found statement " + stmt.toString() 
                             + " where subject is not " + this.subject.getURI());
                 }
             }
@@ -198,7 +198,7 @@ public abstract class BfResourceConverter {
                             (OntNamespace.LEGACY)) {
                         // Log for review, to determine what legacy properties 
                         // are being used, to inform future development.
-                        LOGGER.info("Adding statement with property in legacy "
+                        LOGGER.debug("Adding statement with property in legacy "
                                 + "namespace: " + predicate.getURI());
                     }
                 }
@@ -239,7 +239,7 @@ public abstract class BfResourceConverter {
             
             // Log for dev purposes, to make sure we shouldn't have handled 
             // this type in a more specific way.
-            LOGGER.info("Changing resource " + type.getURI()
+            LOGGER.debug("Changing resource " + type.getURI()
                     + " in Bibframe namespace to " 
                     + newType.getURI() + " in LD4L namespace.");
              
@@ -271,7 +271,7 @@ public abstract class BfResourceConverter {
             
             // Log for dev purposes, to make sure we shouldn't have handled 
             // this type in a more specific way.
-            LOGGER.info("Changing property " + predicate.getURI()
+            LOGGER.debug("Changing property " + predicate.getURI()
                     + " in Bibframe namespace to " + ld4lProp.getURI()
                     + " in LD4L namespace.");
             assertions.add(subject, ld4lProp, object);

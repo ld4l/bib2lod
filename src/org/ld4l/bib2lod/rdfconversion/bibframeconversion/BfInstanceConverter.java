@@ -130,7 +130,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                 
                 if (bfProp == null) {
                     // Log for review, to make sure nothing has escaped.
-                    LOGGER.info("No specific handling defined for property " 
+                    LOGGER.debug("No specific handling defined for property " 
                             + predicate.getURI()
                             + "; falling through to default case.");
                     continue;

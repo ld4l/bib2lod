@@ -84,7 +84,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             } else {
                 // Not sure what values other than "original" could occur; for 
                 // now log them and remove them.  
-                LOGGER.info("Found value of bf:resourcePart " + value);
+                LOGGER.debug("Found value of bf:resourcePart " + value);
             }
             model.remove(resourcePartStmt);
         }
