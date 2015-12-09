@@ -21,6 +21,7 @@ public enum Ld4lProperty {
     CHARS(OntNamespace.CONTENT, "chars"),
     DATE(OntNamespace.DCTERMS, "date"),
     DEATHDATE(OntNamespace.SCHEMA, "deathDate"),
+    FOLLOWS("follows"),
     HAS_AGENT(OntNamespace.PROV, "agent"),
     HAS_ANNOTATION("hasAnnotation"),
     HAS_BODY(OntNamespace.OA, "hasBody"),
@@ -46,9 +47,8 @@ public enum Ld4lProperty {
     LEGACY_PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
     LEGACY_SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
     NAME(OntNamespace.FOAF, "name"),
-    NEXT(OntNamespace.IANA, "next"),
+    PRECEDES("precedes"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
-    PREV(OntNamespace.IANA, "prev"),
     RANK(OntNamespace.VIVO, "rank"),
     VALUE(OntNamespace.RDF, "value");
     

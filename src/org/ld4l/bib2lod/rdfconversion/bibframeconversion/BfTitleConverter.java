@@ -112,7 +112,7 @@ public class BfTitleConverter extends BfResourceConverter {
             
             // Non-sort element precedes main title element
             if (nonSortElement != null) {
-                assertions.add(nonSortElement, Ld4lProperty.NEXT.property(), 
+                assertions.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
                         mainTitleElement);
             }
             
@@ -136,7 +136,7 @@ public class BfTitleConverter extends BfResourceConverter {
                 fullTitleString += " " + subtitleValue;
                 
                 // Order the mainTitleElement and subtitleElement
-                assertions.add(mainTitleElement, Ld4lProperty.NEXT.property(), 
+                assertions.add(mainTitleElement, Ld4lProperty.PRECEDES.property(), 
                         subtitleElement);
           
             } 
@@ -286,7 +286,7 @@ public class BfTitleConverter extends BfResourceConverter {
         
         // Non-sort element precedes main title element
         if (nonSortElement != null) {
-            model.add(nonSortElement, Ld4lProperty.NEXT.property(), 
+            model.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
                     mainTitleElement);
         }
 

@@ -17,7 +17,6 @@
     <!ENTITY rdau "http://rdaregistry.info/Elements/u/" >
     <!ENTITY skos "http://www.w3.org/2004/02/skos/core#" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
-    <!ENTITY iana "http://www.iana.org/assignments/relation/" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
     <!ENTITY vs "http://www.w3.org/2003/06/sw-vocab-status/ns#" >
 ]>
@@ -31,7 +30,6 @@
      xmlns:cnt="http://www.w3.org/2011/content#"
      xmlns:madsrdf="http://www.loc.gov/mads/rdf/v1#"
      xmlns:vann="http://purl.org/vocab/vann/"
-     xmlns:iana="http://www.iana.org/assignments/relation/"
      xmlns:fabio="http://purl.org/spar/fabio/"
      xmlns:vs="http://www.w3.org/2003/06/sw-vocab-status/ns#"
      xmlns:dcterms="http://purl.org/dc/terms/"
@@ -284,7 +282,7 @@
         <rdfs:comment xml:lang="en-us">This Work continues the content of an earlier Work under a new title.</rdfs:comment>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
     </owl:ObjectProperty>
     
 
@@ -308,15 +306,7 @@
         <rdfs:comment xml:lang="en-us">This resource was derived from another resource.</rdfs:comment>
         <skos:scopeNote xml:lang="en-us">Titles can be derived from other Titles, and Works can be derived from other Works. Property restrictions on Work and Title prevent linking subjects and objects of different types.</skos:scopeNote>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
-        <rdfs:domain>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://ld4l.org/ontology/bib/Work"/>
-                    <rdf:Description rdf:about="&madsrdf;Title"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:domain>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
         <rdfs:range>
             <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
@@ -325,19 +315,14 @@
                 </owl:unionOf>
             </owl:Class>
         </rdfs:range>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://ld4l.org/ontology/bib/distributedBy -->
-
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/distributedBy">
-        <rdfs:label xml:lang="en-us">distributed by</rdfs:label>
-        <skos:scopeNote xml:lang="en-us">The distribution Activity is related to an Agent that performed or performs the distribution via prov:wasAssociatedWith.</skos:scopeNote>
-        <rdfs:comment xml:lang="en-us">This Instance was or is distributed by the specified Activity.</rdfs:comment>
-        <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/providedBy"/>
-        <rdfs:range rdf:resource="&prov;Activity"/>
+        <rdfs:domain>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://ld4l.org/ontology/bib/Work"/>
+                    <rdf:Description rdf:about="&madsrdf;Title"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:domain>
     </owl:ObjectProperty>
     
 
@@ -361,7 +346,7 @@
         <rdfs:comment xml:lang="en-us">The subject works were formed by splitting another work.</rdfs:comment>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/splitInto"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
         <rdfs:domain>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -411,7 +396,7 @@
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/absorbedBy"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
     </owl:ObjectProperty>
     
 
@@ -889,7 +874,7 @@
         <rdfs:comment xml:lang="en-us">This Work is an expression of another Work. For use to connect Works under FRBR/RDA rules.</rdfs:comment>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
     </owl:ObjectProperty>
     
 
@@ -1055,7 +1040,7 @@
         <rdfs:comment xml:lang="en-us">This Work was formed from two or more Works that came together.</rdfs:comment>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/mergedToForm"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
         <rdfs:range>
             <owl:Class>
                 <owl:intersectionOf rdf:parseType="Collection">
@@ -1084,18 +1069,6 @@
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
         <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/accompaniedBy"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://ld4l.org/ontology/bib/manufacturedBy -->
-
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/manufacturedBy">
-        <rdfs:label xml:lang="en-us">manufactured by</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Activity resulting in the manufacture of this Instance.</rdfs:comment>
-        <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/providedBy"/>
-        <rdfs:range rdf:resource="&prov;Activity"/>
     </owl:ObjectProperty>
     
 
@@ -1185,41 +1158,6 @@
     
 
 
-    <!-- http://ld4l.org/ontology/bib/producedBy -->
-
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/producedBy">
-        <rdfs:label xml:lang="en-us">produced by</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Activity resulting in the production of this Instance.</rdfs:comment>
-        <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/providedBy"/>
-        <rdfs:range rdf:resource="&prov;Activity"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://ld4l.org/ontology/bib/providedBy -->
-
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/providedBy">
-        <rdfs:label xml:lang="en-us">provided by</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Activity relating to the publication, printing, distribution, issue, release, or production instance.</rdfs:comment>
-        <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
-        <rdfs:range rdf:resource="&prov;Activity"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://ld4l.org/ontology/bib/publishedBy -->
-
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/publishedBy">
-        <rdfs:label xml:lang="en-us">published by</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Information relating to publication of an instance.</rdfs:comment>
-        <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Instance"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/providedBy"/>
-        <rdfs:range rdf:resource="&prov;Activity"/>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://ld4l.org/ontology/bib/received -->
 
     <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/received">
@@ -1303,7 +1241,7 @@
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/separatedInto"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
     </owl:ObjectProperty>
     
 
@@ -1346,10 +1284,20 @@
     
 
 
-    <!-- http://ld4l.org/ontology/bib/succeeds -->
+    <!-- http://ld4l.org/ontology/bib/isSubjectOf -->
 
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/succeeds">
-        <rdfs:label xml:lang="en-us">succeeds</rdfs:label>
+    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/isSubjectOf">
+        <rdfs:label xml:lang="en">is subject of</rdfs:label>
+        <rdfs:comment xml:lang="en">This entity is the topic of another entity.</rdfs:comment>
+        <owl:inverseOf rdf:resource="&dcterms;subject"/>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://ld4l.org/ontology/bib/follows -->
+
+    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/follows">
+        <rdfs:label xml:lang="en-us">follows</rdfs:label>
         <skos:scopeNote>Generally one of the subproperties should be used to specify the exact relationship. This will be used only when the precise relationship is unknown.</skos:scopeNote>
         <rdfs:comment xml:lang="en-us">This resource follows the specified resource (e.g., is later in time or after in narrative).</rdfs:comment>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/precedes"/>
@@ -1357,15 +1305,15 @@
     
 
 
-    <!-- http://ld4l.org/ontology/bib/succeedsInNarrative -->
+    <!-- http://ld4l.org/ontology/bib/followsInNarrative -->
 
-    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/succeedsInNarrative">
-        <rdfs:label>succeeds in narrative</rdfs:label>
+    <owl:ObjectProperty rdf:about="http://ld4l.org/ontology/bib/followsInNarrative">
+        <rdfs:label>follows in narrative</rdfs:label>
         <rdfs:comment>This Work narratively follows another Work.</rdfs:comment>
-        <skos:example>The Two Towers succeeds The Fellowship of the Ring in The Lord of the Rings narrative.</skos:example>
+        <skos:example>The Two Towers follows The Fellowship of the Ring in The Lord of the Rings narrative.</skos:example>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
     </owl:ObjectProperty>
     
 
@@ -1389,7 +1337,7 @@
         <rdfs:comment xml:lang="en-us">The content of this Work has replaced the content of an earlier Work, usually because the later work contains updated or new information.</rdfs:comment>
         <rdfs:range rdf:resource="http://ld4l.org/ontology/bib/Work"/>
         <rdfs:domain rdf:resource="http://ld4l.org/ontology/bib/Work"/>
-        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/succeeds"/>
+        <rdfs:subPropertyOf rdf:resource="http://ld4l.org/ontology/bib/follows"/>
         <owl:inverseOf rdf:resource="http://ld4l.org/ontology/bib/supersededBy"/>
     </owl:ObjectProperty>
     
@@ -1524,27 +1472,6 @@
     
 
 
-    <!-- http://www.iana.org/assignments/relation/next -->
-
-    <owl:ObjectProperty rdf:about="&iana;next">
-        <rdfs:label>next</rdfs:label>
-        <skos:example>A MainTitleElement is linked to a SubTitleElement with iana:next.</skos:example>
-        <rdfs:comment>Links an individual in a sequence to the individual that follows it in the sequence.</rdfs:comment>
-        <owl:inverseOf rdf:resource="&iana;prev"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.iana.org/assignments/relation/prev -->
-
-    <owl:ObjectProperty rdf:about="&iana;prev">
-        <rdfs:label>prev</rdfs:label>
-        <skos:example>A SubTitleElement is linked to a MainTitleElement with iana:prev</skos:example>
-        <rdfs:comment>Links an individual in a sequence to the individual that precedes it in the sequence.</rdfs:comment>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://www.loc.gov/mads/rdf/v1#identifiesRWO -->
 
     <owl:ObjectProperty rdf:about="&madsrdf;identifiesRWO">
@@ -1650,16 +1577,6 @@
     
 
 
-    <!-- http://www.w3.org/ns/prov#generated -->
-
-    <owl:ObjectProperty rdf:about="&prov;generated">
-        <rdfs:label xml:lang="en-us">generated</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Generation is the completion of production of a new entity by an activity. This entity did not exist before generation and becomes available for usage after this generation.</rdfs:comment>
-        <rdfs:domain rdf:resource="&prov;Activity"/>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://www.w3.org/ns/prov#locationOf -->
 
     <owl:ObjectProperty rdf:about="&prov;locationOf">
@@ -1675,40 +1592,6 @@
     <owl:ObjectProperty rdf:about="&prov;qualifiedAttribution">
         <rdfs:label xml:lang="en-us">qualified attribution</rdfs:label>
         <rdfs:comment xml:lang="en-us">Attribution is the ascribing of an entity to an agent. When an entity e is attributed to agent ag, entity e was generated by some unspecified activity that in turn was associated to agent ag. Thus, this relation is useful when the activity is not known, or irrelevant.</rdfs:comment>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#wasAssociateFor -->
-
-    <owl:ObjectProperty rdf:about="&prov;wasAssociateFor">
-        <rdfs:label>was associate for</rdfs:label>
-        <skos:editorialNote xml:lang="en-us">Prov specifies domain as prov:Agent. We will use with instances of foaf:Agent. This allows the inference that those agents are also prov:Agents, but doesn&apos;t say anything more general about the relationship between the classes themselves.</skos:editorialNote>
-        <rdfs:comment>This Agent had some (unspecified) responsibility for the occurence of the prov:Activity.</rdfs:comment>
-        <rdfs:range rdf:resource="&prov;Activity"/>
-        <owl:inverseOf rdf:resource="&prov;wasAssociatedWith"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#wasAssociatedWith -->
-
-    <owl:ObjectProperty rdf:about="&prov;wasAssociatedWith">
-        <rdfs:label xml:lang="en-us">was associated with</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Agent associated with this Activity. An activity association is an assignment of responsibility to an agent for an activity, indicating that the agent had a role in the activity. It further allows for a plan to be specified, which is the plan intended by the agent to achieve some goals in the context of this activity.</rdfs:comment>
-        <skos:editorialNote xml:lang="en-us">Prov specifies range as prov:Agent. We will use with objects of type foaf:Agent. This allows the inference that those agents are also prov:Agents, but doesn&apos;t say anything more general about the relationship between the classes themselves.</skos:editorialNote>
-        <rdfs:domain rdf:resource="&prov;Activity"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#wasGeneratedBy -->
-
-    <owl:ObjectProperty rdf:about="&prov;wasGeneratedBy">
-        <rdfs:label xml:lang="en-us">was generated by</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Generation is the completion of production of a new entity by an activity. This entity did not exist before generation and becomes available for usage after this generation.</rdfs:comment>
-        <rdfs:range rdf:resource="&prov;Activity"/>
-        <owl:inverseOf rdf:resource="&prov;generated"/>
     </owl:ObjectProperty>
     
 
@@ -2325,6 +2208,16 @@
     
 
 
+    <!-- http://vivoweb.org/ontology/core#rank -->
+
+    <owl:DatatypeProperty rdf:about="&vivo;rank">
+        <rdfs:label>rank</rdfs:label>
+        <rdfs:comment>An integer indicating the position of an entity in a list.</rdfs:comment>
+        <rdfs:range rdf:resource="&xsd;int"/>
+    </owl:DatatypeProperty>
+    
+
+
     <!-- http://www.w3.org/2011/content#chars -->
 
     <owl:DatatypeProperty rdf:about="&cnt;chars">
@@ -2344,16 +2237,6 @@
         <rdfs:comment xml:lang="en-us">The time at which the Annotation was created.</rdfs:comment>
         <rdfs:range rdf:resource="&xsd;dateTimeStamp"/>
         <rdfs:domain rdf:resource="&oa;Annotation"/>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#startedAtTime -->
-
-    <owl:DatatypeProperty rdf:about="&prov;startedAtTime">
-        <rdfs:label xml:lang="en-us">started at time</rdfs:label>
-        <rdfs:comment xml:lang="en-us">The time at which an activity started. See also prov:endedAtTime.</rdfs:comment>
-        <rdfs:domain rdf:resource="&prov;Activity"/>
     </owl:DatatypeProperty>
     
 
@@ -2403,7 +2286,7 @@
 
     <owl:Class rdf:about="http://ld4l.org/ontology/bib/AuthorContribution">
         <rdfs:label xml:lang="en">Author contribution</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/Contribution"/>
+        <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/CreatorContribution"/>
         <rdfs:comment xml:lang="en">An author contribution to a work by an agent.</rdfs:comment>
     </owl:Class>
     
@@ -2501,11 +2384,19 @@
 
     <owl:Class rdf:about="http://ld4l.org/ontology/bib/ComposerContribution">
         <rdfs:label xml:lang="en">Composer contribution</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/Contribution"/>
+        <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/CreatorContribution"/>
         <rdfs:comment xml:lang="en">A composer contribution to a work by an agent.</rdfs:comment>
     </owl:Class>
     
-
+    <!-- http://ld4l.org/ontology/bib/CreatorContribution -->
+    
+    <owl:Class rdf:about="http://ld4l.org/ontology/bib/CreatorContribution">
+        <rdfs:label xml:lang="en">Creator contribution</rdfs:label>
+        <skos:scopeNote>Used when the exact nature of the creative contribution (composer, author, illustrator, etc.) is unknown.</skos:scopeNote>
+        <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/Contribution"/>
+        <rdfs:comment xml:lang="en">A creator contribution to a work by an agent.</rdfs:comment>
+    </owl:Class>
+    
 
     <!-- http://ld4l.org/ontology/bib/ConciseTitle -->
 
@@ -3033,7 +2924,7 @@
         <skos:example>The television series Cosmos is a MultipartMonograph (having a defined endpoint) with no continuous narrative.</skos:example>
         <rdfs:comment xml:lang="en-us">A resource issued in two or more parts (either simultaneously or successively) that is complete or intended to be completed within a finite number of parts.</rdfs:comment>
         <skos:example>The Lord of the Rings is a MultipartMonograph with a continuous narrative.</skos:example>
-        <skos:scopeNote>A MultipartMonograph often has a continuous narrative. The component Monographs can then be linked using the predicates ld4l:precedesInNarrative and ld4l:succeedsInNarrative, especially if there is no PartNameElement of the Title to indicate sequencing.</skos:scopeNote>
+        <skos:scopeNote>A MultipartMonograph often has a continuous narrative. The component Monographs can then be linked using the predicates ld4l:precedesInNarrative and ld4l:followsInNarrative, especially if there is no PartNameElement of the Title to indicate sequencing.</skos:scopeNote>
     </owl:Class>
     
 
@@ -3168,6 +3059,12 @@
         <rdfs:subClassOf rdf:resource="http://ld4l.org/ontology/bib/FiniteResource"/>
         <rdfs:subClassOf>
             <owl:Restriction>
+                <owl:onProperty rdf:resource="&dcterms;isPartOf"/>
+                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
                 <owl:onProperty rdf:resource="&dcterms;hasPart"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/PeriodicalPart"/>
             </owl:Restriction>
@@ -3176,12 +3073,6 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&dcterms;isPartOf"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/Periodical"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
-                <owl:onProperty rdf:resource="&dcterms;isPartOf"/>
-                <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
             </owl:Restriction>
         </rdfs:subClassOf>
         <skos:example>Volume 3</skos:example>
@@ -3531,13 +3422,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="http://ld4l.org/ontology/bib/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -3593,7 +3484,6 @@
 
     <owl:Class rdf:about="http://schema.org/Audience">
         <rdfs:label xml:lang="en-us">Audience</rdfs:label>
-        <rdfs:subClassOf rdf:resource="http://schema.org/Intangible"/>
         <skos:editorialNote xml:lang="en-us">Need to locate an appropriate audience vocabulary to create NamedIndividuals of this type.</skos:editorialNote>
         <rdfs:comment xml:lang="en-us">The specific audience or intellectual level for which the content of the resource is considered appropriate.</rdfs:comment>
     </owl:Class>
@@ -3617,12 +3507,6 @@
         <rdfs:subClassOf rdf:resource="&foaf;Organization"/>
         <rdfs:comment xml:lang="en-us">A government agency, department, branch, or other organization.</rdfs:comment>
     </owl:Class>
-    
-
-
-    <!-- http://schema.org/Intangible -->
-
-    <owl:Class rdf:about="http://schema.org/Intangible"/>
     
 
 
@@ -3699,7 +3583,7 @@
         <owl:disjointWith rdf:resource="&madsrdf;PartNameElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
         <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
-        <skos:scopeNote>The MainTitleElement follows (iana:prev) a NonSortElement and precedes (iana:next) any SubTitleElements and PartNumberElements.</skos:scopeNote>
+        <skos:scopeNote>The MainTitleElement follows (ld4l:follows) a NonSortElement and precedes (ld4l:precedes) any SubTitleElements and PartNumberElements.</skos:scopeNote>
         <rdfs:comment xml:lang="en">The main portion of a title.</rdfs:comment>
         <skos:example xml:lang="en">Title &quot;A Tree Grows in Brooklyn&quot; has NonSortElement with rdfs:label &quot;A &quot; and MainTitleElement with rdfs:label &quot;Tree Grows in Brooklyn&quot;.</skos:example>
     </owl:Class>
@@ -3714,7 +3598,7 @@
         <owl:disjointWith rdf:resource="&madsrdf;PartNameElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
         <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
-        <skos:scopeNote>The NonSortElement is linked to the MainTitleElement via iana:next.</skos:scopeNote>
+        <skos:scopeNote>The NonSortElement is linked to the MainTitleElement via ld4l:precedes.</skos:scopeNote>
         <rdfs:comment xml:lang="en">The initial portion of a title that is removed for sorting.</rdfs:comment>
     </owl:Class>
     
@@ -3728,7 +3612,7 @@
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
         <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
         <skos:example>III</skos:example>
-        <skos:scopeNote>A title may have more than one part name element, in which case they are ordered by iana:next and iana:prev. They are also order by iana:prev with respect to any subtitles; the usual case is that all part name elements would follow all subtitles.</skos:scopeNote>
+        <skos:scopeNote>A title may have more than one part name element, in which case they are ordered by ld4l:precedes and ld4l:follows. They are also order with respect to any subtitles; the usual case is that all part name elements would follow all subtitles.</skos:scopeNote>
         <skos:editorialNote>We do not use madsrdf:PartNumberElement, since so frequently this is not an integer but a string, as in the example.</skos:editorialNote>
         <skos:example>Fourth Edition</skos:example>
         <rdfs:comment xml:lang="en">The portion of a title indicating that it is a part of another work or sequence of works.</rdfs:comment>
@@ -3748,7 +3632,7 @@
     <owl:Class rdf:about="&madsrdf;SubTitleElement">
         <rdfs:label rdf:datatype="&xsd;string">Subtitle element</rdfs:label>
         <rdfs:subClassOf rdf:resource="&madsrdf;TitleElement"/>
-        <skos:scopeNote>A title may have more than one subtitle, in which case they are ordered by iana:next and iana:prev. A SubTitleElement is ordered by iana:next with respect to a following PartNameElement, and by iana:prev with respect to the MainTitleElement.</skos:scopeNote>
+        <skos:scopeNote>A title may have more than one subtitle, in which case they are ordered by ld4l:precedes and ld4l:follows. A SubTitleElement is ordered by ld4l:precedes with respect to a following PartNameElement, and by ld4l:follows with respect to the MainTitleElement.</skos:scopeNote>
         <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
         <rdfs:comment xml:lang="en">The subtitle portion of a title.</rdfs:comment>
     </owl:Class>
@@ -3763,13 +3647,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://ld4l.org/ontology/bib/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -3878,15 +3762,6 @@
         <rdfs:comment xml:lang="en-us">The Motivation for creating an Annotation, indicated with oa:motivatedBy, is a reason for its creation, and might include things like oa:replying to another annotation, oa:commenting on a resource, or oa:linking to a related resource.
             
             Each Annotation SHOULD have at least one oa:motivatedBy relationship to an instance of oa:Motivation, which is a subClass of skos:Concept.</rdfs:comment>
-    </owl:Class>
-    
-
-
-    <!-- http://www.w3.org/ns/prov#Activity -->
-
-    <owl:Class rdf:about="&prov;Activity">
-        <rdfs:label xml:lang="en-us">Activity</rdfs:label>
-        <rdfs:comment xml:lang="en">An activity is something that occurs over a period of time and acts upon or with entities; it may include consuming, processing, transforming, modifying, relocating, using, or generating entities.</rdfs:comment>
     </owl:Class>
     
 
