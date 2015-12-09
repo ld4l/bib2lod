@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.naco;
+package org.ld4l.bib2lod.util;
 
 /**
  * Normalize authority name according to NACO authority name comparison rules

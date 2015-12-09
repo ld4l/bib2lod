@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion.naco;
 
 import org.junit.Assert;
 import org.junit.Test;
+import org.ld4l.bib2lod.util.NacoNormalizer;
 
 // TODO Write more tests
 public class NacoNormalizerTest {
