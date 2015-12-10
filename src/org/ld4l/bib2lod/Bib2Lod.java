@@ -35,6 +35,8 @@ public class Bib2Lod {
      */
     public static void main(String[] args) {
 
+        LOGGER.info("Starting conversion");
+        
         // Define program options
         Options options = getOptions();
         

@@ -5,7 +5,8 @@
     <Appenders>
         <RollingFile name="RollingFile" fileName="log/bib2lod.log"
             filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
-            <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/>
+            <!-- <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/> -->
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} - %msg%n"/>
             <Policies>
                 <OnStartupTriggeringPolicy />
             </Policies>
