@@ -4,9 +4,9 @@ import java.time.Duration;
 import java.time.Instant;
 import java.util.concurrent.TimeUnit;
 
-public final class Util {
+public final class TimerUtils {
 
-    private Util() {}
+    private TimerUtils() {}
 
     public static String formatSeconds(Instant start, Instant end) {
         return formatSeconds(Duration.between(start, end));
@@ -55,7 +55,7 @@ public final class Util {
         millis -= TimeUnit.SECONDS.toMillis(seconds);
        
         return String.format(
-                "%02d:%02d:%02d:%03d", hours, minutes, seconds, millis);
+                "%02d:%02d:%02d.%03d", hours, minutes, seconds, millis);
     }
     
 

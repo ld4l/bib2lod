@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 public class BfHeldItemDeduper extends BfResourceDeduper {
 
@@ -44,7 +46,12 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through query results
+        int resultCount = 0;
+        Instant start = Instant.now();
+        
         while (results.hasNext()) {
+            
+            resultCount++;
             
             QuerySolution soln = results.next();
             
@@ -79,6 +86,20 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
                 uniqueUris.put(itemUri, itemUri);
                 uniqueItems.put(key, itemUri);
             }
+            
+            if (resultCount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Deduped " + resultCount + " resources in " 
+                        + TimerUtils.formatMillis(start, end));
+                resultCount = 0;
+                start = end;
+            } 
+            
+        }
+
+        if (resultCount > 0) {
+            LOGGER.info("Deduped " + resultCount + " resources in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));       
         }
         
         if (LOGGER.isDebugEnabled()) {

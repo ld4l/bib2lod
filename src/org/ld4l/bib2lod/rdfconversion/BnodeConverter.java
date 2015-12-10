@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,12 +16,14 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 public class BnodeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BnodeConverter.class);
    
+    private static final int PROGRESS_LOG_LIMIT = 200;
     
     public BnodeConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -34,17 +37,37 @@ public class BnodeConverter extends RdfProcessor {
         LOGGER.info("Start converting blank nodes to URIs.");
         String outputDir = getOutputDir();
 
-        int fileCount = 0;
+        // For logging
+        int filecount = 0;
+        Instant start = Instant.now();
+        
+        // Gets prefixed to URIs
+        int fileNum = 0;
+        
         for ( File file : new File(inputDir).listFiles() ) {
+            fileNum++;
+            filecount++;
             String filename = file.getName();
             LOGGER.trace("Start processing file " + filename);
-            fileCount++;
-            Model outputModel = processInputFile(file, fileCount);
+            Model outputModel = processInputFile(file, fileNum);
             // Write out to same filename as input file
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
             LOGGER.trace("Done processing file " + filename);
+            
+            if (filecount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Processed " + filecount + " input files in " 
+                        + TimerUtils.formatMillis(start, end));
+                filecount = 0;
+                start = end;
+            }
         }   
+
+        if (filecount > 0) {
+            LOGGER.info("Processed " + filecount + " input files in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));        
+        }
         
         LOGGER.info("End converting blank nodes to URIs.");
         return outputDir;
@@ -63,8 +86,9 @@ public class BnodeConverter extends RdfProcessor {
             convertBnodesToUris(statement, assertions, retractions, 
                     bnodeIdToUriResource, fileCount);
         }
-        inputModel.remove(retractions);
-        inputModel.add(assertions);   
+        inputModel.remove(retractions)
+                  .add(assertions);   
+        
         if (LOGGER.isDebugEnabled()) {
             for (Map.Entry<String, Resource> entry : 
                     bnodeIdToUriResource.entrySet()) {
@@ -114,8 +138,13 @@ public class BnodeConverter extends RdfProcessor {
          * much in the way that unique URIs are created, but when Jena reads the 
          * RDF file into a model, it generates its own bnode ids that are 
          * locally scoped to the file.
+         * 
+         * Prepend "n" to avoid problems with URI parsing in Jena - localnames
+         * starting with a digit are mis-parsed, and not allowed in xml.
+         * 
+         * TODO - just use RdfProcessor.mintUri()
          */
-        String id = fileCount + "_" + node.getBlankNodeId().toString();
+        String id = "n" + fileCount + "_" + node.getBlankNodeId().toString();
         Resource uriResource;
         if (idToUriResource.containsKey(id)) {
             uriResource = idToUriResource.get(id);  

@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -17,12 +18,15 @@ import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
 public class ResourceDeduper extends RdfProcessor {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(ResourceDeduper.class);  
+            LogManager.getLogger(ResourceDeduper.class); 
+    
+    private static final int PROGRESS_LOG_LIMIT = 10000;
   
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
@@ -147,8 +151,9 @@ public class ResourceDeduper extends RdfProcessor {
 //          newAssertions.add(statements);
 //      }
 //  }
-        
+            
         for ( File file : inputFiles ) {
+            Instant startFile = Instant.now();
             String filename = file.getName();
             LOGGER.trace("Deduping file " + filename);
             String basename = FilenameUtils.getBaseName(file.toString());
@@ -163,7 +168,6 @@ public class ResourceDeduper extends RdfProcessor {
                 uniqueUris.putAll(dedupedUris);
             }
             
-
             /*
              * If deduping has generated any new assertions (e.g., Instance
              * deduping asserts owl:sameAs between a local Instance URI and the
@@ -173,21 +177,28 @@ public class ResourceDeduper extends RdfProcessor {
              * these statements don't receive any further processing.
              */
             writeNewAssertions(deduper.getNewAssertions());
-        }         
+            
+            LOGGER.info("Assigned unique URIs in one input files in "
+                    + TimerUtils.formatMillis(startFile, Instant.now()));
+        }               
     }
     
     private void dedupeUris(File[] inputFiles, Map<String, String> uniqueUris,
             String outputDir) {
 
         for ( File file : inputFiles ) {
-
+            Instant startFile = Instant.now();
             // Rename each resource with the new URI specified in uniqueUris.
             // Renaming Resources rather than dumb string replacement avoids
             // problems of substrings, non-matching whitespace, etc. In 
             // addition, when working with a model, duplicate statements are
             // automatically removed rather than requiring a separate step.
             Model model = readModelFromFile(file);
+            
+            Instant startUris = Instant.now();
+            int uriCount = 0;
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
+                uriCount++;
                 String originalUri = entry.getKey();
                 String newUri = entry.getValue();
                 // Instead of this test, we may want to simply leave entries 
@@ -198,8 +209,23 @@ public class ResourceDeduper extends RdfProcessor {
                     Resource resource = model.getResource(originalUri);
                     ResourceUtils.renameResource(resource, newUri);                          
                 }
+                
+                if (uriCount == PROGRESS_LOG_LIMIT) {
+                    Instant end = Instant.now();
+                    LOGGER.info("Renamed resources for " + uriCount  
+                            + " unique URIs " 
+                            + TimerUtils.formatMillis(startUris, end));
+                    uriCount = 0;
+                    startUris = end;
+                }                   
             }
 
+            if (uriCount > 0) {
+                LOGGER.info("Renamed resources for " + uriCount  
+                        + " unique URIs " 
+                        + TimerUtils.formatMillis(startUris, Instant.now()));      
+            }
+            
             String basename = FilenameUtils.getBaseName(file.toString());
             
             /*
@@ -248,7 +274,11 @@ public class ResourceDeduper extends RdfProcessor {
             // automatically removed.
             LOGGER.trace("Writing model for file " + file.getName());
             writeModelToFile(model, basename);    
-        }        
+            
+            LOGGER.info("Deduped URIs in one input file in " 
+                    + TimerUtils.formatMillis(startFile, Instant.now()));
+
+        }
     }
    
     private void writeNewAssertions(Model newStatements) {

@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -16,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 /*
  * NB Possibly we only need to dedupe Instance URIs within a single bib record,
@@ -63,7 +65,12 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through the query results
+        int resultCount = 0;
+        Instant start = Instant.now();
+        
         while (results.hasNext()) {
+            resultCount++;
+            
             QuerySolution soln = results.next();
             String instanceUri = soln.getResource("instance").getURI();
             String key = getKey(soln);
@@ -94,12 +101,30 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                 uniqueUris.put(instanceUri, instanceUri);
                 uniqueInstances.put(key, instanceUri);
             }
+            
+            if (resultCount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Deduped " + resultCount + " resources in " 
+                        + TimerUtils.formatMillis(start, end));
+                resultCount = 0;
+                start = end;
+            }    
         }
+
+        if (resultCount > 0) {
+            LOGGER.info("Deduped " + resultCount + " resources in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));       
+        }
+        
         
         // NB Since Instance keys are always WorldCat URIs, we can always add
         // the sameAs assertion. If we add other types of keys, we'll have to 
         // test here that the map key is a URI.
+        int uniqueInstanceCount = 0;
+        start = Instant.now();
         for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
+ 
+            uniqueInstanceCount++;
             Resource subject = 
                     model.createResource(entry.getValue());
             Resource object = model.createResource(entry.getKey()); 
@@ -107,6 +132,9 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                     + " owl:sameAs " + object.getURI());
             newAssertions.add(subject, OWL.sameAs, object);            
         }
+        
+        LOGGER.info("Added " + uniqueInstanceCount + " new assertions in " 
+                + TimerUtils.formatMillis(start, Instant.now())); 
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");

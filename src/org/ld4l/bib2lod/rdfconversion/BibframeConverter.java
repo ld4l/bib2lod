@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -28,6 +29,7 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 /**
  * Converts Bibframe RDF to LD4L RDF.
@@ -38,6 +40,8 @@ public class BibframeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
+    
+    private static final int PROGRESS_LOG_LIMIT = 10000;
       
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
@@ -174,6 +178,10 @@ public class BibframeConverter extends RdfProcessor {
         
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
+        
+        Instant start = Instant.now();
+        int subjectCount = 0;
+        
         while (subjects.hasNext()) {
 
             Resource inputSubject = subjects.nextResource();
@@ -181,7 +189,9 @@ public class BibframeConverter extends RdfProcessor {
             LOGGER.debug("Found subject " + inputSubject.getURI());
 
             if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
-
+                
+                subjectCount++;
+                
                 LOGGER.debug("Converting " + typeForFile + " subject " 
                         + inputSubject.getURI());
                 
@@ -189,10 +199,25 @@ public class BibframeConverter extends RdfProcessor {
                 
                 outputModel.add(converter.convert(subject));
                 
+                if (subjectCount == PROGRESS_LOG_LIMIT) {
+                    Instant end = Instant.now();
+                    LOGGER.info("Converted RDF for " + subjectCount  
+                            + " resources in " 
+                            + TimerUtils.formatMillis(start, end));
+                    subjectCount = 0;
+                    start = end;
+                }   
+                
             } else {
+                
                 LOGGER.debug("Skipping subject " + inputSubject.getURI()
                         + " since it's not of type " + typeForFile);                        
             }
+        }
+        
+        if (subjectCount > 0) {
+            LOGGER.info("Converted RDF for " + subjectCount + " resources in "                   
+                    + TimerUtils.formatMillis(start, Instant.now()));       
         }
 
         writeModelToFile(outputModel, outputFile);       

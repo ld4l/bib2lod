@@ -12,7 +12,6 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
-import java.util.Date;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -20,14 +19,14 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.util.Util;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
     
-    // Process this many files before logging a report.
-    private static final int LOG_LIMIT = 2;
+    // Process this many files before logging status.
+    private static final int PROGRESS_LOG_LIMIT = 200;
     
     private static final Pattern URIS_TO_REPLACE = 
             /*
@@ -74,7 +73,6 @@ public class RdfCleaner extends RdfProcessor {
         
         int filecount = 0;
         Instant start = Instant.now();
-        Instant end = start;
         
         for ( File file : new File(inputDir).listFiles() ) {
             filecount++;
@@ -93,10 +91,10 @@ public class RdfCleaner extends RdfProcessor {
             LOGGER.trace("Start processing file " + filename);
             replaceLinesInFile(file, outputDir); 
             
-            if (filecount == LOG_LIMIT) {
-                end = Instant.now();
+            if (filecount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
                 LOGGER.info("Processed " + filecount + " input files in " 
-                        + Util.formatMillis(start, end));
+                        + TimerUtils.formatMillis(start, end));
                 filecount = 0;
                 start = end;
             }
@@ -104,7 +102,7 @@ public class RdfCleaner extends RdfProcessor {
         
         if (filecount > 0) {
             LOGGER.info("Processed " + filecount + " input files in " 
-                    + Util.formatMillis(start, Instant.now()));        
+                    + TimerUtils.formatMillis(start, Instant.now()));        
         }
         
         LOGGER.info("End RDF cleanup.");

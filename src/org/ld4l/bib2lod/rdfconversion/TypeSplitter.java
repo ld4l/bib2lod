@@ -1,6 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
+import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -16,11 +17,15 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 public class TypeSplitter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
+
+    // Process this many files before logging progress.
+    private static final int PROGRESS_LOG_LIMIT = 200;
     
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES; 
     
@@ -57,22 +62,39 @@ public class TypeSplitter extends RdfProcessor {
         LOGGER.info("Start splitting triples into files by subject type.");
         String outputDir = getOutputDir();
 
-        //ParameterizedSparqlString pss = getParameterizedSparqlString();
+        // ParameterizedSparqlString pss = getParameterizedSparqlString();
        
         // Map each type to a file for writing output. The files are constant
         // across input files, and output from successive input files is 
         // appended to each file.
         Map<String, File> outputFilesByType = 
                 createOutputFilesByType(outputDir);
+
+        int filecount = 0;
+        Instant start = Instant.now();
         
         // For each file in the input directory
         for ( File inputFile : new File(inputDir).listFiles() ) {
+            filecount++;
             String filename = inputFile.getName();
             LOGGER.trace("Start processing file " + filename);
             processInputFile(inputFile, outputFilesByType);
             LOGGER.trace("Done processing file " + filename);
+            
+            if (filecount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Processed " + filecount + " input files in " 
+                        + TimerUtils.formatMillis(start, end));
+                filecount = 0;
+                start = end;
+            }
         }
-           
+
+        if (filecount > 0) {
+            LOGGER.info("Processed " + filecount + " input files in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));        
+        }
+        
         LOGGER.info("End splitting triples into files by subject type.");
         return outputDir;                                                                                                                               
     }

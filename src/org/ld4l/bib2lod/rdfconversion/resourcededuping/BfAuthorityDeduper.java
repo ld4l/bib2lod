@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 /**
  * Default deduper for bf:Authority subclasses. Use to dedupe bf:Authorities
@@ -24,6 +26,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfAuthorityDeduper.class);
+   
 
     public BfAuthorityDeduper(BfType type) {
         super(type);
@@ -56,13 +59,18 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through query results
+        int resultCount = 0;
+        Instant start = Instant.now();
+        
         while (results.hasNext()) {
+            
+            resultCount++;
             
             QuerySolution soln = results.next();
             
             String localAuthUri = soln.getResource("localAuth").getURI();
             
-            // Get key for agent identity matching.
+            // Get key for authority identity matching.
             String key = getKey(soln);
             
             // Without a key there's nothing to dedupe on.
@@ -131,6 +139,19 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                     uniqueExtAuths.put(key, extAuthUri);
                 }
             }
+            
+            if (resultCount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Deduped " + resultCount + " resources in " 
+                        + TimerUtils.formatMillis(start, end));
+                resultCount = 0;
+                start = end;
+            }                        
+        }
+
+        if (resultCount > 0) {
+            LOGGER.info("Deduped " + resultCount + " resources in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));       
         }
         
         if (LOGGER.isDebugEnabled()) {

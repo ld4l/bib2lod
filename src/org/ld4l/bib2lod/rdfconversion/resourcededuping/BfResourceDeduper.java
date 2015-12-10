@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.resourcededuping;
 
+import java.time.Instant;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -17,6 +18,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.util.NacoNormalizer;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 /**
  * Default deduper: dedupes on bf:authorizedAccessPoint and/or bf:label
@@ -29,6 +31,8 @@ public class BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
+
+    protected static final int PROGRESS_LOG_LIMIT = 10000;
     
     protected Model newAssertions;
     protected BfType type;
@@ -64,7 +68,12 @@ public class BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through query results
+        int resultCount = 0;
+        Instant start = Instant.now();
+        
         while (results.hasNext()) {
+            
+            resultCount++;
             
             QuerySolution soln = results.next();
             
@@ -100,6 +109,19 @@ public class BfResourceDeduper {
                 uniqueUris.put(resourceUri, resourceUri);
                 uniqueResources.put(key, resourceUri);
             }
+            
+            if (resultCount == PROGRESS_LOG_LIMIT) {
+                Instant end = Instant.now();
+                LOGGER.info("Deduped " + resultCount + " resources in " 
+                        + TimerUtils.formatMillis(start, end));
+                resultCount = 0;
+                start = end;
+            }              
+        }
+        
+        if (resultCount > 0) {
+            LOGGER.info("Deduped " + resultCount + " resources in " 
+                    + TimerUtils.formatMillis(start, Instant.now()));       
         }
         
         if (LOGGER.isDebugEnabled()) {
