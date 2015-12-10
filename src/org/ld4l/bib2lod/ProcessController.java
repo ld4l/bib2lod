@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod;
 
+import java.time.Instant;
 import java.util.Set;
 
 import org.apache.jena.ontology.OntDocumentManager;
@@ -14,6 +15,7 @@ import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 
 
@@ -59,8 +61,10 @@ public class ProcessController {
     }
     
     public String processAll(Set<Action> selectedActions) {
-        
-        LOGGER.info("Processing input files in " + this.inputDir + ".");
+
+        Instant start = Instant.now();
+        LOGGER.info("Start converting input files in " + this.inputDir + ".");
+   
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
@@ -75,8 +79,7 @@ public class ProcessController {
             // Resource deduping requires some prior processing steps.
             
             outputDir = new RdfCleaner(outputDir, mainOutputDir).process();
-                    
-            
+                             
             // Required since bnode ids are not guaranteed to be unique across
             // input files, so Jena may create duplicate ids across files when
             // reading into and writing out models. 
@@ -101,7 +104,6 @@ public class ProcessController {
                     mainOutputDir).process();
         }
             
-
         /* Previous approach where processors were called by looping through
          * Action values. Switch to calling processors by name in order to
          * express dependencies. Dependencies could be automated by defining
@@ -141,12 +143,11 @@ public class ProcessController {
             }
         }
         */
-        
+
+        LOGGER.info("Done! Total duration: " 
+                + TimerUtils.formatMillis(start, Instant.now())
+                + ". Results in " + outputDir + ".");
         return outputDir;
-
-
-        
+ 
     }
-
-
 }

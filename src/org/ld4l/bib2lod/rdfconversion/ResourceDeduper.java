@@ -25,9 +25,7 @@ public class ResourceDeduper extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(ResourceDeduper.class); 
-    
-    private static final int PROGRESS_LOG_LIMIT = 10000;
-  
+
     /* Define types eligible for deduping.  Two kinds of types are excluded:
      * those where instances are not reused (e.g., Annotation, Title, HeldItem),
      * and those which are not likely to have independent significance (e.g.,
@@ -105,7 +103,9 @@ public class ResourceDeduper extends RdfProcessor {
     
     @Override
     public String process() {
-        LOGGER.info("Start local URI deduping.");
+        
+        Instant processStart = Instant.now();
+        LOGGER.info("Start resource deduping.");
         
         String outputDir = getOutputDir();    
 
@@ -116,7 +116,9 @@ public class ResourceDeduper extends RdfProcessor {
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
 
-        LOGGER.info("End local URI deduping.");
+        LOGGER.info("End resource deduping. "
+                + TimerUtils.getDuration(processStart));
+        
         return outputDir;
     }
 
@@ -151,11 +153,17 @@ public class ResourceDeduper extends RdfProcessor {
 //          newAssertions.add(statements);
 //      }
 //  }
-            
+
+        Instant processStart = Instant.now();
+        LOGGER.info("Start finding unique URIs.");
+        
         for ( File file : inputFiles ) {
-            Instant startFile = Instant.now();
+            
+            Instant fileStart = Instant.now();
             String filename = file.getName();
-            LOGGER.trace("Deduping file " + filename);
+            
+            LOGGER.info("Finding unique URIs in file " + filename + ".");
+            
             String basename = FilenameUtils.getBaseName(file.toString());
             BfResourceDeduper deduper = dedupers.get(basename);
             if (deduper == null) {
@@ -178,16 +186,27 @@ public class ResourceDeduper extends RdfProcessor {
              */
             writeNewAssertions(deduper.getNewAssertions());
             
-            LOGGER.info("Assigned unique URIs in one input files in "
-                    + TimerUtils.formatMillis(startFile, Instant.now()));
-        }               
+            LOGGER.info("Done finding unique URIs in input file " + filename
+                    + ". " + TimerUtils.getDuration(fileStart));
+                    
+        } 
+        
+        LOGGER.info("Done finding unique URIs. " 
+                + TimerUtils.getDuration(processStart));
     }
     
     private void dedupeUris(File[] inputFiles, Map<String, String> uniqueUris,
             String outputDir) {
 
+        Instant processStart = Instant.now();
+        LOGGER.info("Start replacing URIs with unique URIs.");
+        
         for ( File file : inputFiles ) {
-            Instant startFile = Instant.now();
+
+            Instant fileStart = Instant.now();
+            String filename = file.getName();
+            LOGGER.info("Replacing URIs with unique URIs in " + filename + ".");
+            
             // Rename each resource with the new URI specified in uniqueUris.
             // Renaming Resources rather than dumb string replacement avoids
             // problems of substrings, non-matching whitespace, etc. In 
@@ -195,8 +214,9 @@ public class ResourceDeduper extends RdfProcessor {
             // automatically removed rather than requiring a separate step.
             Model model = readModelFromFile(file);
             
-            Instant startUris = Instant.now();
             int uriCount = 0;
+            Instant uriStart = Instant.now();
+            
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
                 uriCount++;
                 String originalUri = entry.getKey();
@@ -210,20 +230,19 @@ public class ResourceDeduper extends RdfProcessor {
                     ResourceUtils.renameResource(resource, newUri);                          
                 }
                 
-                if (uriCount == PROGRESS_LOG_LIMIT) {
-                    Instant end = Instant.now();
-                    LOGGER.info("Renamed resources for " + uriCount  
-                            + " unique URIs " 
-                            + TimerUtils.formatMillis(startUris, end));
+                if (uriCount == TimerUtils.NUM_ITEMS_TO_TIME) {
+                    LOGGER.info("Replaced URIs with " + uriCount  
+                            + " unique URIs. " 
+                            + TimerUtils.getDuration(uriStart));   
                     uriCount = 0;
-                    startUris = end;
+                    uriStart = Instant.now();
                 }                   
             }
 
             if (uriCount > 0) {
-                LOGGER.info("Renamed resources for " + uriCount  
-                        + " unique URIs " 
-                        + TimerUtils.formatMillis(startUris, Instant.now()));      
+                LOGGER.info("Replaced URIs with " + uriCount  
+                        + " unique URIs. " 
+                        + TimerUtils.getDuration(uriStart));        
             }
             
             String basename = FilenameUtils.getBaseName(file.toString());
@@ -272,13 +291,16 @@ public class ResourceDeduper extends RdfProcessor {
 
             // Write out new model to file. Duplicate statements are 
             // automatically removed.
-            LOGGER.trace("Writing model for file " + file.getName());
+            LOGGER.trace("Writing model for file " + filename);
             writeModelToFile(model, basename);    
             
-            LOGGER.info("Deduped URIs in one input file in " 
-                    + TimerUtils.formatMillis(startFile, Instant.now()));
+            LOGGER.info("Done deduping URIs in input file " + filename + ". "
+                    + TimerUtils.getDuration(fileStart));   
 
         }
+        
+        LOGGER.info("Done deduping URIs. " 
+                + TimerUtils.getDuration(processStart));   
     }
    
     private void writeNewAssertions(Model newStatements) {

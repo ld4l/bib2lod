@@ -19,14 +19,12 @@ import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.io.LineIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
-    
-    // Process this many files before logging status.
-    private static final int PROGRESS_LOG_LIMIT = 200;
     
     private static final Pattern URIS_TO_REPLACE = 
             /*
@@ -68,14 +66,19 @@ public class RdfCleaner extends RdfProcessor {
     @Override
     public String process() {
         
+        Instant processStart = Instant.now();
         LOGGER.info("Start RDF cleanup.");
+        
         String outputDir = getOutputDir();
         
-        int filecount = 0;
-        Instant start = Instant.now();
-        
+        // For logging
+        int fileCount = 0;
+        Instant fileStart = Instant.now();
+       
         for ( File file : new File(inputDir).listFiles() ) {
-            filecount++;
+
+            fileCount++;
+
             String filename = file.getName();
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
@@ -91,24 +94,28 @@ public class RdfCleaner extends RdfProcessor {
             LOGGER.trace("Start processing file " + filename);
             replaceLinesInFile(file, outputDir); 
             
-            if (filecount == PROGRESS_LOG_LIMIT) {
-                Instant end = Instant.now();
-                LOGGER.info("Processed " + filecount + " input files in " 
-                        + TimerUtils.formatMillis(start, end));
-                filecount = 0;
-                start = end;
+            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+                LOGGER.info("Cleaned RDF in " + fileCount + " " 
+                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                        + ". " + TimerUtils.getDuration(fileStart));
+                fileCount = 0;
+                fileStart = Instant.now();   
             }
         }
         
-        if (filecount > 0) {
-            LOGGER.info("Processed " + filecount + " input files in " 
-                    + TimerUtils.formatMillis(start, Instant.now()));        
-        }
+        if (fileCount > 0) {
+            LOGGER.info("Cleaned RDF in " + fileCount 
+                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+                    + ". " + TimerUtils.getDuration(fileStart));    
+        }   
         
-        LOGGER.info("End RDF cleanup.");
+        LOGGER.info("End RDF cleanup. "
+                + TimerUtils.getDuration(processStart));
+        
         return outputDir;
     }
-
+    
+    
     /*
      * Done as string replacement, because the illegal RDF handled by 
      * encodeURIs() can't be read into a Jena model without error.

@@ -17,15 +17,13 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class TypeSplitter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(TypeSplitter.class);
-
-    // Process this many files before logging progress.
-    private static final int PROGRESS_LOG_LIMIT = 200;
     
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES; 
     
@@ -59,7 +57,10 @@ public class TypeSplitter extends RdfProcessor {
     @Override
     public String process() {
         
-        LOGGER.info("Start splitting triples into files by subject type.");
+        Instant processStart = Instant.now();
+        
+        LOGGER.info("Start splitting files by resource type.");
+        
         String outputDir = getOutputDir();
 
         // ParameterizedSparqlString pss = getParameterizedSparqlString();
@@ -70,32 +71,38 @@ public class TypeSplitter extends RdfProcessor {
         Map<String, File> outputFilesByType = 
                 createOutputFilesByType(outputDir);
 
-        int filecount = 0;
-        Instant start = Instant.now();
+        // For logging
+        int fileCount = 0;
+        Instant fileStart = Instant.now();
         
         // For each file in the input directory
         for ( File inputFile : new File(inputDir).listFiles() ) {
-            filecount++;
+            fileCount++;
             String filename = inputFile.getName();
             LOGGER.trace("Start processing file " + filename);
             processInputFile(inputFile, outputFilesByType);
             LOGGER.trace("Done processing file " + filename);
             
-            if (filecount == PROGRESS_LOG_LIMIT) {
-                Instant end = Instant.now();
-                LOGGER.info("Processed " + filecount + " input files in " 
-                        + TimerUtils.formatMillis(start, end));
-                filecount = 0;
-                start = end;
+            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+                LOGGER.info("Split " + fileCount + " "
+                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                        + " by resource type. " 
+                        + TimerUtils.getDuration(fileStart));
+                fileCount = 0;
+                fileStart = Instant.now();   
             }
         }
 
-        if (filecount > 0) {
-            LOGGER.info("Processed " + filecount + " input files in " 
-                    + TimerUtils.formatMillis(start, Instant.now()));        
-        }
+        if (fileCount > 0) {
+            LOGGER.info("Split " + fileCount 
+                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+                    + "by resource type. " 
+                    + TimerUtils.getDuration(fileStart)); 
+        }   
         
-        LOGGER.info("End splitting triples into files by subject type.");
+        LOGGER.info("End splitting files by resource type. " 
+                + TimerUtils.getDuration(processStart));
+        
         return outputDir;                                                                                                                               
     }
 

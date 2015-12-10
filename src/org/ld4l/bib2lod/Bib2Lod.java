@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -22,6 +23,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 
 public class Bib2Lod {
@@ -35,7 +37,8 @@ public class Bib2Lod {
      */
     public static void main(String[] args) {
 
-        LOGGER.info("Starting conversion");
+        LOGGER.info("Start conversion.");
+        Instant start = Instant.now();
         
         // Define program options
         Options options = getOptions();
@@ -79,10 +82,7 @@ public class Bib2Lod {
         String absFinalOutputDir = processController.processAll(actions);
         if (absFinalOutputDir == null) {
             LOGGER.error("Processing failed.");
-        } else {
-            LOGGER.info("Done! Results in " + absFinalOutputDir);
-        }
-
+        } 
     }
 
 
@@ -266,7 +266,7 @@ public class Bib2Lod {
 //                .hasArg()
 //                .desc("Serialization format of input and output. Valid "
 //                        + "formats: " 
-//                        + StringUtils.join(VALID_OUTPUT_FORMATS, ", ")
+//                        + Bib2LodStringUtils.join(VALID_OUTPUT_FORMATS, ", ")
 //                        + ". Defaults to " 
 //                        + DEFAULT_OUTPUT_FORMAT.label() + ".")
 //                .build());

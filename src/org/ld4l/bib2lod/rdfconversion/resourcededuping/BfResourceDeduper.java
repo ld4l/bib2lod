@@ -31,8 +31,6 @@ public class BfResourceDeduper {
 
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
-
-    protected static final int PROGRESS_LOG_LIMIT = 10000;
     
     protected Model newAssertions;
     protected BfType type;
@@ -68,12 +66,12 @@ public class BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through query results
-        int resultCount = 0;
-        Instant start = Instant.now();
+        int resourceCount = 0;
+        Instant resourceStart = Instant.now();
         
         while (results.hasNext()) {
             
-            resultCount++;
+            resourceCount++;
             
             QuerySolution soln = results.next();
             
@@ -110,18 +108,17 @@ public class BfResourceDeduper {
                 uniqueResources.put(key, resourceUri);
             }
             
-            if (resultCount == PROGRESS_LOG_LIMIT) {
-                Instant end = Instant.now();
-                LOGGER.info("Deduped " + resultCount + " resources in " 
-                        + TimerUtils.formatMillis(start, end));
-                resultCount = 0;
-                start = end;
+            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
+                LOGGER.info("Deduped " + resourceCount + " resources. " 
+                        + TimerUtils.getDuration(resourceStart));
+                resourceCount = 0;
+                resourceStart = Instant.now();
             }              
         }
         
-        if (resultCount > 0) {
-            LOGGER.info("Deduped " + resultCount + " resources in " 
-                    + TimerUtils.formatMillis(start, Instant.now()));       
+        if (resourceCount > 0) {
+            LOGGER.info("Deduped " + resourceCount + " resources. " 
+                    + TimerUtils.getDuration(resourceStart));      
         }
         
         if (LOGGER.isDebugEnabled()) {

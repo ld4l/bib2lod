@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 /*
@@ -65,11 +66,11 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through the query results
-        int resultCount = 0;
-        Instant start = Instant.now();
+        int resourceCount = 0;
+        Instant resourceStart = Instant.now();
         
         while (results.hasNext()) {
-            resultCount++;
+            resourceCount++;
             
             QuerySolution soln = results.next();
             String instanceUri = soln.getResource("instance").getURI();
@@ -102,26 +103,28 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                 uniqueInstances.put(key, instanceUri);
             }
             
-            if (resultCount == PROGRESS_LOG_LIMIT) {
-                Instant end = Instant.now();
-                LOGGER.info("Deduped " + resultCount + " resources in " 
-                        + TimerUtils.formatMillis(start, end));
-                resultCount = 0;
-                start = end;
-            }    
+            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
+                LOGGER.info("Deduped " + resourceCount + " resources. " 
+                        + TimerUtils.getDuration(resourceStart));
+                resourceCount = 0;
+                resourceStart = Instant.now();
+            }   
         }
 
-        if (resultCount > 0) {
-            LOGGER.info("Deduped " + resultCount + " resources in " 
-                    + TimerUtils.formatMillis(start, Instant.now()));       
+        if (resourceCount > 0) {
+            LOGGER.info("Deduped " + resourceCount + " resources. " 
+                    + TimerUtils.getDuration(resourceStart));       
         }
         
         
         // NB Since Instance keys are always WorldCat URIs, we can always add
         // the sameAs assertion. If we add other types of keys, we'll have to 
         // test here that the map key is a URI.
+        
         int uniqueInstanceCount = 0;
-        start = Instant.now();
+        Instant newAssertionsStart = Instant.now();
+        LOGGER.info("Start adding new assertions.");
+        
         for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
  
             uniqueInstanceCount++;
@@ -133,8 +136,10 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             newAssertions.add(subject, OWL.sameAs, object);            
         }
         
-        LOGGER.info("Added " + uniqueInstanceCount + " new assertions in " 
-                + TimerUtils.formatMillis(start, Instant.now())); 
+        LOGGER.info("Added " + uniqueInstanceCount + " new "
+                + Bib2LodStringUtils.simplePlural(
+                        "assertion", uniqueInstanceCount)
+                + TimerUtils.getDuration(newAssertionsStart));    
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");

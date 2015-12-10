@@ -20,8 +20,6 @@ public abstract class Processor {
     private final String mainOutputDir;
     protected final String inputDir;
 
-
-
     public Processor(String inputDir, String mainOutputDir) {
             
         LOGGER.trace("In constructor for " + this.getClass().toString());            
@@ -116,4 +114,5 @@ public abstract class Processor {
         }
         return outputDir;
     }
+
 }

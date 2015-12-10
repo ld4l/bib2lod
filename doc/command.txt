@@ -1,0 +1,32 @@
+java -jar Bib2Lod.jar -a <action> -i <input_directory> -n
+       <local_namespace> -o <output_directory> 
+       
+ -a,--action <action>               Processing action. Valid actions: dedupe,
+                                    convert_bibframe. Can be invoked more than
+                                    once to specify multiple actions.
+ -i,--indir <input_directory>       Absolute or relative path to directory
+                                    containing input files.
+ -n,--namespace <local_namespace>   Local HTTP namespace for minting and
+                                    deduping URIs.
+ -o,--outdir <output_directory>     Absolute or relative path to output
+                                    directory. Will be created if it doesn't
+                                    exist.
+
+*** Logging ***
+
+log4j2.xml is built into the jar file. The application logs its progress to a
+rolling log file in a subdirectory log of the working directory. Logging to the 
+console is turned off, so run tail -f the log file to follow the progress of 
+the application.
+
+
+*** Sample converter commands ***
+
+java -jar /home/rjy7/projects/bib2lod/jar/Bib2Lod.jar -a convert_bibframe -i bibframe -o ld4l -n http://draft.ld4l.org/cornell/
+
+java -jar Bib2Lod.jar -a convert_bibframe -i testinput -o output/harvard
+ -n http://draft.ld4l.org/harvard/
+
+java -jar Bib2Lod.jar -a convert_bibframe -i testinput -o output/stanford
+-n http://draft.ld4l.org/stanford/
+       

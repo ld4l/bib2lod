@@ -16,14 +16,13 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class BnodeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BnodeConverter.class);
-   
-    private static final int PROGRESS_LOG_LIMIT = 200;
     
     public BnodeConverter(String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -34,19 +33,21 @@ public class BnodeConverter extends RdfProcessor {
     @Override
     public String process() {        
         
-        LOGGER.info("Start converting blank nodes to URIs.");
+        Instant processStart = Instant.now();
+        LOGGER.info("Start blank node conversion.");
+        
         String outputDir = getOutputDir();
 
         // For logging
-        int filecount = 0;
-        Instant start = Instant.now();
+        int fileCount = 0;
+        Instant fileStart = Instant.now();
         
         // Gets prefixed to URIs
         int fileNum = 0;
         
         for ( File file : new File(inputDir).listFiles() ) {
             fileNum++;
-            filecount++;
+            fileCount++;
             String filename = file.getName();
             LOGGER.trace("Start processing file " + filename);
             Model outputModel = processInputFile(file, fileNum);
@@ -55,21 +56,24 @@ public class BnodeConverter extends RdfProcessor {
             writeModelToFile(outputModel, basename);
             LOGGER.trace("Done processing file " + filename);
             
-            if (filecount == PROGRESS_LOG_LIMIT) {
-                Instant end = Instant.now();
-                LOGGER.info("Processed " + filecount + " input files in " 
-                        + TimerUtils.formatMillis(start, end));
-                filecount = 0;
-                start = end;
+            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+                LOGGER.info("Converted blank nodes in " + fileCount + " "
+                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                        + ". " + TimerUtils.getDuration(fileStart));
+                fileCount = 0;
+                fileStart = Instant.now();   
             }
         }   
 
-        if (filecount > 0) {
-            LOGGER.info("Processed " + filecount + " input files in " 
-                    + TimerUtils.formatMillis(start, Instant.now()));        
-        }
+        if (fileCount > 0) {
+            LOGGER.info("Converted blank nodes in " + fileCount 
+                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+                    + ". " + TimerUtils.getDuration(fileStart));    
+        } 
         
-        LOGGER.info("End converting blank nodes to URIs.");
+        LOGGER.info("End blank node conversion. "
+                + TimerUtils.getDuration(processStart));
+        
         return outputDir;
     }
     

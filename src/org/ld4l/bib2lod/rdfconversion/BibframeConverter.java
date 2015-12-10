@@ -40,8 +40,6 @@ public class BibframeConverter extends RdfProcessor {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BibframeConverter.class);
-    
-    private static final int PROGRESS_LOG_LIMIT = 10000;
       
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
@@ -117,13 +115,16 @@ public class BibframeConverter extends RdfProcessor {
     @Override
     public String process() {
 
+        Instant processStart = Instant.now();
         LOGGER.info("Start Bibframe RDF conversion.");
         
         String outputDir = getOutputDir();  
 
         convertFiles(inputDir, outputDir);
 
-        LOGGER.info("End Bibframe RDF conversion.");
+        LOGGER.info("End Bibframe RDF conversion. "                
+                + TimerUtils.getDuration(processStart));
+        
         return outputDir;        
     }
     
@@ -148,9 +149,7 @@ public class BibframeConverter extends RdfProcessor {
         
         String filename = file.getName();
         String outputFile = FilenameUtils.getBaseName(file.toString());
-        
-        LOGGER.debug("Processing file " + filename);
-
+       
         BfType typeForFile = BfType.typeForFilename(filename);
         
         // Includes newAssertions.nt, other.nt
@@ -173,13 +172,16 @@ public class BibframeConverter extends RdfProcessor {
             writeModelToFile(inputModel, outputFile);
             return;
         }
+
+        Instant fileStart = Instant.now();
+        LOGGER.info("Start converting RDF in file " + filename + ".");
         
         Model outputModel = ModelFactory.createDefaultModel();
         
         // Iterate over the subjects of the input model
         ResIterator subjects = inputModel.listSubjects();
         
-        Instant start = Instant.now();
+        Instant subjectStart = Instant.now();
         int subjectCount = 0;
         
         while (subjects.hasNext()) {
@@ -199,13 +201,11 @@ public class BibframeConverter extends RdfProcessor {
                 
                 outputModel.add(converter.convert(subject));
                 
-                if (subjectCount == PROGRESS_LOG_LIMIT) {
-                    Instant end = Instant.now();
+                if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Converted RDF for " + subjectCount  
-                            + " resources in " 
-                            + TimerUtils.formatMillis(start, end));
+                            + " resources. " 
+                            + TimerUtils.getDuration(subjectStart));
                     subjectCount = 0;
-                    start = end;
                 }   
                 
             } else {
@@ -216,11 +216,14 @@ public class BibframeConverter extends RdfProcessor {
         }
         
         if (subjectCount > 0) {
-            LOGGER.info("Converted RDF for " + subjectCount + " resources in "                   
-                    + TimerUtils.formatMillis(start, Instant.now()));       
+            LOGGER.info("Converted RDF for " + subjectCount + " resources. "                   
+                    + TimerUtils.getDuration(subjectStart));       
         }
 
-        writeModelToFile(outputModel, outputFile);       
+        writeModelToFile(outputModel, outputFile);   
+        
+        LOGGER.info("Done converting RDF in file " + filename + ". "
+                + TimerUtils.getDuration(fileStart));
     }
 
     
