@@ -66,7 +66,7 @@ public class BnodeConverter extends RdfProcessor {
         }   
 
         if (fileCount > 0) {
-            LOGGER.info("Converted blank nodes in " + fileCount 
+            LOGGER.info("Converted blank nodes in " + fileCount + " "
                     + Bib2LodStringUtils.simplePlural("file", fileCount)
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 

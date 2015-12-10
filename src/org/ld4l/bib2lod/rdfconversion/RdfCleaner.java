@@ -104,7 +104,7 @@ public class RdfCleaner extends RdfProcessor {
         }
         
         if (fileCount > 0) {
-            LOGGER.info("Cleaned RDF in " + fileCount 
+            LOGGER.info("Cleaned RDF in " + fileCount + " "
                     + Bib2LodStringUtils.simplePlural("file", fileCount)
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   

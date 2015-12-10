@@ -29,6 +29,7 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 /**
@@ -174,7 +175,7 @@ public class BibframeConverter extends RdfProcessor {
         }
 
         Instant fileStart = Instant.now();
-        LOGGER.info("Start converting RDF in file " + filename + ".");
+        LOGGER.info("Start converting Bibframe RDF in file " + filename + ".");
         
         Model outputModel = ModelFactory.createDefaultModel();
         
@@ -202,8 +203,10 @@ public class BibframeConverter extends RdfProcessor {
                 outputModel.add(converter.convert(subject));
                 
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                    LOGGER.info("Converted RDF for " + subjectCount  
-                            + " resources. " 
+                    LOGGER.info("Converted Bibframe RDF for " + subjectCount 
+                            + " " + Bib2LodStringUtils.simplePlural(
+                                    "resource", subjectCount)
+                            + " in file " + filename + ". " 
                             + TimerUtils.getDuration(subjectStart));
                     subjectCount = 0;
                 }   
@@ -216,13 +219,15 @@ public class BibframeConverter extends RdfProcessor {
         }
         
         if (subjectCount > 0) {
-            LOGGER.info("Converted RDF for " + subjectCount + " resources. "                   
-                    + TimerUtils.getDuration(subjectStart));       
+            LOGGER.info("Converted Bibframe RDF for " + subjectCount + " " 
+                    + Bib2LodStringUtils.simplePlural("resource", subjectCount)
+                    + " in file " + filename + ". " 
+                    + TimerUtils.getDuration(subjectStart));      
         }
 
         writeModelToFile(outputModel, outputFile);   
         
-        LOGGER.info("Done converting RDF in file " + filename + ". "
+        LOGGER.info("Done converting Bibframe RDF in file " + filename + ". "
                 + TimerUtils.getDuration(fileStart));
     }
 

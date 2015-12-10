@@ -18,6 +18,7 @@ import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 // May need to be abstract - we only instantiate PersonDeduper, WorkDeduper, etc.
@@ -186,7 +187,7 @@ public class ResourceDeduper extends RdfProcessor {
              */
             writeNewAssertions(deduper.getNewAssertions());
             
-            LOGGER.info("Done finding unique URIs in input file " + filename
+            LOGGER.info("Done finding unique URIs in file " + filename
                     + ". " + TimerUtils.getDuration(fileStart));
                     
         } 
@@ -199,13 +200,14 @@ public class ResourceDeduper extends RdfProcessor {
             String outputDir) {
 
         Instant processStart = Instant.now();
-        LOGGER.info("Start replacing URIs with unique URIs.");
+        LOGGER.info("Start substituting unique URIs for duplicate URIs.");
         
         for ( File file : inputFiles ) {
 
             Instant fileStart = Instant.now();
             String filename = file.getName();
-            LOGGER.info("Replacing URIs with unique URIs in " + filename + ".");
+            LOGGER.info("Start substituting unique URIs for duplicate URIs in" 
+                    + " file " + filename + ".");
             
             // Rename each resource with the new URI specified in uniqueUris.
             // Renaming Resources rather than dumb string replacement avoids
@@ -231,18 +233,20 @@ public class ResourceDeduper extends RdfProcessor {
                 }
                 
                 if (uriCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                    LOGGER.info("Replaced URIs with " + uriCount  
-                            + " unique URIs. " 
-                            + TimerUtils.getDuration(uriStart));   
+                    LOGGER.info("Substituted " + uriCount + " unique "
+                            + Bib2LodStringUtils.simplePlural("URI", uriCount) 
+                            + " for duplicate URIs in file " + filename + ". "
+                            + TimerUtils.getDuration(uriStart));    
                     uriCount = 0;
                     uriStart = Instant.now();
                 }                   
             }
 
             if (uriCount > 0) {
-                LOGGER.info("Replaced URIs with " + uriCount  
-                        + " unique URIs. " 
-                        + TimerUtils.getDuration(uriStart));        
+                LOGGER.info("Substituted " + uriCount + " unique "
+                        + Bib2LodStringUtils.simplePlural("URI", uriCount) 
+                         + " for duplicate URIs in file " + filename + ". "
+                        + TimerUtils.getDuration(uriStart));       
             }
             
             String basename = FilenameUtils.getBaseName(file.toString());
@@ -294,7 +298,7 @@ public class ResourceDeduper extends RdfProcessor {
             LOGGER.trace("Writing model for file " + filename);
             writeModelToFile(model, basename);    
             
-            LOGGER.info("Done deduping URIs in input file " + filename + ". "
+            LOGGER.info("Done deduping URIs in file " + filename + ". "
                     + TimerUtils.getDuration(fileStart));   
 
         }

@@ -138,7 +138,7 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         
         LOGGER.info("Added " + uniqueInstanceCount + " new "
                 + Bib2LodStringUtils.simplePlural(
-                        "assertion", uniqueInstanceCount)
+                        "assertion", uniqueInstanceCount) + ". "
                 + TimerUtils.getDuration(newAssertionsStart));    
         
         if (LOGGER.isDebugEnabled()) {
