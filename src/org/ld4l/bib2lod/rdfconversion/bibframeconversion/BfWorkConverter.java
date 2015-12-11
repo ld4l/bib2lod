@@ -25,7 +25,8 @@ public class BfWorkConverter extends BfBibResourceConverter {
     private static final List<BfType> TYPES_TO_RETRACT = 
             new ArrayList<BfType>();
     static {
-            TYPES_TO_RETRACT.add(BfType.BF_EXPRESSION);
+        // Is there anything we want to deduce from this before it gets deleted?
+        TYPES_TO_RETRACT.add(BfType.BF_EXPRESSION);
     }
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
