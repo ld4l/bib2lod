@@ -59,8 +59,12 @@ public class RdfCleaner extends RdfProcessor {
 //    private static final Pattern DEC_CODE_PATTERN = 
 //            Pattern.compile("&#(\\d+);");
     
-    public RdfCleaner(String inputDir, String mainOutputDir) {            
-        super(inputDir, mainOutputDir);
+    private final Pattern BAD_LOCALNAME = 
+            Pattern.compile("(" + localNamespace + ")(\\d)");
+    
+    public RdfCleaner(
+            String localNamespace, String inputDir, String mainOutputDir) {            
+        super(localNamespace, inputDir, mainOutputDir);
     }
 
     @Override
@@ -136,13 +140,9 @@ public class RdfCleaner extends RdfProcessor {
             PrintWriter writer = new PrintWriter(new BufferedWriter(
                     new FileWriter(outputFile, true)));               
             LineIterator iterator = new LineIterator(reader);
+            
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
-                // Remove empty lines
-//                if (line.length() == 0) {
-//                    LOGGER.trace("Removing empty line");
-//                    continue;
-//                }
                 LOGGER.debug(line);
                 String processedLine = processLine(line);
                 if (LOGGER.isDebugEnabled()) {
@@ -157,6 +157,7 @@ public class RdfCleaner extends RdfProcessor {
                     LOGGER.debug("Writing out: " + processedLine);
                 }
             }
+            
             reader.close();
             writer.close();
             LOGGER.trace("Done replacing lines in file " + file);                
@@ -168,16 +169,18 @@ public class RdfCleaner extends RdfProcessor {
     
     private String processLine(String line) {
         line = removeStatementWithEmptyObject(line);
-        if (! line.trim().isEmpty()) {
-            line = encodeUris(line);
-            
-            // Any other operations go here
-            
-        } 
-        
+        if (line.trim().isEmpty()) {
+            return line;
+        }
+
+        line = encodeUris(line);
+        line = fixLocalNames(line);
+
         return line;    
     }
   
+
+
     /*
      * Possibly could be handled better within Jena than as string search and
      * replace. Could move to BnodeConverter - rename to UriConverter?.
@@ -327,5 +330,22 @@ public class RdfCleaner extends RdfProcessor {
         return sb.toString();
     }
 
-
+    /* Bibframe generates local names with an initial digit, which is
+     * incompatible with Jena's Resource.getLocalName() method. Jena's 
+     * expectation that a local name not start with a digit is presumably 
+     * based on the XML spec, which doesn't allow it. That would only apply to
+     * RDF/XML, but Jena applies it across the board. Fixing it means that the
+     * generated LD4L RDF will be valid in RDF/XML as well as in other 
+     * serializations.
+     */
+    protected String fixLocalNames(String line) {
+        StringBuilder sb = new StringBuilder(line);       
+        Matcher m = BAD_LOCALNAME.matcher(sb);
+        int matchPointer = 0;
+        while (m.find(matchPointer)) {            
+            sb.replace(m.start(), m.end(), m.group(1) + "n" + m.group(2));
+            matchPointer = m.end() + 1;
+        }       
+        return sb.toString();     
+    } 
 }
