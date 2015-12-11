@@ -61,6 +61,8 @@ public enum BfProperty {
             Ld4lProperty.LEGACY_PROVIDER_STATEMENT),
     BF_PRODUCTION("production", Ld4lProperty.HAS_PROVISION),
     BF_PUBLICATION("publication", Ld4lProperty.HAS_PROVISION),
+    BF_RELATED_INSTANCE("relatedInstance", Ld4lProperty.RELATED),
+    BF_RELATED_WORK("relatedWork", Ld4lProperty.RELATED),    
     BF_RELATOR("relator", Ld4lProperty.HAS_CONTRIBUTION),
     BF_RESOURCE_PART("resourcePart"),
     BF_REVIEW("review", Ld4lProperty.HAS_BODY),

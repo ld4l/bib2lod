@@ -21,15 +21,27 @@
         <Console name="Console" target="SYSTEM_OUT">
             <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} line %L - %msg%n"/>
         </Console>
+        <RollingFile name="RollingFileAbbreviated" fileName="log/bib2lod.log"
+            filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+            </Policies>
+        </RollingFile> 
+        <Console name="ConsoleAbbreviated" target="SYSTEM_OUT">
+            <PatternLayout pattern="%d{HH:mm:ss.SSS} - %msg%n"/>
+        </Console>       
     </Appenders>
     <Loggers>
         <Root level="info">
-            <AppenderRef ref="RollingFile" /> 
-            <AppenderRef ref="Console"/>          
+            <AppenderRef ref="RollingFileAbbreviated" /> 
+            <AppenderRef ref="ConsoleAbbreviated"/>          
         </Root>
+        <!--
         <Logger name="org.ld4l.bib2lod.Bib2Lod" additivity="false" level="info">
             <AppenderRef ref="Console"/>
         </Logger>
+        -->
         <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfContributorConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
@@ -45,9 +57,11 @@
             <AppenderRef ref="Console"/>
         </Logger>
         -->
+        <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.RdfProcessor" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
         </Logger> 
+        -->
         <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.BibframeConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>

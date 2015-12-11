@@ -50,6 +50,7 @@ public enum Ld4lProperty {
     PRECEDES("precedes"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
     RANK(OntNamespace.VIVO, "rank"),
+    RELATED(OntNamespace.DCTERMS, "relation"),
     VALUE(OntNamespace.RDF, "value");
     
 

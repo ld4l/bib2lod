@@ -21,11 +21,18 @@ public class BfWorkConverter extends BfBibResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfWorkConverter.class);
+ 
+    private static final List<BfType> TYPES_TO_RETRACT = 
+            new ArrayList<BfType>();
+    static {
+            TYPES_TO_RETRACT.add(BfType.BF_EXPRESSION);
+    }
     
     private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
             new ArrayList<BfProperty>();
     static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE);        
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE); 
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_RELATED_WORK);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUBJECT);
     }
 
@@ -142,6 +149,11 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // model, so they get added to the BibframeConverter output model.
         assertions.add(converter.convertSubject(annotation, statement));        
         
+    }
+
+    @Override
+    protected List<BfType> getBfTypesToRetract() {
+        return TYPES_TO_RETRACT;
     }
     
     @Override

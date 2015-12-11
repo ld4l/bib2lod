@@ -65,6 +65,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
             new ArrayList<BfProperty>();
     static {
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_STATEMENT);
+        PROPERTIES_TO_CONVERT.add(BfProperty.BF_RELATED_INSTANCE);
         PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUPPLEMENTARY_CONTENT_NOTE);
 
     }

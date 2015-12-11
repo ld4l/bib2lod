@@ -24,6 +24,7 @@ public enum BfType {
     BF_COLLECTION("Collection", Ld4lType.COLLECTION),
     BF_ELECTRONIC("Electronic", Ld4lType.ELECTRONIC),
     BF_EVENT("Event", Ld4lType.EVENT),
+    BF_EXPRESSION("EXPRESSION"),
     BF_FAMILY("Family", Ld4lType.FAMILY),
     BF_HELD_ITEM("HeldItem", Ld4lType.ITEM),
     BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER),    
