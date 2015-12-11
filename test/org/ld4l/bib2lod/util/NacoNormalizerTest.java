@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.naco;
+package org.ld4l.bib2lod.util;
 
 import org.junit.Assert;
 import org.junit.Test;
