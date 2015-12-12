@@ -41,16 +41,14 @@ public class BnodeConverter extends RdfProcessor {
         // For logging
         int fileCount = 0;
         Instant fileStart = Instant.now();
-        
-        // Gets prefixed to URIs
-        int fileNum = 0;
+
         
         for ( File file : new File(inputDir).listFiles() ) {
-            fileNum++;
+
             fileCount++;
             String filename = file.getName();
             LOGGER.trace("Start processing file " + filename);
-            Model outputModel = processInputFile(file, fileNum);
+            Model outputModel = processInputFile(file);
             // Write out to same filename as input file
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
@@ -77,7 +75,7 @@ public class BnodeConverter extends RdfProcessor {
         return outputDir;
     }
     
-    private Model processInputFile(File inputFile, int fileCount) {
+    private Model processInputFile(File inputFile) {
         
         Model inputModel = readModelFromFile(inputFile);
         Model assertions = ModelFactory.createDefaultModel();
@@ -88,7 +86,7 @@ public class BnodeConverter extends RdfProcessor {
         while (statements.hasNext()) {
             Statement statement = statements.next();
             convertBnodesToUris(statement, assertions, retractions, 
-                    bnodeIdToUriResource, fileCount);
+                    bnodeIdToUriResource);
         }
         inputModel.remove(retractions)
                   .add(assertions);   
@@ -104,8 +102,7 @@ public class BnodeConverter extends RdfProcessor {
     }
 
     private void convertBnodesToUris(Statement statement, Model assertions,
-            Model retractions, Map<String, Resource> bnodeIdToUriResource,
-            int fileCount) {
+            Model retractions, Map<String, Resource> bnodeIdToUriResource) {
         
         Resource subject = statement.getSubject();
         Property property = statement.getPredicate();
@@ -117,11 +114,11 @@ public class BnodeConverter extends RdfProcessor {
         RDFNode newObject = object;
         if (subject.isAnon()) {
             newSubject = createUriResourceForAnonNode(subject, 
-                    bnodeIdToUriResource, assertions, fileCount);
+                    bnodeIdToUriResource, assertions);
         }
         if (object.isAnon()) {
             newObject = createUriResourceForAnonNode(object, 
-                    bnodeIdToUriResource, assertions, fileCount);               
+                    bnodeIdToUriResource, assertions);               
         }
         retractions.add(subject, property, object);
         // This handles cases where both subject and object are blank nodes.
@@ -130,8 +127,7 @@ public class BnodeConverter extends RdfProcessor {
     
     
     private Resource createUriResourceForAnonNode(RDFNode rdfNode, 
-            Map<String, Resource> idToUriResource, Model assertions, 
-            int fileCount) {
+            Map<String, Resource> idToUriResource, Model assertions) {
         Node node = rdfNode.asNode();
         /*
          * Prepend fileCount to blank node label to ensure that URIs are not
@@ -148,25 +144,18 @@ public class BnodeConverter extends RdfProcessor {
          * 
          * TODO - just use RdfProcessor.mintUri()
          */
-        String id = "n" + fileCount + "_" + node.getBlankNodeId().toString();
+        String id = node.getBlankNodeId().toString();
         Resource uriResource;
         if (idToUriResource.containsKey(id)) {
             uriResource = idToUriResource.get(id);  
             LOGGER.debug("Found hash key " + id);
         } else {
             // Use Java UUID to mint new URIs
-            // uriResource = assertions.createResource(convertLabelToUri(id));
             uriResource = assertions.createResource(mintUri(localNamespace));
             idToUriResource.put(id, uriResource);
             LOGGER.debug("Creating new hash entry for id " + id);
         }
         return uriResource;
     }
-    
-//    private String convertLabelToUri(String id) {
-//        String localName = id.replaceAll("\\W", "");
-//        return localNamespace + localName;
-//    }
-
 
 }
