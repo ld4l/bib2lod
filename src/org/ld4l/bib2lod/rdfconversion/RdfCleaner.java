@@ -12,6 +12,8 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -62,6 +64,10 @@ public class RdfCleaner extends RdfProcessor {
     private final Pattern BAD_LOCALNAME = 
             Pattern.compile("(" + localNamespace + ")(\\d)");
     
+//    private final Pattern BNODE_ID = 
+//            Pattern.compile("_:bnode\\d+");
+    
+    
     public RdfCleaner(
             String localNamespace, String inputDir, String mainOutputDir) {            
         super(localNamespace, inputDir, mainOutputDir);
@@ -80,23 +86,24 @@ public class RdfCleaner extends RdfProcessor {
         Instant fileStart = Instant.now();
        
         for ( File file : new File(inputDir).listFiles() ) {
+            
+            Map<String, String> bnodesToUris = new HashMap<String, String>();
 
             fileCount++;
 
             String filename = file.getName();
+            
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
             // clean them up here.
             if (file.isDirectory()) { 
-                LOGGER.trace("Skipping directory " + filename);
                 continue;
             }
             if (file.length() == 0) {
-                LOGGER.trace("Skipping empty file " + filename);
                 continue;
             }
-            LOGGER.trace("Start processing file " + filename);
-            replaceLinesInFile(file, outputDir); 
+
+            replaceLinesInFile(file, outputDir, bnodesToUris); 
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 LOGGER.info("Cleaned RDF in " + fileCount + " " 
@@ -128,11 +135,13 @@ public class RdfCleaner extends RdfProcessor {
      * better within Jena. See notes for method, below.
      *
      */
-    protected void replaceLinesInFile(File file, String outputDir) {
+    protected void replaceLinesInFile(
+            File file, String outputDir, Map<String, String> bnodesToUris) {
+
         BufferedReader reader;
         try {
             String filename = file.getName();
-            LOGGER.trace("Start replacing lines in file " + filename);
+
             reader = Files.newBufferedReader(file.toPath());
             String outputFilename =
                     FilenameUtils.getName(file.toString()); 
@@ -143,8 +152,8 @@ public class RdfCleaner extends RdfProcessor {
             
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
-                LOGGER.debug(line);
-                String processedLine = processLine(line);
+
+                String processedLine = processLine(line, bnodesToUris);
                 if (LOGGER.isDebugEnabled()) {
                     // append newline before comparing lines?
                     if (!line.equals(processedLine)) {
@@ -160,21 +169,34 @@ public class RdfCleaner extends RdfProcessor {
             
             reader.close();
             writer.close();
-            LOGGER.trace("Done replacing lines in file " + file);                
+              
         } catch (IOException e) {
             // TODO Auto-generated catch block
             e.printStackTrace();
         }       
     }
     
-    private String processLine(String line) {
+    private String processLine(String line, Map<String, String> bnodesToUris) {
+
         line = removeStatementWithEmptyObject(line);
         if (line.trim().isEmpty()) {
             return line;
         }
 
         line = encodeUris(line);
+        
         line = fixLocalNames(line);
+        
+        /* 
+         * Can't do bnode conversion here: we don't get bnode ids in rdf/xml
+         * input. Could convert all formats to ntriples before starting 
+         * RDF cleanup, but that's an extra step as well. Possible future
+         * performance optimization if needed, and if it IS a performance
+         * improvement.
+         * 
+         * line = convertBnodes(line, bnodesToUris);
+         */
+        
 
         return line;    
     }
@@ -183,7 +205,7 @@ public class RdfCleaner extends RdfProcessor {
 
     /*
      * Possibly could be handled better within Jena than as string search and
-     * replace. Could move to BnodeConverter - rename to UriConverter?.
+     * replace. Could move to BnodeConverter1 - rename to UriConverter?.
      * However, even within Jena different input serializations would have to
      * be handled differently, unless we convert all input to n-triples first. 
      * See sample input/output below. 
@@ -339,7 +361,9 @@ public class RdfCleaner extends RdfProcessor {
      * serializations.
      */
     protected String fixLocalNames(String line) {
-        StringBuilder sb = new StringBuilder(line);       
+        
+        StringBuilder sb = new StringBuilder(line);
+        
         Matcher m = BAD_LOCALNAME.matcher(sb);
         int matchPointer = 0;
         while (m.find(matchPointer)) {            
@@ -348,4 +372,31 @@ public class RdfCleaner extends RdfProcessor {
         }       
         return sb.toString();     
     } 
+    
+//    protected String convertBnodes(
+//            String line, Map<String, String> bnodesToUris) {
+//        
+//        StringBuilder sb = new StringBuilder(line);  
+//        
+//        Matcher m = BNODE_ID.matcher(sb);
+//        int matchPointer = 0;
+//        while (m.find(matchPointer)) {  
+//
+//            String uri;
+//            String bnodeId = m.group();
+//            // No bnode found here in rdf/xml input
+//            LOGGER.debug("Found bnode: " + bnodeId);
+//            if (bnodesToUris.containsKey(bnodeId)) {
+//                uri = bnodesToUris.get(bnodeId);
+//                sb.replace(m.start(), m.end(), uri);
+//            } else {
+//                uri = mintUri(localNamespace);
+//                bnodesToUris.put(bnodeId, uri);
+//            }
+//            matchPointer += uri.length() - bnodeId.length();
+//                
+//        }       
+//        return sb.toString();     
+//    }
+    
 }
