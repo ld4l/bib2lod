@@ -81,9 +81,12 @@ public class ProcessController {
             outputDir = new RdfCleaner(
                     localNamespace, outputDir, mainOutputDir).process();
                              
-            // Required since bnode ids are not guaranteed to be unique across
-            // input files, so Jena may create duplicate ids across files when
-            // reading into and writing out models. 
+            /* Required since bnode ids are not guaranteed to be unique across
+             * input files, so Jena may create duplicate ids across files when
+             * reading into and writing out models. 
+             * NB Not including in RdfCleaner as a string replacement, since
+             * rdf/xml input doesn't contain explicit bnodes.
+             */
             outputDir = new BnodeConverter(
                     localNamespace, outputDir, mainOutputDir).process(); 
                     
