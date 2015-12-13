@@ -28,7 +28,7 @@ public abstract class BfResourceConverter {
     protected Resource subject;
     protected Model model;
     protected BfType bfType;
-    protected Model assertions;
+    protected Model outputModel;
     protected Model retractions;
     protected String localNamespace;
     protected Statement linkingStatement;
@@ -49,7 +49,7 @@ public abstract class BfResourceConverter {
 
         this.localNamespace = localNamespace;
         
-        this.assertions = ModelFactory.createDefaultModel();
+        this.outputModel = ModelFactory.createDefaultModel();
         this.retractions = ModelFactory.createDefaultModel();
         
     }
@@ -81,7 +81,7 @@ public abstract class BfResourceConverter {
      * Top level method: initialize instance variables and convert.
      * Subclasses may override: needed in the case where one converter calls
      * another. The called converter must pass back a converted model, with
-     * assertions and retractions applied, to the caller. The subject of the
+     * outputModel and retractions applied, to the caller. The subject of the
      * called converter is also different from the caller's subject. Examples:
      * Instance converter calls Provider, Title, and Identifier converters.
      * Work converter calls Title converter.
@@ -117,7 +117,7 @@ public abstract class BfResourceConverter {
     /* 
      * Default conversion method. Subclasses may override.
      * 
-     * The general strategy is to add new statements to the assertions model,
+     * The general strategy is to add new statements to the outputModel model,
      * which then get added to the model after processing all conversions. In
      * some subclasses, new statements need to be added to the model immediately
      * so that they can be reprocessed. For example, in BfLanguageConverter, 
@@ -178,7 +178,7 @@ public abstract class BfResourceConverter {
                 
                 // If new type has been specified, use it
                 if (typeMap.containsKey(type)) {
-                    assertions.add(subject, predicate, typeMap.get(type));
+                    outputModel.add(subject, predicate, typeMap.get(type));
                     stmts.remove();
                     
                 } else if (typesToRetract.contains(type)) {
@@ -202,7 +202,7 @@ public abstract class BfResourceConverter {
                                 + "namespace: " + predicate.getURI());
                     }
                 }
-                assertions.add(subject, propertyMap.get(predicate), object);
+                outputModel.add(subject, propertyMap.get(predicate), object);
                 stmts.remove();
                 
             } else if (propsToRetract.contains(predicate)) {
@@ -216,7 +216,7 @@ public abstract class BfResourceConverter {
             } // else: external namespace (e.g., madsrdf); don't modify
         }
         
-        model.add(assertions);
+        model.add(outputModel);
  
     }   
     
@@ -243,7 +243,7 @@ public abstract class BfResourceConverter {
                     + " in Bibframe namespace to " 
                     + newType.getURI() + " in LD4L namespace.");
              
-            assertions.add(subject, RDF.type, newType);
+            outputModel.add(subject, RDF.type, newType);
             
             return true;
         }
@@ -274,7 +274,7 @@ public abstract class BfResourceConverter {
             LOGGER.debug("Changing property " + predicate.getURI()
                     + " in Bibframe namespace to " + ld4lProp.getURI()
                     + " in LD4L namespace.");
-            assertions.add(subject, ld4lProp, object);
+            outputModel.add(subject, ld4lProp, object);
             return true;
         }
         

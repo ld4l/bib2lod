@@ -75,7 +75,7 @@ public class BfLanguageConverter extends BfResourceConverter {
                             Ld4lProperty.HAS_ORIGINAL_LANGUAGE.property();
                     // OK to alter model here, since we're not continuing the 
                     // iteration.
-                    // NB Must add to model rather than assertions model, since 
+                    // NB Must add to model rather than outputModel model, since 
                     // subject's URI may need to be changed in 
                     // assignExternalUri().
                     model.add(work, originalLangProp, subject);

@@ -119,15 +119,15 @@ public class BfProviderConverter extends BfResourceConverter {
          * be discarded.
         */
         
-        assertions.add(subject, RDF.type, newType.ontClass());
+        outputModel.add(subject, RDF.type, newType.ontClass());
         
         if (newType.label() != null) {
-            assertions.add(subject, RDFS.label, newType.label());
+            outputModel.add(subject, RDFS.label, newType.label());
         }
 
         // Could also let these fall through to super.convertModel(), but might
         // as well do it now.
-        assertions.add(instance, Ld4lProperty.HAS_PROVISION.property(), subject);
+        outputModel.add(instance, Ld4lProperty.HAS_PROVISION.property(), subject);
         retractions.add(linkingStatement);
 
     }

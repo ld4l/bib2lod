@@ -36,7 +36,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     /*
      * This case is problematic, since, unlike the Work, we do not have links to
      * the Instance's Items here. However, in the TypeSplitter we could create
-     * the inverse assertions (Instance to Item) and add those to the Instance
+     * the inverse outputModel (Instance to Item) and add those to the Instance
      * file. The real problem is: if the Instance has more than one Item, how 
      * would we know which of the Instance's Items are Manuscripts? 
      private static final Map<Resource, Resource> NEW_ITEM_TYPES =
@@ -149,7 +149,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                     if (relatedWork != null) {
                         // Probably also added from conversion of statement
                         // :instance a Monograph
-                        assertions.add(relatedWork, RDF.type, 
+                        outputModel.add(relatedWork, RDF.type, 
                                 Ld4lType.MONOGRAPH.ontClass());
                         retractions.add(statement);
                     }                   
@@ -165,7 +165,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
 
         if (NEW_WORK_TYPES.containsKey(type)) {
             if (relatedWork != null) {
-                assertions.add(relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
+                outputModel.add(relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
             }
             return true;
         }
@@ -183,9 +183,9 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         Resource provider = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
         
-        // Add BfProviderConverter model to this converter's assertions model,
+        // Add BfProviderConverter model to this converter's outputModel model,
         // so they get added to the BibframeConverter output model.
-        assertions.add(converter.convertSubject(provider, statement));
+        outputModel.add(converter.convertSubject(provider, statement));
     }
     
     private void convertIdentifier(Statement statement) {

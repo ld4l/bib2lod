@@ -106,20 +106,20 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 // would be an anomalous record, since a shelf mark literal 
                 // with no scheme specification makes no sense.
                 if (bfShelfMarkProp.equals(BfProperty.BF_SHELF_MARK)) {
-                    // Add to assertions model rather than main model, so the
+                    // Add to outputModel model rather than main model, so the
                     // statement doesn't get reprocessed.
-                    assertions.add(subject, newProp, shelfMarkLiteral);
+                    outputModel.add(subject, newProp, shelfMarkLiteral);
                 } else {
                     String shelfMarkUri = mintShelfMarkUri(bfShelfMarkProp);                           
                     Resource shelfMark = model.createResource(shelfMarkUri); 
-                    // Add to assertions model rather than main model, so the
+                    // Add to outputModel model rather than main model, so the
                     // statements don't get reprocessed.
-                    assertions.add(subject, newProp, shelfMark);
+                    outputModel.add(subject, newProp, shelfMark);
                     Ld4lType shelfMarkType = 
                             SHELF_MARK_PROP_TO_SUBCLASS.get(bfShelfMarkProp);
-                    assertions.add(shelfMark, RDF.type, 
+                    outputModel.add(shelfMark, RDF.type, 
                             shelfMarkType.ontClass());
-                    assertions.add(shelfMark, RDF.value, shelfMarkLiteral);
+                    outputModel.add(shelfMark, RDF.value, shelfMarkLiteral);
                 }
                 
                 subject.removeAll(oldProp);

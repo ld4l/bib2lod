@@ -74,7 +74,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
     protected void convertModel() {
         
         Resource relatedWork = linkingStatement.getResource();
-        assertions.add(
+        outputModel.add(
                 relatedWork, Ld4lProperty.HAS_ANNOTATION.property(), subject);
 
         convertAnnotationBody();
@@ -103,11 +103,11 @@ public class BfAnnotationConverter extends BfResourceConverter {
         
         Resource body = bodyStmt.getResource();
         retractions.add(bodyStmt);
-        assertions.add(body, RDF.type, Ld4lType.TEXT_CONTENT.ontClass());
+        outputModel.add(body, RDF.type, Ld4lType.TEXT_CONTENT.ontClass());
         // It's not clear what predicate in Bibframe links the body Resource
         // to the text content, so can't at this point find the content of the
         // annotation.
-        // assertions.add(body, Ld4lProperty.CHARS.property(), "");
+        // outputModel.add(body, Ld4lProperty.CHARS.property(), "");
         
         // TODO
         // coverArt => hasCoverArt - need to call from Instance converter too

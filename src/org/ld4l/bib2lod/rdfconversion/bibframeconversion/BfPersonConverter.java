@@ -54,9 +54,9 @@ public class BfPersonConverter extends BfAuthorityConverter {
                 Ld4lProperty key = entry.getKey();
                 String value = entry.getValue();
                 if (value != null) {
-                    // Add to assertions model rather than main model, so the
+                    // Add to outputModel model rather than main model, so the
                     // statement doesn't get reprocessed.
-                    assertions.add(subject, key.property(), value);
+                    outputModel.add(subject, key.property(), value);
                 }
             }
         }

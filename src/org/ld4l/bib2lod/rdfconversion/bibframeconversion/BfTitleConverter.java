@@ -97,7 +97,7 @@ public class BfTitleConverter extends BfResourceConverter {
             String fullTitleString = titleValueString;
        
             Resource nonSortElement = createNonSortTitleElement(
-                    titleValueString, titleValueLanguage, subject, assertions);
+                    titleValueString, titleValueLanguage, subject, outputModel);
 
             // This will be the rdfs:label value of the MainTitleElement. In
             // the absence of other title elements, it's the full bf:titleValue
@@ -112,7 +112,7 @@ public class BfTitleConverter extends BfResourceConverter {
             
             // Non-sort element precedes main title element
             if (nonSortElement != null) {
-                assertions.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
+                outputModel.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
                         mainTitleElement);
             }
             
@@ -136,13 +136,13 @@ public class BfTitleConverter extends BfResourceConverter {
                 fullTitleString += " " + subtitleValue;
                 
                 // Order the mainTitleElement and subtitleElement
-                assertions.add(mainTitleElement, Ld4lProperty.PRECEDES.property(), 
+                outputModel.add(mainTitleElement, Ld4lProperty.PRECEDES.property(), 
                         subtitleElement);
           
             } 
             
             // Add the rdfs:label of the Title
-            assertions.add(
+            outputModel.add(
                     subject, RDFS.label, fullTitleString, titleValueLanguage);
             
             // NB Some Title objects have both a bf:titleValue and a bf:label, 
@@ -183,7 +183,7 @@ public class BfTitleConverter extends BfResourceConverter {
             String language) {
         
         return createTitleElement(
-                titleElementType, value, language, subject, assertions);
+                titleElementType, value, language, subject, outputModel);
     }
     
     /*

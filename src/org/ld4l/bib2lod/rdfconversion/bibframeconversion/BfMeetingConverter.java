@@ -30,9 +30,9 @@ public class BfMeetingConverter extends BfAuthorityConverter {
         StmtIterator stmts = model.listStatements(null, RDF.type, 
                 BfType.MADSRDF_CONFERENCE_NAME.ontClass());
         if (stmts.hasNext()) { 
-            // Add to assertions model rather than main model, so the
+            // Add to outputModel model rather than main model, so the
             // statement doesn't get reprocessed.
-            assertions.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
+            outputModel.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
             // Not retracting the original statement or any other statements
             // about the madsrdf:Authority.
         }

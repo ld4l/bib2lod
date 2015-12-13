@@ -113,16 +113,16 @@ public class BfContributorConverter extends BfResourceConverter {
                 PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.CONTRIBUTION;
 
         Resource contribution = 
-                assertions.createResource(RdfProcessor.mintUri(localNamespace));
-        assertions.add(contribution, RDF.type, newType.ontClass());
+                outputModel.createResource(RdfProcessor.mintUri(localNamespace));
+        outputModel.add(contribution, RDF.type, newType.ontClass());
         
         if (newType.label() != null) {
-            assertions.add(contribution, RDFS.label, newType.label());
+            outputModel.add(contribution, RDFS.label, newType.label());
         }
         
-        assertions.add(contribution, Ld4lProperty.HAS_AGENT.property(), agent);
+        outputModel.add(contribution, Ld4lProperty.HAS_AGENT.property(), agent);
         
-        assertions.add(
+        outputModel.add(
                 work, Ld4lProperty.HAS_CONTRIBUTION.property(), contribution);
         retractions.add(linkingStatement);
     }

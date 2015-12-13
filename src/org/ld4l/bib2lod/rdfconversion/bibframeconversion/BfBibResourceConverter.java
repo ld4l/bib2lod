@@ -103,7 +103,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         Resource title = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
 
-        assertions.add(converter.convertSubject(title));
+        outputModel.add(converter.convertSubject(title));
         
         Statement labelStmt = title.getProperty(RDFS.label);
         if (labelStmt != null) {
@@ -124,6 +124,6 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
     private void createTitle(Literal label) {
         
         BfTitleConverter converter = new BfTitleConverter(this.localNamespace);
-        assertions.add(converter.create(subject, label));
+        outputModel.add(converter.create(subject, label));
     }
 }
