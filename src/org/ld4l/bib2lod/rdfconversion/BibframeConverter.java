@@ -298,10 +298,8 @@ public class BibframeConverter extends RdfProcessor {
             }  
         }
         
-        // The converted model, with assertions and retractions applied,  will 
-        // be returned by the converter. Other converters will not need to 
-        // process these statements, so they can be removed from the input 
-        // model.
+        // Other converters will not need to process these statements, so they 
+        // can be removed from the input model.
         inputModel.remove(modelForSubject);
            
         // NB At this point, resource.getModel() is the inputModel, not 

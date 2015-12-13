@@ -78,8 +78,12 @@ public class BnodeConverter extends RdfProcessor {
     private Model processInputFile(File inputFile) {
         
         Model inputModel = readModelFromFile(inputFile);
+        
+        // Makes sense to apply outputModel and retractions to original input
+        // model in this processor, since most statements will remain the same.
         Model assertions = ModelFactory.createDefaultModel();
         Model retractions = ModelFactory.createDefaultModel();
+        
         Map<String, Resource> bnodeIdToUriResource = 
                 new HashMap<String, Resource>();
         StmtIterator statements = inputModel.listStatements();
