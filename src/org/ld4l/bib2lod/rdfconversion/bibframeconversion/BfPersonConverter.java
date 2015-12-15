@@ -5,6 +5,7 @@ import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
@@ -30,9 +31,9 @@ public class BfPersonConverter extends BfAuthorityConverter {
     }
     
     @Override 
-    protected void convertModel() {
+    protected Model convertModel() {
         convertBfLabel();
-        super.convertModel();
+        return super.convertModel();
     }
 
     /** 

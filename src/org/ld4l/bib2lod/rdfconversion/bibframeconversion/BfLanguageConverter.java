@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -19,23 +20,16 @@ public class BfLanguageConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfLanguageConverter.class);
     
-
-    private static List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE_OF_PART);
-    }
     
     public BfLanguageConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
     
     @Override
-    protected void convertModel() {
+    protected Model convertModel() {
         convertOriginalLanguage();
         assignExternalUri();
-        super.convertModel();  
+        return super.convertModel();  
     }
 
     /**
@@ -65,7 +59,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
                 StmtIterator langStmts = 
-                        model.listStatements(null, langProp, subject);
+                        inputModel.listStatements(null, langProp, subject);
                 // There should be only one statement, since each local language 
                 // URI is unique to the Work.
                 if (langStmts.hasNext()) {
@@ -78,22 +72,18 @@ public class BfLanguageConverter extends BfResourceConverter {
                     // NB Must add to model rather than outputModel model, since 
                     // subject's URI may need to be changed in 
                     // assignExternalUri().
-                    model.add(work, originalLangProp, subject);
-                    model.remove(langStmt);
+                    outputModel.add(work, originalLangProp, subject);
+                    retractions.add(langStmt);
                 }      
             } else {
                 // Not sure what values other than "original" could occur; for 
                 // now log them and remove them.  
                 LOGGER.debug("Found value of bf:resourcePart " + value);
             }
-            model.remove(resourcePartStmt);
+            retractions.add(resourcePartStmt);
         }
+        
+        applyRetractions(inputModel, retractions);
     }
-
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
-    }
-
     
 }

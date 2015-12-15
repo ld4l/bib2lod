@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -24,19 +25,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);
-    
-    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_HOLDING_FOR);
-    }
 
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
-    }
-    
             
     // Bibframe models shelf mark types with different properties; LD4L models
     // them with subclasses of Classification. Map the Bibframe property to the
@@ -70,9 +59,9 @@ public class BfHeldItemConverter extends BfResourceConverter {
     }
     
     @Override
-    protected void convertModel() {
+    protected Model convertModel() {
         convertShelfMark();
-        super.convertModel();
+        return super.convertModel();
     }
     
     
@@ -111,7 +100,8 @@ public class BfHeldItemConverter extends BfResourceConverter {
                     outputModel.add(subject, newProp, shelfMarkLiteral);
                 } else {
                     String shelfMarkUri = mintShelfMarkUri(bfShelfMarkProp);                           
-                    Resource shelfMark = model.createResource(shelfMarkUri); 
+                    Resource shelfMark = 
+                            outputModel.createResource(shelfMarkUri); 
                     // Add to outputModel model rather than main model, so the
                     // statements don't get reprocessed.
                     outputModel.add(subject, newProp, shelfMark);
@@ -170,13 +160,4 @@ public class BfHeldItemConverter extends BfResourceConverter {
         return RdfProcessor.mintUri(namespace);
     }
 
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
-    }
-   
-    @Override
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
-    }
 }

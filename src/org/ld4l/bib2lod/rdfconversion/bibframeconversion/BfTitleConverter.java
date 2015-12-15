@@ -26,38 +26,6 @@ public class BfTitleConverter extends BfResourceConverter {
             LogManager.getLogger(BfTitleConverter.class);
 
     
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_CONVERT.add(BfType.BF_TITLE);
-    }
-    
-    private static final List<BfType> TYPES_TO_RETRACT = 
-            new ArrayList<BfType>();
-    static {
-
-    }
-    
-    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LABEL);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_INSTANCE_TITLE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_WORK_TITLE);
-    }
-
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-
-    }
-    
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            new ArrayList<BfProperty>();
-    static {
-
-    }
-    
     private static final List<String> NON_SORT_STRINGS = 
             new ArrayList<String>();
     static {
@@ -73,10 +41,10 @@ public class BfTitleConverter extends BfResourceConverter {
     
     
     @Override
-    protected void convertModel() {
+    protected Model convertModel() {
         
       convertTitleValue();
-      super.convertModel();
+      return super.convertModel();
     }
     
     private void convertTitleValue() {
@@ -306,32 +274,5 @@ public class BfTitleConverter extends BfResourceConverter {
         
         return mainTitleString;
     }
-    
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
-    
-    @Override 
-    protected List<BfType> getBfTypesToRetract() {
-        return TYPES_TO_RETRACT;
-    }
-    
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
-    }
-   
-    @Override
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
-    }
-
-    @Override
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
-    }
-
-
 
 }

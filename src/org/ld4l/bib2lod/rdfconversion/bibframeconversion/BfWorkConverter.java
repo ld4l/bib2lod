@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -22,27 +23,6 @@ public class BfWorkConverter extends BfBibResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfWorkConverter.class);
  
-    private static final List<BfType> TYPES_TO_RETRACT = 
-            new ArrayList<BfType>();
-    static {
-        // Is there anything we want to deduce from this before it gets deleted?
-        TYPES_TO_RETRACT.add(BfType.BF_EXPRESSION);
-    }
-    
-    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_LANGUAGE); 
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_RELATED_WORK);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_SUBJECT);
-    }
-
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-
-    }
-    
     private static final List<BfProperty> CONTRIBUTOR_PROPERTIES = 
             new ArrayList<BfProperty>();
     static {
@@ -58,30 +38,20 @@ public class BfWorkConverter extends BfBibResourceConverter {
         ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_REVIEW_OF);
         ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_SUMMARY_OF);
     }
-    
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
-        // LD4L uses the derivedFrom predicate to relate Titles to Titles and
-        // Works to Works, but this is used to relate a Work or Instance to
-        // a marcxml record, so it should be removed.
-        PROPERTIES_TO_RETRACT.add(BfProperty.BF_DERIVED_FROM);
-    }
 
     public BfWorkConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
 
     @Override 
-    protected void convertModel() {
+    protected Model convertModel() {
         
         convertTitles(BfProperty.BF_WORK_TITLE);
 
         // Copy statements to a list and loop through the list rather than
         // using the iterator. This allows us to modify the model inside the
         // loop.
-        List<Statement> statements = model.listStatements().toList();     
+        List<Statement> statements = inputModel.listStatements().toList();     
         
         for (Statement statement : statements) {
             
@@ -113,8 +83,8 @@ public class BfWorkConverter extends BfBibResourceConverter {
                 } 
             }          
         }
-        //RdfProcessor.printModel(model, Level.DEBUG);
-        super.convertModel();
+
+        return super.convertModel();
 
     }
     
@@ -150,26 +120,6 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // model, so they get added to the BibframeConverter output model.
         outputModel.add(converter.convertSubject(annotation, statement));        
         
-    }
-
-    @Override
-    protected List<BfType> getBfTypesToRetract() {
-        return TYPES_TO_RETRACT;
-    }
-    
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
-    }
-   
-    @Override
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
-    }
-
-    @Override
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
     }
     
 }

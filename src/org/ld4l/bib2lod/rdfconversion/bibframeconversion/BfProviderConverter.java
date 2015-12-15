@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -19,22 +20,8 @@ import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfProviderConverter extends BfResourceConverter {
 
-
     private static final Logger LOGGER = 
             LogManager.getLogger(BfProviderConverter.class);
-
-    
-    private static final List<BfType> TYPES_TO_CONVERT = 
-            new ArrayList<BfType>();
-    static {
- 
-    }
-    
-    private static final List<BfType> TYPES_TO_RETRACT = 
-            new ArrayList<BfType>();
-    static {
-        TYPES_TO_RETRACT.add(BfType.BF_PROVIDER);
-    }
 
     private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE = 
             new HashMap<BfProperty, Ld4lType>();
@@ -51,47 +38,17 @@ public class BfProviderConverter extends BfResourceConverter {
                 BfProperty.BF_PUBLICATION, Ld4lType.PUBLISHER_PROVISION);
     }
     
-    private static final List<BfProperty> PROPERTIES_TO_CONVERT = 
-            new ArrayList<BfProperty>();
-    static {
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_DATE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_DISTRIBUTION);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_MANUFACTURE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PRODUCTION);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_NAME);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_PLACE);
-        PROPERTIES_TO_CONVERT.add(BfProperty.BF_PROVIDER_ROLE);
-        // PROPERTIES_TO_CONVERT.add(BfProperty.BF_PUBLICATION);
-        PROPERTIES_TO_CONVERT.addAll(PROPERTY_TO_TYPE.keySet());
-    }
 
-    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP =
-            new HashMap<BfProperty, Ld4lProperty>();
-    static {
-
-    }
-    
-    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
-            new ArrayList<BfProperty>();
-    static {
-
-    }
-    
-  
     protected BfProviderConverter(String localNamespace, Statement statement) {
         super(localNamespace, statement);
     }   
     
     @Override
-    protected void convertModel() {
+    protected Model convertModel() {
         
       createProvision();
       
-      // If there were retractions, we should apply them to the model here,
-      // so that super.convertModel() doesn't reprocess them.
-      
-      super.convertModel();
+      return super.convertModel();
     }
 
     private void createProvision() {
@@ -127,34 +84,12 @@ public class BfProviderConverter extends BfResourceConverter {
 
         // Could also let these fall through to super.convertModel(), but might
         // as well do it now.
-        outputModel.add(instance, Ld4lProperty.HAS_PROVISION.property(), subject);
+        outputModel.add(
+                instance, Ld4lProperty.HAS_PROVISION.property(), subject);
         retractions.add(linkingStatement);
 
     }
     
     
-    @Override 
-    protected List<BfType> getBfTypesToConvert() {
-        return TYPES_TO_CONVERT;
-    }
-    
-    @Override 
-    protected List<BfType> getBfTypesToRetract() {
-        return TYPES_TO_RETRACT;
-    }
-    
-    @Override
-    protected List<BfProperty> getBfPropertiesToConvert() {
-        return PROPERTIES_TO_CONVERT;
-    }
-   
-    @Override
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
-    }
 
-    @Override
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return PROPERTIES_TO_RETRACT;
-    }
 }

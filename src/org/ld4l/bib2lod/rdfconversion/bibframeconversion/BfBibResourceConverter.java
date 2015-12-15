@@ -67,10 +67,10 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             String value = BfTitleConverter.normalizeTitle(literal.getString());
             LOGGER.debug("Adding literal with value '" + value + "' to list");
             titleLiterals.add(
-                    model.createLiteral(value, literal.getLanguage()));
+                    outputModel.createLiteral(value, literal.getLanguage()));
         }
 
-        List<Statement> titles = model.listStatements(subject, 
+        List<Statement> titles = inputModel.listStatements(subject, 
                 titleProp.property(), (RDFNode) null).toList();
         for (Statement stmt : titles) {
             convertTitle(stmt, titleLiterals);
@@ -88,7 +88,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             createTitle(literal);            
         }
         
-        applyRetractions();           
+        applyRetractions(inputModel, retractions);           
     }
 
     // TODO This method is also used by BfWorkConverter. Need to combine.

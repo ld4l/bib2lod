@@ -17,16 +17,14 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
-import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
-import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 
-public abstract class BfResourceConverter {
+public class BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfResourceConverter.class);
-    
+  
     protected Resource subject;
-    protected Model model;
+    protected Model inputModel;
     protected BfType bfType;
     protected Model outputModel;
     protected Model retractions;
@@ -89,11 +87,9 @@ public abstract class BfResourceConverter {
     protected Model convertSubject(Resource subject) {    
         
         this.subject = subject;
-        this.model = subject.getModel();
+        this.inputModel = subject.getModel();
 
-        convertModel();
-        
-        return model;
+        return convertModel();
     }
 
     protected Model convertSubject(
@@ -105,15 +101,12 @@ public abstract class BfResourceConverter {
              * BfProviderConverter.
              */
             Resource subject, Statement linkingStatement) {
-        
-        this.subject = subject;
-        this.model = subject.getModel();
+
         this.linkingStatement = linkingStatement;
         
-        convertModel();
-
-        return model;        
+        return convertSubject(subject);       
     }
+    
     /* 
      * Default conversion method. Subclasses may override.
      * 
@@ -128,30 +121,26 @@ public abstract class BfResourceConverter {
      * the results will not be affected.) A retractions model has been defined
      * anyway, to give the subclasses more flexibility.
      */
-    protected void convertModel() {
+    protected Model convertModel() {
         
         // If this method is called from a subclass method which neglected to
         // apply retractions to the model, apply them now, so that they are not
         // reprocessed here.
         applyRetractions();
-                    
+
         // Map of Bibframe to LD4L types.
-        Map<Resource, Resource> typeMap = 
-                BfType.typeMap(getBfTypesToConvert());
+        Map<Resource, Resource> typeMap = buildTypeMap();
         
-        List<Resource> typesToRetract = 
-                BfType.ontClasses(getBfTypesToRetract());
-                 
         // Map of Bibframe to LD4L properties.
-        Map<Property, Property> propertyMap = BfProperty.propertyMap(
-                getBfPropertiesToConvert(), getBfPropertyMap());
+        Map<Property, Property> propertyMap = buildPropertyMap();
+    
+        // Remove resources designated for removal so that statements containing
+        // these resources are not processed in the iteration through the 
+        // model statements.
+        removeResources(BfProperty.properties(getBfResourcesToRemove()));
 
-        // List of Bibframe properties to retract.
-        List<Property> propsToRetract = 
-                BfProperty.propertyList(getBfPropertiesToRetract());
-
-        // Iterate through the statements in the model.
-        StmtIterator stmts = model.listStatements();
+        // Iterate through the statements in the input model.
+        StmtIterator stmts = inputModel.listStatements();
         while (stmts.hasNext()) {
             
             Statement stmt = stmts.nextStatement();
@@ -165,174 +154,123 @@ public abstract class BfResourceConverter {
             // but in case that hasn't been done, we can't assume the subject
             // is this.subject. This should be logged for further investigation.
             Resource subject = stmt.getSubject();
-            if (LOGGER.isInfoEnabled()) {
+            if (LOGGER.isDebugEnabled()) {
                 if (! subject.equals(this.subject)) {
                     LOGGER.debug("Found statement " + stmt.toString() 
                             + " where subject is not " + this.subject.getURI());
                 }
             }
-                      
+     
             if (predicate.equals(RDF.type)) {
 
                 Resource type = object.asResource();
-                
-                // If new type has been specified, use it
+                    
                 if (typeMap.containsKey(type)) {
                     outputModel.add(subject, predicate, typeMap.get(type));
-                    stmts.remove();
-                    
-                } else if (typesToRetract.contains(type)) {
-                    stmts.remove();
-                
-                // Change any remaining types in Bibframe namespace to LD4L
-                // namespace.
-                } else if (convertBfTypeNamespace(subject, type)) {
-                    stmts.remove();
-                    
-                } // else: external namespace (e.g., madsrdf); don't modify
-
+                } 
+  
             } else if (propertyMap.containsKey(predicate)) {
                 
-                if (LOGGER.isInfoEnabled()) {
-                    if (BfProperty.get(predicate).namespace().equals
-                            (OntNamespace.LEGACY)) {
-                        // Log for review, to determine what legacy properties 
-                        // are being used, to inform future development.
-                        LOGGER.debug("Adding statement with property in legacy "
-                                + "namespace: " + predicate.getURI());
-                    }
-                }
                 outputModel.add(subject, propertyMap.get(predicate), object);
-                stmts.remove();
-                
-            } else if (propsToRetract.contains(predicate)) {
-                stmts.remove(); 
-              
-            // Change any remaining predicates in Bibframe namespace to LD4L
-            // namespace.
-            } else if (convertBfPropertyNamespace(subject, predicate, object)) {
-                stmts.remove();    
-                
-            } // else: external namespace (e.g., madsrdf); don't modify
-        }
-        
-        model.add(outputModel);
+            }
  
+            // We could add this if there are any child converters that do 
+            // additional processing AFTER the superclass method, so that the
+            // statements aren't reprocessed. At this point we don't have such
+            // cases.
+            // stmt.remove();
+        }
+        
+        return outputModel;  
     }   
-    
+           
     /*
-     * Fall-through case: change namespace from Bibframe to LD4L. Don't modify
-     * statements in external namespace (e.g., madsrdf).
-     * 
-     * Possibly we should reverse the default: change namespace if in a 
-     * list of types, else discard. 
+     * Resources to remove are expressed as a list of properties, because it is
+     * easiest to identify the objects of those properties and remove all the
+     * statements it occurs in either as subject or object. 
      */
-    protected boolean convertBfTypeNamespace(Resource subject, Resource type) {
-        
-        String bfNamespace = OntNamespace.BIBFRAME.uri();
-        String ld4lNamespace = OntNamespace.LD4L.uri();
-
-        if (type.getNameSpace().equals(bfNamespace)) {
-            
-            Resource newType = model.createResource(
-                    ld4lNamespace + type.getLocalName());
-            
-            // Log for dev purposes, to make sure we shouldn't have handled 
-            // this type in a more specific way.
-            LOGGER.debug("Changing resource " + type.getURI()
-                    + " in Bibframe namespace to " 
-                    + newType.getURI() + " in LD4L namespace.");
-             
-            outputModel.add(subject, RDF.type, newType);
-            
-            return true;
-        }
-        
-        return false;
-    }
-
-    /*
-     * Fall-through case: change namespace from Bibframe to LD4L. Don't modify
-     * statements in external namespace (e.g., madsrdf).
-     * 
-     * Possibly we should reverse the default: change namespace if in a 
-     * list of properties, else discard. 
-     */
-    protected boolean convertBfPropertyNamespace(Resource subject,
-            Property predicate, RDFNode object) {
-        
-        String bfNamespace = OntNamespace.BIBFRAME.uri();
-        String ld4lNamespace = OntNamespace.LD4L.uri();
-        
-        if (predicate.getNameSpace().equals(bfNamespace)) {  
-            
-            Property ld4lProp = model.createProperty(
-                    ld4lNamespace, predicate.getLocalName());
-            
-            // Log for dev purposes, to make sure we shouldn't have handled 
-            // this type in a more specific way.
-            LOGGER.debug("Changing property " + predicate.getURI()
-                    + " in Bibframe namespace to " + ld4lProp.getURI()
-                    + " in LD4L namespace.");
-            outputModel.add(subject, ld4lProp, object);
-            return true;
-        }
-        
-        return false;
-    }
-
-    protected List<BfType> getBfTypesToConvert() {
-        List<BfType> typesToConvert = new ArrayList<BfType>();
-        typesToConvert.add(this.bfType);
-        return typesToConvert;
-    }
-    
-    protected List<BfType> getBfTypesToRetract() {
-        return new ArrayList<BfType>();
-    }
-    
-    protected List<BfProperty> getBfPropertiesToConvert() {
+    protected List<BfProperty> getBfResourcesToRemove() {
         return new ArrayList<BfProperty>();
     }
-    
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return new HashMap<BfProperty, Ld4lProperty>();
+      
+    private Map<Resource, Resource> buildTypeMap() {
+        
+        // Get default mapping from Bibframe to LD4l types
+        Map<Resource, Resource> typeMap = BfType.typeMap();
+        
+        // Type-specific mappings will override
+        typeMap.putAll(getTypeMap());
+        
+        // If a child converter needs to delete rather than convert a type,
+        // remove it from the map.
+        List<Resource> typesToRetract = getTypesToRetract();
+        typeMap.keySet().removeAll(typesToRetract);
+        
+        return typeMap;
     }
-     
-    protected List<BfProperty> getBfPropertiesToRetract() {
-        return new ArrayList<BfProperty>();
+    
+    protected Map<Resource, Resource> getTypeMap() {
+        return new HashMap<Resource, Resource>();
     }
 
+    protected List<Resource> getTypesToRetract() {
+        return new ArrayList<Resource>();
+    }
+    
+    private Map<Property, Property> buildPropertyMap() {
+        
+        // Get default mapping from Bibframe to LD4L properties
+        Map<Property, Property> propertyMap = BfProperty.propertyMap();
+        
+        // Type-specific mapping will override
+        propertyMap.putAll(getPropertyMap());
+        
+        List<Property> propertiesToRetract = getPropertiesToRetract();
+        propertyMap.keySet().removeAll(propertiesToRetract);
+        
+        return propertyMap;
+    }
+
+    protected Map<Property, Property> getPropertyMap() {
+        return new HashMap<Property, Property>();
+    }
+
+    protected List<Property> getPropertiesToRetract() {
+        return new ArrayList<Property>();
+    }
+    
     /**
      * If there is a statement in the model with a property in the list, remove
      * the resource that is the object of the property from the model.
      * @param props
      */
-    protected void removeResources(List<BfProperty> props) {
-        for (BfProperty prop : props) {
+    protected void removeResources(List<Property> props, Model model) {
+        for (Property prop : props) {
             Resource resource = 
-                    subject.getPropertyResourceValue(prop.property());
+                    subject.getPropertyResourceValue(prop);
             if (resource != null) {
-                removeResource(model, resource);
+                removeResource(resource, model);
             }
         }
     }
+    
+    protected void removeResources(List<Property> props) {
+        removeResources(props, inputModel);
+    }
+    
     /**
      * Convenience methods to remove a resource from a Jena model. In Jena, this
      * is accomplished by removing all statements in which the resource is the
      * subject or the object.
      */
-    protected void removeResource(Model model, Resource resource) {
+    protected void removeResource(Resource resource, Model model) {
         model.removeAll(resource, null, null);
         model.removeAll(null, null, resource);
     }
     
-    protected void removeResource(Resource resource) {
-        removeResource(model, resource);
-    }
     
     protected void applyRetractions() {
-        applyRetractions(model, retractions);
+        applyRetractions(inputModel, retractions);
     }
     
     /*
@@ -342,8 +280,6 @@ public abstract class BfResourceConverter {
      */
     protected void applyRetractions(Model model, Model retractions) {
         model.remove(retractions);
-        // Empty retractions model so if another conversion process applies,
-        // we won't re-retract the statements.
         retractions.removeAll();  
     }
 

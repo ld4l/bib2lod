@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Model;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -16,8 +17,11 @@ public class BfTopicConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicConverter.class);
+    
+    private static List<BfProperty> RESOURCES_TO_REMOVE = 
+            new ArrayList<BfProperty>();
 
-    private static List<BfProperty> FAST_PROPERTIES_TO_RETRACT = 
+    private static final List<BfProperty> FAST_PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
         FAST_PROPERTIES_TO_RETRACT.add(BfProperty.BF_HAS_AUTHORITY);
@@ -34,9 +38,9 @@ public class BfTopicConverter extends BfAuthorityConverter {
         super(bfType, localNamespace);
     }
     
-    protected void convertModel() {
+    protected Model convertModel() {
         convertFastTopic();
-        super.convertModel();
+        return super.convertModel();
     }
 
     /** 
@@ -44,16 +48,19 @@ public class BfTopicConverter extends BfAuthorityConverter {
      * so we remove it.
      * They are also not authorities, so we remove the MADS Authority from the
      * model. 
+     * Note that we don't add these properties statically to 
+     * RESOURCES_TO_REMOVE, because it is only in the case of FAST Topics that 
+     * we do so. For Topics with local URIs, we retain the related resources.
      */
     private void convertFastTopic() {
         String namespace = subject.getNameSpace();
         if (namespace.equals(Vocabulary.FAST.uri())) {
-            removeResources(FAST_PROPERTIES_TO_RETRACT);  
+            RESOURCES_TO_REMOVE.addAll(FAST_PROPERTIES_TO_RETRACT);
         }
     }
-
+    
     @Override
-    protected Map<BfProperty, Ld4lProperty> getBfPropertyMap() {
-        return PROPERTY_MAP;
+    protected List<BfProperty> getBfResourcesToRemove() {
+        return RESOURCES_TO_REMOVE;
     }
 }

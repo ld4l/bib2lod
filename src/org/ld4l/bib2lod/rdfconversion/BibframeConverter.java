@@ -20,7 +20,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfEventConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
@@ -44,6 +43,9 @@ public class BibframeConverter extends RdfProcessor {
       
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
+    // Commented out converters are called from another converter, so don't
+    // need to be included here. If they get called independently, need to be
+    // included in this mapping.
     static {
         CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
@@ -52,7 +54,7 @@ public class BibframeConverter extends RdfProcessor {
 //                BfCategoryConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
 //                BfClassificationConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfEventConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
@@ -68,7 +70,7 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfAuthorityConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
 //      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
         // Maybe can just use BfAuthorityConverter for Topics?
         CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
@@ -149,30 +151,28 @@ public class BibframeConverter extends RdfProcessor {
     private void convertFile(File file) {
         
         String filename = file.getName();
-        String outputFile = FilenameUtils.getBaseName(file.toString());
-       
-        BfType typeForFile = BfType.typeForFilename(filename);
         
-        // Includes newAssertions.nt, other.nt
-        if (typeForFile == null) {
-            LOGGER.debug("No type for file " + filename);
+        if (filename.equals(ResourceDeduper.getNewAssertionsFilename())) {
+            LOGGER.debug("Copying new assertions file.");
             copyFile(file);
             return;
         }
-
-        Model inputModel = readModelFromFile(file); 
         
-        LOGGER.debug("Got model of size : " + inputModel.size() 
-                + " for type " + typeForFile);
-        
-        BfResourceConverter converter = getConverter(typeForFile);
-        
-        // If no converter for this type, write the input model as output and
-        // return
-        if (converter == null) {
-            writeModelToFile(inputModel, outputFile);
+        if (filename.equals(ResourceDeduper.getRemainderFilename())) {
+            LOGGER.debug("Dropping remainder file.");
             return;
         }
+       
+        BfType typeForFile = BfType.typeForFilename(filename);
+        
+        // Should not happen
+        if (typeForFile == null) {
+            return;
+        }
+
+        BfResourceConverter converter = getConverter(typeForFile);
+              
+        Model inputModel = readModelFromFile(file); 
 
         Instant fileStart = Instant.now();
         LOGGER.info("Start converting Bibframe RDF in file " + filename + ".");
@@ -191,6 +191,13 @@ public class BibframeConverter extends RdfProcessor {
             
             LOGGER.debug("Found subject " + inputSubject.getURI());
 
+            // Statements about other, "secondary" subjects of other types that 
+            // have been  included in this file have distinct converters that 
+            // are called from the primary subject's converter. They are 
+            // converted with the primary subject because some of these  
+            // assertions are needed for or incorporated into conversion of the 
+            // primary subject. Examples: Work Titles, Instance Titles and
+            // Identifiers.
             if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
                 
                 subjectCount++;
@@ -198,6 +205,8 @@ public class BibframeConverter extends RdfProcessor {
                 LOGGER.debug("Converting " + typeForFile + " subject " 
                         + inputSubject.getURI());
                 
+                // Get the statements about this subject and related objects
+                // that must be converted together.
                 Resource subject = getSubjectModelToConvert(inputSubject);
                 
                 outputModel.add(converter.convert(subject));
@@ -225,6 +234,8 @@ public class BibframeConverter extends RdfProcessor {
                     + TimerUtils.getDuration(subjectStart));      
         }
 
+        
+        String outputFile = FilenameUtils.getBaseName(file.toString());
         writeModelToFile(outputModel, outputFile);   
         
         LOGGER.info("Done converting Bibframe RDF in file " + filename + ". "

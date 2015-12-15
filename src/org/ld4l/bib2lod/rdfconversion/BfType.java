@@ -163,7 +163,7 @@ public enum BfType {
             new HashMap<Resource, Resource>();
     
     static {
-        for (BfType bfType : BfType.values()) {
+        for (BfType bfType : values()) {
             LOOKUP_BY_FILENAME.put(bfType.filename, bfType);
             if (bfType.ld4lType != null) {
                 TYPE_MAP.put(bfType.ontClass, bfType.ld4lType.ontClass());
@@ -210,22 +210,33 @@ public enum BfType {
         return TYPE_MAP;
     }
     
-    public static Map<Resource, Resource> typeMap(List<BfType> bfTypes) {
+    public static Map<Resource, Resource> typeMap(Map<BfType, Ld4lType> map) {
 
         Map<Resource, Resource> typeMap = new HashMap<Resource, Resource>();
         
-        if (bfTypes != null) {
-            for (BfType type : bfTypes) {
-                if (type.ld4lType != null) {
-                    typeMap.put(type.ontClass, type.ld4lType.ontClass());
-                }
-            }
+        for (Map.Entry<BfType, Ld4lType> entry : map.entrySet()) {
+            typeMap.put(
+                    entry.getKey().ontClass, entry.getValue().ontClass());
         }
-        
+                
         return typeMap;
     }
     
-    public static List<Resource> ontClasses(List<BfType> bfTypes) {
+    public static Map<Resource, Resource> typeMap(List<BfType> bfTypes) {
+        
+        Map<Resource, Resource> typeMap = new HashMap<Resource, Resource>();
+        
+        for (BfType bfType : bfTypes) {
+            Ld4lType ld4lType = bfType.ld4lType;
+            if (ld4lType != null) {
+                typeMap.put(bfType.ontClass, ld4lType.ontClass());                    
+            }
+        }
+                
+        return typeMap;        
+    }
+    
+    public static List<Resource> types(List<BfType> bfTypes) {
         
         List<Resource> resources = new ArrayList<Resource>();
         for (BfType type : bfTypes) {
