@@ -168,19 +168,25 @@ public class BfResourceConverter {
                     
                 if (typeMap.containsKey(type)) {
                     outputModel.add(subject, RDF.type, typeMap.get(type));
-                
-                } else if (type.getNameSpace().equals(
-                        OntNamespace.MADSRDF.uri())) {
-                    outputModel.add(stmt);
+
+                // Handle mads types in typeMap, so individual converters are 
+                // able to remove them.
+                // } else if (type.getNameSpace().equals(
+                //         OntNamespace.MADSRDF.uri())) {
+                //     outputModel.add(stmt);
+                    
                 }
   
             } else if (propertyMap.containsKey(predicate)) {
                 
                 outputModel.add(subject, propertyMap.get(predicate), object);
-            
-            } else if (predicate.getNameSpace().equals(
-                    OntNamespace.MADSRDF.uri())) {
-                outputModel.add(stmt);
+
+            // Handle mads types in typeMap, so individual converters are able 
+            // to remove them.
+            // } else if (predicate.getNameSpace().equals(
+            //           OntNamespace.MADSRDF.uri())) {
+            //       outputModel.add(stmt);
+                
             }
  
             // We could add this if there are any child converters that do 
@@ -211,7 +217,8 @@ public class BfResourceConverter {
         typeMap.putAll(getTypeMap());
         
         // If a child converter needs to delete rather than convert a type,
-        // remove it from the map.
+        // remove it from the map. One case is where FAST topics remove 
+        // the relationship to a madsrdf:Authority.
         List<Resource> typesToRetract = getTypesToRetract();
         typeMap.keySet().removeAll(typesToRetract);
         

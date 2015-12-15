@@ -77,7 +77,8 @@ public enum BfType {
     BF_TOPIC("Topic", Ld4lType.TOPIC),  
     BF_WORK("Work", Ld4lType.WORK),
     
-    MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
+    MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority", 
+            Ld4lType.MADSRDF_AUTHORITY),
     MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
     MADSRDF_CONFERENCE_NAME(OntNamespace.MADSRDF, "ConferenceName");
     

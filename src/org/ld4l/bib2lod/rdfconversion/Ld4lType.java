@@ -45,6 +45,7 @@ public enum Ld4lType {
     LANGUAGE(OntNamespace.LINGVO, "Lingvo"),
     LOCAL_ILS_IDENTIFIER("LocalIlsIdentifier"),
     LCC_SHELF_MARK("LccShelfMark"),
+    MADSRDF_AUTHORITY(OntNamespace.MADSRDF, "Authority"),
     MAIN_TITLE_ELEMENT(OntNamespace.MADSRDF, "MainTitleElement"),
     MANUFACTURER_PROVISION("ManufacturerProvision", "Manufacturer"),
     MANUSCRIPT("Manuscript"),

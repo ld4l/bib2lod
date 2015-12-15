@@ -151,15 +151,21 @@ public class BibframeConverter extends RdfProcessor {
     private void convertFile(File file) {
         
         String filename = file.getName();
+        String basename = FilenameUtils.getBaseName(filename);
         
-        if (filename.equals(ResourceDeduper.getNewAssertionsFilename())) {
+        LOGGER.debug("FILENAME: " + filename);
+        
+        if (basename.equals(ResourceDeduper.getNewAssertionsFilename())) {
             LOGGER.debug("Copying new assertions file.");
             copyFile(file);
             return;
         }
         
-        if (filename.equals(ResourceDeduper.getRemainderFilename())) {
-            LOGGER.debug("Dropping remainder file.");
+        if (basename.equals(ResourceDeduper.getRemainderFilename())) {
+            // Temporarily keep these statements for analysis. Some at least 
+            // may need to be included in other files for conversion.
+            LOGGER.debug("Copying remainder file.");
+            copyFile(file);
             return;
         }
        

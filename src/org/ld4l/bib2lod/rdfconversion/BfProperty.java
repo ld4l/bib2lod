@@ -92,9 +92,11 @@ public enum BfProperty {
     BF_TITLE_VALUE("titleValue", Ld4lProperty.LABEL),
     BF_WORK_TITLE("workTitle", Ld4lProperty.HAS_TITLE),
        
-    MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
-    MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
-            OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+    MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel", 
+            Ld4lProperty.MADSRDF_AUTHORITATIVE_LABEL),
+    MADSRDF_IS_MEMBER_OF_MADS_SCHEME(OntNamespace.MADSRDF, 
+            "isMemberOfMADSScheme", 
+            Ld4lProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME),
 
     // Add others as appropriate
     RELATORS_AUTHOR(
