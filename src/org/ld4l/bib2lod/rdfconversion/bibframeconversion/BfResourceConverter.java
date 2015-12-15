@@ -17,6 +17,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 
 public class BfResourceConverter {
 
@@ -166,12 +167,20 @@ public class BfResourceConverter {
                 Resource type = object.asResource();
                     
                 if (typeMap.containsKey(type)) {
-                    outputModel.add(subject, predicate, typeMap.get(type));
-                } 
+                    outputModel.add(subject, RDF.type, typeMap.get(type));
+                
+                } else if (type.getNameSpace().equals(
+                        OntNamespace.MADSRDF.uri())) {
+                    outputModel.add(stmt);
+                }
   
             } else if (propertyMap.containsKey(predicate)) {
                 
                 outputModel.add(subject, propertyMap.get(predicate), object);
+            
+            } else if (predicate.getNameSpace().equals(
+                    OntNamespace.MADSRDF.uri())) {
+                outputModel.add(stmt);
             }
  
             // We could add this if there are any child converters that do 
