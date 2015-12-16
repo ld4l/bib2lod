@@ -84,6 +84,10 @@ public class ResourceDeduper extends RdfProcessor {
             Class<?> deduperClass = entry.getValue();
 
             try {
+                // Consider passing the localNamespace to constructor or
+                // process() method, in case we want to query for localNamespace
+                // when getting resource to dedupe. However, the current queries
+                // should get only resources in the localNamespace.
                 BfResourceDeduper deduper = (BfResourceDeduper) deduperClass
                         .getConstructor(BfType.class).newInstance(type);
                 dedupers.put(basename,  deduper);      

@@ -10,7 +10,7 @@ public final class TimerUtils {
     
     // Time processing of this many files or other items (URIs, resources, 
     // etc.). Individual classes may choose to define their own limits.
-    public static final int NUM_FILES_TO_TIME = 200;
+    public static final int NUM_FILES_TO_TIME = 10000;
     public static final int NUM_ITEMS_TO_TIME = 10000;
 
     public static String formatSeconds(Instant start, Instant end) {
