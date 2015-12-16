@@ -1,8 +1,5 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
-import java.util.List;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
