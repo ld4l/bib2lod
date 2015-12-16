@@ -25,7 +25,7 @@ the application.
 java -jar /home/rjy7/projects/bib2lod/jar/Bib2Lod.jar -a convert_bibframe -i bibframe -o ld4l -n http://draft.ld4l.org/cornell/
 
 To control Java heap memory size (-Xms = initial allocation, -Xmx max allocation):
-export JAVA_OPTS="-Xms4g -Xms8g"
+export JAVA_OPTS="-Xms4g -Xmx12g"
 java ${JAVA_OPTS} -jar /home/rjy7/projects/bib2lod/jar/Bib2Lod.jar -a convert_bibframe -i bibframe -o ld4l -n http://draft.ld4l.org/cornell/
 
 java -jar Bib2Lod.jar -a convert_bibframe -i testinput -o output/harvard -n http://draft.ld4l.org/harvard/
