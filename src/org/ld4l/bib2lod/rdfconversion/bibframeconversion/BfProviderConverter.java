@@ -1,14 +1,13 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
@@ -75,6 +74,13 @@ public class BfProviderConverter extends BfResourceConverter {
          * provider and object properties, and the data is the same, it should 
          * be discarded.
         */
+
+        // Remove type statement that gets converted to Provision superclass
+        // in super.convertModel()
+// Don't need - doing now by removing mapping in BfType
+//        StmtIterator stmts = inputModel.listStatements(
+//                subject, RDF.type, BfType.BF_PROVIDER.ontClass());
+//        retractions.add(stmts);
         
         outputModel.add(subject, RDF.type, newType.ontClass());
         
@@ -89,7 +95,5 @@ public class BfProviderConverter extends BfResourceConverter {
         retractions.add(linkingStatement);
 
     }
-    
-    
 
 }

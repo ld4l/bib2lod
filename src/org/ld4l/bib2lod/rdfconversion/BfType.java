@@ -57,8 +57,12 @@ public enum BfType {
     BF_NOTATED_MOVEMENT("NotatedMovement", Ld4lType.NOTATED_MOVEMENT),
     BF_NOTATED_MUSIC("NotatedMusic", Ld4lType.NOTATED_MUSIC),
     BF_ORGANIZATION("Organization", Ld4lType.ORGANIZATION),                        
-    BF_PERSON("Person", Ld4lType.PERSON),
-    BF_PROVIDER("Provider", Ld4lType.PROVISION),
+    BF_PERSON("Person", Ld4lType.PERSON),  
+    // Don't add Provider mapping here; handled in BfProviderConverter. If the
+    // mapping is also included here, we get a type statement to the Provision
+    // superclass in addition to the Provision subclass.
+    // BF_PROVIDER("Provider", Ld4lType.PROVISION),
+    BF_PROVIDER("Provider"),
     BF_PLACE("Place", Ld4lType.PLACE),
     BF_PRINT("Print", Ld4lType.PRINT),
     BF_RELATOR("Relator"),
