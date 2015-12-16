@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Set;
 
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -103,22 +104,29 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         Resource title = BibframeConverter.getSubjectModelToConvert(
                 statement.getResource());
 
-        outputModel.add(converter.convertSubject(title));
+        Model titleModel = converter.convertSubject(title);
+        outputModel.add(titleModel);
         
-        Statement labelStmt = title.getProperty(RDFS.label);
-        if (labelStmt != null) {
-            Literal label = labelStmt.getLiteral();
+        // title.getModel() is the original model. Need to get the title 
+        // resource from the new model.
+        Resource newTitle = titleModel.getResource(title.getURI());
+        if (newTitle != null) {
+            Statement labelStmt = newTitle.getProperty(RDFS.label); 
+            if (labelStmt != null) {
 
-            if (label != null) {
-                boolean removed = 
-                        titleLiterals.removeIf(i -> label.sameValueAs(i));
-                LOGGER.debug(removed 
-                        ? "Found a match for bf:titleStatement '" 
-                        + label.toString() + "': removing"
-                        : "No bf:titleStatement matching title '" 
-                        + label.toString() + "'");
+                Literal label = labelStmt.getLiteral(); 
+    
+                if (label != null) {
+                    boolean removed = 
+                            titleLiterals.removeIf(i -> label.sameValueAs(i));
+                    LOGGER.debug(removed 
+                            ? "Found a match for bf:titleStatement '" 
+                            + label.toString() + "': removing"
+                            : "No bf:titleStatement matching title '" 
+                            + label.toString() + "'");
+                }
             }
-        }
+        }        
     }
     
     private void createTitle(Literal label) {
