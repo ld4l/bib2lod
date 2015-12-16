@@ -52,7 +52,8 @@ public enum BfType {
     BF_MULTIMEDIA("Multimedia", Ld4lType.MULTIMEDIA),
     // ld4l:MultipartMonograph has domain Work rather than Instance, so we 
     // don't want a direct conversion.
-    // BF_MULTIPART_MONOGRAPH("MultipartMonograph", Ld4lType.MULTIPART_MONOGRAPH),
+    // BF_MULTIPART_MONOGRAPH(
+    //         "MultipartMonograph", Ld4lType.MULTIPART_MONOGRAPH),
     BF_MULTIPART_MONOGRAPH("MultipartMonograph"),
     BF_NOTATED_MOVEMENT("NotatedMovement", Ld4lType.NOTATED_MOVEMENT),
     BF_NOTATED_MUSIC("NotatedMusic", Ld4lType.NOTATED_MUSIC),
@@ -76,7 +77,8 @@ public enum BfType {
     BF_TACTILE("Tactile", Ld4lType.TACTILE),
     BF_TEMPORAL("Temporal", Ld4lType.TIME),
     BF_TEXT("Text", Ld4lType.TEXT), 
-    BF_THREE_DIMENSIONAL_OBJECT("ThreeDimensionalObject", Ld4lType.THREE_DIMENSIONAL_OBJECT),
+    BF_THREE_DIMENSIONAL_OBJECT(
+            "ThreeDimensionalObject", Ld4lType.THREE_DIMENSIONAL_OBJECT),
     BF_TITLE("Title", Ld4lType.TITLE),
     BF_TOPIC("Topic", Ld4lType.TOPIC),  
     BF_WORK("Work", Ld4lType.WORK),

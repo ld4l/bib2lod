@@ -33,18 +33,20 @@
         </Console>       
     </Appenders>
     <Loggers>
-        <Root level="error">
-            <!-- <AppenderRef ref="RollingFileAbbreviated" /> -->
-            <AppenderRef ref="Console" />          
+        <Root level="info">
+            <AppenderRef ref="RollingFileAbbreviated" /> 
+            <AppenderRef ref="ConsoleAbbreviated"/>          
         </Root>
         <!--
         <Logger name="org.ld4l.bib2lod.Bib2Lod" additivity="false" level="info">
             <AppenderRef ref="Console"/>
         </Logger>
         -->
-        <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfBibResourceConverter" additivity="false" level="debug">
+        <!--
+        <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfContributorConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
         </Logger>
+        -->
         <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAnnotationConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
@@ -60,11 +62,11 @@
             <AppenderRef ref="Console"/>
         </Logger> 
         -->
-        
+        <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.BibframeConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
         </Logger>
-
+        -->
         <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
