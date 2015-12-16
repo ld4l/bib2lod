@@ -224,6 +224,7 @@ public class BibframeConverter extends RdfProcessor {
                             + " in file " + filename + ". " 
                             + TimerUtils.getDuration(subjectStart));
                     subjectCount = 0;
+                    subjectStart = Instant.now();
                 }   
                 
             } else {
