@@ -138,7 +138,7 @@ public class BfResourceConverter {
         // Remove resources designated for removal so that statements containing
         // these resources are not processed in the iteration through the 
         // model statements.
-        removeResources(BfProperty.properties(getBfResourcesToRemove()));
+        removeResources(getResourcesToRemove());
 
         // Iterate through the statements in the input model.
         StmtIterator stmts = inputModel.listStatements();
@@ -204,8 +204,8 @@ public class BfResourceConverter {
      * easiest to identify the objects of those properties and remove all the
      * statements it occurs in either as subject or object. 
      */
-    protected List<BfProperty> getBfResourcesToRemove() {
-        return new ArrayList<BfProperty>();
+    protected List<Property> getResourcesToRemove() {
+        return new ArrayList<Property>();
     }
       
     private Map<Resource, Resource> buildTypeMap() {

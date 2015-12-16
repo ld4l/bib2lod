@@ -6,6 +6,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.Property;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -37,30 +38,26 @@ public class BfTopicConverter extends BfAuthorityConverter {
     public BfTopicConverter(BfType bfType, String localNamespace) {
         super(bfType, localNamespace);
     }
-    
-    protected Model convertModel() {
-        convertFastTopic();
-        return super.convertModel();
-    }
 
-    /** 
+
+    /* 
      * FAST topics don't need a system number, since the FAST URI replaces it,
      * so we remove it.
      * They are also not authorities, so we remove the MADS Authority from the
      * model. 
-     * Note that we don't add these properties statically to 
-     * RESOURCES_TO_REMOVE, because it is only in the case of FAST Topics that 
-     * we do so. For Topics with local URIs, we retain the related resources.
-     */
-    private void convertFastTopic() {
+     * Note that Topics with local URIs retain these related resources.
+     */    
+    @Override
+    protected List<Property> getResourcesToRemove() {
         String namespace = subject.getNameSpace();
         if (namespace.equals(Vocabulary.FAST.uri())) {
-            RESOURCES_TO_REMOVE.addAll(FAST_PROPERTIES_TO_RETRACT);
+            return BfProperty.properties(FAST_PROPERTIES_TO_RETRACT);
         }
+        return new ArrayList<Property>();        
     }
     
     @Override
-    protected List<BfProperty> getBfResourcesToRemove() {
-        return RESOURCES_TO_REMOVE;
+    protected Map<Property, Property> getPropertyMap() {
+        return BfProperty.propertyMap(PROPERTY_MAP);
     }
 }
