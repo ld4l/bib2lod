@@ -153,7 +153,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                     + TimerUtils.getDuration(resourceStart));       
         }
         
-        if (LOGGER.isDebugEnabled()) {
+        if (LOGGER.isTraceEnabled()) {
             LOGGER.trace("uniqueUris map:");
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
                 LOGGER.trace(entry.getKey() + " => " + entry.getValue());

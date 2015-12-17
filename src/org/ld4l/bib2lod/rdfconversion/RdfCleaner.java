@@ -120,7 +120,7 @@ public class RdfCleaner extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   
         
-        LOGGER.info("End RDF cleanup. "
+        LOGGER.info("End RDF cleanup in all files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;

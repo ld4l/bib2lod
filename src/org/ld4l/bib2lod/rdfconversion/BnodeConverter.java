@@ -69,7 +69,7 @@ public class BnodeConverter extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
         
-        LOGGER.info("End blank node conversion. "
+        LOGGER.info("End blank node conversion in all input files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;

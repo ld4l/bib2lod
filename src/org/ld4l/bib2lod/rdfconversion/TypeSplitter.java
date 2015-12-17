@@ -100,7 +100,7 @@ public class TypeSplitter extends RdfProcessor {
                     + TimerUtils.getDuration(fileStart)); 
         }   
         
-        LOGGER.info("End splitting files by resource type. " 
+        LOGGER.info("End splitting all files by resource type. " 
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;                                                                                                                               

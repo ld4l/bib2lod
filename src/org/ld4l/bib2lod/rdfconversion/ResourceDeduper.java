@@ -121,7 +121,7 @@ public class ResourceDeduper extends RdfProcessor {
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
 
-        LOGGER.info("End resource deduping. "
+        LOGGER.info("End resource deduping in all files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;
@@ -196,7 +196,7 @@ public class ResourceDeduper extends RdfProcessor {
                     
         } 
         
-        LOGGER.info("Done finding unique URIs. " 
+        LOGGER.info("Done finding unique URIs in all files. " 
                 + TimerUtils.getDuration(processStart));
     }
     
@@ -307,7 +307,7 @@ public class ResourceDeduper extends RdfProcessor {
 
         }
         
-        LOGGER.info("Done deduping URIs. " 
+        LOGGER.info("Done deduping URIs in all files. " 
                 + TimerUtils.getDuration(processStart));   
     }
    
