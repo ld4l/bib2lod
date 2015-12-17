@@ -123,20 +123,24 @@ public class BibframeConverter extends RdfProcessor {
         
         String outputDir = getOutputDir();  
 
-        convertFiles(inputDir, outputDir);
+        int totalSubjectCount = convertFiles(inputDir, outputDir);
 
-        LOGGER.info("End Bibframe RDF conversion. "                
+        LOGGER.info("End Bibframe RDF conversion. Converted " 
+                + totalSubjectCount + " "     
+                + Bib2LodStringUtils.simplePlural("resource", totalSubjectCount)
+                + " in all input files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;        
     }
     
-    private void convertFiles(String inputDir, String outputDir) {
+    private int convertFiles(String inputDir, String outputDir) {
         
         File[] inputFiles = new File(inputDir).listFiles();
+        int totalSubjectCount = 0;
         
         for ( File file : inputFiles ) {
-            convertFile(file);
+            totalSubjectCount += convertFile(file);
         }  
 
         /*
@@ -146,36 +150,40 @@ public class BibframeConverter extends RdfProcessor {
          * we create linking ld4l entities to bf entities, where the latter
          * shouldn't undergo URI replacement.
          */
+        
+        return totalSubjectCount;
     }
 
-    private void convertFile(File file) {
+    private int convertFile(File file) {
         
         String filename = file.getName();
         String basename = FilenameUtils.getBaseName(filename);
         
-        LOGGER.debug("FILENAME: " + filename);
+        // LOGGER.debug("FILENAME: " + filename);
         
         if (basename.equals(ResourceDeduper.getNewAssertionsFilename())) {
-            LOGGER.debug("Copying new assertions file.");
+            // LOGGER.debug("Copying new assertions file.");
             copyFile(file);
-            return;
+            return 0;
         }
         
         if (basename.equals(ResourceDeduper.getRemainderFilename())) {
             // Temporarily keep these statements for analysis. Some at least 
             // may need to be included in other files for conversion.
-            LOGGER.debug("Copying remainder file.");
+            // LOGGER.debug("Copying remainder file.");
             copyFile(file);
-            return;
+            return 0;
         }
        
         BfType typeForFile = BfType.typeForFilename(filename);
         
         // Should not happen
         if (typeForFile == null) {
-            return;
+            return 0;
         }
 
+        String outputFile = FilenameUtils.getBaseName(file.toString());
+        
         BfResourceConverter converter = getConverter(typeForFile);
               
         Model inputModel = readModelFromFile(file); 
@@ -190,12 +198,14 @@ public class BibframeConverter extends RdfProcessor {
         
         Instant subjectStart = Instant.now();
         int subjectCount = 0;
+        int subjectCountForFile = 0;
+        int subjectCountToWrite = 0;
         
         while (subjects.hasNext()) {
 
             Resource inputSubject = subjects.nextResource();
             
-            LOGGER.debug("Found subject " + inputSubject.getURI());
+            // LOGGER.debug("Found subject " + inputSubject.getURI());
 
             // Statements about other, "secondary" subjects of other types that 
             // have been  included in this file have distinct converters that 
@@ -207,15 +217,26 @@ public class BibframeConverter extends RdfProcessor {
             if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
                 
                 subjectCount++;
+                subjectCountForFile++;
+                subjectCountToWrite++;
                 
-                LOGGER.debug("Converting " + typeForFile + " subject " 
-                        + inputSubject.getURI());
+                // LOGGER.debug("Converting " + typeForFile + " subject " 
+                //         + inputSubject.getURI());
                 
                 // Get the statements about this subject and related objects
                 // that must be converted together.
                 Resource subject = getSubjectModelToConvert(inputSubject);
                 
                 outputModel.add(converter.convert(subject));
+                if (subjectCountToWrite >= 1000) {
+                    LOGGER.debug("Appending RDF for " + subjectCountToWrite                              
+                            + " " + Bib2LodStringUtils.simplePlural(
+                                    "resource", subjectCountToWrite)
+                            + " to file.");
+                    appendModelToFile(outputModel, outputFile);
+                    outputModel.removeAll();
+                    subjectCountToWrite = 0;
+                }
                 
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Converted Bibframe RDF for " + subjectCount 
@@ -229,8 +250,8 @@ public class BibframeConverter extends RdfProcessor {
                 
             } else {
                 
-                LOGGER.debug("Skipping subject " + inputSubject.getURI()
-                        + " since it's not of type " + typeForFile);                        
+                // LOGGER.debug("Skipping subject " + inputSubject.getURI()
+                //        + " since it's not of type " + typeForFile);                        
             }
         }
         
@@ -238,15 +259,26 @@ public class BibframeConverter extends RdfProcessor {
             LOGGER.info("Converted Bibframe RDF for " + subjectCount + " " 
                     + Bib2LodStringUtils.simplePlural("resource", subjectCount)
                     + " in file " + filename + ". " 
-                    + TimerUtils.getDuration(subjectStart));      
+                    + TimerUtils.getDuration(subjectStart));  
         }
-
         
-        String outputFile = FilenameUtils.getBaseName(file.toString());
-        writeModelToFile(outputModel, outputFile);   
+        // writeModelToFile(outputModel, outputFile);   
+        if (subjectCountToWrite > 0) {
+            LOGGER.info("Appending RDF for " + subjectCountToWrite + " "                              
+                    + Bib2LodStringUtils.simplePlural(
+                            "resource", subjectCountToWrite)
+                    + " to file.");
+            appendModelToFile(outputModel, outputFile);  
+        }
         
-        LOGGER.info("Done converting Bibframe RDF in file " + filename + ". "
-                + TimerUtils.getDuration(fileStart));
+        LOGGER.info("Done converting Bibframe RDF in file " + filename 
+                + ". Processed " + subjectCountForFile + " " 
+                + Bib2LodStringUtils.simplePlural(
+                        "resource", subjectCountForFile)
+                + " of type " + typeForFile.uri()
+                + ". " + TimerUtils.getDuration(fileStart));
+        
+        return subjectCountForFile;
     }
 
     
@@ -261,7 +293,7 @@ public class BibframeConverter extends RdfProcessor {
      */
     public static Resource getSubjectModelToConvert(Resource resource) {
             
-        LOGGER.debug("Constructing subject model for " + resource.getURI());
+        // LOGGER.debug("Constructing subject model for " + resource.getURI());
         Model inputModel = resource.getModel();
         
         // Create the new model of statements related to this subject
@@ -370,16 +402,16 @@ public class BibframeConverter extends RdfProcessor {
                         (BfResourceConverter) converterClass
                         .getConstructor(BfType.class, String.class)
                         .newInstance(bfType, localNamespace);   
-                LOGGER.debug("Got converter for type " + bfType);
+                // LOGGER.debug("Got converter for type " + bfType);
                 return converter;
             } catch (Exception e) {
-                LOGGER.debug("Can't instantiate class " 
+                LOGGER.warn("Can't instantiate class " 
                         + converterClass.getName());
                 e.printStackTrace();
             } 
         }
 
-        LOGGER.debug("No converter found for type " + bfType);
+        // LOGGER.debug("No converter found for type " + bfType);
         return null;
     }
 
