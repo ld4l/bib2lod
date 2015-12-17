@@ -1,12 +1,17 @@
 package org.ld4l.bib2lod.rdfconversion;
 
+import java.io.BufferedWriter;
 import java.io.File;
+import java.io.FileWriter;
+import java.io.IOException;
+import java.io.PrintWriter;
 import java.time.Instant;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
@@ -199,7 +204,7 @@ public class BibframeConverter extends RdfProcessor {
         Instant subjectStart = Instant.now();
         int subjectCount = 0;
         int subjectCountForFile = 0;
-        int subjectCountToWrite = 0;
+        // int subjectCountToWrite = 0;
         
         while (subjects.hasNext()) {
 
@@ -218,7 +223,7 @@ public class BibframeConverter extends RdfProcessor {
                 
                 subjectCount++;
                 subjectCountForFile++;
-                subjectCountToWrite++;
+                // subjectCountToWrite++;
                 
                 // LOGGER.debug("Converting " + typeForFile + " subject " 
                 //         + inputSubject.getURI());
@@ -226,17 +231,21 @@ public class BibframeConverter extends RdfProcessor {
                 // Get the statements about this subject and related objects
                 // that must be converted together.
                 Resource subject = getSubjectModelToConvert(inputSubject);
+
+
+                // appendModelToFile(converter.convert(subject), outputFile);
                 
                 outputModel.add(converter.convert(subject));
-                if (subjectCountToWrite >= 1000) {
-                    LOGGER.debug("Appending RDF for " + subjectCountToWrite                              
-                            + " " + Bib2LodStringUtils.simplePlural(
-                                    "resource", subjectCountToWrite)
-                            + " to file.");
-                    appendModelToFile(outputModel, outputFile);
-                    outputModel.removeAll();
-                    subjectCountToWrite = 0;
-                }
+
+//                if (subjectCountToWrite >= 1000) {
+//                    LOGGER.debug("Appending RDF for " + subjectCountToWrite                              
+//                            + " " + Bib2LodStringUtils.simplePlural(
+//                                    "resource", subjectCountToWrite)
+//                            + " to file.");
+//                    appendModelToFile(outputModel, outputFile);
+//                    outputModel.removeAll();
+//                    subjectCountToWrite = 0;
+//                }
                 
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Converted Bibframe RDF for " + subjectCount 
@@ -261,15 +270,16 @@ public class BibframeConverter extends RdfProcessor {
                     + " in file " + filename + ". " 
                     + TimerUtils.getDuration(subjectStart));  
         }
-        
-        // writeModelToFile(outputModel, outputFile);   
-        if (subjectCountToWrite > 0) {
-            LOGGER.info("Appending RDF for " + subjectCountToWrite + " "                              
-                    + Bib2LodStringUtils.simplePlural(
-                            "resource", subjectCountToWrite)
-                    + " to file.");
-            appendModelToFile(outputModel, outputFile);  
-        }
+       
+        writeModelToFile(outputModel, outputFile);   
+         
+//        if (subjectCountToWrite > 0) {
+//            LOGGER.info("Appending RDF for " + subjectCountToWrite + " "                              
+//                    + Bib2LodStringUtils.simplePlural(
+//                            "resource", subjectCountToWrite)
+//                    + " to file.");
+//            appendModelToFile(outputModel, outputFile);  
+//        }
         
         LOGGER.info("Done converting Bibframe RDF in file " + filename 
                 + ". Processed " + subjectCountForFile + " " 
