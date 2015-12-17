@@ -96,7 +96,7 @@ public class TypeSplitter extends RdfProcessor {
         if (fileCount > 0) {
             LOGGER.info("Split " + fileCount + " "
                     + Bib2LodStringUtils.simplePlural("file", fileCount)
-                    + "by resource type. " 
+                    + " by resource type. " 
                     + TimerUtils.getDuration(fileStart)); 
         }   
         
