@@ -3,9 +3,15 @@
 <!-- Status = level of internal log4j events to log to console. Set status to "trace" to troubleshoot log4j2. -->
 <Configuration status="warn">
     <Appenders>
+        <RollingFile name="RollingFileDev" fileName="log/bib2lod.log" 
+            filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
+            <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} [%t] %-5level %logger{36} line %L - %msg%n"/>
+            <Policies>
+                <OnStartupTriggeringPolicy />
+            </Policies>
+        </RollingFile>
         <RollingFile name="RollingFile" fileName="log/bib2lod.log"
             filePattern="log/$${date:yyyy-MM-dd}/bib2lod-%d{yyyy-MM-dd-HHmmss}.log">
-            <!-- <PatternLayout pattern="%d{HH:mm:ss.SSS} [%t] %-5level %logger{36} - %msg%n"/> -->
             <PatternLayout pattern="%d{yyyy-MM-dd HH:mm:ss.SSS} - %msg%n"/>
             <Policies>
                 <OnStartupTriggeringPolicy />
