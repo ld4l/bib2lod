@@ -28,7 +28,7 @@ public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
     
-    private static final Pattern URIS_TO_REPLACE = 
+    private static final Pattern URIS = 
             /*
              * Matches:
              * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
@@ -39,24 +39,27 @@ public class RdfCleaner extends RdfProcessor {
              * Does not match:
              * "http://id.loc.gov/vocabulary/subjectSchemes/fast" . 
              * 
-             * Does not break 
-             * <http://id.loc.gov/authorities/classification/TN"69> into
-             * http://id.loc.gov/authorities/classification/TN"
+             * Does not break: 
+             * <http://id.loc.gov/authorities/classification/TN"69> at the "
              * 
-             * The disjunction in the regex is required to handle all these 
-             * cases: If we remove the lookaheads/lookbehinds, then we must
-             * exclude " internal to the uri, so that we don't extend past
-             * the end of a quoted uri. But then we break up 
-             * <http://id.loc.gov/authorities/classification/TN"69> after the
-             * double quote. So here we are saying we have either a bracketed
-             * uri which cannot contain a bracket in the middle (but could 
-             * contain a quote), or a non-bracketed uri (quoted or not) which
-             * cannot contain internal brackets or quotes. A quoted uri in 
-             * rdfxml escapes an actual quote as &#34;
+             * Does not match:
+             * http://www.organic-europe.net"
+             * The quote is the close of a quoted string literal value
+             * 
+             * Does not match: 
+             * http://www.organic-europe.net / Stefanie Graf and Helga Willer
+             * Part of a string literal value
              */
-            Pattern.compile(
-                    "(?<=<)http://[^>]+(?=>)|(?<!<)http://[^\"><]+(?!>)");
-    
+            
+            Pattern.compile(                   
+                    // Bracketed URI (nt, ttl, json): no internal closing 
+                    // brackets
+                    "(?<=<)http://[^>]+(?=>)" 
+                    // Quoted URI (rdfxml): no internal quotes 
+                    // Require quotes on both ends, otherwise the quote is the
+                    // opening or closing of a quoted string.
+                    + "|(?<=\")http://[^\"]+(?=\")"
+                    );
     
 //    private static final Pattern DEC_CODE_PATTERN = 
 //            Pattern.compile("&#(\\d+);");
@@ -312,7 +315,7 @@ public class RdfCleaner extends RdfProcessor {
     
     private String encodeUris(String line) {    
         StringBuilder sb = new StringBuilder(line);       
-        Matcher m = URIS_TO_REPLACE.matcher(sb);
+        Matcher m = URIS.matcher(sb);
         int matchPointer = 0;
         while (m.find(matchPointer)) { 
             try {
