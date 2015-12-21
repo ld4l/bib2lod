@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod;
 
+import java.io.File;
 import java.time.Instant;
 import java.util.Set;
 
@@ -15,6 +16,7 @@ import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 
@@ -63,7 +65,12 @@ public class ProcessController {
     public String processAll(Set<Action> selectedActions) {
 
         Instant start = Instant.now();
-        LOGGER.info("Start converting input files in " + this.inputDir + ".");
+        int fileCount = new File(this.inputDir).listFiles().length;
+        String fileNum = fileCount + " input " 
+                + Bib2LodStringUtils.simplePlural("file", fileCount);
+        LOGGER.info(
+                "Start converting " + fileNum + " in " + this.inputDir + ".");
+                
    
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
@@ -149,7 +156,7 @@ public class ProcessController {
         }
         */
 
-        LOGGER.info("Done! Total duration: " 
+        LOGGER.info("Done! Total duration to convert " + fileNum + ": " 
                 + TimerUtils.formatMillis(start, Instant.now())
                 + ". Results in " + outputDir + ".");
         return outputDir;
