@@ -48,7 +48,7 @@
         <Root level="info">
             <!-- <AppenderRef ref="RollingFileDev" /> -->
             <AppenderRef ref="RollingFile" />         
-            <!-- <AppenderRef ref="Console" /> -->         
+            <AppenderRef ref="Console" />        
         </Root>
         <!--
         <Logger name="org.ld4l.bib2lod.Bib2Lod" additivity="false" level="info">

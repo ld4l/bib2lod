@@ -28,7 +28,13 @@ public class RdfCleaner extends RdfProcessor {
 
     private static final Logger LOGGER = LogManager.getLogger(RdfCleaner.class);
     
-    private static final Pattern URIS = 
+    // ntriples, turtle
+    private static final Pattern URI_BRACKETED = 
+            Pattern.compile("(?<=<)http://[^>]+(?=>)");    
+    private static final Pattern URI_RDFXML = 
+            Pattern.compile("(?<==\")http://[^\"]+(?=\")");
+    
+    private static final Pattern URI = 
             /*
              * Matches:
              * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
@@ -89,8 +95,6 @@ public class RdfCleaner extends RdfProcessor {
         Instant fileStart = Instant.now();
        
         for ( File file : new File(inputDir).listFiles() ) {
-            
-            Map<String, String> bnodesToUris = new HashMap<String, String>();
 
             fileCount++;
 
@@ -106,7 +110,7 @@ public class RdfCleaner extends RdfProcessor {
                 continue;
             }
 
-            replaceLinesInFile(file, outputDir, bnodesToUris); 
+            replaceLinesInFile(file, outputDir); 
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 LOGGER.info("Cleaned RDF in " + fileCount + " " 
@@ -138,13 +142,14 @@ public class RdfCleaner extends RdfProcessor {
      * better within Jena. See notes for method, below.
      *
      */
-    protected void replaceLinesInFile(
-            File file, String outputDir, Map<String, String> bnodesToUris) {
-
+    protected void replaceLinesInFile(File file, String outputDir) {
+            
         BufferedReader reader;
         try {
             String filename = file.getName();
 
+            String fileExt = FilenameUtils.getExtension(filename);
+            
             reader = Files.newBufferedReader(file.toPath());
             String outputFilename =
                     FilenameUtils.getName(file.toString()); 
@@ -156,7 +161,7 @@ public class RdfCleaner extends RdfProcessor {
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
 
-                String processedLine = processLine(line, bnodesToUris);
+                String processedLine = processLine(line, fileExt);
                 if (LOGGER.isDebugEnabled()) {
                     // append newline before comparing lines?
                     if (!line.equals(processedLine)) {
@@ -179,14 +184,14 @@ public class RdfCleaner extends RdfProcessor {
         }       
     }
     
-    private String processLine(String line, Map<String, String> bnodesToUris) {
+    private String processLine(String line, String fileExt) {
 
         line = removeStatementWithEmptyObject(line);
         if (line.trim().isEmpty()) {
             return line;
         }
 
-        line = encodeUris(line);
+        line = encodeUris(line, fileExt);
         
         line = fixLocalNames(line);
         
@@ -313,9 +318,19 @@ public class RdfCleaner extends RdfProcessor {
         return line;
     }
     
-    private String encodeUris(String line) {    
-        StringBuilder sb = new StringBuilder(line);       
-        Matcher m = URIS.matcher(sb);
+    private String encodeUris(String line, String fileExt) {  
+        
+        StringBuilder sb = new StringBuilder(line);   
+        
+        /*
+         * By using the uri pattern that corresponds to the RDF serialization
+         * type, we eliminate uris that appear as part of string literals,
+         * either within quotes or not. We also use =" lookbehind in rdfxml
+         * uris for the same reason.
+         */
+        Pattern uriPattern = fileExt == "rdf" ? URI_RDFXML : URI_BRACKETED;
+        Matcher m = uriPattern.matcher(sb);
+        
         int matchPointer = 0;
         while (m.find(matchPointer)) { 
             try {
