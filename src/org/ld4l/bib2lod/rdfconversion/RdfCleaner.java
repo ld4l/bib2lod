@@ -30,7 +30,8 @@ public class RdfCleaner extends RdfProcessor {
     
     // ntriples, turtle
     private static final Pattern URI_BRACKETED = 
-            Pattern.compile("(?<=<)http://[^>]+(?=>)");    
+            Pattern.compile("(?<=<)http://[^>]+(?=>)");  
+    
     private static final Pattern URI_RDFXML = 
             Pattern.compile("(?<==\")http://[^\"]+(?=\")");
     
@@ -98,7 +99,7 @@ public class RdfCleaner extends RdfProcessor {
 
             fileCount++;
 
-            String filename = file.getName();
+            LOGGER.debug("Processing file: " + file.getName());
             
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
@@ -143,35 +144,63 @@ public class RdfCleaner extends RdfProcessor {
      *
      */
     protected void replaceLinesInFile(File file, String outputDir) {
-            
+         
+        String fileExt = FilenameUtils.getExtension(file.getName());
+        
+        /*
+         * By using the URI pattern that corresponds to the RDF serialization
+         * type, we eliminate URIs that appear as part of string literals,
+         * either within quotes or not. We also use =" lookbehind in rdfxml
+         * URIs for the same reason.
+         * This means we do not correct URI string literals at all, as in these
+         * hypothetical examples:
+         * rdfxml: <bf:authoritySource>http://id.loc.gov/vocabulary/ subjectSchemes/fast</bf:authoritySource>
+         * nt: <http://draft.ld4l.org/cornell/21384topic15> <http://bibframe.org/vocab/authoritySource> "http://id.loc.gov/vocabulary/ subjectSchemes/fast" . 
+         * ttl: <http://draft.ld4l.org/cornell/21384topic15> bf:authoritySource "http://id.loc.gov/vocabulary/ subjectSchemes/fast"
+         * It's tricky to distinguish this case from those where URI is part of 
+         * a larger string literal, where it's more difficult to  isolate a 
+         * faulty URI from surrounding text. For now we'll say we only correct 
+         * bad data if it breaks later processing.
+         */
+        Pattern uriPattern = 
+                fileExt.equals("rdf") ? URI_RDFXML : URI_BRACKETED;
+        
+        LOGGER.debug("Using uri pattern " + uriPattern.toString() 
+                + " for file extension " + fileExt);
+        
+        String outputFilename =
+                FilenameUtils.getName(file.toString()); 
+        
+        File outputFile = new File(outputDir, outputFilename);
+        
         BufferedReader reader;
-        try {
-            String filename = file.getName();
-
-            String fileExt = FilenameUtils.getExtension(filename);
-            
+        try {           
             reader = Files.newBufferedReader(file.toPath());
-            String outputFilename =
-                    FilenameUtils.getName(file.toString()); 
-            File outputFile = new File(outputDir, outputFilename);
+      
             PrintWriter writer = new PrintWriter(new BufferedWriter(
-                    new FileWriter(outputFile, true)));               
+                    new FileWriter(outputFile, true)));     
+            
             LineIterator iterator = new LineIterator(reader);
             
             while (iterator.hasNext()) {
                 String line = iterator.nextLine();
 
-                String processedLine = processLine(line, fileExt);
+                String processedLine = processLine(line, uriPattern);
+                
                 if (LOGGER.isDebugEnabled()) {
                     // append newline before comparing lines?
                     if (!line.equals(processedLine)) {
-                        LOGGER.debug("Original: " + line);
-                        LOGGER.debug("New: " + processedLine);
+                        // LOGGER.debug("Original: " + line);
+                        // LOGGER.debug("New: " + processedLine);
                     }
                 }
+                
                 writer.append(processedLine + "\n");
-                if (processedLine.contains("<>")) {
-                    LOGGER.debug("Writing out: " + processedLine);
+                
+                if (LOGGER.isDebugEnabled()) {
+                    if (processedLine.contains("<>")) {
+                        // LOGGER.debug("Writing out: " + processedLine);
+                    }
                 }
             }
             
@@ -184,14 +213,14 @@ public class RdfCleaner extends RdfProcessor {
         }       
     }
     
-    private String processLine(String line, String fileExt) {
+    private String processLine(String line, Pattern uriPattern) {
 
         line = removeStatementWithEmptyObject(line);
         if (line.trim().isEmpty()) {
             return line;
         }
 
-        line = encodeUris(line, fileExt);
+        line = encodeUris(line, uriPattern);
         
         line = fixLocalNames(line);
         
@@ -205,7 +234,6 @@ public class RdfCleaner extends RdfProcessor {
          * line = convertBnodes(line, bnodesToUris);
          */
         
-
         return line;    
     }
   
@@ -310,7 +338,7 @@ public class RdfCleaner extends RdfProcessor {
         if (line.contains("<>") 
                 // rdfxml input
                 || line.contains("rdf:resource=\"\"")) {
-                // turtle input; this doesn't work - see above
+                // turtle input; this doesn't work - see comments above
                 // || line.contains("<unknown:namespace>")) {
             LOGGER.debug("Found line with empty object: " + line);
             line = "";
@@ -318,24 +346,28 @@ public class RdfCleaner extends RdfProcessor {
         return line;
     }
     
-    private String encodeUris(String line, String fileExt) {  
+    private String encodeUris(String line, Pattern uriPattern) {  
         
         StringBuilder sb = new StringBuilder(line);   
-        
-        /*
-         * By using the uri pattern that corresponds to the RDF serialization
-         * type, we eliminate uris that appear as part of string literals,
-         * either within quotes or not. We also use =" lookbehind in rdfxml
-         * uris for the same reason.
-         */
-        Pattern uriPattern = fileExt == "rdf" ? URI_RDFXML : URI_BRACKETED;
+
+        LOGGER.debug("Processing line: " + line);
+
         Matcher m = uriPattern.matcher(sb);
         
+        if (LOGGER.isDebugEnabled()) {
+            if (!m.find()) {
+                LOGGER.debug("No match found.");
+            }
+        }
+        
         int matchPointer = 0;
-        while (m.find(matchPointer)) { 
+        while (m.find(matchPointer)) {             
             try {
+                
                 matchPointer = m.end();
                 String match = m.group();
+                LOGGER.debug("Found match: " + match);
+                
                 /*
                  * Only the multi-argument URI constructor encodes illegal
                  * characters, so use URL methods to break up the string into
@@ -345,6 +377,7 @@ public class RdfCleaner extends RdfProcessor {
                 String uri = new URI(url.getProtocol(), url.getUserInfo(), 
                         url.getHost(), url.getPort(), url.getPath(), 
                         url.getQuery(), url.getRef()).toString();
+                
                 /*
                  * &#34; must be replaced manually, because the URI constructor
                  * doesn't change it, and Jena will not accept it when reading
@@ -353,12 +386,20 @@ public class RdfCleaner extends RdfProcessor {
                  * above.
                  */
                 uri = uri.replace("&#34;", "%22");
+                
                 if (! uri.equals(m.group().toString())) {
+                    
+                    LOGGER.debug("Replacing original line with new line: " 
+                            + uri);
                     sb.replace(m.start(), m.end(), uri);
                     // Manually reset matchPointer, since the old and new 
                     // strings may differ in length.
                     matchPointer += uri.length() - match.length();
+                    
+                } else {
+                    LOGGER.debug("No change");
                 }
+                
             } catch (MalformedURLException e) {
                 // TODO Auto-generated catch block
                 e.printStackTrace();
