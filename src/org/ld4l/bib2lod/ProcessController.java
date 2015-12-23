@@ -79,14 +79,21 @@ public class ProcessController {
         String outputDir = newInputDir;
         
         // TODO Implement earlier actions: marcxml pre-processing, 
-        // marcxml2bibframe conversion, etc.        
+        // marcxml2bibframe conversion, etc. 
+        
+        if (selectedActions.contains(Action.CLEAN_RDF)) {
+            
+            outputDir = new RdfCleaner(
+                    localNamespace, outputDir, mainOutputDir).process();            
+        }
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
 
             // Resource deduping requires some prior processing steps.
             
-            outputDir = new RdfCleaner(
-                    localNamespace, outputDir, mainOutputDir).process();
+            // This is now an independent action, so is handled above.
+            // outputDir = new RdfCleaner(
+            //        localNamespace, outputDir, mainOutputDir).process();
                              
             /* Required since bnode ids are not guaranteed to be unique across
              * input files, so Jena may create duplicate ids across files when
@@ -96,9 +103,8 @@ public class ProcessController {
              */
             outputDir = new BnodeConverter(
                     localNamespace, outputDir, mainOutputDir).process(); 
-                    
-            
-            // Mechanism for handling large data files by reading only partial
+                              
+            // Strategy for handling large data files by reading only partial
             // data (split by type) into memory for deduping.
             outputDir = new TypeSplitter(outputDir, mainOutputDir).process();
             
@@ -106,11 +112,6 @@ public class ProcessController {
 
         }
         
-        // TODO Check for valid sequences of actions. E.g., converting bibframe
-        // rdf depends on deduping resources first; but we can dedupe resources
-        // without going on to rdf conversion. This type of validation should
-        // either be done here, or controlled through action dependencies in
-        // the enum. The main Bib2Lod class shouldn't know about it (maybe).
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
             outputDir = new BibframeConverter(localNamespace, outputDir, 
                     mainOutputDir).process();

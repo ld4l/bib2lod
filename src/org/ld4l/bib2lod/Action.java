@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
+import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
 
 public enum Action {
@@ -23,6 +24,7 @@ public enum Action {
     // CONVERT_BNODES("convert_bnodes", BnodeConverter.class),
     // SPLIT_TYPES("split_types", TypeSplitter.class),
     
+    CLEAN_RDF("clean_rdf", RdfCleaner.class),
     DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
     CONVERT_BIBFRAME("convert_bibframe", BibframeConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
@@ -47,7 +49,9 @@ public enum Action {
         EnumSet<Action> prereqs = EnumSet.noneOf(Action.class);
         if (this.equals(CONVERT_BIBFRAME)) {
             prereqs.add(DEDUPE_RESOURCES);
-        } 
+        } else if (this.equals(DEDUPE_RESOURCES)) {
+            prereqs.add(CLEAN_RDF);
+        }
         return prereqs;
     }
     

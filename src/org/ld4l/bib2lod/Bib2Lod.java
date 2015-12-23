@@ -295,7 +295,7 @@ public class Bib2Lod {
                 .hasArg()
                 .argName("output_directory")
                 .desc("Absolute or relative path to output directory. "
-                        + "Will be created if it doesn't exist.")
+                        + "Will be created if it does not exist.")
                 .build());
  
         return options;
