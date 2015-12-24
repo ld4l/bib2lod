@@ -368,17 +368,23 @@ public class RdfCleaner extends RdfProcessor {
                 matchPointer = m.end();
                 String match = m.group();
                 LOGGER.debug("Found match: " + match);
-                
+ 
                 /*
                  * Only the multi-argument URI constructor encodes illegal
                  * characters, so use URL methods to break up the string into
                  * components to feed to the URI constructor.
                  */
-                URL url = new URL(match);        
+                URL url = new URL(match);  
 
-                String uri = new URI(url.getProtocol(), url.getUserInfo(), 
-                        url.getHost(), url.getPort(), url.getPath(), 
-                        url.getQuery(), url.getRef()).toString();
+                String uri = new URI(
+                        url.getProtocol(), 
+                        url.getUserInfo(), 
+                        url.getHost(), 
+                        url.getPort(), 
+                        url.getPath(), 
+                        url.getQuery(), 
+                        url.getRef())
+                        .toString();
                 
                 /*
                  * &#34; must be replaced manually, because the URI constructor
@@ -403,19 +409,17 @@ public class RdfCleaner extends RdfProcessor {
                 }
                 
             } catch (MalformedURLException e) {
-                LOGGER.info("MalformedURLException in line " + line 
-                        + ". Deleting line.");
+                LOGGER.info("MalformedURLException in line \"" + line 
+                        + "\". Deleting line.");
                 return "";
             } catch (URISyntaxException e) {
-                // The offending URI was 
-                // http://rev_gerenc_polit_salud.javeriana.edu.co/ in Cornell
-                // record 6451508. Not easy to fix, so deleting the entire line.
-                // This way we cover any other errors as well.
-                LOGGER.info("URISyntaxException in line " + line 
-                        + ". Deleting line.");
+
+                LOGGER.info("URISyntaxException in line \"" + line 
+                        + "\". Deleting line.");
                 return "";
             }
-        }       
+        }   
+        
         return sb.toString();
     }
 
