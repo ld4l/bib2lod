@@ -368,7 +368,7 @@ public class RdfCleaner extends RdfProcessor {
                 matchPointer = m.end();
                 String match = m.group();
                 LOGGER.debug("Found match: " + match);
- 
+
                 /*
                  * Only the multi-argument URI constructor encodes illegal
                  * characters, so use URL methods to break up the string into
@@ -379,7 +379,7 @@ public class RdfCleaner extends RdfProcessor {
                 String uri = new URI(
                         url.getProtocol(), 
                         url.getUserInfo(), 
-                        url.getHost(), 
+                        url.getHost().replaceAll(" ", ""), 
                         url.getPort(), 
                         url.getPath(), 
                         url.getQuery(), 
@@ -409,12 +409,11 @@ public class RdfCleaner extends RdfProcessor {
                 }
                 
             } catch (MalformedURLException e) {
-                LOGGER.info("MalformedURLException in line \"" + line 
+                LOGGER.debug("MalformedURLException in line \"" + line 
                         + "\". Deleting line.");
                 return "";
             } catch (URISyntaxException e) {
-
-                LOGGER.info("URISyntaxException in line \"" + line 
+                LOGGER.debug("URISyntaxException in line \"" + line 
                         + "\". Deleting line.");
                 return "";
             }

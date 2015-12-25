@@ -125,7 +125,7 @@ public class BnodeConverter extends RdfProcessor {
                     bnodeIdToUriResource, assertions);               
         }
         retractions.add(subject, property, object);
-        // This handles cases where both subject and object are blank nodes.
+        // Handle statements where both subject and object are blank nodes.
         assertions.add(newSubject, property, newObject);
     }        
     
