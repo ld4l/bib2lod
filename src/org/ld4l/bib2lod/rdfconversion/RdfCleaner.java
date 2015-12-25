@@ -363,8 +363,7 @@ public class RdfCleaner extends RdfProcessor {
         
         int matchPointer = 0;
         while (m.find(matchPointer)) {             
-            try {
-                
+            try { 
                 matchPointer = m.end();
                 String match = m.group();
                 LOGGER.debug("Found match: " + match);
@@ -408,6 +407,8 @@ public class RdfCleaner extends RdfProcessor {
                     LOGGER.debug("No change");
                 }
                 
+            // Deletes an entire string literal containing a bad URI, but these
+            // are very rare.
             } catch (MalformedURLException e) {
                 LOGGER.debug("MalformedURLException in line \"" + line 
                         + "\". Deleting line.");
