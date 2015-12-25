@@ -59,6 +59,8 @@ public enum Ld4lProperty {
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
     RANK(OntNamespace.VIVO, "rank"),
     RELATED(OntNamespace.DCTERMS, "relation"),
+    TRANSLATED_AS("translatedAs"),
+    TRANSLATES("translates"),
     VALUE(OntNamespace.RDF, "value");
     
 

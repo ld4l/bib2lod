@@ -90,6 +90,8 @@ public enum BfProperty {
     BF_TITLE("title", Ld4lProperty.HAS_TITLE),
     BF_TITLE_STATEMENT("titleStatement"),
     BF_TITLE_VALUE("titleValue", Ld4lProperty.LABEL),
+    BF_TRANSLATION("translation", Ld4lProperty.TRANSLATED_AS),
+    BF_TRANSLATION_OF("translationOf", Ld4lProperty.TRANSLATES),
     BF_WORK_TITLE("workTitle", Ld4lProperty.HAS_TITLE),
        
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel", 
