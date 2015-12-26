@@ -47,6 +47,7 @@ public enum Ld4lProperty {
     ILLUSTRATION_NOTE("illustrationNote"),
     IS_HOLDING_FOR("isHoldingFor"),
     IS_INSTANCE_OF("isInstanceOf"),
+    IS_PART_OF(OntNamespace.DCTERMS, "isPartOf"),
     IS_SUBJECT_OF("isSubjectOf"),
     LABEL(OntNamespace.RDFS, "label"),
     LEGACY_PROVIDER_ROLE(OntNamespace.LEGACY, "providerRole"),
