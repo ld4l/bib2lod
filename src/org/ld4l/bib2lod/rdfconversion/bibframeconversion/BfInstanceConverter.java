@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
@@ -15,6 +16,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
+import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfInstanceConverter extends BfBibResourceConverter {
@@ -103,9 +105,11 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                     // Log for review, to make sure nothing has escaped.
                     LOGGER.debug("No handling defined for property " 
                             + predicate.getURI()
-                            + "; eliminating.");
+                            + "; deleting statement.");
                     continue;
                 }
+                
+                // RDFNode object = statement.getObject();
                 
                 // TODO Do we ever get a providerStatement instead of a 
                 // Provider object? If so, we need to parse the literal value 
@@ -125,7 +129,10 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                         outputModel.add(relatedWork, RDF.type, 
                                 Ld4lType.MONOGRAPH.ontClass());
                         retractions.add(statement);
-                    }                   
+                    }        
+                    
+                } else if (bfProp.equals(BfProperty.BF_REPRODUCTION)) {
+                    convertReproduction(statement);                       
                 }
             }          
         }

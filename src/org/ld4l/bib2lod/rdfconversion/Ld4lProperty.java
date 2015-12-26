@@ -33,6 +33,7 @@ public enum Ld4lProperty {
     HAS_LANGUAGE(OntNamespace.DCTERMS, "language"),
     HAS_LOCATION(OntNamespace.PROV, "atLocation"),
     HAS_ORIGINAL_LANGUAGE("hasOriginalLanguage"),
+    HAS_ORIGINAL_VERSION("hasOriginalVersion"),
     HAS_PART(OntNamespace.DCTERMS, "hasPart"),
     HAS_PREFERRED_TITLE("hasPreferredTitle"),
     HAS_PROVISION("hasProvision"),

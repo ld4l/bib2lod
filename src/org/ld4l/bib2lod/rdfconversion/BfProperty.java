@@ -70,6 +70,7 @@ public enum BfProperty {
     BF_RELATED_INSTANCE("relatedInstance", Ld4lProperty.RELATED),
     BF_RELATED_WORK("relatedWork", Ld4lProperty.RELATED),    
     BF_RELATOR("relator", Ld4lProperty.HAS_CONTRIBUTION),
+    BF_REPRODUCTION("reproduction"),
     BF_RESOURCE_PART("resourcePart"),
     BF_REVIEW("review", Ld4lProperty.HAS_BODY),
     BF_REVIEW_OF("reviewOf", Ld4lProperty.HAS_TARGET),

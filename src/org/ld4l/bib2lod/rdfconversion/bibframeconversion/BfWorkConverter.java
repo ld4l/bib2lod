@@ -76,8 +76,15 @@ public class BfWorkConverter extends BfBibResourceConverter {
                     
                 } else if (ANNOTATION_TARGET_PROPERTIES.contains(bfProp)) {
                     convertAnnotation(statement);
-                    
-                } 
+                  
+                // Pending input from Steven:
+                // Bibframe defines bf:reproduction as an Instance-to-Instance
+                // relationship, but the converter generates the predicate
+                // between Works rather than Instances.  
+                } else if (bfProp.equals(BfProperty.BF_REPRODUCTION)) {
+                    convertReproduction(statement);    
+                }
+                
             }          
         }
 
