@@ -136,22 +136,5 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         outputModel.add(converter.create(subject, label));
     }
     
-    protected void convertReproduction(Statement statement) {
-        
-        // Statement predicate = bf:reproduction
-        RDFNode object = statement.getObject();
-        
-        // Pending input from Steven:
-        // Bibframe defines bf:reproduction as an Instance-to-Instance
-        // relationship, but the converter generates the predicate
-        // between Works. ld4l:hasOriginalVersion is also an Instance-to-
-        // Instance relationship, but for now use it between Works as well.
-        
-        // ld4l:hasOriginalVersion reverses the direction of
-        // bf:reproduction
-        outputModel.add(object.asResource(), 
-                Ld4lProperty.HAS_ORIGINAL_VERSION.property(), 
-                subject);                           
-        retractions.add(statement);
-    }
+
 }

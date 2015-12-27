@@ -130,9 +130,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                                 Ld4lType.MONOGRAPH.ontClass());
                         retractions.add(statement);
                     }        
-                    
-                } else if (bfProp.equals(BfProperty.BF_REPRODUCTION)) {
-                    convertReproduction(statement);                       
+                                    
                 }
             }          
         }
