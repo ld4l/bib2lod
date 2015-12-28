@@ -9,6 +9,7 @@ import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDFS;
@@ -17,7 +18,6 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
-import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
 /*
  * Provides conversions shared by Works and Instances - e.g., Title conversion
@@ -68,8 +68,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             // labels.
             String value = BfTitleConverter.normalizeTitle(literal.getString());
             LOGGER.debug("Adding literal with value '" + value + "' to list");
-            titleLiterals.add(
-                    outputModel.createLiteral(value, literal.getLanguage()));
+            titleLiterals.add(ResourceFactory.createLangLiteral(
+                    value, literal.getLanguage()));
         }
 
         List<Statement> titles = inputModel.listStatements(subject, 

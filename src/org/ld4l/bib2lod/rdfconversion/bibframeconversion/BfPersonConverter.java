@@ -1,18 +1,28 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
+import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfPersonConverter extends BfAuthorityConverter {
 
@@ -32,7 +42,23 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     @Override 
     protected Model convertModel() {
-        convertBfLabel();
+        
+        // Must do before the iteration on model statements, since it requires
+        // modification of the label as well.
+        convertPersonSubject();
+        
+        List<Statement> statements = inputModel.listStatements().toList();     
+        
+        for (Statement statement : statements) {           
+            Property predicate = statement.getPredicate();
+            
+            if (predicate.equals(BfProperty.BF_LABEL.property())) {
+                convertBfLabel(statement);
+            
+            } 
+
+        }
+        
         return super.convertModel();
     }
 
@@ -43,25 +69,102 @@ public class BfPersonConverter extends BfAuthorityConverter {
      * @param model
      * @return
      */
-    private void convertBfLabel() {
-        
-        Property property = BfProperty.BF_LABEL.property();
-        Statement stmt = subject.getProperty(property);
-        if (stmt != null) {
-            String label = stmt.getString();
-            Map<Ld4lProperty, String> labelProps = parseLabel(label);
-            for (Map.Entry<Ld4lProperty, String> entry 
-                    : labelProps.entrySet()) {
-                Ld4lProperty key = entry.getKey();
-                String value = entry.getValue();
-                if (value != null) {
-                    // Add to outputModel model rather than main model, so the
-                    // statement doesn't get reprocessed.
-                    outputModel.add(subject, key.property(), value);
-                }
+    private void convertBfLabel(Statement statement) {
+
+        Literal labelLiteral = statement.getLiteral();       
+        String label = labelLiteral.getLexicalForm();
+        String language = labelLiteral.getLanguage();
+        Map<Ld4lProperty, String> labelProps = parseLabel(label);
+        for (Map.Entry<Ld4lProperty, String> entry 
+                : labelProps.entrySet()) {
+            Ld4lProperty key = entry.getKey();
+            String value = entry.getValue();
+            if (value != null) {
+                outputModel.add(subject, key.property(), 
+                        ResourceFactory.createLangLiteral(value, language));
             }
         }
-        subject.removeAll(property);
+
+        retractions.add(statement);
+    }
+    
+    private void convertPersonSubject() {
+        
+        StmtIterator statements = inputModel.listStatements(
+                null, BfProperty.BF_SUBJECT.property(), subject);
+        if (statements.hasNext()) {
+            Resource work = statements.nextStatement().getSubject();
+            StmtIterator labelStmts = 
+                    subject.listProperties(BfProperty.BF_LABEL.property());
+            while (labelStmts.hasNext()) {
+                convertPersonSubjectLabel(labelStmts.nextStatement(), work);
+            }
+            
+        }
+        applyRetractions();
+    }
+    
+    private void convertPersonSubjectLabel(
+            Statement labelStatement, Resource work) {
+        
+        // TODO Move to BfAuthorityConverter
+        // Break into methods - person will have its own label parsing method,
+        // otherwise the same.
+        
+        
+        Literal labelLiteral = labelStatement.getLiteral();
+        String label = labelLiteral.getLexicalForm();
+        String language = labelLiteral.getLanguage(); 
+        
+        // "Hannes Sigfússon--Biography."
+        if (label.endsWith(".")) {
+            LOGGER.debug("Before removing final period: " + label);
+            label = label.substring(0, label.length()-1);
+            LOGGER.debug("After removing final period: " + label);
+        }
+        
+        // "Twain, Mark, 1835-1910--Censorship."        
+        List<String> subjects = Arrays.asList(label.split("--"));
+        
+        for (String subjectValue : subjects) {
+            if (subjects.indexOf(subjectValue) == 0) {
+                Map<Ld4lProperty, String> labelProps = parseLabel(subjectValue);
+                for (Map.Entry<Ld4lProperty, String> entry 
+                        : labelProps.entrySet()) {
+                    Ld4lProperty key = entry.getKey();
+                    String value = entry.getValue();
+                    if (value != null) {
+                        outputModel.add(subject, key.property(), 
+                                ResourceFactory.createLangLiteral(
+                                        value, language));                               
+                    }
+                } 
+                
+            } else {
+                // Create a new Topic that is also the subject of the related
+                // Work.
+                // In some cases this should perhaps be a genre/form; e.g., 
+                // "Biography".
+                Resource newSubject = ResourceFactory.
+                        createResource(RdfProcessor.mintUri(localNamespace));
+                Literal literal = ResourceFactory.createLangLiteral(
+                        subjectValue, language);
+                outputModel.add(work, Ld4lProperty.HAS_SUBJECT.property(),
+                        newSubject);
+                outputModel.add(
+                        newSubject, RDF.type, Ld4lType.TOPIC.ontClass());
+                outputModel.add(newSubject, 
+                        Ld4lProperty.PREFERRED_LABEL.property(), literal);
+            }
+            
+        }
+        
+        
+        // TODO handle fast uri
+                
+
+        
+        retractions.add(labelStatement);
     }
     
     /**
@@ -93,5 +196,6 @@ public class BfPersonConverter extends BfAuthorityConverter {
         
         return props;   
     }
+    
 
 }

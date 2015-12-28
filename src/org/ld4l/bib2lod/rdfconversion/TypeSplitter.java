@@ -270,7 +270,7 @@ public class TypeSplitter extends RdfProcessor {
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . " 
-                + "?s2 ?p3 ?s1 } "
+                + "?work ?p3 ?s1 } "
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -288,8 +288,9 @@ public class TypeSplitter extends RdfProcessor {
                 // Include the :work bf:subject :authority statement here rather
                 // than with the work, since it affects the conversion of the
                 // authority.
-                + "?s2 ?p3 ?s1 . "
+                + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
+                + "?work ?p3 ?s1 . "
                 + "FILTER (str(?p3) = \"" + BfProperty.BF_SUBJECT.uri() 
                 + "\") "
                 + "} }"                

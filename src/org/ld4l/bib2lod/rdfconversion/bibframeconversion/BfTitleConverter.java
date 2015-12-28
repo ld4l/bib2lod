@@ -212,7 +212,7 @@ public class BfTitleConverter extends BfResourceConverter {
 //  String language = literal.getLanguage();
 //  
 //  // OK if language is null or empty
-//  return literal.getModel().createLiteral(value, language); 
+//  return ResourceFactory.createLangLiteral(value, language); 
 //}
     
     public Model create(Resource subject, Literal titleStatementLiteral) {

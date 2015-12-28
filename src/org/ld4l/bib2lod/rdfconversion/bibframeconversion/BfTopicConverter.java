@@ -18,9 +18,6 @@ public class BfTopicConverter extends BfAuthorityConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicConverter.class);
     
-    private static List<BfProperty> RESOURCES_TO_REMOVE = 
-            new ArrayList<BfProperty>();
-
     private static final List<BfProperty> FAST_PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
