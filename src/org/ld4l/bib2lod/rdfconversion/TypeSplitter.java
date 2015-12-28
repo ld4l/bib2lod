@@ -7,7 +7,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.jena.ontology.OntModelSpec;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -163,10 +162,12 @@ public class TypeSplitter extends RdfProcessor {
 
         for (BfType type: TYPES_TO_SPLIT) {
             modelsByType.put(type.uri(), 
-                    ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
+                    ModelFactory.createDefaultModel());
+                    //ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));     
         }
         modelsByType.put(REMAINDER_FILENAME, 
-                ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));
+                ModelFactory.createDefaultModel());
+                //ModelFactory.createOntologyModel(OntModelSpec.OWL_MEM));
         
         return modelsByType;
     }
@@ -182,12 +183,12 @@ public class TypeSplitter extends RdfProcessor {
         Model constructModel = qexec.execConstruct();
         qexec.close();
  
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Type: " + type.name());
-            LOGGER.debug("Query: " + query.toString());   
-            LOGGER.debug("Model size: " + constructModel.size());
-            RdfProcessor.printModel(constructModel, Level.DEBUG);
-        }
+//        if (LOGGER.isDebugEnabled()) {
+//            LOGGER.debug("Type: " + type.name());
+//            LOGGER.debug("Query: " + query.toString());   
+//            LOGGER.debug("Model size: " + constructModel.size());
+//            RdfProcessor.printModel(constructModel, Level.DEBUG);
+//        }
 
         // Add resulting graph to the model for this type
         modelForType.add(constructModel);
@@ -206,9 +207,6 @@ public class TypeSplitter extends RdfProcessor {
         
         ParameterizedSparqlString pss = null;
         
-        // NB Topic is an Authority, so ordering is crucial
-//        if (type == BfType.BF_TOPIC) {          
-//            pss = getBfTopicSparql();
         if (type.isAuthority()) {
             pss = getBfAuthoritySparql();
         } else if (type == BfType.BF_INSTANCE) {       
@@ -224,6 +222,7 @@ public class TypeSplitter extends RdfProcessor {
         pss.setNsPrefix("bf", OntNamespace.BIBFRAME.uri());
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
+        LOGGER.debug(pss.toString());
         return pss.asQuery();
         
     }
@@ -262,33 +261,6 @@ public class TypeSplitter extends RdfProcessor {
         return pss;
     }
 
-//    private ParameterizedSparqlString getBfTopicSparql() {
-//
-//        ParameterizedSparqlString pss = new ParameterizedSparqlString();
-//        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
-//
-//        pss.setCommandText(
-//                "CONSTRUCT { ?s1 ?p1 ?o1 . "
-//                + "?o1 ?p2 ?o2 . } "
-//                + "WHERE {  { " 
-//                + "?s1 ?p1 ?o1 . "
-//                + "?s1 a ?type . "
-//                + "} UNION { "
-//                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
-//                + "?s1 a ?type . "
-//                + "?o1 ?p2 ?o2 . " 
-//                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed() 
-//                + "} UNION { "
-//                + "?s1 ?p1 ?o1 . "
-//                + "?s1 a ?type . "
-//                + "?o1 ?p2 ?o2 . "
-//                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()                 
-//                + "} }"                
-//        );
-//        
-//        LOGGER.debug(pss.toString());
-//        return pss;
-//    }
     
     private ParameterizedSparqlString getBfAuthoritySparql() {
 
@@ -297,7 +269,8 @@ public class TypeSplitter extends RdfProcessor {
 
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
-                + "?o1 ?p2 ?o2 . } "
+                + "?o1 ?p2 ?o2 . " 
+                + "?s2 ?p3 ?s1 } "
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -310,10 +283,18 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()     
+                + "?o1 a " + BfType.BF_IDENTIFIER.prefixed()  
+                + "} UNION { "
+                // Include the :work bf:subject :authority statement here rather
+                // than with the work, since it affects the conversion of the
+                // authority.
+                + "?s2 ?p3 ?s1 . "
+                + "?s1 a ?type . "
+                + "FILTER (str(?p3) = \"" + BfProperty.BF_SUBJECT.uri() 
+                + "\") "
                 + "} }"                
         );
-        
+
         return pss;
     }
     
@@ -381,6 +362,10 @@ public class TypeSplitter extends RdfProcessor {
                 + "WHERE {  { " 
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
+                // These statements need to be included in the file for the
+                // Authority object rather than the Work.
+                + "FILTER (str(?p1) = \"" + BfProperty.BF_SUBJECT.uri() 
+                + "\") "
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
