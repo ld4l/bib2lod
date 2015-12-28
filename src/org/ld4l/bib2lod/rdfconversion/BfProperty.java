@@ -1,4 +1,4 @@
-                                                               package org.ld4l.bib2lod.rdfconversion;
+package org.ld4l.bib2lod.rdfconversion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -41,7 +41,10 @@ public enum BfProperty {
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_EXPRESSION_OF("expressionOf", Ld4lProperty.IS_EXPRESSION_OF),
     BF_EXTENT("extent", Ld4lProperty.EXTENT),
+    BF_FORM_DESIGNATION("formDesignation", 
+            Ld4lProperty.LEGACY_FORM_DESIGNATION),
     BF_GENERATION_PROCESS("generationProcess"),
+    BF_GENRE("genre"),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
     BF_HAS_EXPRESSION("hasExpression", Ld4lProperty.HAS_EXPRESSION),
