@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.NacoNormalizer;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 /**
@@ -71,24 +72,31 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
             String localAuthUri = soln.getResource("localAuth").getURI();
             
             // Get key for authority identity matching.
-            String key = getKey(soln);
-            
+            String localAuthKey = getKey(soln);
+        
             // Without a key there's nothing to dedupe on.
-            if (key == null) {
+            if (localAuthKey == null) {
                 LOGGER.trace("No key for " + localAuthUri + "; can't dedupe");
                 continue;
             }
 
-            LOGGER.trace("Original uri: " + localAuthUri + " has key " + key);
+            LOGGER.trace("Original uri: " + localAuthUri + " has key " 
+                    + localAuthKey);
     
             Resource extAuth = soln.getResource("extAuth");
-            String extAuthUri = extAuth == null ? null : extAuth.getURI();            
+            String extAuthUri = null;
+            String extAuthKey = null;
+            if (extAuth != null) {
+                extAuthUri = extAuth.getURI();
+                extAuthKey = getExternalAuthorityKey(soln, localAuthKey);
+                LOGGER.debug("extAuthKey: " + extAuthKey);
+            }         
 
-            // We've seen this Agent before
-            if (uniqueLocalAuths.containsKey(key)) {
+            // We've seen this local Authority before
+            if (uniqueLocalAuths.containsKey(localAuthKey)) {
                 
-                String uniqueLocalAuthUri = uniqueLocalAuths.get(key);
-                LOGGER.trace("Found matching value for key " + key 
+                String uniqueLocalAuthUri = uniqueLocalAuths.get(localAuthKey);
+                LOGGER.trace("Found matching value for key " + localAuthKey 
                         + " and bf:Authority URI " + localAuthUri);
                 LOGGER.trace("Adding: " + localAuthUri + " => " 
                         + uniqueLocalAuthUri);                
@@ -96,32 +104,28 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 // Authority URI throughout the data.
                 uniqueUris.put(localAuthUri, uniqueLocalAuthUri);
                 
-                // If there's an associated external Authority, dedupe that
-                // URI as well.
-                // NB The algorithm assumes the local auth key and the external
-                // auth key will always be identical, and uses the local auth
-                // keys to dedupe external auths as well. If this assumption is
-                // incorrect, we need to get key for the external auth from
-                // madsrdf:authoritativeLabel and dedupe on that instead.
-                if (extAuthUri != null) {
+                // Dedupe an associated external Authority
+                if (extAuthKey != null) {
                     
-                    // We've seen this Authority before
-                    if (uniqueExtAuths.containsKey(key)) {
-                        String uniqueAuthUri = uniqueExtAuths.get(key);
-                        LOGGER.trace("Found matching value for key " + key 
+                    // We've seen this external Authority before
+                    if (uniqueExtAuths.containsKey(extAuthKey)) {
+                        String uniqueAuthUri = uniqueExtAuths.get(extAuthKey);
+                        LOGGER.trace("Found matching value for key " 
+                                    + localAuthKey 
                                     + " and external auth URI " + extAuthUri);
                         LOGGER.trace("Adding: " + extAuthUri + " => " 
                                     + uniqueAuthUri);
                         
-                        // This local Authority URI will be replaced by the
+                        // This external Authority URI will be replaced by the
                         // unique Authority URI throughout the data.
                         uniqueUris.put(extAuthUri, uniqueAuthUri); 
                         
                     } else {
                         // We haven't seen this Authority before
-                        LOGGER.trace("Didn't find external auth URI for" + key);
-                        // Add the local Authority URI to the maps
-                        uniqueExtAuths.put(key, extAuthUri);
+                        LOGGER.trace("Didn't find external auth URI for" 
+                                + extAuthKey);
+                        // Add the external Authority URI to the maps
+                        uniqueExtAuths.put(extAuthKey, extAuthUri);
                         uniqueUris.put(extAuthUri, extAuthUri);
                     }
                 }
@@ -131,12 +135,12 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 LOGGER.trace("New local auth: " + localAuthUri);
                 // Not sure if this is needed in the map
                 uniqueUris.put(localAuthUri, localAuthUri);
-                uniqueLocalAuths.put(key, localAuthUri);
-                if (extAuthUri != null) {
+                uniqueLocalAuths.put(localAuthKey, localAuthUri);
+                if (extAuthKey != null) {
                     LOGGER.trace("New external auth: " + extAuthUri);
                     // Not sure if this is needed in the map
                     uniqueUris.put(extAuthUri, extAuthUri);                
-                    uniqueExtAuths.put(key, extAuthUri);
+                    uniqueExtAuths.put(extAuthKey, extAuthUri);
                 }
             }
             
@@ -168,6 +172,13 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         return uniqueUris;        
     }
     
+    private String getExternalAuthorityKey(
+            QuerySolution soln, String localAuthKey) {
+        
+        LOGGER.debug("Non-person authority: extAuthKey = localAuthKey");
+        return localAuthKey;
+    }
+
     protected Query getQuery(BfType type) {
 
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
@@ -181,7 +192,8 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                  */
                 // "SELECT ?localAuth ?authAccessPt ?label ?extAuth 
                 // ?extAuthLabel "
-                "SELECT ?localAuth ?authAccessPoint ?label ?extAuth "
+                "SELECT "
+                + "?localAuth ?authAccessPoint ?label ?extAuth ?extAuthLabel "
                 + "WHERE { "
                 + "?localAuth a ?type . "
                 + "OPTIONAL { ?localAuth "
@@ -191,9 +203,9 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?localAuth " 
                 + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?extAuth . "
-                // + "?externalAuth " 
-                // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
-                // + " ?extAuthLabel . "
+                 + "?externalAuth " 
+                 + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
+                 + " ?extAuthLabel . "
                 + "} }";
 
         pss.setCommandText(commandText);
@@ -203,5 +215,6 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         return pss.asQuery();            
 
     }
+    
 
 }

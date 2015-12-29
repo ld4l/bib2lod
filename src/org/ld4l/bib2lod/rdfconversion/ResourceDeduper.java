@@ -15,6 +15,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfAuthorityDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfHeldItemDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfInstanceDeduper;
+import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfPersonDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfResourceDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfTopicDeduper;
 import org.ld4l.bib2lod.rdfconversion.resourcededuping.BfWorkDeduper;
@@ -47,7 +48,7 @@ public class ResourceDeduper extends RdfProcessor {
         DEDUPERS_BY_TYPE.put(BfType.BF_JURISDICTION,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_MEETING,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_ORGANIZATION,  BfAuthorityDeduper.class);        
-        DEDUPERS_BY_TYPE.put(BfType.BF_PERSON,  BfAuthorityDeduper.class);
+        DEDUPERS_BY_TYPE.put(BfType.BF_PERSON,  BfPersonDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_PLACE,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_TEMPORAL,  BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_TOPIC,  BfTopicDeduper.class);
