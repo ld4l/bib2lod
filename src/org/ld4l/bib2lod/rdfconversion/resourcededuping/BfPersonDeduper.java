@@ -48,38 +48,33 @@ public class BfPersonDeduper extends BfAuthorityDeduper {
         }
      
         key = NacoNormalizer.normalize(key);
-        LOGGER.debug("Unnormalized key: " + key);
+        LOGGER.debug("Normalized key: " + key);
         return key;
         
     }
    
+    @Override
     protected String getExternalAuthorityKey(
             QuerySolution soln, String localAuthKey) {
         
-        LOGGER.debug("Getting extAuthKey for bf:Person");
+        LOGGER.debug("Getting extAuthKey for a bf:Person external auth");
         
         String extAuthKey;
         
         String extAuthLabel = soln.get("extAuthLabel").toString();
 
         if (extAuthLabel != null) {
+            LOGGER.debug("Getting extAuthKey from madsrdf:authoritativeLabel");
             extAuthKey = NacoNormalizer.normalize(extAuthLabel.toString());
             
         // Dedupe on the local authority resource key if there is no 
         // madsrdf:authoritativeLabel. Probably never happens.
         } else {
+            LOGGER.debug("No extAuthLabel; using localAuthKey to dedupe");
             extAuthKey = localAuthKey;
         }
         
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("extAuthKey: " + extAuthKey);
-            if (extAuthKey.equals(localAuthKey)) {
-                LOGGER.debug("extAuthKey same as localAuthKey");
-            } else {
-                LOGGER.debug("extAuthKey different from localAuthKey " 
-                        + localAuthKey);
-            }
-        }
+        LOGGER.debug("extAuthKey: " + extAuthKey);
         return extAuthKey;
     }
 }

@@ -114,7 +114,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 // NB The algorithm assumes the topic key and the authority
                 // key will always be identical. If not, we should normalize
                 // auth labels and dedupe authorities on them, rather than on 
-                // the topic keys.
+                // the topic keys. (See this applied in BfAuthorityDeduper.)
                 if (authUri != null) {
                     
                     // We've seen this Authority before

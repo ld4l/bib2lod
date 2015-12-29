@@ -28,6 +28,8 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
     }  
     
     @Override
+    // TODO - do we need to override BfResourceDeduper.dedupe()? What's 
+    // different here?
     public Map<String, String> dedupe(Model model) {
         
         LOGGER.debug("Deduping type " + type.toString());
@@ -75,8 +77,8 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
                 LOGGER.debug("Found matching value for key " + key 
                         + " and item URI " + itemUri);
                 LOGGER.debug("Adding: " + itemUri + " => " + uniqueItemUri);                
-                // This local Agent URI will be replaced by the unique Agent URI
-                // throughout the data
+                // This local HeldItem URI will be replaced by the unique 
+                // HeldItem URI throughout the data.
                 uniqueUris.put(itemUri, uniqueItemUri);
                 
             } else {

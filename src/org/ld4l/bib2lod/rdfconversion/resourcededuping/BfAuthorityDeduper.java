@@ -36,7 +36,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
     @Override
     public Map<String, String> dedupe(Model model) {
         
-        LOGGER.trace("Deduping type " + type.toString());
+        LOGGER.debug("Deduping type " + type.toString());
 
         // Maps Authority URIs in the Bibframe RDF to deduped URIs (single, 
         // unique URI per bf:Authority or madsrdf:Authority). This map will be 
@@ -76,11 +76,11 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         
             // Without a key there's nothing to dedupe on.
             if (localAuthKey == null) {
-                LOGGER.trace("No key for " + localAuthUri + "; can't dedupe");
+                LOGGER.debug("No key for " + localAuthUri + "; can't dedupe");
                 continue;
             }
 
-            LOGGER.trace("Original uri: " + localAuthUri + " has key " 
+            LOGGER.debug("Original uri: " + localAuthUri + " has key " 
                     + localAuthKey);
     
             Resource extAuth = soln.getResource("extAuth");
@@ -96,53 +96,56 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
             if (uniqueLocalAuths.containsKey(localAuthKey)) {
                 
                 String uniqueLocalAuthUri = uniqueLocalAuths.get(localAuthKey);
-                LOGGER.trace("Found matching value for key " + localAuthKey 
+                LOGGER.debug("Found matching value for key " + localAuthKey 
                         + " and bf:Authority URI " + localAuthUri);
-                LOGGER.trace("Adding: " + localAuthUri + " => " 
+                LOGGER.debug("Adding: " + localAuthUri + " => " 
                         + uniqueLocalAuthUri);                
                 // This local Authority URI will be replaced by the unique 
                 // Authority URI throughout the data.
                 uniqueUris.put(localAuthUri, uniqueLocalAuthUri);
                 
-                // Dedupe an associated external Authority
-                if (extAuthKey != null) {
-                    
-                    // We've seen this external Authority before
-                    if (uniqueExtAuths.containsKey(extAuthKey)) {
-                        String uniqueAuthUri = uniqueExtAuths.get(extAuthKey);
-                        LOGGER.trace("Found matching value for key " 
-                                    + localAuthKey 
-                                    + " and external auth URI " + extAuthUri);
-                        LOGGER.trace("Adding: " + extAuthUri + " => " 
-                                    + uniqueAuthUri);
-                        
-                        // This external Authority URI will be replaced by the
-                        // unique Authority URI throughout the data.
-                        uniqueUris.put(extAuthUri, uniqueAuthUri); 
-                        
-                    } else {
-                        // We haven't seen this Authority before
-                        LOGGER.trace("Didn't find external auth URI for" 
-                                + extAuthKey);
-                        // Add the external Authority URI to the maps
-                        uniqueExtAuths.put(extAuthKey, extAuthUri);
-                        uniqueUris.put(extAuthUri, extAuthUri);
-                    }
-                }
                 
             } else {
                 // We haven't seen this local Authority before
-                LOGGER.trace("New local auth: " + localAuthUri);
+                LOGGER.debug("New local auth: " + localAuthUri);
                 // Not sure if this is needed in the map
+                LOGGER.debug("Adding: " + localAuthUri + " => " 
+                        + localAuthUri);
                 uniqueUris.put(localAuthUri, localAuthUri);
+                LOGGER.debug("Adding: " + localAuthKey + " => " 
+                        + localAuthUri);
                 uniqueLocalAuths.put(localAuthKey, localAuthUri);
-                if (extAuthKey != null) {
-                    LOGGER.trace("New external auth: " + extAuthUri);
-                    // Not sure if this is needed in the map
-                    uniqueUris.put(extAuthUri, extAuthUri);                
-                    uniqueExtAuths.put(extAuthKey, extAuthUri);
-                }
             }
+            
+            // Dedupe an associated external Authority
+            if (extAuthKey != null) {
+                
+                // We've seen this external Authority before
+                if (uniqueExtAuths.containsKey(extAuthKey)) {
+                    String uniqueExtAuthUri = uniqueExtAuths.get(extAuthKey);
+                    LOGGER.debug("Found matching value for key " 
+                                + extAuthKey 
+                                + " and external auth URI " + extAuthUri);
+                    LOGGER.debug("Adding: " + extAuthUri + " => " 
+                                + uniqueExtAuthUri);
+                    
+                    // This external Authority URI will be replaced by the
+                    // unique Authority URI throughout the data.
+                    uniqueUris.put(extAuthUri, uniqueExtAuthUri); 
+                    
+                } else {
+                    // We haven't seen this Authority before
+                    LOGGER.debug("Didn't find matching external auth URI for " 
+                            + extAuthKey);
+                    // Add the external Authority URI to the maps
+                    LOGGER.debug("Adding: " + extAuthKey + " => " 
+                            + extAuthUri);
+                    uniqueExtAuths.put(extAuthKey, extAuthUri);
+                    LOGGER.debug("Adding: " + extAuthUri + " => " 
+                            + extAuthUri);
+                    uniqueUris.put(extAuthUri, extAuthUri);
+                }
+            }                                                        
             
             if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                 LOGGER.info("Deduped " + resourceCount + " resources. " 
@@ -158,11 +161,11 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         }
         
         if (LOGGER.isTraceEnabled()) {
-            LOGGER.trace("uniqueUris map:");
+            LOGGER.debug("uniqueUris map:");
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
-                LOGGER.trace(entry.getKey() + " => " + entry.getValue());
+                LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
-            LOGGER.trace("uniqueLocalAuths map:");
+            LOGGER.debug("uniqueLocalAuths map:");
             for (Map.Entry<String, String> entry : 
                     uniqueLocalAuths.entrySet()) {
                 LOGGER.trace(entry.getKey() + " => " + entry.getValue());
@@ -172,7 +175,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         return uniqueUris;        
     }
     
-    private String getExternalAuthorityKey(
+    protected String getExternalAuthorityKey(
             QuerySolution soln, String localAuthKey) {
         
         LOGGER.debug("Non-person authority: extAuthKey = localAuthKey");
@@ -184,14 +187,6 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
         
         String commandText = 
-                /* NB We're not getting the authority label because we assume 
-                 * it's identical to the agent label, so we can use that to 
-                 * dedupe the authorities as well. If that turns out to be 
-                 * wrong, we'll need to normalize the auth labels and dedupe 
-                 * authorities against them directly.
-                 */
-                // "SELECT ?localAuth ?authAccessPt ?label ?extAuth 
-                // ?extAuthLabel "
                 "SELECT "
                 + "?localAuth ?authAccessPoint ?label ?extAuth ?extAuthLabel "
                 + "WHERE { "
@@ -203,7 +198,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                 + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?localAuth " 
                 + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?extAuth . "
-                 + "?externalAuth " 
+                 + "?extAuth " 
                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
                  + " ?extAuthLabel . "
                 + "} }";
@@ -211,7 +206,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
         pss.setCommandText(commandText);
         // Make the type substitution into the parameterized SPARQL string
         pss.setIri("type", type.uri());
-        LOGGER.trace(pss.toString());
+        // LOGGER.debug(pss.toString());
         return pss.asQuery();            
 
     }
