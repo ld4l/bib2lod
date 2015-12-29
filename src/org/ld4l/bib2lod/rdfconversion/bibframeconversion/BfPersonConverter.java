@@ -74,6 +74,12 @@ public class BfPersonConverter extends BfAuthorityConverter {
         Literal labelLiteral = statement.getLiteral();       
         String label = labelLiteral.getLexicalForm();
         String language = labelLiteral.getLanguage();
+        parseLabel(label, language);
+        retractions.add(statement);
+    }
+    
+    private void parseLabel(String label, String language) {
+        
         Map<Ld4lProperty, String> labelProps = parseLabel(label);
         for (Map.Entry<Ld4lProperty, String> entry 
                 : labelProps.entrySet()) {
@@ -83,9 +89,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
                 outputModel.add(subject, key.property(), 
                         ResourceFactory.createLangLiteral(value, language));
             }
-        }
-
-        retractions.add(statement);
+        }        
     }
     
     private void convertPersonSubject() {
@@ -105,50 +109,35 @@ public class BfPersonConverter extends BfAuthorityConverter {
     }
     
     private void convertPersonSubjectLabel(
-            Statement labelStatement, Resource work) {
-        
-        // TODO Move to BfAuthorityConverter
-        // Break into methods - person will have its own label parsing method,
-        // otherwise the same.
-        
-        
+            Statement labelStatement, Resource work) {                                                
+            
         Literal labelLiteral = labelStatement.getLiteral();
         String label = labelLiteral.getLexicalForm();
         String language = labelLiteral.getLanguage(); 
         
         // "Hannes Sigfússon--Biography."
         if (label.endsWith(".")) {
-            LOGGER.debug("Before removing final period: " + label);
             label = label.substring(0, label.length()-1);
-            LOGGER.debug("After removing final period: " + label);
         }
         
         // "Twain, Mark, 1835-1910--Censorship."        
         List<String> subjects = Arrays.asList(label.split("--"));
         
-        for (String subjectValue : subjects) {
-            if (subjects.indexOf(subjectValue) == 0) {
-                Map<Ld4lProperty, String> labelProps = parseLabel(subjectValue);
-                for (Map.Entry<Ld4lProperty, String> entry 
-                        : labelProps.entrySet()) {
-                    Ld4lProperty key = entry.getKey();
-                    String value = entry.getValue();
-                    if (value != null) {
-                        outputModel.add(subject, key.property(), 
-                                ResourceFactory.createLangLiteral(
-                                        value, language));                               
-                    }
-                } 
-                
+        for (String subject : subjects) {
+            // The first item contains the personal data
+            if (subjects.indexOf(subject) == 0) {        
+                parseLabel(subject, language);
+               
             } else {
                 // Create a new Topic that is also the subject of the related
                 // Work.
                 // In some cases this should perhaps be a genre/form; e.g., 
-                // "Biography".
+                // "Biography", but at this point we have no basis for the
+                // distinction.
                 Resource newSubject = ResourceFactory.
                         createResource(RdfProcessor.mintUri(localNamespace));
                 Literal literal = ResourceFactory.createLangLiteral(
-                        subjectValue, language);
+                        subject, language);
                 outputModel.add(work, Ld4lProperty.HAS_SUBJECT.property(),
                         newSubject);
                 outputModel.add(
@@ -158,12 +147,9 @@ public class BfPersonConverter extends BfAuthorityConverter {
             }
             
         }
-        
-        
-        // TODO handle fast uri
+               
+        // TODO handle fast uri - need to call Identifier converter
                 
-
-        
         retractions.add(labelStatement);
     }
     
