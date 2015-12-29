@@ -365,7 +365,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 a ?type . "
                 // These statements need to be included in the file for the
                 // Authority object rather than the Work.
-                + "FILTER (str(?p1) = \"" + BfProperty.BF_SUBJECT.uri() 
+                + "FILTER (str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
                 + "\") "
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
