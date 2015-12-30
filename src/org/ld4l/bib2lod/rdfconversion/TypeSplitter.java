@@ -367,8 +367,12 @@ public class TypeSplitter extends RdfProcessor {
                 // object rather than the Work subject, UNLESS the object is 
                 // itself a Work, in which case it should be added to the 
                 // Work file.
-                + "FILTER ( (str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
-                + "\" ) || EXISTS { ?o1 a ?type } ) "
+                + "FILTER ( str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
+                + "\" ) "
+                + "} UNION { "
+                + "?s1 ?p1 ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 a ?type . "                
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
