@@ -75,6 +75,7 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
 //        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
 //      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
         // Maybe can just use BfAuthorityConverter for Topics?
@@ -170,16 +171,19 @@ public class BibframeConverter extends RdfProcessor {
             copyFile(file);
             return 0;
         }
+
+        BfType typeForFile;
         
         if (basename.equals(ResourceDeduper.getRemainderFilename())) {
-            // Temporarily keep these statements for analysis. Some at least 
-            // may need to be included in other files for conversion.
-            // LOGGER.debug("Copying remainder file.");
-            copyFile(file);
-            return 0;
+//            // LOGGER.debug("Copying remainder file.");
+//            copyFile(file);
+//            return 0;
+            // This file needs further analysis - at least some statements 
+            // should be included in other files
+            typeForFile = BfType.BF_RESOURCE;            
+        } else {
+            typeForFile = BfType.typeForFilename(filename);
         }
-       
-        BfType typeForFile = BfType.typeForFilename(filename);
         
         // Should not happen
         if (typeForFile == null) {
@@ -218,7 +222,9 @@ public class BibframeConverter extends RdfProcessor {
             // assertions are needed for or incorporated into conversion of the 
             // primary subject. Examples: Work Titles, Instance Titles and
             // Identifiers.
-            if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass())) {
+            if (inputSubject.hasProperty(RDF.type, typeForFile.ontClass()) ||
+                    // For file other.nt - convert any subject
+                    typeForFile.equals(BfType.BF_RESOURCE)) {
                 
                 subjectCount++;
                 subjectCountForFile++;
@@ -230,7 +236,6 @@ public class BibframeConverter extends RdfProcessor {
                 // Get the statements about this subject and related objects
                 // that must be converted together.
                 Resource subject = getSubjectModelToConvert(inputSubject);
-
 
                 // appendModelToFile(converter.convert(subject), outputFile);
                 

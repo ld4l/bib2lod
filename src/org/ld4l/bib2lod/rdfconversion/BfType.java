@@ -67,6 +67,7 @@ public enum BfType {
     BF_PLACE("Place", Ld4lType.PLACE),
     BF_PRINT("Print", Ld4lType.PRINT),
     BF_RELATOR("Relator"),
+    BF_RESOURCE("Resource"),
     BF_REVIEW("Review", Ld4lType.ANNOTATION),
     // ld4l:Serial has domain Work rather than Instance, so we don't want a
     // direct conversion.
