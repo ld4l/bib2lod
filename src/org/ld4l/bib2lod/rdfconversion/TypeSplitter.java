@@ -364,9 +364,11 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 // These statements need to be included in the file for the
-                // Authority object rather than the Work.
-                + "FILTER (str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
-                + "\") "
+                // object rather than the Work subject, UNLESS the object is 
+                // itself a Work, in which case it should be added to the 
+                // Work file.
+                + "FILTER ( (str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
+                + "\" ) || EXISTS { ?o1 a ?type } ) "
                 + "} UNION { "
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
@@ -407,7 +409,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()                 
                 + "} }"                
         );
-        
+        LOGGER.debug(pss.toString());
         return pss;
         
     }
