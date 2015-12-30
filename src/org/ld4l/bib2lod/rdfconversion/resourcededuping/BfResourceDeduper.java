@@ -103,8 +103,6 @@ public class BfResourceDeduper {
             } else {
                 // We haven't seen this Resource before
                 LOGGER.debug("New resource: " + resourceUri);
-                // Not sure if this is needed in the map
-                uniqueUris.put(resourceUri, resourceUri);
                 uniqueResources.put(key, resourceUri);
             }
             

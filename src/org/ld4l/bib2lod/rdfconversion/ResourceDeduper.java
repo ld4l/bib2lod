@@ -228,15 +228,11 @@ public class ResourceDeduper extends RdfProcessor {
                 uriCount++;
                 String originalUri = entry.getKey();
                 String newUri = entry.getValue();
-                // Instead of this test, we may want to simply leave entries 
-                // where key and value are the same out of the map.
-                if (! newUri.equals(originalUri)) {
-                    LOGGER.trace("Replacing " + originalUri + " with " 
-                            + newUri);                           
-                    Resource resource = model.getResource(originalUri);
-                    ResourceUtils.renameResource(resource, newUri);                          
-                }
-                
+                LOGGER.debug("Replacing " + originalUri + " with " 
+                        + newUri);                           
+                Resource resource = model.getResource(originalUri);
+                ResourceUtils.renameResource(resource, newUri);                          
+             
                 if (uriCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Substituted " + uriCount + " unique "
                             + Bib2LodStringUtils.simplePlural("URI", uriCount) 

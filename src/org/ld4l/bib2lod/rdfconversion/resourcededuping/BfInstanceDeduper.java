@@ -98,8 +98,6 @@ public class BfInstanceDeduper extends BfResourceDeduper {
             } else {
                 // We haven't seen this Instance before
                 LOGGER.debug("New instance: " + instanceUri);
-                // Not sure if this is needed in the map
-                uniqueUris.put(instanceUri, instanceUri);
                 uniqueInstances.put(key, instanceUri);
             }
             

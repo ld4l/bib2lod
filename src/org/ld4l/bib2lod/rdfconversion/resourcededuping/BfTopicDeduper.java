@@ -57,7 +57,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
         
         // Maps keys for Authority identity matching to the unique Authority
         // URIs.        
-        Map<String, String> uniqueAuths = new HashMap<String, String>();
+        Map<String, String> uniqueExtAuths = new HashMap<String, String>();
         
         // Execute the query
         Query query = getQuery();        
@@ -96,8 +96,8 @@ public class BfTopicDeduper extends BfResourceDeduper {
             String replacementUri = 
                     externalTopicUri != null ? externalTopicUri : localTopicUri;
 
-            Resource auth = soln.getResource("auth");
-            String authUri = auth != null ? auth.getURI() : null;
+            Resource extAuth = soln.getResource("extAuth");
+            String extAuthUri = extAuth != null ? extAuth.getURI() : null;
 
             if (uniqueTopics.containsKey(key)) {
                 
@@ -115,30 +115,33 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 // key will always be identical. If not, we should normalize
                 // auth labels and dedupe authorities on them, rather than on 
                 // the topic keys. (See this applied in BfAuthorityDeduper.)
-                if (authUri != null) {
+                // TODO May want to unnest the external auth from the topic
+                // (again see BfAuthorityDeduper).
+                if (extAuthUri != null) {
                     
-                    // We've seen this Authority before
-                    if (uniqueAuths.containsKey(key)) {
-                        String uniqueAuthUri = uniqueAuths.get(key);
+                    // We've seen this external Authority before
+                    if (uniqueExtAuths.containsKey(key)) {
+                        String uniqueAuthUri = uniqueExtAuths.get(key);
                         LOGGER.debug("Found matching value for key " 
-                                    + key + " and auth URI " + authUri);
-                        LOGGER.debug("Adding: " + authUri + " => " 
+                                    + key + " and external auth URI " 
+                                    + extAuthUri);
+                        LOGGER.debug("Adding: " + extAuthUri + " => " 
                                     + uniqueAuthUri);
                         
                         // This local Authority URI will be replaced by the
                         // unique Authority URI throughout the data.
-                        uniqueUris.put(authUri, uniqueAuthUri);
+                        uniqueUris.put(extAuthUri, uniqueAuthUri);
                         
                     } else {
                         // We haven't seen this Authority before
-                        LOGGER.debug("Didn't find auth URI for" + key);
+                        LOGGER.debug("Didn't find matching external auth URI for " 
+                                + key);
                         // Add the local Authority URI to the maps
-                        uniqueAuths.put(key, authUri);
-                        // Not sure if this is needed in the map
-                        uniqueUris.put(authUri, authUri);
+                        uniqueExtAuths.put(key, extAuthUri);
                     }
                 }
-                
+            
+
             } else {
                 // We haven't seen this Topic before
                 LOGGER.debug("New topic: " + localTopicUri);
@@ -146,11 +149,9 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 // external URI, if it exists.
                 uniqueUris.put(localTopicUri, replacementUri);
                 uniqueTopics.put(key, replacementUri);
-                if (authUri != null) {
-                    LOGGER.debug("New auth: " + authUri);
-                    // Not sure if this is needed in the map
-                    uniqueUris.put(authUri, authUri);                
-                    uniqueAuths.put(key, authUri);
+                if (extAuthUri != null) {
+                    LOGGER.debug("New external auth: " + extAuthUri);               
+                    uniqueExtAuths.put(key, extAuthUri);
                 }
             }
 
@@ -192,8 +193,7 @@ public class BfTopicDeduper extends BfResourceDeduper {
                  * wrong, we'll need to normalize the auth labels and dedupe 
                  * authorities against them directly.
                  */
-                // "SELECT ?topic ?id ?authAccessPt ?label ?auth ?authLabel "
-                "SELECT ?topic ?authAccessPoint ?label ?auth  ?scheme ?id "
+                "SELECT ?topic ?authAccessPoint ?label ?extAuth  ?scheme ?id "
                 + "WHERE { "
                 + "?topic a " + BfType.BF_TOPIC.sparqlUri() + " . "
                 + "OPTIONAL { ?topic "
@@ -202,15 +202,15 @@ public class BfTopicDeduper extends BfResourceDeduper {
                 + "OPTIONAL { ?topic " 
                 + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "OPTIONAL { ?topic " 
-                + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?auth . "
+                + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?extAuth . "
                 // The authority seems to always have a scheme, but make it
                 // optional just in case.
-                + "OPTIONAL { ?auth " 
+                + "OPTIONAL { ?extAuth " 
                 + BfProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri() 
                 + " ?scheme . } " 
-                // + "?auth " 
+                // + "?extAuth " 
                 // + OntologyProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
-                // + " ?authLabel . "
+                // + " ?extAuthLabel . "
                 + "} "
                 + "OPTIONAL { ?topic "
                 + BfProperty.BF_SYSTEM_NUMBER.sparqlUri()

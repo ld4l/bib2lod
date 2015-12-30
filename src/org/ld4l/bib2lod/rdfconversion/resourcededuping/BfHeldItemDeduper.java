@@ -84,8 +84,6 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
             } else {
                 // We haven't seen this HeldItem before
                 LOGGER.debug("New item: " + itemUri);
-                // Not sure if this is needed in the map
-                uniqueUris.put(itemUri, itemUri);
                 uniqueItems.put(key, itemUri);
             }
             

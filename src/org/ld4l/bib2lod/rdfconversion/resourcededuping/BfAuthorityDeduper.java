@@ -108,10 +108,6 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
             } else {
                 // We haven't seen this local Authority before
                 LOGGER.debug("New local auth: " + localAuthUri);
-                // Not sure if this is needed in the map
-                LOGGER.debug("Adding: " + localAuthUri + " => " 
-                        + localAuthUri);
-                uniqueUris.put(localAuthUri, localAuthUri);
                 LOGGER.debug("Adding: " + localAuthKey + " => " 
                         + localAuthUri);
                 uniqueLocalAuths.put(localAuthKey, localAuthUri);
@@ -141,9 +137,6 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
                     LOGGER.debug("Adding: " + extAuthKey + " => " 
                             + extAuthUri);
                     uniqueExtAuths.put(extAuthKey, extAuthUri);
-                    LOGGER.debug("Adding: " + extAuthUri + " => " 
-                            + extAuthUri);
-                    uniqueUris.put(extAuthUri, extAuthUri);
                 }
             }                                                        
             
