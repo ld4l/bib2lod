@@ -22,6 +22,8 @@ the application.
 
 *** Sample converter commands ***
 
+java -jar /Users/rjy7/Workspace/bib2lod/jar/lib-package/Bib2Lod.e2dd4538.jar -a convert_bibframe -i bibframe -o ld4l -n http://draft.ld4l.org/cornell/
+
 java -jar /home/rjy7/projects/bib2lod/jar/Bib2Lod.jar -a convert_bibframe -i bibframe -o ld4l -n http://draft.ld4l.org/cornell/
 
 To control Java heap memory size (-Xms = initial allocation, -Xmx max allocation):
