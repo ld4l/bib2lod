@@ -81,7 +81,7 @@ public class BfResourceConverter {
      * converter (e.g., BfInstanceConverter) to the subject of this converter
      * (e.g., BfTitleConverter).
      * So far the known use cases don't require a BfType parameter, since these
-     * converters handle only a single type. Can add the parameter, or another 
+     * converters handle only a single type. Add the parameter, or another 
      * constructor, if needed later.  
      */
     protected BfResourceConverter(String localNamespace, Statement statement) {
@@ -90,44 +90,33 @@ public class BfResourceConverter {
     }
 
     /*
-     * Public interface method. Defined so convertSubject() and convertModel() 
-     * can be protected, so that if subclasses override these methods they
-     * cannot be called from outside the package.
+     * Public interface method. 
      */
-    public final Model convert(Resource subject) {        
-        return convertSubject(subject);
-    }
-
-    /*
-     * Top level method: initialize instance variables and convert.
-     * Subclasses may override: needed in the case where one converter calls
-     * another. The called converter must pass back a converted model, with
-     * outputModel and retractions applied, to the caller. The subject of the
-     * called converter is also different from the caller's subject. Examples:
-     * Instance converter calls Provider, Title, and Identifier converters.
-     * Work converter calls Title converter.
-     */
-    protected Model convertSubject(Resource subject) {    
+    public final Model convert(Resource subject) {  
         
         this.subject = subject;
         this.inputModel = subject.getModel();
+        
+        // Start with an empty output model
+        this.outputModel.removeAll();
+        this.retractions.removeAll();
 
         return convertModel();
     }
 
-    protected Model convertSubject(
-            /* The linking statement is passed in when the converter is called
-             * by another converter: the linking statement is the statement 
-             * that relates the caller's subject to this subject. For example,
-             * the statement :instance bf:publication :provider links the 
-             * Instance to the Provider, when BfInstanceConverter calls
-             * BfProviderConverter.
-             */
-            Resource subject, Statement linkingStatement) {
+    /* 
+     * This convert() method is called when the converter is called from 
+     * another converter, rather than from BibframeConverter. The linking 
+     * statement is the statement that relates the caller's subject to this 
+     * subject. For example, the statement :instance bf:publication :provider
+     * links the Instance to the Provider, when BfInstanceConverter calls
+     * BfProviderConverter.
+     */
+    protected Model convert(Resource subject, Statement linkingStatement) {
 
         this.linkingStatement = linkingStatement;
-        
-        return convertSubject(subject);       
+       
+        return convert(subject);       
     }
     
     /* 

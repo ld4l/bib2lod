@@ -104,7 +104,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         // statements in which it is the subject or object).
         Resource title = getSubjectModelToConvert(statement.getResource());
                 
-        Model titleModel = converter.convertSubject(title);
+        Model titleModel = converter.convert(title);
         outputModel.add(titleModel);
         
         // title.getModel() is the original model. Need to get the title 
