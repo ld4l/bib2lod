@@ -216,26 +216,9 @@ public class BibframeConverter extends RdfProcessor {
                 // that must be converted together.
                 Resource subject = converter.getSubjectModelToConvert(
                         inputSubject);
-
-                // appendModelToFile(converter.convert(subject), outputFile);
-                
-				Model subjectOutputModel = converter.convert(subject);
+	
+				outputModel.add(converter.convert(subject));
 				
-				LOGGER.debug("subjectOutputModel.size() after conversion = " 
-				        + subjectOutputModel.size());
-				LOGGER.debug("outputModel.size() before adding "
-				        + "subjectOutputModel = " + outputModel.size());
-				
-				outputModel.add(subjectOutputModel);
-				
-                LOGGER.debug("outputModel.size() after adding "
-                        + "subjectOutputModel = " + outputModel.size());
-                        	               
-				subjectOutputModel.removeAll();
-				
-                LOGGER.debug("subjectOutputModel.size() = " 
-                        + subjectOutputModel.size());
-
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Converted Bibframe RDF for " + subjectCount 
                             + " " + Bib2LodStringUtils.simplePlural(

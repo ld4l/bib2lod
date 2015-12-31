@@ -69,10 +69,7 @@ public class BfResourceConverter {
                 + "; no Bibframe type specified.");
 
         this.localNamespace = localNamespace;
-        
-        this.outputModel = ModelFactory.createDefaultModel();
-        this.retractions = ModelFactory.createDefaultModel();
-        
+
     }
 
     /* 
@@ -97,10 +94,10 @@ public class BfResourceConverter {
         this.subject = subject;
         this.inputModel = subject.getModel();
         
-        // Start with an empty output model
-        this.outputModel.removeAll();
-        this.retractions.removeAll();
-
+        // Start with new, empty models for each conversion
+        this.outputModel = ModelFactory.createDefaultModel();
+        this.retractions = ModelFactory.createDefaultModel();     
+        
         return convertModel();
     }
 
@@ -116,7 +113,11 @@ public class BfResourceConverter {
 
         this.linkingStatement = linkingStatement;
        
-        return convert(subject);       
+        Model model = convert(subject);
+        
+        this.linkingStatement = null;
+        
+        return model;      
     }
     
     /* 
