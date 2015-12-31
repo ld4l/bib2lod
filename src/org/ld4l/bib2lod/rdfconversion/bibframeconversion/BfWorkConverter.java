@@ -93,9 +93,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
         
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource contributor = BibframeConverter.getSubjectModelToConvert(
-                statement.getResource());
-        
+        Resource contributor = 
+                getSubjectModelToConvert(statement.getResource());
+                       
         // Add BfContributorConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
         outputModel.add(converter.convertSubject(contributor, statement));
@@ -111,9 +111,8 @@ public class BfWorkConverter extends BfBibResourceConverter {
 
         // Identify the annotation resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource annotation = BibframeConverter.getSubjectModelToConvert(
-                statement.getSubject()); 
-        
+        Resource annotation = getSubjectModelToConvert(statement.getSubject());
+                        
         // Add BfAnnotationConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
         outputModel.add(converter.convertSubject(annotation, statement));        

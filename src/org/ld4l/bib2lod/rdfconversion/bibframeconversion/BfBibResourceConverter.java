@@ -102,9 +102,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         
         // Identify the title resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource title = BibframeConverter.getSubjectModelToConvert(
-                statement.getResource());
-
+        Resource title = getSubjectModelToConvert(statement.getResource());
+                
         Model titleModel = converter.convertSubject(title);
         outputModel.add(titleModel);
         

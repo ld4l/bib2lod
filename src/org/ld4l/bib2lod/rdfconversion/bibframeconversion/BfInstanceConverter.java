@@ -159,9 +159,8 @@ public class BfInstanceConverter extends BfBibResourceConverter {
      
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource provider = BibframeConverter.getSubjectModelToConvert(
-                statement.getResource());
-        
+        Resource provider = getSubjectModelToConvert(statement.getResource());
+                      
         // Add BfProviderConverter model to this converter's outputModel model,
         // so they get added to the BibframeConverter output model.
         outputModel.add(converter.convertSubject(provider, statement));
