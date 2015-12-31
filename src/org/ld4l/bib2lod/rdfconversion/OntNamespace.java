@@ -3,6 +3,9 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 public enum OntNamespace {
 
     // Assign prefixes here rather than getting from the models, since they may
@@ -27,6 +30,9 @@ public enum OntNamespace {
     TIME("http://www.w3.org/TR/owl-time/", "time"), 
     VIVO("http://vivoweb.org/ontology/core#", "vivo");
 
+    private static final Logger LOGGER = 
+            LogManager.getLogger(OntNamespace.class);
+    
     private final String uri;
     private final String prefix;
     

@@ -6,6 +6,8 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Defines classes used by LD4L in the RDF output of the conversion process.
@@ -84,7 +86,8 @@ public enum Ld4lType {
     UDC_SHELF_MARK("UdcShelfMark"),
     WORK("Work");
     
-
+    private static final Logger LOGGER = LogManager.getLogger(Ld4lType.class);           
+    
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;

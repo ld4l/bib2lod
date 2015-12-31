@@ -9,6 +9,8 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Defines classes used by Bibframe in the RDF input to the conversion process.
@@ -89,7 +91,8 @@ public enum BfType {
     MADSRDF_COMPLEX_SUBJECT(OntNamespace.MADSRDF, "ComplexSubject"),
     MADSRDF_CONFERENCE_NAME(OntNamespace.MADSRDF, "ConferenceName");
     
-
+    private static final Logger LOGGER = LogManager.getLogger(BfType.class);
+              
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;

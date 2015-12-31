@@ -8,6 +8,8 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 /**
  * Defines properties used by Bibframe in the RDF input to the conversion
@@ -16,7 +18,7 @@ import org.apache.jena.rdf.model.ResourceFactory;
  *
  */
 public enum BfProperty {
-
+    
     BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
     BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
             Ld4lProperty.ANNOTATED_BY),
@@ -123,14 +125,15 @@ public enum BfProperty {
     RELATORS_PERFORMER(
             OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION); 
 
+    private static final Logger LOGGER = LogManager.getLogger(BfProperty.class);
+              
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;
     private final String prefixed;
     private final Property property;
     private final Ld4lProperty ld4lProperty;
-    
-
+ 
     BfProperty(String localname) {
         // Assign default namespace for this enum value
         // No corresponding Ld4lProperty for this enum value
@@ -228,6 +231,7 @@ public enum BfProperty {
     }
     
     public static Map<Property, Property> propertyMap() {
+        LOGGER.debug("PROPERTY_MAP: " + PROPERTY_MAP.toString());
         return PROPERTY_MAP;
     }
 

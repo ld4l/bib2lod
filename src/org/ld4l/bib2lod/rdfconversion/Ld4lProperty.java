@@ -2,6 +2,8 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.ResourceFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 
 /**
@@ -70,7 +72,10 @@ public enum Ld4lProperty {
     TRANSLATES("translates"),
     VALUE(OntNamespace.RDF, "value");
     
-
+    private static final Logger LOGGER = 
+            LogManager.getLogger(Ld4lProperty.class);
+            
+    
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;

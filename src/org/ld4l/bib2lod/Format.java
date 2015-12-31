@@ -7,6 +7,8 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.riot.RDFFormat;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
 public enum Format {
 
@@ -15,6 +17,8 @@ public enum Format {
     NTRIPLES("ntriples", "nt", RDFFormat.NTRIPLES);
     // RDFXML("rdfxml", RDFFormat.RDFXML, "rdf");
 
+    private static final Logger LOGGER = LogManager.getLogger(Format.class);
+    
     private final String label;
     private final String extension;
     private RDFFormat jenaRDFFormat;

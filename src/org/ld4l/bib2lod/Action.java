@@ -6,6 +6,9 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
@@ -28,7 +31,9 @@ public enum Action {
     DEDUPE_RESOURCES("dedupe", ResourceDeduper.class),
     CONVERT_BIBFRAME("convert_bibframe", BibframeConverter.class);
     // RESOLVE_TO_EXTERNAL_ENTITIES);
-    
+
+    private static final Logger LOGGER = LogManager.getLogger(Action.class);
+            
     private final String label;    
     private final Class<?> processorClass;
 
