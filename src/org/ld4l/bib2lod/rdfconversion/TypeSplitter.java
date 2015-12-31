@@ -356,7 +356,8 @@ public class TypeSplitter extends RdfProcessor {
     private ParameterizedSparqlString getBfWorkSparql() {
         
         ParameterizedSparqlString pss = new ParameterizedSparqlString();
-
+        pss.setNsPrefix("madsrdf", OntNamespace.MADSRDF.uri());
+        
         pss.setCommandText(
                 "CONSTRUCT { ?s1 ?p1 ?o1 . "
                 + "?o1 ?p2 ?o2 . } "
@@ -364,12 +365,12 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 // These statements need to be included in the file for the
-                // object rather than the Work subject, UNLESS the object is 
-                // itself a Work, in which case it should be added to the 
-                // Work file.
+                // object rather than the Work subject.
                 + "FILTER ( str(?p1) != \"" + BfProperty.BF_SUBJECT.uri() 
                 + "\" ) "
                 + "} UNION { "
+                // If the object of bf:subject is also a Work, include it here,
+                // else it ends up in other.nt.
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 a ?type . "                
@@ -397,6 +398,7 @@ public class TypeSplitter extends RdfProcessor {
                 + "?o1 ?p2 ?o2 . "
                 + "?o1 a " + BfType.BF_ANNOTATION.prefixed()
                 + "} UNION {"
+                // TODO Review and Summary not working
                 + "?o1 " + BfProperty.BF_REVIEW_OF.prefixed() +  " ?s1 . "
                 + "?s1 a ?type . " 
                 + "?o1 ?p2 ?o2 . "
@@ -410,7 +412,12 @@ public class TypeSplitter extends RdfProcessor {
                 + "?s1 ?p1 ?o1 . "
                 + "?s1 a ?type . "
                 + "?o1 ?p2 ?o2 . "
-                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()                 
+                + "?o1 a " + BfType.BF_CLASSIFICATION.prefixed()    
+                + "} UNION { "
+                + "?s1 " + BfProperty.BF_HAS_AUTHORITY.prefixed() + " ?o1 . "
+                + "?s1 a ?type . "
+                + "?o1 ?p2 ?o2 . " 
+                + "?o1 a " + BfType.MADSRDF_AUTHORITY.prefixed()                  
                 + "} }"                
         );
         LOGGER.debug(pss.toString());
