@@ -221,7 +221,9 @@ public class BibframeConverter extends RdfProcessor {
 
                 // appendModelToFile(converter.convert(subject), outputFile);
                 
-                outputModel.add(converter.convert(subject));
+				Model addModel = converter.convert(subject);
+				outputModel.add(addModel);
+				addModel.removeAll();
 
 //                if (subjectCountToWrite >= 1000) {
 //                    LOGGER.debug("Appending RDF for " + subjectCountToWrite                              
