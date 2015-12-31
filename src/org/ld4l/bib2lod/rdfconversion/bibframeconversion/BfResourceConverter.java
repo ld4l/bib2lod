@@ -209,10 +209,14 @@ public class BfResourceConverter {
       
     private Map<Resource, Resource> buildTypeMap() {
         
-        // Get default mapping from Bibframe to LD4l types
-        Map<Resource, Resource> typeMap = BfType.typeMap();
+        // WRONG - alters map returned by BfType.typeMap()
+        // Map<Resource, Resource> typeMap = BfType.typeMap();
+        // typeMap.putAll(getTypeMap());
         
-        // Type-specific mappings will override
+        Map<Resource, Resource> typeMap = new HashMap<Resource, Resource>();
+        // Get default mapping from Bibframe to LD4L properties
+        typeMap.putAll(BfType.typeMap());
+        // Type-specific mappings override
         typeMap.putAll(getTypeMap());
         
         // If a child converter needs to delete rather than convert a type,
@@ -234,12 +238,16 @@ public class BfResourceConverter {
     
     private Map<Property, Property> buildPropertyMap() {
         
+        // WRONG - alters map returned by BfProperty.propertyMap()
+        // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
+        // propertyMap.putAll(getPropertyMap());
+
+        Map<Property, Property> propertyMap = new HashMap<Property, Property>();
         // Get default mapping from Bibframe to LD4L properties
-        Map<Property, Property> propertyMap = BfProperty.propertyMap();
-        
-        // Type-specific mapping will override
+        propertyMap.putAll(BfProperty.propertyMap());
+        // Type-specific mapping override
         propertyMap.putAll(getPropertyMap());
-        
+
         List<Property> propertiesToRetract = getPropertiesToRetract();
         propertyMap.keySet().removeAll(propertiesToRetract);
         
