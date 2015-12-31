@@ -188,7 +188,6 @@ public class BibframeConverter extends RdfProcessor {
         Instant subjectStart = Instant.now();
         int subjectCount = 0;
         int subjectCountForFile = 0;
-        // int subjectCountToWrite = 0;
         
         while (subjects.hasNext()) {
 
@@ -209,7 +208,6 @@ public class BibframeConverter extends RdfProcessor {
                 
                 subjectCount++;
                 subjectCountForFile++;
-                // subjectCountToWrite++;
                 
                 // LOGGER.debug("Converting " + typeForFile + " subject " 
                 //         + inputSubject.getURI());
@@ -221,20 +219,23 @@ public class BibframeConverter extends RdfProcessor {
 
                 // appendModelToFile(converter.convert(subject), outputFile);
                 
-				Model addModel = converter.convert(subject);
-				outputModel.add(addModel);
-				addModel.removeAll();
+				Model subjectOutputModel = converter.convert(subject);
+				
+				LOGGER.debug("subjectOutputModel.size() after conversion = " 
+				        + subjectOutputModel.size());
+				LOGGER.debug("outputModel.size() before adding "
+				        + "subjectOutputModel = " + outputModel.size());
+				
+				outputModel.add(subjectOutputModel);
+				
+                LOGGER.debug("outputModel.size() after adding "
+                        + "subjectOutputModel = " + outputModel.size());
+                        	               
+				subjectOutputModel.removeAll();
+				
+                LOGGER.debug("subjectOutputModel.size() = " 
+                        + subjectOutputModel.size());
 
-//                if (subjectCountToWrite >= 1000) {
-//                    LOGGER.debug("Appending RDF for " + subjectCountToWrite                              
-//                            + " " + Bib2LodStringUtils.simplePlural(
-//                                    "resource", subjectCountToWrite)
-//                            + " to file.");
-//                    appendModelToFile(outputModel, outputFile);
-//                    outputModel.removeAll();
-//                    subjectCountToWrite = 0;
-//                }
-                
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     LOGGER.info("Converted Bibframe RDF for " + subjectCount 
                             + " " + Bib2LodStringUtils.simplePlural(
@@ -260,14 +261,6 @@ public class BibframeConverter extends RdfProcessor {
         }
        
         writeModelToFile(outputModel, outputFile);   
-         
-//        if (subjectCountToWrite > 0) {
-//            LOGGER.info("Appending RDF for " + subjectCountToWrite + " "                              
-//                    + Bib2LodStringUtils.simplePlural(
-//                            "resource", subjectCountToWrite)
-//                    + " to file.");
-//            appendModelToFile(outputModel, outputFile);  
-//        }
         
         LOGGER.info("Done converting Bibframe RDF in file " + filename 
                 + ". Processed " + subjectCountForFile + " " 
