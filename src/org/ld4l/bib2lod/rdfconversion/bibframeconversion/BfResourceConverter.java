@@ -56,20 +56,11 @@ public class BfResourceConverter {
 
     public BfResourceConverter(BfType bfType, String localNamespace) {
         this(localNamespace);     
-        LOGGER.debug("In constructor for converter type " 
-                + this.getClass().getSimpleName()
-                + "; converting Bibframe type " + bfType);  
-     
         this.bfType = bfType;
     }
     
     protected BfResourceConverter(String localNamespace) {
-        LOGGER.debug("In constructor for converter type " 
-                + this.getClass().getSimpleName() 
-                + "; no Bibframe type specified.");
-
         this.localNamespace = localNamespace;
-
     }
 
     /* 
