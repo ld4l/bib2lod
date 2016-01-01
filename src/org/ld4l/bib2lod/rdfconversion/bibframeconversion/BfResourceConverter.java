@@ -431,9 +431,8 @@ public class BfResourceConverter {
         // If this method is called from a converter that is passing off
         // processing of a secondary type, we don't need to collect further
         // statements about that primary resource. If this method is called
-        // from BibframeConverter for a primary resource, this.subject is null,
-        // so the statement evaluates false.
-        if (resource.equals(this.subject)) {
+        // from BibframeConverter for a primary resource, this.subject is null.
+        if (this.subject != null && resource.equals(this.subject)) {
             return model;
         }
         
