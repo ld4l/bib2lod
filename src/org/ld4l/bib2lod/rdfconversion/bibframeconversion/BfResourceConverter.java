@@ -333,7 +333,7 @@ public class BfResourceConverter {
         // Create the new model of statements related to this subject
         Model modelForSubject = ModelFactory.createDefaultModel();
         
-        // Start with statements of which this subject is the subject
+        // Start with statements of which this resource is the subject
         List<Statement> resourceAsSubjectStmts = 
                 resource.listProperties().toList();
         modelForSubject.add(resourceAsSubjectStmts);
@@ -376,7 +376,7 @@ public class BfResourceConverter {
              * I.e., DON'T include statements about a work which, is, say the 
              * object of a :work bf:relatedWork :work statement - these should
              * be handled when that work is converted (i.e., on another 
-             * iteration of the main loop over subjects in the input model. DO 
+             * iteration of the main loop over subjects in the input model). DO 
              * include statements about Identifiers, Titles, Annotations, etc. 
              * which are objects of statements about the current subject 
              * resource. Note that the statements of this sort that are 
@@ -384,7 +384,8 @@ public class BfResourceConverter {
              * in TypeSplitter.
              */           
             for (Statement stmt : resourceAsObjectStmts) {
-                modelForSubject.add(getRelatedResourceStmts(stmt.getSubject()));              
+                    modelForSubject.add(
+                            getRelatedResourceStmts(stmt.getSubject()));   
             }  
         }
         
@@ -421,19 +422,44 @@ public class BfResourceConverter {
             
         Model model = ModelFactory.createDefaultModel();
         
-        if (node.isResource()) {
-            Resource resource = node.asResource();
-            StmtIterator typeStmts = resource.listProperties(RDF.type);
-            while (typeStmts.hasNext()) {
-                Resource type = typeStmts.nextStatement().getResource();
-                if (SECONDARY_TYPES.contains(type)) {
-                    model.add(resource.listProperties());     
-                    break;
-                }
+        if (! node.isResource()) {
+            return model;
+        }
+         
+        Resource resource = node.asResource();
+
+        // If this method is called from a converter that is passing off
+        // processing of a secondary type, we don't need to collect further
+        // statements about that primary resource. If this method is called
+        // from BibframeConverter for a primary resource, this.subject is null,
+        // so the statement evaluates false.
+        if (resource.equals(this.subject)) {
+            return model;
+        }
+        
+        StmtIterator typeStmts = resource.listProperties(RDF.type);
+        while (typeStmts.hasNext()) {
+            Resource type = typeStmts.nextStatement().getResource();
+            if (SECONDARY_TYPES.contains(type)) {
+                model.add(resource.listProperties());     
+                break;
             }
-        }           
+        }
+        
         return model;
     }
    
-
+    protected void convertIdentifier(Statement statement) {
+        
+        BfResourceConverter converter = new BfIdentifierConverter(
+                this.localNamespace, statement);
+     
+        // Identify the identifier resource and build its associated model 
+        // (i.e., statements in which it is the subject or object).
+        Resource identifier = getSubjectModelToConvert(statement.getResource());
+                      
+        // Add BfIdentifierConverter model to this converter's outputModel 
+        // model.
+        outputModel.add(converter.convert(identifier, statement));       
+    }
 }
