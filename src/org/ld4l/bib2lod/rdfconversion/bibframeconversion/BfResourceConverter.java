@@ -89,16 +89,20 @@ public class BfResourceConverter {
     /*
      * Public interface method. 
      */
-    public final Model convert(Resource subject) {  
-        
+    public final Model convert(Resource subject) {         
+        init(subject);       
+        return convertModel();
+    }
+    
+    // Reset converter for processing of new subject
+    private void init(Resource subject) {
+
         this.subject = subject;
         this.inputModel = subject.getModel();
         
         // Start with new, empty models for each conversion
         this.outputModel = ModelFactory.createDefaultModel();
-        this.retractions = ModelFactory.createDefaultModel();     
-        
-        return convertModel();
+        this.retractions = ModelFactory.createDefaultModel();  
     }
 
     /* 
@@ -329,6 +333,8 @@ public class BfResourceConverter {
      * already been written to different files.
      */
     public Resource getSubjectModelToConvert(Resource resource) {
+        
+        LOGGER.debug("Getting model for subject " + resource.getURI());
             
         // LOGGER.debug("Constructing subject model for " + resource.getURI());
         Model inputModel = resource.getModel();
@@ -364,7 +370,9 @@ public class BfResourceConverter {
         // However, note that in :work1 [related-work-predicate] :work2, the
         // statement gets added to the model for whichever work is processed
         // first. We must be prepared to handle the statement in either case -
-        // i.e., from the subject or object point of view.
+        // i.e., from the subject or object point of view, OR override this
+        // method in BfWorkConverter if we must ensure that it goes with the 
+        // subject work or the object work.
         List<Statement> resourceAsObjectStmts = 
                 inputModel.listStatements(null, null, resource).toList();
         
@@ -392,6 +400,8 @@ public class BfResourceConverter {
         // Other converters will not need to process these statements, so they 
         // can be removed from the input model.
         inputModel.remove(modelForSubject);
+        
+        // RdfProcessor.printModel(modelForSubject, Level.DEBUG);
            
         // NB At this point, resource.getModel() is the inputModel, not 
         // the modelForSubject. Get the subject of the modelForSubject 
@@ -416,7 +426,7 @@ public class BfResourceConverter {
      * with the same label exists. That requires having all the Instance's
      * title information together when converting the Instance.
      */
-    private Model getRelatedResourceStmts(RDFNode node) {
+    protected Model getRelatedResourceStmts(RDFNode node) {
             
         Model model = ModelFactory.createDefaultModel();
         
