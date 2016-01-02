@@ -161,14 +161,15 @@ public class ResourceDeduper extends RdfProcessor {
 //  }
 
         Instant processStart = Instant.now();
-        LOGGER.info("Start finding unique URIs.");
+        LOGGER.info("START identifying unique URIs.");
         
         for ( File file : inputFiles ) {
             
             Instant fileStart = Instant.now();
             String filename = file.getName();
             
-            LOGGER.info("Start finding unique URIs in file " + filename + ".");
+            LOGGER.info(
+                    "Start identifying unique URIs in file " + filename + ".");
             
             String basename = FilenameUtils.getBaseName(file.toString());
             BfResourceDeduper deduper = dedupers.get(basename);
@@ -192,12 +193,12 @@ public class ResourceDeduper extends RdfProcessor {
              */
             writeNewAssertions(deduper.getNewAssertions());
             
-            LOGGER.info("Done finding unique URIs in file " + filename
+            LOGGER.info("Done identifying unique URIs in file " + filename
                     + ". " + TimerUtils.getDuration(fileStart));
                     
         } 
         
-        LOGGER.info("Done finding unique URIs in all files. " 
+        LOGGER.info("END identifying unique URIs in all files. " 
                 + TimerUtils.getDuration(processStart));
     }
     
@@ -205,14 +206,14 @@ public class ResourceDeduper extends RdfProcessor {
             String outputDir) {
 
         Instant processStart = Instant.now();
-        LOGGER.info("Start substituting unique URIs for duplicate URIs.");
+        LOGGER.info("START replacing duplicate URIs with unique URIs.");
         
         for ( File file : inputFiles ) {
 
             Instant fileStart = Instant.now();
             String filename = file.getName();
-            LOGGER.info("Start substituting unique URIs for duplicate URIs in" 
-                    + " file " + filename + ".");
+            LOGGER.info("Start replacing duplicate URIs with unique URIs in " 
+                    + "file " + filename + ".");
             
             // Rename each resource with the new URI specified in uniqueUris.
             // Renaming Resources rather than dumb string replacement avoids
@@ -301,13 +302,13 @@ public class ResourceDeduper extends RdfProcessor {
             LOGGER.trace("Writing model for file " + filename);
             writeModelToFile(model, basename);    
             
-            LOGGER.info("Done substituting unique URIs for duplicate URIs in "
+            LOGGER.info("Done replacing duplicate URIs with unique URIs in "
                     + "file " + filename + ". "  
                     + TimerUtils.getDuration(fileStart));
 
         }
         
-        LOGGER.info("Done substituting unique URIs for duplicate URIs in all " 
+        LOGGER.info("DONE replacing duplicate URIs with unique URIs in all " 
                 + "files. " + TimerUtils.getDuration(processStart));
                    
     }
