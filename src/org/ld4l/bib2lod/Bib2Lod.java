@@ -38,8 +38,8 @@ public class Bib2Lod {
      */
     public static void main(String[] args) {
 
-        LOGGER.info("START conversion.");
-        LOGGER.info("START initial setup.");
+        LOGGER.info("START CONVERSION.");
+        LOGGER.info("START application configuration.");
         Instant start = Instant.now();
         
         // Define program options
@@ -75,9 +75,9 @@ public class Bib2Lod {
             return;
         }
            
-        LOGGER.info("END initial setup. " 
+        LOGGER.info("END application configuration. " 
                 + TimerUtils.getDuration(start));
-        LOGGER.info("Application configuration: ");
+        LOGGER.info("Settings: ");
         LOGGER.info("Local namespace: " + namespace);
 
         LOGGER.info("Input directory: " + absInputDir);

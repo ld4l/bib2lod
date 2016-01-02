@@ -38,41 +38,60 @@ public class BnodeConverter extends RdfProcessor {
         
         String outputDir = getOutputDir();
 
-        // For logging
+        File[] inputFiles = new File(inputDir).listFiles();
+        int totalFileCount = inputFiles.length;
+        
         int fileCount = 0;
+        int timeFileCount = 0;
         Instant fileStart = Instant.now();
 
         
-        for ( File file : new File(inputDir).listFiles() ) {
+        for ( File file : inputFiles ) {
 
             fileCount++;
+            timeFileCount++;
+            
             String filename = file.getName();
-            LOGGER.info("Start blank node conversion in file " + filename);
+            
+            LOGGER.info("Start blank node conversion in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
+            
             Model outputModel = processInputFile(file);
+            
             // Write out to same filename as input file
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
-            LOGGER.info("End blank node conversion in file " + filename);
             
-            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+            LOGGER.info("End blank node conversion in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
+            
+            if (timeFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
-                LOGGER.trace("Converted blank nodes in " + fileCount + " "
-                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                LOGGER.trace("Converted blank nodes in " + timeFileCount + " "
+                        + Bib2LodStringUtils.simplePlural("file", timeFileCount)
                         + ". " + TimerUtils.getDuration(fileStart));
-                fileCount = 0;
+                timeFileCount = 0;
                 fileStart = Instant.now();   
             }
         }   
 
-        if (fileCount > 0) {
+        if (timeFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
-            LOGGER.trace("Converted blank nodes in " + fileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+            LOGGER.trace("Converted blank nodes in " + timeFileCount + " "
+                    + Bib2LodStringUtils.simplePlural("file", timeFileCount)
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
         
-        LOGGER.info("END blank node conversion in all input files. "
-                + TimerUtils.getDuration(processStart));
+        LOGGER.info("END blank node conversion in all " + totalFileCount                 
+                + " input " 
+                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + ". " + TimerUtils.getDuration(processStart));
         
         return outputDir;
     }

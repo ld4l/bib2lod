@@ -301,12 +301,13 @@ public class ResourceDeduper extends RdfProcessor {
             LOGGER.trace("Writing model for file " + filename);
             writeModelToFile(model, basename);    
             
-            LOGGER.info("Done substituting unique URIs for duplicates in file " 
-                    + filename + ". "  + TimerUtils.getDuration(fileStart));
+            LOGGER.info("Done substituting unique URIs for duplicate URIs in "
+                    + "file " + filename + ". "  
+                    + TimerUtils.getDuration(fileStart));
 
         }
         
-        LOGGER.info("Done substituting unique URIs for duplicates in all " 
+        LOGGER.info("Done substituting unique URIs for duplicate URIs in all " 
                 + "files. " + TimerUtils.getDuration(processStart));
                    
     }

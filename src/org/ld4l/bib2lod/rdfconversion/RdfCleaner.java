@@ -89,49 +89,66 @@ public class RdfCleaner extends RdfProcessor {
         
         String outputDir = getOutputDir();
         
-        // For logging
+        File[] inputFiles = new File(inputDir).listFiles();
+        int totalFileCount = inputFiles.length;
+        
         int fileCount = 0;
+        int timerFileCount = 0;
         Instant fileStart = Instant.now();
-       
-        for ( File file : new File(inputDir).listFiles() ) {
+        
+        for ( File file : inputFiles ) {
 
             fileCount++;
-    
+            timerFileCount++;    
+            String filename = file.getName();
+            
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
             // clean them up here.
             if (file.isDirectory()) { 
+                LOGGER.trace(
+                        "Skipping " + filename + " because it is a directory.");
                 continue;
             }
             if (file.length() == 0) {
+                LOGGER.trace("Skipping " + filename + " because it is empty.");
                 continue;
             }
-            
-            LOGGER.info("Start RDF cleanup in file " + file.getName());
+                        
+            LOGGER.info("Start RDF cleanup in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
             
             replaceLinesInFile(file, outputDir); 
             
-            LOGGER.info("End RDF cleanup in file " + file.getName());
+            LOGGER.info("End RDF cleanup in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
             
-            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+            if (timerFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
-                LOGGER.trace("Cleaned RDF in " + fileCount + " " 
-                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                LOGGER.trace("Cleaned RDF in " + timerFileCount + " " 
+                        + Bib2LodStringUtils.simplePlural("file", timerFileCount)
                         + ". " + TimerUtils.getDuration(fileStart));
-                fileCount = 0;
+                timerFileCount = 0;
                 fileStart = Instant.now();   
             }
         }
         
-        if (fileCount > 0) {
+        if (timerFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
-            LOGGER.trace("Cleaned RDF in " + fileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+            LOGGER.trace("Cleaned RDF in " + timerFileCount + " "
+                    + Bib2LodStringUtils.simplePlural("file", timerFileCount)
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   
         
-        LOGGER.info("END RDF cleanup in all files. "
-                + TimerUtils.getDuration(processStart));
+        LOGGER.info("END RDF cleanup in all " + totalFileCount + " input "                
+                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + ". " + TimerUtils.getDuration(processStart));
         
         return outputDir;
     }

@@ -69,41 +69,56 @@ public class TypeSplitter extends RdfProcessor {
         Map<String, File> outputFilesByType = 
                 createOutputFilesByType(outputDir);
 
-        // For logging
+        File[] inputFiles = new File(inputDir).listFiles();
+        int totalFileCount = inputFiles.length;
+        
         int fileCount = 0;
+        int timerFileCount = 0;
         Instant fileStart = Instant.now();
         
         // For each file in the input directory
-        for ( File inputFile : new File(inputDir).listFiles() ) {
+        for ( File inputFile : inputFiles ) {
+            
             fileCount++;
+            timerFileCount++;
             String filename = inputFile.getName();
             
-            LOGGER.info("Start splitting triples by type in file " + filename);
+            LOGGER.info("Start splitting triples by type in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
             
             processInputFile(inputFile, outputFilesByType);
             
-            LOGGER.info("End splitting triples by type in file " + filename);
+            LOGGER.info("End splitting triples by type in file " + filename
+                    + " (file " + fileCount + " of " + totalFileCount  
+                    + " input "
+                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + ").");
             
-            if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
+            if (timerFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
-                LOGGER.trace("Split " + fileCount + " "
-                        + Bib2LodStringUtils.simplePlural("file", fileCount)
+                LOGGER.trace("Split " + timerFileCount + " "
+                        + Bib2LodStringUtils.simplePlural("file", timerFileCount)
                         + " by resource type. " 
                         + TimerUtils.getDuration(fileStart));
-                fileCount = 0;
+                timerFileCount = 0;
                 fileStart = Instant.now();   
             }
         }
 
-        if (fileCount > 0) {
+        if (timerFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
-            LOGGER.trace("Split " + fileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", fileCount)
+            LOGGER.trace("Split " + timerFileCount + " "
+                    + Bib2LodStringUtils.simplePlural("file", timerFileCount)
                     + " by resource type. " 
                     + TimerUtils.getDuration(fileStart)); 
         }   
         
-        LOGGER.info("END splitting all files by resource type. " 
+        LOGGER.info("END splitting all " + totalFileCount + " input " 
+                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + " by resource type. " 
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;                                                                                                                               
