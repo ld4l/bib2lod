@@ -82,7 +82,7 @@ public class TypeSplitter extends RdfProcessor {
             
             processInputFile(inputFile, outputFilesByType);
             
-            LOGGER.info("Start splitting triples by type in file " + filename);
+            LOGGER.info("End splitting triples by type in file " + filename);
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
