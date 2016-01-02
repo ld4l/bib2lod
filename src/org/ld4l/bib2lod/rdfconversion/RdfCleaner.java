@@ -107,11 +107,11 @@ public class RdfCleaner extends RdfProcessor {
                 continue;
             }
             
-            LOGGER.info("Start RDF cleanup in file: " + file.getName());
+            LOGGER.info("Start RDF cleanup in file " + file.getName());
             
             replaceLinesInFile(file, outputDir); 
             
-            LOGGER.info("End RDF cleanup in file: " + file.getName());
+            LOGGER.info("End RDF cleanup in file " + file.getName());
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug

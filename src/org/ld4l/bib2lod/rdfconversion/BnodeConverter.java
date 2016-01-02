@@ -52,7 +52,7 @@ public class BnodeConverter extends RdfProcessor {
             // Write out to same filename as input file
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
-            LOGGER.trace("End blank node conversion in file " + filename);
+            LOGGER.info("End blank node conversion in file " + filename);
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
