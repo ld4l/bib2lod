@@ -111,7 +111,7 @@ public class ResourceDeduper extends RdfProcessor {
     public String process() {
         
         Instant processStart = Instant.now();
-        LOGGER.info("Start resource deduping.");
+        LOGGER.info("START resource deduping.");
         
         String outputDir = getOutputDir();    
 
@@ -122,7 +122,7 @@ public class ResourceDeduper extends RdfProcessor {
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
 
-        LOGGER.info("End resource deduping in all files. "
+        LOGGER.info("END resource deduping in all files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;
@@ -299,13 +299,14 @@ public class ResourceDeduper extends RdfProcessor {
             LOGGER.trace("Writing model for file " + filename);
             writeModelToFile(model, basename);    
             
-            LOGGER.info("Done deduping URIs in file " + filename + ". "
-                    + TimerUtils.getDuration(fileStart));   
+            LOGGER.info("Done substituting unique URIs for duplicates in file " 
+                    + filename + ". "  + TimerUtils.getDuration(fileStart));
 
         }
         
-        LOGGER.info("Done deduping URIs in all files. " 
-                + TimerUtils.getDuration(processStart));   
+        LOGGER.info("Done substituting unique URIs for duplicates in all " 
+                + "files. " + TimerUtils.getDuration(processStart));
+                   
     }
    
     private void writeNewAssertions(Model newStatements) {

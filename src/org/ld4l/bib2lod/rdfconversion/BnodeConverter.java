@@ -34,7 +34,7 @@ public class BnodeConverter extends RdfProcessor {
     public String process() {        
         
         Instant processStart = Instant.now();
-        LOGGER.info("Start blank node conversion.");
+        LOGGER.info("START blank node conversion.");
         
         String outputDir = getOutputDir();
 
@@ -69,7 +69,7 @@ public class BnodeConverter extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
         
-        LOGGER.info("End blank node conversion in all input files. "
+        LOGGER.info("END blank node conversion in all input files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;

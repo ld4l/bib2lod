@@ -5,6 +5,7 @@ import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
 import java.util.List;
@@ -23,6 +24,7 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.util.TimerUtils;
 
 
 public class Bib2Lod {
@@ -36,7 +38,8 @@ public class Bib2Lod {
      */
     public static void main(String[] args) {
 
-        LOGGER.info("Start conversion.");
+        LOGGER.info("START conversion.");
+        LOGGER.info("START initial setup.");
         Instant start = Instant.now();
         
         // Define program options
@@ -53,29 +56,42 @@ public class Bib2Lod {
         if (!isValidNamespace(namespace)) {
             return;
         }
+
         
         Set<Action> actions = getValidActions(cmd.getOptionValues("action"));
         if (actions == null) {
-            LOGGER.debug("No valid actions specified.");
+            LOGGER.debug("No valid actions specified. Exiting.");
             return;
-        }
-        if (LOGGER.isDebugEnabled()) {
-            for (Action a : actions) {
-                LOGGER.debug(a.label());
-            }
         }
 
         String absInputDir = getAbsoluteInputDir(cmd.getOptionValue("indir"));                
         if (absInputDir == null) {
             return;
         }
-        
+
         String absTopLevelOutputDir = 
                 createTopLevelOutputDir(cmd.getOptionValue("outdir"));
         if (absTopLevelOutputDir == null) {
             return;
         }
-               
+           
+        LOGGER.info("END initial setup. " 
+                + TimerUtils.getDuration(start));
+        LOGGER.info("Application configuration: ");
+        LOGGER.info("Local namespace: " + namespace);
+
+        LOGGER.info("Input directory: " + absInputDir);
+        LOGGER.info("Output directory: " + absTopLevelOutputDir);
+        if (LOGGER.isInfoEnabled()) {
+            List<String> actionLabels = new ArrayList<String>();
+            for (Action a : actions) {
+                actionLabels.add(a.label());
+            }
+            LOGGER.info("Actions to be executed, including prerequisites: " 
+                    + actionLabels.toString());
+        }
+      
+        
         ProcessController processController = new ProcessController(namespace, 
                 absInputDir, absTopLevelOutputDir); 
         String absFinalOutputDir = processController.processAll(actions);

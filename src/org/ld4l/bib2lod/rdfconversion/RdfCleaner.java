@@ -85,7 +85,7 @@ public class RdfCleaner extends RdfProcessor {
     public String process() {
         
         Instant processStart = Instant.now();
-        LOGGER.info("Start RDF cleanup.");
+        LOGGER.info("START RDF cleanup.");
         
         String outputDir = getOutputDir();
         
@@ -126,7 +126,7 @@ public class RdfCleaner extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   
         
-        LOGGER.info("End RDF cleanup in all files. "
+        LOGGER.info("END RDF cleanup in all files. "
                 + TimerUtils.getDuration(processStart));
         
         return outputDir;

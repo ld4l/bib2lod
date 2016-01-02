@@ -96,13 +96,13 @@ public class BibframeConverter extends RdfProcessor {
     public String process() {
 
         Instant processStart = Instant.now();
-        LOGGER.info("Start Bibframe RDF conversion.");
+        LOGGER.info("START Bibframe RDF conversion.");
         
         String outputDir = getOutputDir();  
 
         int totalSubjectCount = convertFiles(inputDir, outputDir);
 
-        LOGGER.info("End Bibframe RDF conversion in all input files. Converted " 
+        LOGGER.info("END Bibframe RDF conversion in all input files. Converted " 
                 + totalSubjectCount + " "     
                 + Bib2LodStringUtils.simplePlural("resource", totalSubjectCount)
                 + " . " + TimerUtils.getDuration(processStart));
