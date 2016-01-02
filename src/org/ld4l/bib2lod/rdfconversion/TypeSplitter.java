@@ -85,7 +85,8 @@ public class TypeSplitter extends RdfProcessor {
             LOGGER.info("Start splitting triples by type in file " + filename);
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
-                LOGGER.info("Split " + fileCount + " "
+                // TODO Define TIMER logging level between info and debug
+                LOGGER.trace("Split " + fileCount + " "
                         + Bib2LodStringUtils.simplePlural("file", fileCount)
                         + " by resource type. " 
                         + TimerUtils.getDuration(fileStart));
@@ -95,7 +96,8 @@ public class TypeSplitter extends RdfProcessor {
         }
 
         if (fileCount > 0) {
-            LOGGER.info("Split " + fileCount + " "
+            // TODO Define TIMER logging level between info and debug
+            LOGGER.trace("Split " + fileCount + " "
                     + Bib2LodStringUtils.simplePlural("file", fileCount)
                     + " by resource type. " 
                     + TimerUtils.getDuration(fileStart)); 

@@ -168,7 +168,7 @@ public class ResourceDeduper extends RdfProcessor {
             Instant fileStart = Instant.now();
             String filename = file.getName();
             
-            LOGGER.info("Finding unique URIs in file " + filename + ".");
+            LOGGER.info("Start finding unique URIs in file " + filename + ".");
             
             String basename = FilenameUtils.getBaseName(file.toString());
             BfResourceDeduper deduper = dedupers.get(basename);
@@ -234,7 +234,8 @@ public class ResourceDeduper extends RdfProcessor {
                 ResourceUtils.renameResource(resource, newUri);                          
              
                 if (uriCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                    LOGGER.info("Substituted " + uriCount + " unique "
+                    // TODO Define TIMER logging level between info and debug
+                    LOGGER.trace("Substituted " + uriCount + " unique "
                             + Bib2LodStringUtils.simplePlural("URI", uriCount) 
                             + " for duplicate URIs in file " + filename + ". "
                             + TimerUtils.getDuration(uriStart));    
@@ -244,7 +245,8 @@ public class ResourceDeduper extends RdfProcessor {
             }
 
             if (uriCount > 0) {
-                LOGGER.info("Substituted " + uriCount + " unique "
+                // TODO Define TIMER logging level between info and debug
+                LOGGER.trace("Substituted " + uriCount + " unique "
                         + Bib2LodStringUtils.simplePlural("URI", uriCount) 
                          + " for duplicate URIs in file " + filename + ". "
                         + TimerUtils.getDuration(uriStart));       

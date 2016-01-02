@@ -215,7 +215,8 @@ public class BibframeConverter extends RdfProcessor {
 				outputModel.add(converter.convert(subject));
 				
                 if (subjectCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                    LOGGER.info("Converted Bibframe RDF for " + subjectCount 
+                    // TODO Define TIMER logging level between info and debug
+                    LOGGER.trace("Converted Bibframe RDF for " + subjectCount 
                             + " " + Bib2LodStringUtils.simplePlural(
                                     "resource", subjectCount)
                             + " in file " + filename + ". " 
@@ -232,7 +233,8 @@ public class BibframeConverter extends RdfProcessor {
         }
         
         if (subjectCount > 0) {
-            LOGGER.info("Converted Bibframe RDF for " + subjectCount + " " 
+            // TODO Define TIMER logging level between info and debug
+            LOGGER.trace("Converted Bibframe RDF for " + subjectCount + " " 
                     + Bib2LodStringUtils.simplePlural("resource", subjectCount)
                     + " in file " + filename + ". " 
                     + TimerUtils.getDuration(subjectStart));  

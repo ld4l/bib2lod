@@ -55,7 +55,8 @@ public class BnodeConverter extends RdfProcessor {
             LOGGER.trace("End blank node conversion in file " + filename);
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
-                LOGGER.info("Converted blank nodes in " + fileCount + " "
+                // TODO Define TIMER logging level between info and debug
+                LOGGER.trace("Converted blank nodes in " + fileCount + " "
                         + Bib2LodStringUtils.simplePlural("file", fileCount)
                         + ". " + TimerUtils.getDuration(fileStart));
                 fileCount = 0;
@@ -64,7 +65,8 @@ public class BnodeConverter extends RdfProcessor {
         }   
 
         if (fileCount > 0) {
-            LOGGER.info("Converted blank nodes in " + fileCount + " "
+            // TODO Define TIMER logging level between info and debug
+            LOGGER.trace("Converted blank nodes in " + fileCount + " "
                     + Bib2LodStringUtils.simplePlural("file", fileCount)
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
