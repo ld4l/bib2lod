@@ -11,9 +11,13 @@ public class Bib2LodStringUtils {
      * @param count The count of items
      * @return
      */
-    public static final String simplePlural(String noun, int count) {
+    public static final String simplePlural(String noun, long count) {
         // 0 takes plural
         return (count == 1) ? noun : noun + "s";
     }
 
+    public static final String simplePlural(String noun, int count) {
+        // 0 takes plural
+        return simplePlural(noun, (long) count);
+    }
 }

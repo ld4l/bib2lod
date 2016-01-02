@@ -96,9 +96,7 @@ public class RdfCleaner extends RdfProcessor {
         for ( File file : new File(inputDir).listFiles() ) {
 
             fileCount++;
-
-            LOGGER.debug("Processing file: " + file.getName());
-            
+    
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
             // clean them up here.
@@ -108,8 +106,12 @@ public class RdfCleaner extends RdfProcessor {
             if (file.length() == 0) {
                 continue;
             }
-
+            
+            LOGGER.info("Start RDF cleanup in file: " + file.getName());
+            
             replaceLinesInFile(file, outputDir); 
+            
+            LOGGER.info("End RDF cleanup in file: " + file.getName());
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 LOGGER.info("Cleaned RDF in " + fileCount + " " 

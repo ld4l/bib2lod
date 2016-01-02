@@ -77,9 +77,12 @@ public class TypeSplitter extends RdfProcessor {
         for ( File inputFile : new File(inputDir).listFiles() ) {
             fileCount++;
             String filename = inputFile.getName();
-            LOGGER.trace("Start processing file " + filename);
+            
+            LOGGER.info("Start splitting triples by type in file " + filename);
+            
             processInputFile(inputFile, outputFilesByType);
-            LOGGER.trace("Done processing file " + filename);
+            
+            LOGGER.info("Start splitting triples by type in file " + filename);
             
             if (fileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 LOGGER.info("Split " + fileCount + " "

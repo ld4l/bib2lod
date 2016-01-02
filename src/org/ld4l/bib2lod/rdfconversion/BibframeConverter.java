@@ -165,10 +165,15 @@ public class BibframeConverter extends RdfProcessor {
         
         BfResourceConverter converter = getConverter(typeForFile);
               
-        Model inputModel = readModelFromFile(file); 
+        Model inputModel = readModelFromFile(file);
+        long inputTripleCount = inputModel.size();
+
+        LOGGER.info("Start converting Bibframe RDF in file " + filename 
+                + " containing " + inputTripleCount + " "
+                + Bib2LodStringUtils.simplePlural(
+                        "triple", inputTripleCount) + ".");
 
         Instant fileStart = Instant.now();
-        LOGGER.info("Start converting Bibframe RDF in file " + filename + ".");
         
         Model outputModel = ModelFactory.createDefaultModel();
         
@@ -234,19 +239,21 @@ public class BibframeConverter extends RdfProcessor {
         }
        
         writeModelToFile(outputModel, outputFile);   
+        long outputTripleCount = outputModel.size();
         
         LOGGER.info("Done converting Bibframe RDF in file " + filename 
                 + ". Processed " + subjectCountForFile + " " 
                 + Bib2LodStringUtils.simplePlural(
                         "resource", subjectCountForFile)
-                + " of type " + typeForFile.uri()
+                + " of type " + typeForFile.uri() + " and generated " 
+                + outputTripleCount + " " + 
+                Bib2LodStringUtils.simplePlural("triple", outputTripleCount) 
                 + ". " + TimerUtils.getDuration(fileStart));
         
         return subjectCountForFile;
     }
 
-    
- 
+     
     private BfResourceConverter getConverter(BfType bfType) {
         
         Class<?> converterClass = CONVERTERS_BY_TYPE.get(bfType);
