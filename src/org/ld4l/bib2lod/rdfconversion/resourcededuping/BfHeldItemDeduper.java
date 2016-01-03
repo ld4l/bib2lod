@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class BfHeldItemDeduper extends BfResourceDeduper {
@@ -87,19 +88,21 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
                 uniqueItems.put(key, itemUri);
             }
             
-            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                LOGGER.info("Deduped " + resourceCount + " resources. " 
-                        + TimerUtils.getDuration(resourceStart));
-                resourceCount = 0;
-                resourceStart = Instant.now();
-            } 
+//            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
+//                LOGGER.info("Deduped " + resourceCount + " "
+//                        + Bib2LodStringUtils.simplePlural("file", resourceCount) 
+//                        + ". " + TimerUtils.getDuration(resourceStart));
+//                resourceCount = 0;
+//                resourceStart = Instant.now();
+//            } 
             
         }
 
-        if (resourceCount > 0) {
-            LOGGER.info("Deduped " + resourceCount + " resources. " 
-                    + TimerUtils.getDuration(resourceStart));       
-        }
+//        if (resourceCount > 0) {
+//            LOGGER.info("Deduped " + resourceCount + " "
+//                    + Bib2LodStringUtils.simplePlural("file", resourceCount) 
+//                    + ". " + TimerUtils.getDuration(resourceStart));    
+//        }
         
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");

@@ -115,7 +115,8 @@ public class RdfCleaner extends RdfProcessor {
                 continue;
             }
                         
-            LOGGER.info("Start RDF cleanup in file " + filename
+//            LOGGER.info("Start RDF cleanup in file " + filename
+            LOGGER.info("Cleaning up RDF in file " + filename
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
                     + Bib2LodStringUtils.simplePlural("file", totalFileCount)
@@ -123,16 +124,17 @@ public class RdfCleaner extends RdfProcessor {
             
             replaceLinesInFile(file, outputDir); 
             
-            LOGGER.info("End RDF cleanup in file " + filename
-                    + " (file " + fileCount + " of " + totalFileCount  
-                    + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
-                    + ").");
+//            LOGGER.info("End RDF cleanup in file " + filename
+//                    + " (file " + fileCount + " of " + totalFileCount  
+//                    + " input "
+//                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+//                    + ").");
             
             if (timerFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
                 LOGGER.trace("Cleaned RDF in " + timerFileCount + " " 
-                        + Bib2LodStringUtils.simplePlural("file", timerFileCount)
+                        + Bib2LodStringUtils.simplePlural(
+                                "file", timerFileCount)
                         + ". " + TimerUtils.getDuration(fileStart));
                 timerFileCount = 0;
                 fileStart = Instant.now();   

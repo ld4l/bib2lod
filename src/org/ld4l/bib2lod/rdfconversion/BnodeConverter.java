@@ -53,7 +53,8 @@ public class BnodeConverter extends RdfProcessor {
             
             String filename = file.getName();
             
-            LOGGER.info("Start blank node conversion in file " + filename
+//            LOGGER.info("Start blank node conversion in file " + filename
+            LOGGER.info("Converting blank nodes in file " + filename
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
                     + Bib2LodStringUtils.simplePlural("file", totalFileCount)
@@ -65,11 +66,11 @@ public class BnodeConverter extends RdfProcessor {
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
             
-            LOGGER.info("End blank node conversion in file " + filename
-                    + " (file " + fileCount + " of " + totalFileCount  
-                    + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
-                    + ").");
+//            LOGGER.info("End blank node conversion in file " + filename
+//                    + " (file " + fileCount + " of " + totalFileCount  
+//                    + " input "
+//                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+//                    + ").");
             
             if (timeFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug

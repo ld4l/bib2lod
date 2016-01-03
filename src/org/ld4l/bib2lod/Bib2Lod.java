@@ -275,6 +275,14 @@ public class Bib2Lod {
                 .argName("action")
                 .build());
         
+        options.addOption(Option.builder("e")
+                .longOpt("erase")
+                .required(false)
+                .hasArg(false)
+                .desc("Erase intermediate output.")
+                .argName("erase")
+                .build());
+               
 //        options.addOption(Option.builder("f")
 //                .longOpt("format")
 //                .required(false)
@@ -300,8 +308,6 @@ public class Bib2Lod {
                 .required()
                 .hasArg()
                 .argName("local_namespace")
-                // Should namespace used in deduping?? Do we want to dedupe only 
-                // uris in this namespace?
                 .desc("Local HTTP namespace for minting and deduping URIs.")
                 .build()); 
         

@@ -101,18 +101,20 @@ public class BfInstanceDeduper extends BfResourceDeduper {
                 uniqueInstances.put(key, instanceUri);
             }
             
-            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
-                LOGGER.info("Deduped " + resourceCount + " resources. " 
-                        + TimerUtils.getDuration(resourceStart));
-                resourceCount = 0;
-                resourceStart = Instant.now();
-            }   
+//            if (resourceCount == TimerUtils.NUM_ITEMS_TO_TIME) {
+//                LOGGER.info("Deduped " + resourceCount + " "
+//                        + Bib2LodStringUtils.simplePlural("file", resourceCount) 
+//                        + ". " + TimerUtils.getDuration(resourceStart));
+//                resourceCount = 0;
+//                resourceStart = Instant.now();
+//            }   
         }
 
-        if (resourceCount > 0) {
-            LOGGER.info("Deduped " + resourceCount + " resources. " 
-                    + TimerUtils.getDuration(resourceStart));       
-        }
+//        if (resourceCount > 0) {
+//            LOGGER.info("Deduped " + resourceCount + " "
+//                    + Bib2LodStringUtils.simplePlural("file", resourceCount) 
+//                    + ". " + TimerUtils.getDuration(resourceStart));  
+//        }
         
         
         // NB Since Instance keys are always WorldCat URIs, we can always add
