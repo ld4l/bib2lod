@@ -50,6 +50,8 @@ public class Bib2Lod {
         if (cmd == null) {
             return;
         }
+        
+        boolean noErase = cmd.hasOption("no_erase");
 
         // Process commandline arguments and exit if any are invalid.
         String namespace = cmd.getOptionValue("namespace");
@@ -91,7 +93,6 @@ public class Bib2Lod {
                     + actionLabels.toString());
         }
       
-        
         ProcessController processController = new ProcessController(namespace, 
                 absInputDir, absTopLevelOutputDir); 
         String absFinalOutputDir = processController.processAll(actions);
@@ -275,14 +276,7 @@ public class Bib2Lod {
                 .argName("action")
                 .build());
         
-        options.addOption(Option.builder("e")
-                .longOpt("erase")
-                .required(false)
-                .hasArg(false)
-                .desc("Erase intermediate output.")
-                .argName("erase")
-                .build());
-               
+
 //        options.addOption(Option.builder("f")
 //                .longOpt("format")
 //                .required(false)
@@ -310,7 +304,14 @@ public class Bib2Lod {
                 .argName("local_namespace")
                 .desc("Local HTTP namespace for minting and deduping URIs.")
                 .build()); 
-        
+
+        options.addOption(Option.builder("ne")
+                .longOpt("no_erase")
+                .required(false)
+                .hasArg(false)
+                .desc("Keep intermediate output. Default is to erase.")
+                .build());
+                       
         options.addOption(Option.builder("o")
                 .longOpt("outdir")
                 .required()

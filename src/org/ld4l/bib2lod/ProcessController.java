@@ -1,9 +1,11 @@
 package org.ld4l.bib2lod;
 
 import java.io.File;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Set;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.ontology.OntModelSpec;
@@ -81,9 +83,11 @@ public class ProcessController {
         // marcxml2bibframe conversion, etc. 
         
         if (selectedActions.contains(Action.CLEAN_RDF)) {
-            
+            LOGGER.debug("newInputDir before RDF cleanup: " + newInputDir);
             outputDir = new RdfCleaner(
-                    localNamespace, outputDir, mainOutputDir).process();            
+                    localNamespace, newInputDir, mainOutputDir).process();
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            LOGGER.debug("newInputDir after RDF cleanup: " + newInputDir);            
         }
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
@@ -100,20 +104,34 @@ public class ProcessController {
              * NB Not including in RdfCleaner as a string replacement, since
              * rdf/xml input doesn't contain explicit bnodes.
              */
+            LOGGER.debug("newInputDir before bnode conversion: " + newInputDir);
             outputDir = new BnodeConverter(
-                    localNamespace, outputDir, mainOutputDir).process(); 
-                              
+                    localNamespace, newInputDir, mainOutputDir).process(); 
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            LOGGER.debug("newInputDir before bnode conversion: " + newInputDir);
+            
             // Strategy for handling large data files by reading only partial
             // data (split by type) into memory for deduping.
-            outputDir = new TypeSplitter(outputDir, mainOutputDir).process();
-            
-            outputDir = new ResourceDeduper(outputDir, mainOutputDir).process();
+            LOGGER.debug("newInputDir before type-splitting: " + newInputDir);
+            outputDir = new TypeSplitter(newInputDir, mainOutputDir).process();
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            LOGGER.debug("newInputDir after type-splitting: " + newInputDir);
 
+            LOGGER.debug("newInputDir before URI deduping: " + newInputDir);
+            outputDir = new ResourceDeduper(
+                    newInputDir, mainOutputDir).process();
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            LOGGER.debug("newInputDir after URI deduping: " + newInputDir);
         }
         
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
-            outputDir = new BibframeConverter(localNamespace, outputDir, 
+            LOGGER.debug("newInputDir before Bibframe conversion: " 
+                    + newInputDir);
+            outputDir = new BibframeConverter(localNamespace, newInputDir, 
                     mainOutputDir).process();
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            LOGGER.debug("newInputDir after Bibframe conversion: " 
+                    + newInputDir);
         }
             
         /* Previous approach where processors were called by looping through
@@ -161,5 +179,19 @@ public class ProcessController {
                 + ". Results in " + outputDir + ".");
         return outputDir;
  
+    }
+    
+    private String deleteLastInputDir(String lastInputDir, String newInputDir) {
+        if (! lastInputDir.equals(inputDir)) {
+            try {
+                FileUtils.deleteDirectory(new File(lastInputDir));
+                LOGGER.debug("Deleted last input directory " +  lastInputDir 
+                        + ".");
+            } catch (IOException e) {
+                LOGGER.warn("Can't delete last input directory " 
+                        + lastInputDir);
+            }
+        }
+        return newInputDir;
     }
 }
