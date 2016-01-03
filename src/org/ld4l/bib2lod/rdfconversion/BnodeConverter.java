@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -45,6 +46,14 @@ public class BnodeConverter extends RdfProcessor {
         int timeFileCount = 0;
         Instant fileStart = Instant.now();
 
+        // For consistent ordering. Helps locate errors if program exits
+        // unexpectedly. Could also add back logging statement after each file
+        // is processed, but this approach helps limit the size of the log file.
+        // Reconsider if sort time is significant.
+        Arrays.sort(inputFiles);
+        LOGGER.info("Sorted " + totalFileCount + " " + 
+                Bib2LodStringUtils.simplePlural("file", totalFileCount) + " "
+                        + ". " + TimerUtils.getDuration(processStart)); 
         
         for ( File file : inputFiles ) {
 

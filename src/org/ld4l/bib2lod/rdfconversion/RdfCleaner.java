@@ -12,6 +12,7 @@ import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Files;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -92,6 +93,15 @@ public class RdfCleaner extends RdfProcessor {
         File[] inputFiles = new File(inputDir).listFiles();
         int totalFileCount = inputFiles.length;
         
+        // For consistent ordering. Helps locate errors if program exits
+        // unexpectedly. Could also add back logging statement after each file
+        // is processed, but this approach helps limit the size of the log file.
+        // Reconsider if sort time is significant.
+        Arrays.sort(inputFiles);
+        LOGGER.info("Sorted " + totalFileCount + " " + 
+                Bib2LodStringUtils.simplePlural("file", totalFileCount) + " "
+                        + ". " + TimerUtils.getDuration(processStart));                
+
         int fileCount = 0;
         int timerFileCount = 0;
         Instant fileStart = Instant.now();
@@ -101,7 +111,7 @@ public class RdfCleaner extends RdfProcessor {
             fileCount++;
             timerFileCount++;    
             String filename = file.getName();
-            
+
             // Skip directories and empty files (Jena chokes when reading an 
             // empty file into a model in later processors). Makes sense to 
             // clean them up here.
