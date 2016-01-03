@@ -51,7 +51,7 @@ public class Bib2Lod {
             return;
         }
         
-        boolean noErase = cmd.hasOption("no_erase");
+        boolean erase = ! cmd.hasOption("no_erase");
 
         // Process commandline arguments and exit if any are invalid.
         String namespace = cmd.getOptionValue("namespace");
@@ -92,9 +92,10 @@ public class Bib2Lod {
             LOGGER.info("Actions to be executed, including prerequisites: " 
                     + actionLabels.toString());
         }
+        LOGGER.info("Delete intermediate output directories: " + erase);
       
         ProcessController processController = new ProcessController(namespace, 
-                absInputDir, absTopLevelOutputDir); 
+                absInputDir, absTopLevelOutputDir, erase); 
         String absFinalOutputDir = processController.processAll(actions);
         if (absFinalOutputDir == null) {
             LOGGER.error("Processing failed.");

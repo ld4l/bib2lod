@@ -25,30 +25,35 @@ import org.ld4l.bib2lod.util.TimerUtils;
 
 public class ProcessController {
 
-    private static final Logger LOGGER = LogManager.getLogger(ProcessController.class);
+    private static final Logger LOGGER = 
+            LogManager.getLogger(ProcessController.class);
 
     private String localNamespace;
     
     private String inputDir;
     private String mainOutputDir;
     
+    boolean erase;
+    
     private OntModel bfOntModelInf;
     // private OntModel ld4lInf;
     
     public ProcessController(String localNamespace, String inputDir, 
-            String outputDir) {
+            String outputDir, boolean erase) {
         
         this.localNamespace = localNamespace;
         
         this.inputDir = inputDir;
         this.mainOutputDir = outputDir;
         
-        loadOntModels();
+        this.erase = erase;
+        
+        // loadOntModels();
     }
     
     // TODO So far these are not used. Why aren't we using this instead of the
-    // enums for ontology types and properties? That might be a more stream-
-    // lined solution.
+    // enums for ontology types and properties? Might be a more streamlined
+    // and clearer solution.
     private void loadOntModels() {
 
         OntDocumentManager mgr = new OntDocumentManager();
@@ -182,15 +187,26 @@ public class ProcessController {
     }
     
     private String deleteLastInputDir(String lastInputDir, String newInputDir) {
-        if (! lastInputDir.equals(inputDir)) {
-            try {
-                FileUtils.deleteDirectory(new File(lastInputDir));
-                LOGGER.debug("Deleted last input directory " +  lastInputDir 
-                        + ".");
-            } catch (IOException e) {
-                LOGGER.warn("Can't delete last input directory " 
-                        + lastInputDir);
+        
+        if (erase) {
+            if (! lastInputDir.equals(inputDir)) {
+                LOGGER.debug("Attempting to delete last input directory " +
+                        lastInputDir);
+                try {
+                    FileUtils.deleteDirectory(new File(lastInputDir));
+                    LOGGER.debug("Deleted last input directory " +  lastInputDir 
+                            + ".");
+                } catch (IOException e) {
+                    LOGGER.warn("System error: can't delete last input "
+                            + "directory " + lastInputDir);
+                }
+            } else {
+                LOGGER.debug("Not erasing last input directory because it " +
+                        "is the main input directory.");
             }
+        } else {
+            LOGGER.debug("Not erasing last input directory due to commandline " 
+                    + "value.");            
         }
         return newInputDir;
     }
