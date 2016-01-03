@@ -47,9 +47,8 @@ public class BnodeConverter extends RdfProcessor {
         Instant fileStart = Instant.now();
 
         // For consistent ordering. Helps locate errors if program exits
-        // unexpectedly. Could also add back logging statement after each file
-        // is processed, but this approach helps limit the size of the log file.
-        // Reconsider if sort time is significant.
+        // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
+        // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
                 Bib2LodStringUtils.simplePlural("file", totalFileCount) + " "
