@@ -97,7 +97,6 @@ public enum BfProperty {
     BF_SUMMARY_OF("reviewOf", Ld4lProperty.HAS_TARGET),
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
-    BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
     BF_TITLE("title", Ld4lProperty.HAS_TITLE),
     BF_TITLE_STATEMENT("titleStatement"),
     BF_TITLE_VALUE("titleValue", Ld4lProperty.LABEL),
@@ -123,8 +122,50 @@ public enum BfProperty {
     RELATORS_NARRATOR(
             OntNamespace.RELATORS, "nrt", Ld4lProperty.HAS_CONTRIBUTION),  
     RELATORS_PERFORMER(
-            OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION); 
+            OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION), 
+    
+    // Subproperties of bf:identifier
+    BF_ANSI("ansi"),
+    BF_CODEN("coden"),
+    BF_DISSERTATION_IDENTIFIER("dissertationIdentifier"),
+    BF_DOI("doi"),
+    BF_EAN("ean"),
+    BF_FINGERPRINT("fingerprint"),
+    BF_HDL("hdl"),
+    BF_ISAN("isan"),
+    BF_ISBN("isbn"),
+    BF_ISBN10("isbn10"),
+    BF_ISBN13("isbn13"),
+    BF_ISMN("ismn"),
+    BF_ISO("iso"),
+    BF_ISSN("issn"),
+    BF_ISSNL("issnL"),
+    BF_ISSUE_NUMBER("issueNumber"),
+    BF_ISTC("istc"),
+    BF_ISWC("iswc"),
+    BF_LC_OVERSEAS_ACQ("lcOverseasAcq"),
+    BF_LCCN("lccn"),
+    BF_LEGAL_DEPOSIT("legalDeposit"),
+    BF_LOCAL("local"),
+    BF_MATRIX_NUMBER("matrixNumber"),
+    BF_MUSIC_PLATE("musicPlate"),
+    BF_MUSIC_PUBLISHER_NUMBER("musicPublisherNumber"),
+    BF_NBAN("nban"),
+    BF_NBN("nbn"),
+    BF_POSTAL_REGISTRATION("postalRegistration"),
+    BF_PUBLISHER_NUMBER("publisherNumber"),
+    BF_REPORT_NUMBER("reportNumber"),
+    BF_SICI("sici"),
+    BF_STOCK_NUMBER("stockNumber"),
+    BF_STRN("strn"),
+    BF_STUDY_NUMBER("studyNumber"),
+    BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
+    BF_UPC("upc"),
+    BF_URI("uri"), // -> owl:sameAs
+    BF_URN("urn"), // -> owl:sameAs
+    BF_VIDEORECORDING_NUMBER("videorecordingNumber");
 
+    
     private static final Logger LOGGER = LogManager.getLogger(BfProperty.class);
               
     private final OntNamespace namespace;
