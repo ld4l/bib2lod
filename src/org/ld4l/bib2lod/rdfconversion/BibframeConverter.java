@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.Map;
 
@@ -113,6 +114,12 @@ public class BibframeConverter extends RdfProcessor {
     private int convertFiles(String inputDir, String outputDir) {
         
         File[] inputFiles = new File(inputDir).listFiles();
+        
+        // For consistent ordering. Helps locate errors if program exits
+        // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
+        // files).
+        Arrays.sort(inputFiles);
+
         int totalSubjectCount = 0;
         
         for ( File file : inputFiles ) {

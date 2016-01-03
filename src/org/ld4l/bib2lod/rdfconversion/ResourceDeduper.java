@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -118,6 +119,11 @@ public class ResourceDeduper extends RdfProcessor {
         Map<String, String> uniqueUris = new HashMap<String, String>();
 
         File[] inputFiles = new File(inputDir).listFiles();
+        
+        // For consistent ordering. Helps locate errors if program exits
+        // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
+        // files).
+        Arrays.sort(inputFiles);
         
         getUniqueUris(inputFiles, uniqueUris);
         dedupeUris(inputFiles, uniqueUris, outputDir);
