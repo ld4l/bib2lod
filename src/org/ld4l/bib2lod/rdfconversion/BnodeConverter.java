@@ -51,8 +51,8 @@ public class BnodeConverter extends RdfProcessor {
         // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + " "
-                        + ". " + TimerUtils.getDuration(processStart)); 
+                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
+                        + TimerUtils.getDuration(processStart)); 
         
         for ( File file : inputFiles ) {
 

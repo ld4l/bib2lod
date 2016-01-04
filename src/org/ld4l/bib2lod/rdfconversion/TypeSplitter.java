@@ -77,8 +77,8 @@ public class TypeSplitter extends RdfProcessor {
         // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + " "
-                        + ". " + TimerUtils.getDuration(processStart)); 
+                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
+                        + TimerUtils.getDuration(processStart)); 
         
         int fileCount = 0;
         int timerFileCount = 0;
