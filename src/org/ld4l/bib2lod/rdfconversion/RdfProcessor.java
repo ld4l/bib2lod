@@ -5,6 +5,7 @@ import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
 import java.util.UUID;
 
+import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -13,6 +14,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.riot.RDFDataMgr;
+import org.apache.jena.riot.RiotException;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -85,8 +87,14 @@ public abstract class RdfProcessor extends Processor {
     protected Model readModelFromFile(String filename) {
         //return RDFDataMgr.loadModel(filename);
         // LOGGER.debug("Reading file " + filename);
-        Model model = ModelFactory.createDefaultModel() ; 
-        model.read(filename);
+        Model model = ModelFactory.createDefaultModel(); 
+        try {
+            model.read(filename);
+        } catch (RiotException e) {
+           LOGGER.error("ERROR: RDF parsing error in file " 
+                   + FilenameUtils.getName(filename) + ": " + e.getMessage()
+                   + ". Skipping rest of file.");
+        }
         return model;
     }
 
