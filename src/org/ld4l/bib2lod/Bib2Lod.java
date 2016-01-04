@@ -40,7 +40,6 @@ public class Bib2Lod {
 
         LOGGER.info("START CONVERSION.");
         LOGGER.info("START application configuration.");
-        Instant start = Instant.now();
         
         // Define program options
         Options options = getOptions();
@@ -58,8 +57,7 @@ public class Bib2Lod {
         if (!isValidNamespace(namespace)) {
             return;
         }
-
-        
+     
         Set<Action> actions = getValidActions(cmd.getOptionValues("action"));
         if (actions == null) {
             LOGGER.debug("No valid actions specified. Exiting.");
@@ -77,11 +75,10 @@ public class Bib2Lod {
             return;
         }
            
-        LOGGER.info("END application configuration. " 
-                + TimerUtils.getDuration(start));
+        // Log application configuration settings
+        LOGGER.info("END application configuration. Settings: "); 
         LOGGER.info("Settings: ");
         LOGGER.info("Local namespace: " + namespace);
-
         LOGGER.info("Input directory: " + absInputDir);
         LOGGER.info("Output directory: " + absTopLevelOutputDir);
         if (LOGGER.isInfoEnabled()) {
@@ -93,7 +90,8 @@ public class Bib2Lod {
                     + actionLabels.toString());
         }
         LOGGER.info("Delete intermediate output directories: " + erase);
-      
+
+        
         ProcessController processController = new ProcessController(namespace, 
                 absInputDir, absTopLevelOutputDir, erase); 
         String absFinalOutputDir = processController.processAll(actions);
