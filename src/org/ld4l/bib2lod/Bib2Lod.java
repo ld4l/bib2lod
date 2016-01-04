@@ -119,8 +119,7 @@ public class Bib2Lod {
                 actions.add(action);
             } else {
                 LOGGER.warn("Invalid action '" + selectedAction + "' removed.");
-            }
-            
+            }            
         }
         
         // Add prerequisites of each requested action.
