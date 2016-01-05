@@ -93,14 +93,14 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     private void convertPersonSubject() {
         
-        StmtIterator statements = inputModel.listStatements(
-                null, BfProperty.BF_SUBJECT.property(), subject);
-        if (statements.hasNext()) {
-            Resource work = statements.nextStatement().getSubject();
-            StmtIterator labelStmts = 
-                    subject.listProperties(BfProperty.BF_LABEL.property());
-            while (labelStmts.hasNext()) {
-                convertPersonSubjectLabel(labelStmts.nextStatement(), work);
+        List<Statement> statements = inputModel.listStatements(
+                null, BfProperty.BF_SUBJECT.property(), subject).toList();
+       for (Statement stmt : statements) {
+            Resource work = stmt.getSubject();
+            List<Statement> labelStmts = 
+                    subject.listProperties(BfProperty.BF_LABEL.property()).toList();
+            for (Statement labelStmt : labelStmts) {
+                convertPersonSubjectLabel(labelStmt, work);
             }
             
         }
