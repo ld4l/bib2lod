@@ -123,13 +123,16 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
                             + label.toString() + "'");
                 }
             }
-        }        
+        }       
+        titleModel.close();
     }
     
     private void createTitle(Literal label) {
         
         BfTitleConverter converter = new BfTitleConverter(this.localNamespace);
-        outputModel.add(converter.create(subject, label));
+        Model create = converter.create(subject, label);
+		outputModel.add(create);
+		create.close();
     }
     
 

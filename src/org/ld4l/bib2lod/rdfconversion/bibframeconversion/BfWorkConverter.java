@@ -97,7 +97,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
                        
         // Add BfContributorConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        outputModel.add(converter.convert(contributor));
+        Model convert = converter.convert(contributor);
+		outputModel.add(convert);
+		convert.close();
         
         // TODO Is there any data in the Bibframe RDF that would allow 
         // assignment of vivo:rank to the Contributions?
@@ -114,7 +116,9 @@ public class BfWorkConverter extends BfBibResourceConverter {
                         
         // Add BfAnnotationConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        outputModel.add(converter.convert(annotation));                
+        Model convert = converter.convert(annotation);
+		outputModel.add(convert);
+		convert.close();
     }
     
 }

@@ -109,7 +109,7 @@ public class BfInstanceDeduper extends BfResourceDeduper {
 //                resourceStart = Instant.now();
 //            }   
         }
-
+		qexec.close();
 //        if (resourceCount > 0) {
 //            LOGGER.info("Deduped " + resourceCount + " "
 //                    + Bib2LodStringUtils.simplePlural("file", resourceCount) 

@@ -73,6 +73,7 @@ public class BnodeConverter extends RdfProcessor {
             // Write out to same filename as input file
             String basename = FilenameUtils.getBaseName(file.toString());
             writeModelToFile(outputModel, basename);
+            outputModel.close();
             
 //            LOGGER.info("End blank node conversion in file " + filename
 //                    + " (file " + fileCount + " of " + totalFileCount  
