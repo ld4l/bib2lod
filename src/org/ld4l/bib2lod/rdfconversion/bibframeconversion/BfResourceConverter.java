@@ -415,9 +415,9 @@ public class BfResourceConverter {
             return model;
         }
         
-        StmtIterator typeStmts = resource.listProperties(RDF.type);
-        while (typeStmts.hasNext()) {
-            Resource type = typeStmts.nextStatement().getResource();
+        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
+        for (Statement typeStmt : typeStmts) {
+            Resource type = typeStmt.getResource();
             if (SECONDARY_TYPES.contains(type)) {
                 model.add(resource.listProperties());     
                 break;
