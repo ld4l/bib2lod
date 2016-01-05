@@ -42,6 +42,7 @@ public class ResourceDeduper extends RdfProcessor {
     private static final Map<BfType, Class<?>> DEDUPERS_BY_TYPE =
             new LinkedHashMap<BfType, Class<?>>();
     static {
+        DEDUPERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityDeduper.class);
         DEDUPERS_BY_TYPE.put(BfType.BF_HELD_ITEM, BfHeldItemDeduper.class);
