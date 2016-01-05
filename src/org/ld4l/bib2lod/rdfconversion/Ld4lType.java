@@ -89,7 +89,6 @@ public enum Ld4lType {
     NOTATED_MUSIC("NotatedMusic"),
     OCLC_IDENTIFIER("OclcIdentifier"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
-    OWL_SAME_AS(OntNamespace.OWL, "sameAs"),
     PART_NAME_TITLE_ELEMENT(OntNamespace.MADSRDF, "PartNameElement"),
     PERFORMER_CONTRIBUTION("PerformerContribution", "Performer"),
     PERSON(OntNamespace.FOAF, "Person"),
@@ -201,15 +200,23 @@ public enum Ld4lType {
     private static final Map<String, Ld4lType> LOOKUP_BY_FILENAME = 
             new HashMap<String, Ld4lType>();
     
+    private static final Map<String, Ld4lType> LOOKUP_BY_LABEL = 
+            new HashMap<String, Ld4lType>();
+    
     static {
         for (Ld4lType type : Ld4lType.values()) {
             LOOKUP_BY_FILENAME.put(type.filename, type);
+            LOOKUP_BY_LABEL.put(type.label, type);
         }
     }
     
     public static Ld4lType typeForFilename(String filename) {
         String basename = FilenameUtils.getBaseName(filename);
         return LOOKUP_BY_FILENAME.get(basename);
+    }
+    
+    public static Ld4lType get(String label) {
+        return LOOKUP_BY_LABEL.get(label);
     }
 
     public Resource ontClass() {

@@ -121,6 +121,9 @@ public class BfResourceConverter {
         
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = buildPropertyMap();
+        
+        List<Property> identifierProps = 
+                BfIdentifierConverter.getIdentifierProps();
     
         // Remove resources designated for removal so that statements containing
         // these resources are not processed in the iteration through the 
@@ -149,36 +152,23 @@ public class BfResourceConverter {
      
             if (predicate.equals(RDF.type)) {
 
-                Resource type = object.asResource();
-                    
+                Resource type = object.asResource();                   
                 if (typeMap.containsKey(type)) {
                     outputModel.add(subject, RDF.type, typeMap.get(type));
-
-                // Handle mads types in typeMap, so individual converters are 
-                // able to remove them.
-                // } else if (type.getNameSpace().equals(
-                //         OntNamespace.MADSRDF.uri())) {
-                //     outputModel.add(stmt);
-                    
                 }
   
-            } else if (propertyMap.containsKey(predicate)) {
-                
-                outputModel.add(subject, propertyMap.get(predicate), object);
+           } else if (identifierProps.contains(predicate)) {               
+                convertIdentifier(stmt);
 
-            // Handle mads types in typeMap, so individual converters are able 
-            // to remove them.
-            // } else if (predicate.getNameSpace().equals(
-            //           OntNamespace.MADSRDF.uri())) {
-            //       outputModel.add(stmt);
-                
+            } else if (propertyMap.containsKey(predicate)) {               
+                outputModel.add(subject, propertyMap.get(predicate), object);                
             }
  
             // We could add this if there are any child converters that do 
             // additional processing AFTER the superclass method, so that the
-            // statements aren't reprocessed. At this point we don't have such
+            // statements aren't reprocessed. Currently we don't have such
             // cases.
-            // stmt.remove();
+            // stmts.remove(stmt);
         }
         
         return outputModel;  

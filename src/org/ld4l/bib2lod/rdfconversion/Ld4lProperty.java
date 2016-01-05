@@ -64,6 +64,7 @@ public enum Ld4lProperty {
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
     NAME(OntNamespace.FOAF, "name"),
+    OWL_SAME_AS(OntNamespace.OWL, "sameAs"),
     PRECEDES("precedes"),
     PREFERRED_LABEL(OntNamespace.SKOS, "prefLabel"),
     RANK(OntNamespace.VIVO, "rank"),
