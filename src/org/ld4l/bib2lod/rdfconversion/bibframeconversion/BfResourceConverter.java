@@ -95,25 +95,6 @@ public class BfResourceConverter {
         this.outputModel = ModelFactory.createDefaultModel();
         this.retractions = ModelFactory.createDefaultModel();  
     }
-
-    /* 
-     * This convert() method is called when the converter is called from 
-     * another converter, rather than from BibframeConverter. The linking 
-     * statement is the statement that relates the caller's subject to this 
-     * subject. For example, the statement :instance bf:publication :provider
-     * links the Instance to the Provider, when BfInstanceConverter calls
-     * BfProviderConverter.
-     */
-    protected Model convert(Resource subject, Statement linkingStatement) {
-
-        this.linkingStatement = linkingStatement;
-       
-        Model model = convert(subject);
-        
-        this.linkingStatement = null;
-        
-        return model;      
-    }
     
     /* 
      * Default conversion method. Subclasses may override.
@@ -459,6 +440,6 @@ public class BfResourceConverter {
                       
         // Add BfIdentifierConverter model to this converter's outputModel 
         // model.
-        outputModel.add(converter.convert(identifier, statement));       
+        outputModel.add(converter.convert(identifier));       
     }
 }

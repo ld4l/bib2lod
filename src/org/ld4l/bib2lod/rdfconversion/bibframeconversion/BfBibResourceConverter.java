@@ -92,7 +92,6 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         applyRetractions(inputModel, retractions);           
     }
 
-    // TODO This method is also used by BfWorkConverter. Need to combine.
     private void convertTitle(Statement statement, 
             Set<Literal> titleLiterals) {
 

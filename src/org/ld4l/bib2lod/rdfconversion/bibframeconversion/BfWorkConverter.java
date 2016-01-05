@@ -97,7 +97,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
                        
         // Add BfContributorConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        outputModel.add(converter.convert(contributor, statement));
+        outputModel.add(converter.convert(contributor));
         
         // TODO Is there any data in the Bibframe RDF that would allow 
         // assignment of vivo:rank to the Contributions?
@@ -108,14 +108,13 @@ public class BfWorkConverter extends BfBibResourceConverter {
         BfResourceConverter converter = 
                 new BfAnnotationConverter(localNamespace, statement);
 
-        // Identify the annotation resource and build its associated model (i.e.,
-        // statements in which it is the subject or object).
+        // Identify the annotation resource and build its associated model 
+        // (i.e., statements in which it is the subject or object).
         Resource annotation = getSubjectModelToConvert(statement.getSubject());
                         
         // Add BfAnnotationConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        outputModel.add(converter.convert(annotation, statement));        
-        
+        outputModel.add(converter.convert(annotation));                
     }
     
 }
