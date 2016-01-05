@@ -128,11 +128,9 @@ public class BfResourceConverter {
         // model statements.
         removeResources(getResourcesToRemove());
 
-        // Iterate through the statements in the input model.
-        StmtIterator stmts = inputModel.listStatements();
-        while (stmts.hasNext()) {
+        List<Statement> stmts = inputModel.listStatements().toList();
             
-            Statement stmt = stmts.nextStatement();
+        for (Statement stmt : stmts) {
             Property predicate = stmt.getPredicate();
             RDFNode object = stmt.getObject();
             
