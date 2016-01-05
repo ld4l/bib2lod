@@ -88,11 +88,9 @@ public class ProcessController {
         // marcxml2bibframe conversion, etc. 
         
         if (selectedActions.contains(Action.CLEAN_RDF)) {
-            LOGGER.debug("newInputDir before RDF cleanup: " + newInputDir);
             outputDir = new RdfCleaner(
                     localNamespace, newInputDir, mainOutputDir).process();
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            LOGGER.debug("newInputDir after RDF cleanup: " + newInputDir);            
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);           
         }
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
@@ -109,34 +107,26 @@ public class ProcessController {
              * NB Not including in RdfCleaner as a string replacement, since
              * rdf/xml input doesn't contain explicit bnodes.
              */
-            LOGGER.debug("newInputDir before bnode conversion: " + newInputDir);
             outputDir = new BnodeConverter(
                     localNamespace, newInputDir, mainOutputDir).process(); 
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            LOGGER.debug("newInputDir before bnode conversion: " + newInputDir);
             
-            // Strategy for handling large data files by reading only partial
-            // data (split by type) into memory for deduping.
-            LOGGER.debug("newInputDir before type-splitting: " + newInputDir);
+            // Strategy for handling deduping of large amounts of data by 
+            // reading only partial data (split by type) into memory.
             outputDir = new TypeSplitter(newInputDir, mainOutputDir).process();
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            LOGGER.debug("newInputDir after type-splitting: " + newInputDir);
 
-            LOGGER.debug("newInputDir before URI deduping: " + newInputDir);
             outputDir = new ResourceDeduper(
                     newInputDir, mainOutputDir).process();
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            LOGGER.debug("newInputDir after URI deduping: " + newInputDir);
         }
         
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
-            LOGGER.debug("newInputDir before Bibframe conversion: " 
-                    + newInputDir);
+
             outputDir = new BibframeConverter(localNamespace, newInputDir, 
                     mainOutputDir).process();
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            LOGGER.debug("newInputDir after Bibframe conversion: " 
-                    + newInputDir);
+
         }
             
         /* Previous approach where processors were called by looping through

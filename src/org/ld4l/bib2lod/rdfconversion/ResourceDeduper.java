@@ -316,7 +316,7 @@ public class ResourceDeduper extends RdfProcessor {
 
         }
         
-        LOGGER.info("DONE replacing duplicate URIs with unique URIs in all " 
+        LOGGER.info("END replacing duplicate URIs with unique URIs in all " 
                 + "files. " + TimerUtils.getDuration(processStart));
                    
     }

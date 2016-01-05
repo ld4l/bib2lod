@@ -4,7 +4,6 @@ import java.io.File;
 import java.io.IOException;
 import java.text.DateFormat;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.EnumSet;
@@ -24,7 +23,6 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.commons.validator.routines.UrlValidator;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.util.TimerUtils;
 
 
 public class Bib2Lod {
@@ -40,7 +38,6 @@ public class Bib2Lod {
 
         LOGGER.info("START CONVERSION.");
         LOGGER.info("START application configuration.");
-        Instant start = Instant.now();
         
         // Define program options
         Options options = getOptions();
@@ -58,8 +55,7 @@ public class Bib2Lod {
         if (!isValidNamespace(namespace)) {
             return;
         }
-
-        
+     
         Set<Action> actions = getValidActions(cmd.getOptionValues("action"));
         if (actions == null) {
             LOGGER.debug("No valid actions specified. Exiting.");
@@ -77,11 +73,10 @@ public class Bib2Lod {
             return;
         }
            
-        LOGGER.info("END application configuration. " 
-                + TimerUtils.getDuration(start));
+        // Log application configuration settings
+        LOGGER.info("END application configuration. Settings: "); 
         LOGGER.info("Settings: ");
         LOGGER.info("Local namespace: " + namespace);
-
         LOGGER.info("Input directory: " + absInputDir);
         LOGGER.info("Output directory: " + absTopLevelOutputDir);
         if (LOGGER.isInfoEnabled()) {
@@ -93,7 +88,8 @@ public class Bib2Lod {
                     + actionLabels.toString());
         }
         LOGGER.info("Delete intermediate output directories: " + erase);
-      
+
+        
         ProcessController processController = new ProcessController(namespace, 
                 absInputDir, absTopLevelOutputDir, erase); 
         String absFinalOutputDir = processController.processAll(actions);
@@ -121,8 +117,7 @@ public class Bib2Lod {
                 actions.add(action);
             } else {
                 LOGGER.warn("Invalid action '" + selectedAction + "' removed.");
-            }
-            
+            }            
         }
         
         // Add prerequisites of each requested action.

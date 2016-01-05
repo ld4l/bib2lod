@@ -97,7 +97,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
                        
         // Add BfContributorConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        Model convert = converter.convert(contributor, statement);
+        Model convert = converter.convert(contributor);
 		outputModel.add(convert);
 		convert.close();
         
@@ -110,13 +110,13 @@ public class BfWorkConverter extends BfBibResourceConverter {
         BfResourceConverter converter = 
                 new BfAnnotationConverter(localNamespace, statement);
 
-        // Identify the annotation resource and build its associated model (i.e.,
-        // statements in which it is the subject or object).
+        // Identify the annotation resource and build its associated model 
+        // (i.e., statements in which it is the subject or object).
         Resource annotation = getSubjectModelToConvert(statement.getSubject());
                         
         // Add BfAnnotationConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        Model convert = converter.convert(annotation, statement);
+        Model convert = converter.convert(annotation);
 		outputModel.add(convert);
 		convert.close();
     }

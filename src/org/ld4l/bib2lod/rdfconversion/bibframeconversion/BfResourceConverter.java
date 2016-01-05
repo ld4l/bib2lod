@@ -11,7 +11,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -95,25 +94,6 @@ public class BfResourceConverter {
         this.outputModel = ModelFactory.createDefaultModel();
         this.retractions = ModelFactory.createDefaultModel();  
     }
-
-    /* 
-     * This convert() method is called when the converter is called from 
-     * another converter, rather than from BibframeConverter. The linking 
-     * statement is the statement that relates the caller's subject to this 
-     * subject. For example, the statement :instance bf:publication :provider
-     * links the Instance to the Provider, when BfInstanceConverter calls
-     * BfProviderConverter.
-     */
-    protected Model convert(Resource subject, Statement linkingStatement) {
-
-        this.linkingStatement = linkingStatement;
-       
-        Model model = convert(subject);
-        
-        this.linkingStatement = null;
-        
-        return model;      
-    }
     
     /* 
      * Default conversion method. Subclasses may override.
@@ -147,11 +127,9 @@ public class BfResourceConverter {
         // model statements.
         removeResources(getResourcesToRemove());
 
-        // Iterate through the statements in the input model.
-        StmtIterator stmts = inputModel.listStatements();
-        while (stmts.hasNext()) {
+        List<Statement> stmts = inputModel.listStatements().toList();
             
-            Statement stmt = stmts.nextStatement();
+        for (Statement stmt : stmts) {
             Property predicate = stmt.getPredicate();
             RDFNode object = stmt.getObject();
             
@@ -437,9 +415,9 @@ public class BfResourceConverter {
             return model;
         }
         
-        StmtIterator typeStmts = resource.listProperties(RDF.type);
-        while (typeStmts.hasNext()) {
-            Resource type = typeStmts.nextStatement().getResource();
+        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
+        for (Statement typeStmt : typeStmts) {
+            Resource type = typeStmt.getResource();
             if (SECONDARY_TYPES.contains(type)) {
                 model.add(resource.listProperties());     
                 break;
@@ -460,7 +438,7 @@ public class BfResourceConverter {
                       
         // Add BfIdentifierConverter model to this converter's outputModel 
         // model.
-        Model convert = converter.convert(identifier, statement);
+        Model convert = converter.convert(identifier);
 		outputModel.add(convert);
 		convert.close();
     }

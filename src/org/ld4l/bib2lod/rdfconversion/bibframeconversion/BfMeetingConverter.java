@@ -1,7 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.List;
+
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -32,13 +34,13 @@ public class BfMeetingConverter extends BfAuthorityConverter {
     
     private void convertConferenceName() {
 
-        StmtIterator stmts = inputModel.listStatements(null, RDF.type, 
-                BfType.MADSRDF_CONFERENCE_NAME.ontClass());
-        if (stmts.hasNext()) { 
+        List<Statement> stmts = inputModel.listStatements(null, RDF.type, 
+                BfType.MADSRDF_CONFERENCE_NAME.ontClass()).toList();
+        for (Statement stmt : stmts) { 
             outputModel.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
             // Not retracting the original statement or any other statements
             // about the madsrdf:Authority.
-            retractions.add(stmts.nextStatement());
+            retractions.add(stmt);
         }
 
     }

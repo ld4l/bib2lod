@@ -13,7 +13,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -93,14 +92,14 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     private void convertPersonSubject() {
         
-        StmtIterator statements = inputModel.listStatements(
-                null, BfProperty.BF_SUBJECT.property(), subject);
-        if (statements.hasNext()) {
-            Resource work = statements.nextStatement().getSubject();
-            StmtIterator labelStmts = 
-                    subject.listProperties(BfProperty.BF_LABEL.property());
-            while (labelStmts.hasNext()) {
-                convertPersonSubjectLabel(labelStmts.nextStatement(), work);
+        List<Statement> statements = inputModel.listStatements(
+                null, BfProperty.BF_SUBJECT.property(), subject).toList();
+       for (Statement stmt : statements) {
+            Resource work = stmt.getSubject();
+            List<Statement> labelStmts = 
+                    subject.listProperties(BfProperty.BF_LABEL.property()).toList();
+            for (Statement labelStmt : labelStmts) {
+                convertPersonSubjectLabel(labelStmt, work);
             }
             
         }

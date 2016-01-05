@@ -15,7 +15,7 @@ public enum OntNamespace {
     CONTENT("http://www.w3.org/2011/content#", "cnt"),
     DCTERMS("http://purl.org/dc/terms/", "dcterms"),    
     FOAF("http://xmlns.com/foaf/0.1/", "foaf"),
-    LD4L("http://ld4l.org/ontology/bib/", "ld4l"),
+    LD4L("http://bib.ld4l.org/ontology/", "ld4l"),
     LEGACY("http://ld4l.org/ontology/bib/legacy/", "legacy"),
     LINGVO("http://www.lingvoj.org/ontology#", "lingvo"),
     MADSRDF("http://www.loc.gov/mads/rdf/v1#", "madsrdf"),
