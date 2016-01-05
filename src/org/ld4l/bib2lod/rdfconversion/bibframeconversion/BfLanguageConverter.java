@@ -1,10 +1,11 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.List;
+
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -51,16 +52,18 @@ public class BfLanguageConverter extends BfResourceConverter {
       
         Property resourcePartProp = BfProperty.BF_RESOURCE_PART.property();
         Statement resourcePartStmt = subject.getProperty(resourcePartProp);
+        
         if (resourcePartStmt != null) {  
             String value = resourcePartStmt.getString();
+            
             if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
-                StmtIterator langStmts = 
-                        inputModel.listStatements(null, langProp, subject);
+                List<Statement> langStmts = inputModel.listStatements(              
+                        null, langProp, subject).toList();
+                
                 // There should be only one statement, since each local language 
                 // URI is unique to the Work.
-                if (langStmts.hasNext()) {
-                    Statement langStmt = langStmts.nextStatement();
+                for (Statement langStmt : langStmts) {
                     Resource work = langStmt.getSubject();
                     Property originalLangProp = 
                             Ld4lProperty.HAS_ORIGINAL_LANGUAGE.property();
@@ -72,6 +75,7 @@ public class BfLanguageConverter extends BfResourceConverter {
                     outputModel.add(work, originalLangProp, subject);
                     retractions.add(langStmt);
                 }      
+                
             } else {
                 // Not sure what values other than "original" could occur; for 
                 // now log them and remove them.  
