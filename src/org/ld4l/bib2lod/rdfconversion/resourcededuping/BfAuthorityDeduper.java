@@ -146,6 +146,7 @@ public class BfAuthorityDeduper extends BfResourceDeduper {
 //                resourceStart = Instant.now();
 //            }                       
         }
+        qexec.close();
 
 //        if (resourceCount > 0) {
 //            LOGGER.info("Deduped " + resourceCount + " "

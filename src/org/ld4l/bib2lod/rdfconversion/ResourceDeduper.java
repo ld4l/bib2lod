@@ -185,6 +185,7 @@ public class ResourceDeduper extends RdfProcessor {
             }
             Model model = readModelFromFile(file);
             Map<String, String> dedupedUris = deduper.dedupe(model);
+            model.close();
             if (dedupedUris != null) {
                 uniqueUris.putAll(dedupedUris);
             }
@@ -306,7 +307,8 @@ public class ResourceDeduper extends RdfProcessor {
             // Write out new model to file. Duplicate statements are 
             // automatically removed.
             LOGGER.trace("Writing model for file " + filename);
-            writeModelToFile(model, basename);    
+            writeModelToFile(model, basename);
+            model.close();
             
             LOGGER.info("Done replacing duplicate URIs with unique URIs in "
                     + "file " + filename + ". "  

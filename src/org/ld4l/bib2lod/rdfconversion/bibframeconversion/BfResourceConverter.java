@@ -362,8 +362,9 @@ public class BfResourceConverter {
              * in TypeSplitter.
              */           
             for (Statement stmt : resourceAsObjectStmts) {
-                    modelForSubject.add(
-                            getRelatedResourceStmts(stmt.getSubject()));   
+				Model related = getRelatedResourceStmts(stmt.getSubject());
+				modelForSubject.add(related);
+				related.close();
             }  
         }
         
@@ -437,6 +438,8 @@ public class BfResourceConverter {
                       
         // Add BfIdentifierConverter model to this converter's outputModel 
         // model.
-        outputModel.add(converter.convert(identifier));       
+        Model convert = converter.convert(identifier);
+		outputModel.add(convert);
+		convert.close();
     }
 }

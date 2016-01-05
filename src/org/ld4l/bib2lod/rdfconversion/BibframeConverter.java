@@ -238,6 +238,7 @@ public class BibframeConverter extends RdfProcessor {
                 //        + " since it's not of type " + typeForFile);                        
             }
         }
+        inputModel.close();
         
         if (subjectCount > 0) {
             // TODO Define TIMER logging level between info and debug
@@ -249,6 +250,7 @@ public class BibframeConverter extends RdfProcessor {
        
         writeModelToFile(outputModel, outputFile);   
         long outputTripleCount = outputModel.size();
+        outputModel.close();
         
         LOGGER.info("Done converting Bibframe RDF in file " + filename 
                 + ". Processed " + subjectCountForFile + " " 

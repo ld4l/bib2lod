@@ -108,6 +108,7 @@ public class BfHeldItemDeduper extends BfResourceDeduper {
                 LOGGER.debug(entry.getKey() + " => " + entry.getValue());
             }
         }
+        qexec.close();
         
         return uniqueUris;        
     }

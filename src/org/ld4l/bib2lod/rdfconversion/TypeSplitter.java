@@ -177,6 +177,7 @@ public class TypeSplitter extends RdfProcessor {
         // NB The goal is to eliminate these by refining the queries to include
         // all statements in the models for types.
         modelsByType.get(REMAINDER_FILENAME).add(inputModel);
+        inputModel.close();
         
         // Append each model to the appropriate file
         writeModelsToFiles(modelsByType, outputFilesByType);
@@ -208,7 +209,6 @@ public class TypeSplitter extends RdfProcessor {
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
-        qexec.close();
  
 //        if (LOGGER.isDebugEnabled()) {
 //            LOGGER.debug("Type: " + type.name());
@@ -223,7 +223,9 @@ public class TypeSplitter extends RdfProcessor {
         // Remove the resulting graph from the input model, so we
         // don't have to query against those statements on the next 
         // iteration of the loop on this file.
-        inputModel.remove(constructModel);        
+        inputModel.remove(constructModel);    
+        constructModel.close();
+        qexec.close();
     }
     
     private Query getQueryForType(BfType type) {
@@ -478,6 +480,7 @@ public class TypeSplitter extends RdfProcessor {
             if (! model.isEmpty()) {                                                                                                               
                 appendModelToFile(model, outFile);
             }
+            model.close();
         }          
     }
     
