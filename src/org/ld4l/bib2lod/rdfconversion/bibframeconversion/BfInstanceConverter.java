@@ -160,7 +160,9 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                       
         // Add BfProviderConverter model to this converter's outputModel model,
         // so they get added to the BibframeConverter output model.
-        outputModel.add(converter.convert(provider, statement));
+        Model convert = converter.convert(provider, statement);
+		outputModel.add(convert);
+		convert.close();
     }
 
 }
