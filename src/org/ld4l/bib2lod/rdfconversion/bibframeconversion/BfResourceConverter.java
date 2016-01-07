@@ -16,6 +16,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfResourceConverter {
 
@@ -419,6 +420,21 @@ public class BfResourceConverter {
    
     protected void convertIdentifier(Statement statement) {
         
+        /*
+         * Bibframe has:
+         * <http://draft.ld4l.org/cornell/102063topic10> <http://bibframe.org/vocab/systemNumber> _:bnode130102063 . 
+         * _:bnode130102063 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Identifier> . 
+         * _:bnode130102063 <http://bibframe.org/vocab/identifierValue> "(OCoLC)fst00853831" . 
+         * 
+         * In ResourceDeduper, we've replaced the local Topic URI with a FAST
+         * URI, so we don't need the identifier statements.
+         */
+        if (statement.getSubject().getNameSpace().equals(
+                Vocabulary.FAST.uri())) {
+            return;
+        }
+        
+       
         BfResourceConverter converter = new BfIdentifierConverter(
                 this.localNamespace, statement);
      
