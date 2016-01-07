@@ -130,8 +130,11 @@ public class BfIdentifierConverter extends BfResourceConverter {
 //        RdfProcessor.printModel(inputModel, Level.DEBUG);
 
         Resource relatedResource = linkingStatement.getSubject();
-        
-        if (subject.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+
+        // Jena doesn't recognize the namespace when the localname starts with
+        // a digit.
+        // if (subject.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+        if (subject.getURI().startsWith(Vocabulary.WORLDCAT.uri())) {
             createWorldcatIdentifier(relatedResource);
             return outputModel;
         }
@@ -239,9 +242,15 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         Resource identifier = outputModel.createResource(
                 RdfProcessor.mintUri(localNamespace));
-        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), identifier);
-        outputModel.add(identifier, RDF.type, Ld4lType.OCLC_IDENTIFIER.ontClass());
-        outputModel.add(identifier, RDF.value, subject.getLocalName());
+        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), 
+                identifier);
+        outputModel.add(identifier, RDF.type, 
+                Ld4lType.OCLC_IDENTIFIER.ontClass());
+        
+        // Jena doesn't recognize localname starting with digit.
+        // outputModel.add(identifier, RDF.value, subject.getLocalName());
+        String id = subject.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
+        outputModel.add(identifier, RDF.value, id);
     }
 
     private Ld4lType getIdentifierTypeFromIdentifierValue(
