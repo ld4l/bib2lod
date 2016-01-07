@@ -1,10 +1,12 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
+import java.util.Comparator;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.regex.Pattern;
+import java.util.SortedMap;
+import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
@@ -18,6 +20,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfIdentifierConverter extends BfResourceConverter {
@@ -88,29 +91,31 @@ public class BfIdentifierConverter extends BfResourceConverter {
     private static final List<Property> IDENTIFIER_PROPS = 
             BfProperty.properties(BF_IDENTIFIER_PROPS);
     
-    // TODO change to String => Ld4lType?
-    private static final Map<String, String> IDENTIFIER_PREFIXES = 
-            new HashMap<String, String>();
+    private static final SortedMap<String, Ld4lType> IDENTIFIER_PREFIXES = 
+// TreeMap considers two keys that are equal according to the comparator to be
+// equal, so one is deleted from the map. Must sort by length and then by
+// 
+//          new TreeMap<String, Ld4lType>(
+//           Comparator.comparingInt(String::length));      
+            new TreeMap<String, Ld4lType>(
+                    Comparator.comparingInt(String::length)
+                    .thenComparing(String.CASE_INSENSITIVE_ORDER));
+
+            
     static {
         // Many of these are not instantiated in the data, so it's a guess as
         // to what the string value would be.
 //        IDENTIFIER_PREFIXES.put("CStRLIN", );
 //        IDENTIFIER_PREFIXES.put("NIC", );        
-        IDENTIFIER_PREFIXES.put("OCoLC", "OclcIdentifier");
-        IDENTIFIER_PREFIXES.put("OCoLC-I", "OclcIdentifier");
-        IDENTIFIER_PREFIXES.put("OCoLC-M", "OclcIdentifier");
+        IDENTIFIER_PREFIXES.put("(OCoLC)", Ld4lType.OCLC_IDENTIFIER);
+        IDENTIFIER_PREFIXES.put("(OCoLC-I)", Ld4lType.OCLC_IDENTIFIER);
+        IDENTIFIER_PREFIXES.put("(OCoLC-M)", Ld4lType.OCLC_IDENTIFIER);
+        IDENTIFIER_PREFIXES.put("oc", Ld4lType.OCLC_IDENTIFIER);
+        IDENTIFIER_PREFIXES.put("ocm", Ld4lType.OCLC_IDENTIFIER);
+        IDENTIFIER_PREFIXES.put("ocn", Ld4lType.OCLC_IDENTIFIER);
     }
     
-    // Examples: Harvard: ocn188263227, ocm78759487 
-    private Pattern OCLC_PREFIXED_IDENTIFIER = 
-            Pattern.compile("^(oc[mn]?)(\\d+)");
-    
-    // Examples: Cornell: (OCoLC)fst00845993, (OCoLC)150088819 
-    // Stanford: (OCoLC-I)268808835, (CSt)notisAAA0017, (OCoLC-M)1122955
-    private Pattern PREFIXED_IDENTIFIER = 
-            Pattern.compile("^\\((.+)\\)?(.+)");
 
-    
     public BfIdentifierConverter(String localNamespace, Statement statement) {
         super(localNamespace, statement);
     }
@@ -125,30 +130,48 @@ public class BfIdentifierConverter extends BfResourceConverter {
 //        RdfProcessor.printModel(inputModel, Level.DEBUG);
 
         Resource relatedResource = linkingStatement.getSubject();
+        
+        if (subject.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+            createWorldcatIdentifier(relatedResource);
+            return outputModel;
+        }
+            
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
-        
-        // Maybe break into two main methods, one for type and one for value,
-        // but they're not completely independent: the type may be derived from 
-        // the value, or (for worldcat ids) the value from the type.
-      
-        String newIdentifierValue = null;
+
         Statement identifierValueStmt = 
                 subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
 
-        RDFNode identifierValue = null; 
+        RDFNode identifierValue = null;
+        String prefix = null;
+        String id = null;
+        String newIdentifierValue = null;
         if (identifierValueStmt != null) {
             identifierValue = identifierValueStmt.getObject();
             if (identifierValue.isLiteral()) {
                 newIdentifierValue = 
                         identifierValue.asLiteral().getLexicalForm();
- 
-// This is true of worldcat, but is it otherwise true?
-//            } else {
-//                newIdentifierValue = 
-//                        identifierValue.asResource().getLocalName();
-//            }
+                
+                for (Map.Entry<String, Ld4lType> entry : 
+                        IDENTIFIER_PREFIXES.entrySet()) {
+                    String key = entry.getKey();
+                    if (newIdentifierValue.startsWith(key)) {
+                        prefix = key;
+                        id = newIdentifierValue.substring(key.length());
+                        LOGGER.debug(prefix + " + " + id);                       
+                    }
+                    
+                }
+            
+            // TODO Are there URIs for identifierValue, other than worldcat?
+                
+            // This is true of worldcat, but is it otherwise true?
+            // } else {
+            //   newIdentifierValue = 
+            //           identifierValue.asResource().getLocalName();
+            }
         }
+        
         
         /*
          * Identifier type
@@ -166,11 +189,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
         
         if (identifierType == null) {
-            identifierType = getIdentifierTypeFromIdentifierValue();
-            // use prefix on identifierValue     
-            // if no prefix and all digits, assume LocalIlsIdentifier
+            identifierType = getIdentifierTypeFromIdentifierValue(prefix, 
+                        newIdentifierValue);
         }
-        
+  
         // We may want to assign the supertype in any case, to simplify the
         // queries used to build the search index, since there's no reasoner to
         // infer the supertype.
@@ -178,147 +200,71 @@ public class BfIdentifierConverter extends BfResourceConverter {
             identifierType = Ld4lType.IDENTIFIER;
         }
         
-        outputModel.add(subject, RDF.type, identifierType.ontClass());
+        outputModel.add(subject, RDF.type, identifierType.ontClass());  
 
         
         /*
-         * Identifier value
+         * Identifier value                                
          */
-        
-        // Is this more generally, if the value is a resource, use the local 
-        // name as the new value?
-        if (identifierType == Ld4lType.OCLC_IDENTIFIER) {
-            newIdentifierValue = subject.getLocalName();
-            
-        } else {
-            // No else case. newIdentifierValue already assigned from 
-            // bf:identifierValue above.
-        }
+ 
+// Certainly not true for OCLC_IDENTFIERS derived from a prefix. Would hold for
+// Worldcat numbers, but they are already handled above.
+//        // Is this more generally, if the value is a resource, use the local 
+//        // name as the new value?
+//        if (identifierType == Ld4lType.OCLC_IDENTIFIER) {
+//            newIdentifierValue = subject.getLocalName();
+//            
+//        } else {
+//            // No else case. newIdentifierValue already assigned from 
+//            // bf:identifierValue above.
+//        }
 
         if (newIdentifierValue != null) {
+            // If we've assigned a non-generic Identifier (i.e., a subclass of
+            // Identifier rather than the generic superclass), then remove any
+            // prefix from the value, since that is a type indicator rather 
+            // than part of the value.
+            if (prefix != null && 
+                    ! identifierType.equals(Ld4lType.IDENTIFIER)) {
+                newIdentifierValue = id;
+            }
             outputModel.add(subject, RDF.value, newIdentifierValue);
         }
+ 
+        return outputModel;
+    }
+   
+
+    private void createWorldcatIdentifier(Resource relatedResource) {
+        
+        Resource identifier = outputModel.createResource(
+                RdfProcessor.mintUri(localNamespace));
+        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), identifier);
+        outputModel.add(identifier, RDF.type, Ld4lType.OCLC_IDENTIFIER.ontClass());
+        outputModel.add(identifier, RDF.value, subject.getLocalName());
+    }
+
+    private Ld4lType getIdentifierTypeFromIdentifierValue(
+            String prefix, String newIdentifierValue) {   
             
-//            /*
-//             * Get scheme from identifierScheme, if possible
-//             * Else get from value, if possible
-//             * else make generic Identifier
-//             * 
-//             * remainder of value is rdf:value of the identifier entity
-//             * 
-//             * Use fast code from TopicConverter - move to ??
-//             * Topic must also add the identifier statements
-//             */
-// /* also need to deal with scheme in predicate: 
-//  * <bf:lccn>
-//
-//      <bf:Identifier>
-//        <bf:identifierValue>74227179</bf:identifierValue>
-//        <bf:identifierScheme>lccn</bf:identifierScheme>
-//      </bf:Identifier>
-//    </bf:lccn>
-//      */
-//            String identifierType = null;
-//            
-//            Statement schemeStmt = subject.getProperty(
-//                    BfProperty.BF_IDENTIFIER_SCHEME.property());
-//
-//            // Determine the Identifier subtype from the identifierScheme
-//            // statement, if there is one.
-//            if (schemeStmt != null) {
-//                
-//                RDFNode scheme = schemeStmt.getResource();
-//                
-//                if (scheme.isResource()) {
-//                    // Cornell and Harvard: 
-//                    // http://id.loc.gov/vocabulary/identifiers/lccn
-//                    // http://id.loc.gov/vocabulary/identifiers/systemNumber
-//                    identifierType = scheme.asResource().getLocalName();
-//                            
-//                     
-//                } else {
-//                    // Stanford: 
-//                    // <bf:identifierScheme>lccn</bf:identifierScheme>
-//                    // <bf:identifierScheme>systemNumber</bf:identifierScheme> 
-//                    // <bf:identifierScheme>musicPublisherNumber</bf:identifierScheme>
-//                    identifierType = scheme.asLiteral().getLexicalForm();
-//                            
-//                }
-//                
-//                // "systemNumber" is generic - doesn't specify any particular
-//                // scheme, so delete.
-//                if (identifierType.equals("systemNumber")) {
-//                    identifierType = null;
-//                } else if (identifierType != null) {
-//                    identifierType = StringUtils.capitalize(identifierType);
-//                            
-//                }        
-//            }
-//    
-//            Statement valueStmt = subject.getProperty(
-//                    BfProperty.BF_IDENTIFIER_VALUE.property());
-//
-//            String value = null;
-//            String prefix = null;
-//            String identifierValue = null;
-//            
-//            if (valueStmt != null) {
-//                value = valueStmt.getString();
-//
-//// TODO - match 2 patterns defined above
-////                Matcher m = IDENTIFIER_VALUE.matcher(value);
-////                if (m.find()) {
-////                    prefix = m.group(1);
-////                    identifierValue = m.group(2);
-////                }                       
-//            }
-//
-//            if (identifierValue != null) {
-//                outputModel.add(subject, RDF.value, identifierValue);
-//            }
-//            
-//            // If there was no identifierScheme statement, try to get the 
-//            // identifier type from the identifierValue prefix
-//            if (identifierType == null ||
-//                    // The type SystemNumber is generic - try to find more 
-//                    // specific type from the id value prefix
-//                    identifierType.equals("SystemNumber")) {
-//                if (prefix != null) {
-//                   if  (IDENTIFIER_PREFIXES.keySet().contains(prefix)) {
-//                       identifierType = 
-//                               IDENTIFIER_PREFIXES.get(prefix);
-//                   }
-//                        
-//                // No prefix   
-//                } else {
-//                    // If value is all digits, assume a local ILS identifier
-//                    if (Pattern.matches("^\\d+$", identifierValue)) {
-//                        identifierType = "LocalIlsIdentifier";
-//                    }
-//                }
-//                // otherwise keep SystemNumber
-//            }
-//            
-//            // If no subtype can be determined, assign the generic Identifier
-//            // type.
-//            if (identifierType == null) {
-//                identifierType = "Identifier";
-//            }
-//
-////            Resource identifierType = ResourceFactory.createResource(
-////                    OntNamespace.LD4L.uri() + identifierType);
-////            outputModel.add(subject, RDF.type, identifierType);
-//
+        Ld4lType identifierType = null;
+        
+        if (newIdentifierValue != null) {
+            
+            if (prefix != null) {               
+                identifierType = IDENTIFIER_PREFIXES.get(prefix);
+                
+            } else if (newIdentifierValue.matches("^\\d+$")
+                    // Not sure if this condition is required
+                    && linkingStatement.getPredicate().equals(
+                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+
+                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+            }
 
         }
         
-        return outputModel;
-    }
-
-    private Ld4lType getIdentifierTypeFromIdentifierValue() {
-        
-        return null;
-        
+        return identifierType;
     }
 
     private Ld4lType getIdentifierTypeFromIdentifierScheme() {
@@ -353,28 +299,22 @@ public class BfIdentifierConverter extends BfResourceConverter {
     private Ld4lType getIdentifierTypeFromPredicate(Resource relatedResource) {
             
         Ld4lType identifierType = null;
+            
+        Property predicate = linkingStatement.getPredicate();
         
-        if (subject.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
-            identifierType = Ld4lType.OCLC_IDENTIFIER;
-        
-        } else {
+        BfProperty bfProp = BfProperty.get(predicate);
+                    
+        if (bfProp == null) {
+            // This would be an oversight; log for review.
+            LOGGER.warn("No handling defined for property " 
+                    + predicate.getURI() + " linking " 
+                    + relatedResource.getURI() + " to its identifier "
+                    + subject.getURI() + ".");   
             
-            Property predicate = linkingStatement.getPredicate();
-            
-            BfProperty bfProp = BfProperty.get(predicate);
-                        
-            if (bfProp == null) {
-                // This would be an oversight; log for review.
-                LOGGER.warn("No handling defined for property " 
-                        + predicate.getURI() + " linking " 
-                        + relatedResource.getURI() + " to its identifier "
-                        + subject.getURI() + ".");   
-                
-            } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-                identifierType = PROPERTY_TO_TYPE.get(bfProp);                
-            }
-            
+        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
         }
+           
         return identifierType;        
     }
     

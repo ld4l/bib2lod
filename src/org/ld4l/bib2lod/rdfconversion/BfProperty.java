@@ -55,7 +55,9 @@ public enum BfProperty {
     BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR),
     BF_IDENTIFIER("identifier", Ld4lProperty.IDENTIFIED_BY),
     BF_IDENTIFIER_SCHEME("identifierScheme"),
-    BF_IDENTIFIER_VALUE("identifierValue", Ld4lProperty.VALUE),
+    // Should not apply across-the-board; handled in BfIdentifierConverter.
+    // BF_IDENTIFIER_VALUE("identifierValue", Ld4lProperty.VALUE),
+    BF_IDENTIFIER_VALUE("identifierValue"),
     BF_ILLUSTRATION_NOTE("illustrationNote", Ld4lProperty.ILLUSTRATION_NOTE),
     BF_INSTANCE_OF("instanceOf", Ld4lProperty.IS_INSTANCE_OF),
     BF_INSTANCE_TITLE("instanceTitle", Ld4lProperty.HAS_TITLE),
