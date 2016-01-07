@@ -46,7 +46,8 @@ public enum BfProperty {
     BF_FORM_DESIGNATION("formDesignation", 
             Ld4lProperty.LEGACY_FORM_DESIGNATION),
     BF_GENERATION_PROCESS("generationProcess"),
-    BF_GENRE("genre"),
+    // TODO Need to do more with this
+    BF_GENRE("genre", Ld4lProperty.HAS_GENRE),
     BF_HAS_ANNOTATION("hasAnnotation", Ld4lProperty.HAS_ANNOTATION),
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
     BF_HAS_EXPRESSION("hasExpression", Ld4lProperty.HAS_EXPRESSION),
