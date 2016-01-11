@@ -151,6 +151,7 @@ public enum BfProperty {
     BF_LEGAL_DEPOSIT("legalDeposit"),
     BF_LOCAL("local"),
     BF_MATRIX_NUMBER("matrixNumber"),
+    BF_MUSIC_KEY("musicKey", Ld4lProperty.LEGACY_MUSIC_KEY),
     BF_MUSIC_PLATE("musicPlate"),
     BF_MUSIC_PUBLISHER_NUMBER("musicPublisherNumber"),
     BF_NBAN("nban"),

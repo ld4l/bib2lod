@@ -57,6 +57,7 @@ public enum Ld4lProperty {
     IS_SUBJECT_OF("isSubjectOf"),
     LABEL(OntNamespace.RDFS, "label"),
     LEGACY_FORM_DESIGNATION(OntNamespace.LEGACY, "formDesignation"),
+    LEGACY_MUSIC_KEY(OntNamespace.LEGACY, "musicKey"),
     LEGACY_PROVIDER_ROLE(OntNamespace.LEGACY, "providerRole"),
     LEGACY_PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
     LEGACY_SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
