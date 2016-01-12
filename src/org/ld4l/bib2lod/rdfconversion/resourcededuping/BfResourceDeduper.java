@@ -181,6 +181,7 @@ public class BfResourceDeduper {
             }
         }
         
+        // NacoNormalizer.normalize tolerates null arguments
         return NacoNormalizer.normalize(key);
     }
    
