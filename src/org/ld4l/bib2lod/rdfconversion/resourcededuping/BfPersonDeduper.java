@@ -38,6 +38,11 @@ public class BfPersonDeduper extends BfAuthorityDeduper {
                 key = label.getLexicalForm();
             }
         }
+        
+        if (key == null) {
+            LOGGER.debug("No key for person " + soln.getResource("localAuth"));
+            return null;
+        }
 
         // "Twain, Mark, 1835-1910--Censorship." : dedupe on key
         // "Twain, Mark, 1835-1910". This occurs when the Person is the subject
