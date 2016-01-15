@@ -195,8 +195,8 @@ public class RdfCleaner extends RdfProcessor {
         Pattern uriPattern = 
                 fileExt.equals("rdf") ? URI_RDFXML : URI_BRACKETED;
         
-        LOGGER.debug("Using uri pattern " + uriPattern.toString() 
-                + " for file extension " + fileExt);
+//        LOGGER.debug("Using uri pattern " + uriPattern.toString() 
+//                + " for file extension " + fileExt);
         
         String outputFilename =
                 FilenameUtils.getName(file.toString()); 
@@ -370,7 +370,7 @@ public class RdfCleaner extends RdfProcessor {
                 || line.contains("rdf:resource=\"\"")) {
                 // turtle input; this doesn't work - see comments above
                 // || line.contains("<unknown:namespace>")) {
-            LOGGER.debug("Found line with empty object: " + line);
+            // LOGGER.debug("Found line with empty object: " + line);
             line = "";
         }
         return line;
@@ -381,22 +381,21 @@ public class RdfCleaner extends RdfProcessor {
 
         StringBuilder sb = new StringBuilder(line);   
 
-        LOGGER.debug("Processing line: " + line);
+        // LOGGER.debug("Processing line: " + line);
 
         Matcher m = uriPattern.matcher(sb);
         
-        if (LOGGER.isDebugEnabled()) {
-            if (!m.find()) {
-                LOGGER.debug("No match found.");
-            }
-        }
+//        if (LOGGER.isDebugEnabled()) {
+//            if (!m.find()) {
+//                LOGGER.debug("No match found.");
+//            }
+//        }
         
         int matchPointer = 0;
         while (m.find(matchPointer)) {             
             try { 
                 matchPointer = m.end();
                 String match = m.group();
-                LOGGER.debug("Found match: " + match);
 
                 /*
                  * Only the multi-argument URI constructor encodes illegal
@@ -426,26 +425,26 @@ public class RdfCleaner extends RdfProcessor {
                 
                 if (! uri.equals(m.group().toString())) {
                     
-                    LOGGER.debug("Replacing original line with new line: " 
-                            + uri);
+//                    LOGGER.debug("Replacing original line with new line: " 
+//                            + uri);
                     sb.replace(m.start(), m.end(), uri);
                     // Manually reset matchPointer, since the old and new 
                     // strings may differ in length.
                     matchPointer += uri.length() - match.length();
                     
                 } else {
-                    LOGGER.debug("No change");
+                    // LOGGER.debug("No change");
                 }
                 
             // Deletes an entire string literal containing a bad URI, but these
             // are very rare.
             } catch (MalformedURLException e) {
-                LOGGER.debug("MalformedURLException in line \"" + line 
-                        + "\". Deleting line.");
+//                LOGGER.debug("MalformedURLException in line \"" + line 
+//                        + "\". Deleting line.");
                 return "";
             } catch (URISyntaxException e) {
-                LOGGER.debug("URISyntaxException in line \"" + line 
-                        + "\". Deleting line.");
+//                LOGGER.debug("URISyntaxException in line \"" + line 
+//                        + "\". Deleting line.");
                 return "";
             }
         }   
@@ -464,40 +463,21 @@ public class RdfCleaner extends RdfProcessor {
     protected String fixLocalNames(String line) {
         
         StringBuilder sb = new StringBuilder(line);
-        
+        LOGGER.debug(line);
         Matcher m = BAD_LOCALNAME.matcher(sb);
         int matchPointer = 0;
-        while (m.find(matchPointer)) {            
+        if (LOGGER.isDebugEnabled()) {
+            if (!m.find(matchPointer)) {
+                LOGGER.debug("No local name starting with digit found.");
+            }
+        }
+        while (m.find(matchPointer)) {
+            LOGGER.debug("Match: " + m.group(1) + " " + m.group(2));
             sb.replace(m.start(), m.end(), m.group(1) + "n" + m.group(2));
             matchPointer = m.end() + 1;
-        }       
+        }     
+        LOGGER.debug("Returning from fixLocalNames(): " + sb.toString());
         return sb.toString();     
     } 
-    
-//    protected String convertBnodes(
-//            String line, Map<String, String> bnodesToUris) {
-//        
-//        StringBuilder sb = new StringBuilder(line);  
-//        
-//        Matcher m = BNODE_ID.matcher(sb);
-//        int matchPointer = 0;
-//        while (m.find(matchPointer)) {  
-//
-//            String uri;
-//            String bnodeId = m.group();
-//            // No bnode found here in rdf/xml input
-//            LOGGER.debug("Found bnode: " + bnodeId);
-//            if (bnodesToUris.containsKey(bnodeId)) {
-//                uri = bnodesToUris.get(bnodeId);
-//                sb.replace(m.start(), m.end(), uri);
-//            } else {
-//                uri = mintUri(localNamespace);
-//                bnodesToUris.put(bnodeId, uri);
-//            }
-//            matchPointer += uri.length() - bnodeId.length();
-//                
-//        }       
-//        return sb.toString();     
-//    }
     
 }
