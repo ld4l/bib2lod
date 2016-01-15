@@ -164,21 +164,6 @@ public class BnodeConverter extends RdfProcessor {
     private Resource createUriResourceForAnonNode(RDFNode rdfNode, 
             Map<String, Resource> idToUriResource, Model assertions) {
         Node node = rdfNode.asNode();
-        /*
-         * Prepend fileCount to blank node label to ensure that URIs are not
-         * duplicated across files. Blank node ids are locally scoped to a file
-         * and thus may be duplicated across files, but we do not want 
-         * convergence of the same blank node id across files. Note: The LC 
-         * converter actually creates unique bnode ids by appending the bib id, 
-         * much in the way that unique URIs are created, but when Jena reads the 
-         * RDF file into a model, it generates its own bnode ids that are 
-         * locally scoped to the file.
-         * 
-         * Prepend "n" to avoid problems with URI parsing in Jena - localnames
-         * starting with a digit are mis-parsed, and not allowed in xml.
-         * 
-         * TODO - just use RdfProcessor.mintUri()
-         */
         String id = node.getBlankNodeId().toString();
         Resource uriResource;
         if (idToUriResource.containsKey(id)) {
