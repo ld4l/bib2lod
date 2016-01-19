@@ -66,7 +66,9 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         ResultSet results = qexec.execSelect();
         
         // Loop through the query results
+        @SuppressWarnings("unused")
         int resourceCount = 0;
+        @SuppressWarnings("unused")
         Instant resourceStart = Instant.now();
         
         while (results.hasNext()) {
@@ -117,30 +119,8 @@ public class BfInstanceDeduper extends BfResourceDeduper {
 //        }
         
         
-        // NB Since Instance keys are always WorldCat URIs, we can always add
-        // the sameAs assertion. If we add other types of keys, we'll have to 
-        // test here that the map key is a URI.
-        
-        int uniqueInstanceCount = 0;
-        Instant newAssertionsStart = Instant.now();
-        LOGGER.info("Start adding new assertions.");
-        
-        for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
- 
-            uniqueInstanceCount++;
-            Resource subject = 
-                    model.createResource(entry.getValue());
-            Resource object = model.createResource(entry.getKey()); 
-            LOGGER.debug("Adding " + subject.getURI() 
-                    + " owl:sameAs " + object.getURI());
-            newAssertions.add(subject, OWL.sameAs, object);            
-        }
-        
-        LOGGER.info("Added " + uniqueInstanceCount + " new "
-                + Bib2LodStringUtils.simplePlural(
-                        "assertion", uniqueInstanceCount) + ". "
-                + TimerUtils.getDuration(newAssertionsStart));    
-        
+		addSameAsAssertions(model, uniqueInstances);
+                
         if (LOGGER.isDebugEnabled()) {
             LOGGER.debug("uniqueUris map:");
             for (Map.Entry<String, String> entry : uniqueUris.entrySet()) {
@@ -155,6 +135,34 @@ public class BfInstanceDeduper extends BfResourceDeduper {
         return uniqueUris;        
     }
     
+    private void addSameAsAssertions(Model model, 
+            Map<String, String> uniqueInstances) {
+        
+        int uniqueInstanceCount = 0;
+        Instant newAssertionsStart = Instant.now();
+        LOGGER.info("Start adding new assertions.");
+
+        // NB Since Instance keys are always WorldCat URIs, we can always add
+        // the sameAs assertion. If we add other types of keys, we'll have to 
+        // test here that the map key is a URI.
+        for (Map.Entry<String, String> entry : uniqueInstances.entrySet()) {
+ 
+            uniqueInstanceCount++;
+            Resource subject = 
+                    model.createResource(entry.getValue());
+            Resource object = model.createResource(entry.getKey()); 
+            LOGGER.debug("Adding " + subject.getURI() 
+                    + " owl:sameAs " + object.getURI());
+            newAssertions.add(subject, OWL.sameAs, object);            
+        }
+        
+        LOGGER.info("Added " + uniqueInstanceCount + " new "
+                + Bib2LodStringUtils.simplePlural(
+                        "assertion", uniqueInstanceCount) + ". "
+                + TimerUtils.getDuration(newAssertionsStart));  
+        
+    }
+
     // TODO Query could be a static final field, since there's no type
     // parameterization.
     private Query getQuery() {
