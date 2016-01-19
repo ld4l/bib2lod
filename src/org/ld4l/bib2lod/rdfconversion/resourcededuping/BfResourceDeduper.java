@@ -31,7 +31,7 @@ public class BfResourceDeduper {
     private static final Logger LOGGER =          
             LogManager.getLogger(BfResourceDeduper.class);
     
-    protected Model newAssertions;
+    // protected Model newAssertions;
     protected BfType type;
     
     public BfResourceDeduper(BfType type) {
@@ -44,7 +44,7 @@ public class BfResourceDeduper {
          * and written out to a separate file - because they don't need any
          * further processing.
          */
-        newAssertions = ModelFactory.createDefaultModel();
+        // newAssertions = ModelFactory.createDefaultModel();
     }
     
     public Map<String, String> dedupe(Model model) {
@@ -186,9 +186,9 @@ public class BfResourceDeduper {
     }
    
   
-    public Model getNewAssertions() {
-        return newAssertions;
-    }
+//    public Model getNewAssertions() {
+//        return newAssertions;
+//    }
     
     public Map<BfType, Model> getModelsByType(Model model) {
         Map<BfType, Model> models = new HashMap<BfType, Model>();

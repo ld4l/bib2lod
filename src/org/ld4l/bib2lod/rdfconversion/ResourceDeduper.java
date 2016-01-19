@@ -58,7 +58,7 @@ public class ResourceDeduper extends RdfProcessor {
     }
 
     private static final String REMAINDER_FILENAME = "other";
-    private static final String NEW_ASSERTIONS_FILENAME = "newAssertions";
+    // private static final String NEW_ASSERTIONS_FILENAME = "newAssertions";
     // private static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
     
     // Maps file basenames to deduper instances.
@@ -70,9 +70,9 @@ public class ResourceDeduper extends RdfProcessor {
         dedupers = createDedupers();
     }
     
-    public static String getNewAssertionsFilename() {
-        return NEW_ASSERTIONS_FILENAME;
-    }
+//    public static String getNewAssertionsFilename() {
+//        return NEW_ASSERTIONS_FILENAME;
+//    }
     
     private Map<String, BfResourceDeduper> createDedupers() {
         
@@ -199,7 +199,7 @@ public class ResourceDeduper extends RdfProcessor {
              * separate model (file) rather than the original model so that
              * these statements don't receive any further processing.
              */
-            writeNewAssertions(deduper.getNewAssertions());
+            // writeNewAssertions(deduper.getNewAssertions());
             
             LOGGER.info("Done identifying unique URIs in file " + filename
                     + ". " + TimerUtils.getDuration(fileStart));
@@ -322,11 +322,11 @@ public class ResourceDeduper extends RdfProcessor {
                    
     }
    
-    private void writeNewAssertions(Model newStatements) {
-        if (!newStatements.isEmpty()) {
-            appendModelToFile(newStatements, NEW_ASSERTIONS_FILENAME);
-        }
-    }
+//    private void writeNewAssertions(Model newStatements) {
+//        if (!newStatements.isEmpty()) {
+//            appendModelToFile(newStatements, NEW_ASSERTIONS_FILENAME);
+//        }
+//    }
   
 // Use for second round of type splitting. See comments above.
 //    private void appendModelsToFiles(Map<BfType, Model> modelsByType) {

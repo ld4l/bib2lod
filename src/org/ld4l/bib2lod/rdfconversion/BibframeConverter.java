@@ -144,11 +144,11 @@ public class BibframeConverter extends RdfProcessor {
         
         // LOGGER.debug("FILENAME: " + filename);
         
-        if (basename.equals(ResourceDeduper.getNewAssertionsFilename())) {
-            // LOGGER.debug("Copying new assertions file.");
-            copyFile(file);
-            return 0;
-        }
+//        if (basename.equals(ResourceDeduper.getNewAssertionsFilename())) {
+//            // LOGGER.debug("Copying new assertions file.");
+//            copyFile(file);
+//            return 0;
+//        }
 
         BfType typeForFile;
         

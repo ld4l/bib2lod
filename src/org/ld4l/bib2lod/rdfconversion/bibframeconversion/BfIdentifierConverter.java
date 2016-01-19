@@ -14,6 +14,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -131,11 +132,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
         Resource relatedResource = linkingStatement.getSubject();
 
-        // Jena doesn't recognize the namespace when the localname starts with
-        // a digit.
-        // if (subject.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
-        if (subject.getURI().startsWith(Vocabulary.WORLDCAT.uri())) {
-            createWorldcatIdentifier(relatedResource);
+        if (isWorldcatUri(subject)) {
+            convertWorldcatIdentifier(relatedResource);
             return outputModel;
         }
             
@@ -204,23 +202,11 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
         
         outputModel.add(subject, RDF.type, identifierType.ontClass());  
-
+        
         
         /*
          * Identifier value                                
          */
- 
-// Certainly not true for OCLC_IDENTFIERS derived from a prefix. Would hold for
-// Worldcat numbers, but they are already handled above.
-//        // Is this more generally, if the value is a resource, use the local 
-//        // name as the new value?
-//        if (identifierType == Ld4lType.OCLC_IDENTIFIER) {
-//            newIdentifierValue = subject.getLocalName();
-//            
-//        } else {
-//            // No else case. newIdentifierValue already assigned from 
-//            // bf:identifierValue above.
-//        }
 
         if (newIdentifierValue != null) {
             // If we've assigned a non-generic Identifier (i.e., a subclass of
@@ -230,16 +216,28 @@ public class BfIdentifierConverter extends BfResourceConverter {
             if (prefix != null && 
                     ! identifierType.equals(Ld4lType.IDENTIFIER)) {
                 newIdentifierValue = id;
+                
             }
             outputModel.add(subject, RDF.value, newIdentifierValue);
+            
+            // From string value "(OCoLC)449860683" create 
+            // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
+            // instances based on the identifier values.
+            Resource worldcatInstance = outputModel.createResource(
+                    Vocabulary.WORLDCAT.uri() + newIdentifierValue);
+            if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER)) {
+                outputModel.add(relatedResource, OWL.sameAs, worldcatInstance);
+            }
+            
         }
- 
+
         return outputModel;
     }
    
 
-    private void createWorldcatIdentifier(Resource relatedResource) {
+    private void convertWorldcatIdentifier(Resource relatedResource) {
         
+        // Add an identifier object with the Worldcat id as its value.
         Resource identifier = outputModel.createResource(
                 RdfProcessor.mintUri(localNamespace));
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), 
@@ -251,6 +249,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
         // outputModel.add(identifier, RDF.value, subject.getLocalName());
         String id = subject.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
         outputModel.add(identifier, RDF.value, id);
+        
+        // Also add an owl:sameAs assertion from the instance to the Worldcat
+        // URI.
+        outputModel.add(relatedResource, OWL.sameAs, subject);
     }
 
     private Ld4lType getIdentifierTypeFromIdentifierValue(
@@ -325,6 +327,13 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
            
         return identifierType;        
+    }
+    
+    private boolean isWorldcatUri(Resource resource) {
+        // Jena doesn't recognize the namespace when the localname starts with
+        // a digit.
+        // if (resource.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+        return resource.getURI().startsWith(Vocabulary.WORLDCAT.uri());
     }
     
 
