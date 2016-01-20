@@ -45,8 +45,8 @@
         <rdfs:label xml:lang="en-us">LD4L Proposed Bibliographic Ontology</rdfs:label>
         <dcterms:modified>2015-07-23</dcterms:modified>
         <dcterms:issued>2015-07-23</dcterms:issued>
-        <rdfs:comment xml:lang="en-us">This bibliographic ontology is based on Rob Sanderson&apos;s and LD4L&apos;s recommended changes to BIBFRAME to better reflect best practices in the Linked Data domain. It is LD4L’s hope that derivations from BIBFRAME found in this ontology will be folded into the official BIBFRAME namespace. Efforts have been made to consider each class and property, but this ontology is largely untested. LD4L may provide revised/expanded versions in future as we identify new use cases and begin to test the ontology with instance data. The proposed changes include, but are not limited to, incorporation of the following conventions: (1) Reuse stable pre-existing classes and properties from external ontologies rather than declaring new ones within the BIBFRAME namespace. (2) Use URIs rather than strings to identify resources. (3) Replace the bf:Authority classes with Real World Entity classes for people, places, things, etc. (4) Define only one pattern to model one feature of the knowledge domain. (5) Clarify the directionality of properties via naming, definitions, and, where applicable, domain and range constraints, and add inverse properties where appropriate. (6) Name terms consistently and make the distinction between classes, object properties, and datatype properties clear through standard naming conventions.</rdfs:comment>
         <vann:preferredNamespacePrefix>ld4l</vann:preferredNamespacePrefix>
+        <rdfs:comment xml:lang="en-us">This bibliographic ontology is based on Rob Sanderson&apos;s and LD4L&apos;s recommended changes to BIBFRAME to better reflect best practices in the Linked Data domain. It is LD4L’s hope that derivations from BIBFRAME found in this ontology will be folded into the official BIBFRAME namespace. Efforts have been made to consider each class and property, but this ontology is largely untested. LD4L may provide revised/expanded versions in future as we identify new use cases and begin to test the ontology with instance data. The proposed changes include, but are not limited to, incorporation of the following principles and conventions: (1) Reuse stable pre-existing classes and properties from external ontologies rather than declaring new ones within the BIBFRAME namespace. (2) Use URIs rather than strings to identify resources. (3) Replace the bf:Authority classes with Real World Entity classes for people, places, things, etc. (4) Define only one pattern to model one feature of the knowledge domain. (5) Clarify the directionality of properties via naming, definitions, and, where applicable, domain and range constraints, and add inverse properties where appropriate. (6) Name terms consistently and make the distinction between classes, object properties, and datatype properties clear through standard naming conventions. See http://ld4l.org/ontology/ for more on the LD4L Ontology development process.</rdfs:comment>
         <owl:versionInfo xml:lang="en-us">Version 1.0</owl:versionInfo>
     </owl:Ontology>
     
@@ -184,6 +184,12 @@
     
 
 
+    <!-- &amp;xsd;boolean -->
+
+    <rdfs:Datatype rdf:about="&amp;xsd;boolean"/>
+    
+
+
     <!-- http://bib.ld4l.org/ontology/&amp;xsd;boolean -->
 
     <rdfs:Datatype rdf:about="http://bib.ld4l.org/ontology/&amp;xsd;boolean"/>
@@ -230,6 +236,16 @@
         <rdfs:label xml:lang="en-us">accompanies</rdfs:label>
         <skos:example xml:lang="en-us">An index in a separate volume accompanies an encyclopedia.</skos:example>
         <rdfs:comment xml:lang="en-us">This resource adds to or is issued with another resource.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
+    <!-- http://bib.ld4l.org/ontology/agent -->
+
+    <owl:ObjectProperty rdf:about="http://bib.ld4l.org/ontology/agent">
+        <rdfs:label xml:lang="en">has agent</rdfs:label>
+        <rdfs:comment xml:lang="en">Agent associated with a resource</rdfs:comment>
+        <rdfs:range rdf:resource="&foaf;Agent"/>
     </owl:ObjectProperty>
     
 
@@ -291,14 +307,6 @@
         <skos:scopeNote xml:lang="en-us">Titles can be derived from other Titles, and Works can be derived from other Works. Property restrictions on Work and Title prevent linking subjects and objects of different types.</skos:scopeNote>
         <rdfs:subPropertyOf rdf:resource="http://bib.ld4l.org/ontology/follows"/>
         <owl:inverseOf rdf:resource="http://bib.ld4l.org/ontology/hasDerivative"/>
-        <rdfs:range>
-            <owl:Class>
-                <owl:unionOf rdf:parseType="Collection">
-                    <rdf:Description rdf:about="http://bib.ld4l.org/ontology/Work"/>
-                    <rdf:Description rdf:about="&madsrdf;Title"/>
-                </owl:unionOf>
-            </owl:Class>
-        </rdfs:range>
         <rdfs:domain>
             <owl:Class>
                 <owl:unionOf rdf:parseType="Collection">
@@ -307,6 +315,14 @@
                 </owl:unionOf>
             </owl:Class>
         </rdfs:domain>
+        <rdfs:range>
+            <owl:Class>
+                <owl:unionOf rdf:parseType="Collection">
+                    <rdf:Description rdf:about="http://bib.ld4l.org/ontology/Work"/>
+                    <rdf:Description rdf:about="&madsrdf;Title"/>
+                </owl:unionOf>
+            </owl:Class>
+        </rdfs:range>
     </owl:ObjectProperty>
     
 
@@ -1552,15 +1568,6 @@
     
 
 
-    <!-- http://www.w3.org/ns/prov#agent -->
-
-    <owl:ObjectProperty rdf:about="&prov;agent">
-        <rdfs:label xml:lang="en">has agent</rdfs:label>
-        <rdfs:comment xml:lang="en">Agent associated with a resource.</rdfs:comment>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://www.w3.org/ns/prov#atLocation -->
 
     <owl:ObjectProperty rdf:about="&prov;atLocation">
@@ -1582,6 +1589,15 @@
     
 
 
+    <!-- http://www.w3.org/ns/prov#qualifiedAttribution -->
+
+    <owl:ObjectProperty rdf:about="&prov;qualifiedAttribution">
+        <rdfs:label xml:lang="en-us">qualified attribution</rdfs:label>
+        <rdfs:comment xml:lang="en-us">Attribution is the ascribing of an entity to an agent. When an entity e is attributed to agent ag, entity e was generated by some unspecified activity that in turn was associated to agent ag. Thus, this relation is useful when the activity is not known, or irrelevant.</rdfs:comment>
+    </owl:ObjectProperty>
+    
+
+
     <!-- 
     ///////////////////////////////////////////////////////////////////////////////////////
     //
@@ -1599,18 +1615,6 @@
         <rdfs:label xml:lang="en-us">acquisition note</rdfs:label>
         <rdfs:comment xml:lang="en-us">Information about the circumstances (e.g., source, date, method) under which the resource was directly acquired.</rdfs:comment>
         <rdfs:subPropertyOf rdf:resource="http://bib.ld4l.org/ontology/note"/>
-        <rdfs:range rdf:resource="&rdfs;Literal"/>
-    </owl:DatatypeProperty>
-    
-
-
-    <!-- http://bib.ld4l.org/ontology/barcode -->
-
-    <owl:DatatypeProperty rdf:about="http://bib.ld4l.org/ontology/barcode">
-        <rdfs:label xml:lang="en-us">barcode</rdfs:label>
-        <rdfs:comment xml:lang="en-us">Identification number of the physical item.</rdfs:comment>
-        <skos:editorialNote xml:lang="en-us">Probably not a FunctionalProperty: there are both Codabar and Code 39 barcoding systems; could an Item have both? </skos:editorialNote>
-        <rdfs:domain rdf:resource="http://bib.ld4l.org/ontology/Item"/>
         <rdfs:range rdf:resource="&rdfs;Literal"/>
     </owl:DatatypeProperty>
     
@@ -1834,8 +1838,8 @@
 
     <owl:DatatypeProperty rdf:about="http://bib.ld4l.org/ontology/hasIndex">
         <rdfs:label xml:lang="en-us">has index</rdfs:label>
+        <rdfs:range rdf:datatype="&amp;xsd;boolean"></rdfs:range>
         <rdfs:comment xml:lang="en-us">Indicates whether a work or instance contains an internal index</rdfs:comment>
-        <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
     
 
@@ -1886,9 +1890,9 @@
 
     <owl:DatatypeProperty rdf:about="http://bib.ld4l.org/ontology/producesSound">
         <rdfs:label xml:lang="en-us">produces sound</rdfs:label>
+        <rdfs:range rdf:datatype="&xsd;boolean">false</rdfs:range>
         <rdfs:comment xml:lang="en-us">Indication of whether the production of sound is an integral part of the resource.</rdfs:comment>
         <rdfs:domain rdf:resource="http://bib.ld4l.org/ontology/Instance"/>
-        <rdfs:range rdf:resource="&xsd;boolean"/>
     </owl:DatatypeProperty>
     
 
@@ -2310,6 +2314,16 @@
     <owl:Class rdf:about="http://bib.ld4l.org/ontology/AwardReceipt">
         <rdfs:label xml:lang="en-us">Award receipt</rdfs:label>
         <rdfs:comment xml:lang="en-us">The bestowal of an award, honor, or distinction to an Agent or Work. The award bestowed should be represented with the Award class. The AwardReceipt is a context node between the award and the recipient which may contain further information, such as date.</rdfs:comment>
+    </owl:Class>
+    
+
+
+    <!-- http://bib.ld4l.org/ontology/Barcode -->
+
+    <owl:Class rdf:about="http://bib.ld4l.org/ontology/Barcode">
+        <rdfs:label xml:lang="en">Barcode</rdfs:label>
+        <rdfs:subClassOf rdf:resource="http://bib.ld4l.org/ontology/Identifier"/>
+        <rdfs:comment xml:lang="en">Identification number of a physical item.</rdfs:comment>
     </owl:Class>
     
 
@@ -3086,12 +3100,6 @@
         <rdfs:subClassOf rdf:resource="http://bib.ld4l.org/ontology/FiniteResource"/>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="&dcterms;hasPart"/>
-                <owl:allValuesFrom rdf:resource="http://bib.ld4l.org/ontology/PeriodicalPart"/>
-            </owl:Restriction>
-        </rdfs:subClassOf>
-        <rdfs:subClassOf>
-            <owl:Restriction>
                 <owl:onProperty rdf:resource="&dcterms;isPartOf"/>
                 <owl:allValuesFrom rdf:resource="http://bib.ld4l.org/ontology/Periodical"/>
             </owl:Restriction>
@@ -3100,6 +3108,12 @@
             <owl:Restriction>
                 <owl:onProperty rdf:resource="&dcterms;isPartOf"/>
                 <owl:minCardinality rdf:datatype="&xsd;nonNegativeInteger">1</owl:minCardinality>
+            </owl:Restriction>
+        </rdfs:subClassOf>
+        <rdfs:subClassOf>
+            <owl:Restriction>
+                <owl:onProperty rdf:resource="&dcterms;hasPart"/>
+                <owl:allValuesFrom rdf:resource="http://bib.ld4l.org/ontology/PeriodicalPart"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <skos:example>The June 1, 2015 issue of The New Yorker</skos:example>
@@ -3449,13 +3463,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="http://bib.ld4l.org/ontology/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="http://bib.ld4l.org/ontology/Work"/>
             </owl:Restriction>
         </rdfs:subClassOf>
@@ -3674,13 +3688,13 @@
         <rdfs:label xml:lang="en-us">Work</rdfs:label>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/derivedFrom"/>
+                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/hasDerivative"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
         <rdfs:subClassOf>
             <owl:Restriction>
-                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/hasDerivative"/>
+                <owl:onProperty rdf:resource="http://bib.ld4l.org/ontology/derivedFrom"/>
                 <owl:allValuesFrom rdf:resource="&madsrdf;Title"/>
             </owl:Restriction>
         </rdfs:subClassOf>
