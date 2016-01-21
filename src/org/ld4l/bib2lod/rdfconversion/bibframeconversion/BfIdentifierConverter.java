@@ -16,6 +16,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -93,23 +94,20 @@ public class BfIdentifierConverter extends BfResourceConverter {
             BfProperty.properties(BF_IDENTIFIER_PROPS);
     
     private static final SortedMap<String, Ld4lType> IDENTIFIER_PREFIXES = 
-// TreeMap considers two keys that are equal according to the comparator to be
-// equal, so one is deleted from the map. Must sort by length and then by
-// 
-//          new TreeMap<String, Ld4lType>(
-//           Comparator.comparingInt(String::length));      
+
             new TreeMap<String, Ld4lType>(
                     Comparator.comparingInt(String::length)
-                    .reversed()
-                    // NB Without thenComparing(), only one key of a given
-                    // length is included in the Map.
+                    .reversed()            
+                    // TreeMap considers two keys that are equal according to 
+                    // the  comparator to be equal, so only one is included. 
+                    // Must sort by reverse length and then  by natural 
+                    // ordering in order to retain strings of the same length. 
                     .thenComparing(String.CASE_INSENSITIVE_ORDER));
-
             
     static {
-// Not sure what types these represent.
-//        IDENTIFIER_PREFIXES.put("CStRLIN", );
-//        IDENTIFIER_PREFIXES.put("NIC", );        
+        // Not sure what types these prefixes represent. Add when known.
+        //        IDENTIFIER_PREFIXES.put("CStRLIN", );
+        //        IDENTIFIER_PREFIXES.put("NIC", );        
         IDENTIFIER_PREFIXES.put("(OCoLC)", Ld4lType.OCLC_IDENTIFIER);
         IDENTIFIER_PREFIXES.put("(OCoLC-I)", Ld4lType.OCLC_IDENTIFIER);
         IDENTIFIER_PREFIXES.put("(OCoLC-M)", Ld4lType.OCLC_IDENTIFIER);
@@ -143,6 +141,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
         getIdentifierType(relatedResource, idValues);
 
+        LOGGER.debug("Identifier: " + subject.getURI());
+        RdfProcessor.printModel(outputModel, Level.DEBUG);
         return outputModel;
     }
 
@@ -165,18 +165,13 @@ public class BfIdentifierConverter extends BfResourceConverter {
                 
                 idValue = object.asLiteral().getLexicalForm();
 
-                LOGGER.debug("Identifier: " + subject.getURI());
                 // Parse the id value into prefix and value, if possible.
                 for (Map.Entry<String, Ld4lType> entry : 
                         IDENTIFIER_PREFIXES.entrySet()) {
                     String key = entry.getKey();
-                    LOGGER.debug("Prefix: " + key);
-                    //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - oc + m45123880
-                    //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - ocm + 45123880
                     if (idValue.startsWith(key)) {
                         prefix = key;
-                        idValue = idValue.substring(key.length());                                                                
-                        LOGGER.debug(prefix + " + " + idValue);   
+                        idValue = idValue.substring(key.length());                                                                 
                         break; 
                     }                    
                 }
@@ -198,8 +193,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         identifierType = getIdentifierTypeFromPredicate(relatedResource);
         
-        // Note that Biframe often redundantly specifies type with both a 
-        // predicate and a scheme:
+        // Note that the Bibframe converter may redundantly specify type with 
+        // both a predicate and a scheme:
         // <http://draft.ld4l.org/cornell/102063instance16> <http://bibframe.org/vocab/lccn> _:bnode47102063 .
         // _:bnode47102063 <http://bibframe.org/vocab/identifierScheme> <http://id.loc.gov/vocabulary/identifiers/lccn> . 
         if (identifierType == null) {
@@ -222,7 +217,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         // From string value "(OCoLC)449860683" create 
         // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
-        // instances based on the identifier values.
         if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER) && 
                 value != null) {
             Resource worldcatInstance = outputModel.createResource(
@@ -265,7 +259,9 @@ public class BfIdentifierConverter extends BfResourceConverter {
             if (prefix != null) {               
                 identifierType = IDENTIFIER_PREFIXES.get(prefix);
             
-            // Not sure if this is true for Harvard and Stanford
+            // If no subtype has been identified, and the value is all digits,
+            // assume a local ILS identifer.
+            // TODO Check if this is true for Harvard and Stanford
             } else if (idValue.matches("^\\d+$")
                     // Not sure if this condition is required
                     && linkingStatement.getPredicate().equals(
@@ -273,7 +269,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
                 identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
             }
-
         }
         
         return identifierType;
@@ -300,7 +295,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             
             if (! schemeValue.equals("systemNumber")) {
                 schemeValue = StringUtils.capitalize(schemeValue);
-                // Will be null if it doesn't exist.
+                // Returns null if there's no corresponding type
                 identifierType = Ld4lType.getByLocalName(schemeValue);            
             } 
         }
