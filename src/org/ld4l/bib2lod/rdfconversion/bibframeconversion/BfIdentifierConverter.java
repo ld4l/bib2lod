@@ -156,6 +156,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
                 for (Map.Entry<String, Ld4lType> entry : 
                         IDENTIFIER_PREFIXES.entrySet()) {
                     String key = entry.getKey();
+                    //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - oc + m45123880
+                    //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - ocm + 45123880
                     if (newIdentifierValue.startsWith(key)) {
                         prefix = key;
                         id = newIdentifierValue.substring(key.length());
@@ -300,7 +302,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             if (! schemeValue.equals("systemNumber")) {
                 schemeValue = StringUtils.capitalize(schemeValue);
                 // Will be null if it doesn't exist.
-                identifierType = Ld4lType.get(schemeValue);            
+                identifierType = Ld4lType.getByLocalName(schemeValue);            
             } 
         }
         

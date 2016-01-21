@@ -129,7 +129,8 @@ public enum Ld4lType {
     private final OntNamespace namespace;
     private final String localname;
     private final String uri;
-    private final String filename;
+    // Filename only used by factory classes, which are no longer in use.
+    // private final String filename;
     private final String prefixed;
     private final String sparqlUri;
     private final Resource ontClass;
@@ -155,7 +156,7 @@ public enum Ld4lType {
         this.sparqlUri = "<" + this.uri + ">";
         
         String prefix = this.namespace.prefix();
-        this.filename = prefix + this.localname; 
+        // this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
 
         // Create the Jena ontClass in the constructor to avoid repeated
@@ -185,9 +186,9 @@ public enum Ld4lType {
         return uri;
     }
     
-    public String filename() {
-        return filename;
-    }
+//    public String filename() {
+//        return filename;
+//    }
     
     public String prefixed() {
         return prefixed; 
@@ -197,26 +198,34 @@ public enum Ld4lType {
         return sparqlUri;
     }
    
-    private static final Map<String, Ld4lType> LOOKUP_BY_FILENAME = 
-            new HashMap<String, Ld4lType>();
+//    private static final Map<String, Ld4lType> LOOKUP_BY_FILENAME = 
+//            new HashMap<String, Ld4lType>();
     
     private static final Map<String, Ld4lType> LOOKUP_BY_LABEL = 
             new HashMap<String, Ld4lType>();
     
+    private static final Map<String, Ld4lType> LOOKUP_BY_LOCAL_NAME = 
+            new HashMap<String, Ld4lType>();
+    
     static {
         for (Ld4lType type : Ld4lType.values()) {
-            LOOKUP_BY_FILENAME.put(type.filename, type);
+            //LOOKUP_BY_FILENAME.put(type.filename, type);
             LOOKUP_BY_LABEL.put(type.label, type);
+            LOOKUP_BY_LOCAL_NAME.put(type.localname,type);
         }
     }
     
-    public static Ld4lType typeForFilename(String filename) {
-        String basename = FilenameUtils.getBaseName(filename);
-        return LOOKUP_BY_FILENAME.get(basename);
+//    public static Ld4lType typeForFilename(String filename) {
+//        String basename = FilenameUtils.getBaseName(filename);
+//        return LOOKUP_BY_FILENAME.get(basename);
+//    }
+    
+    public static Ld4lType getByLabel(String label) {
+        return LOOKUP_BY_LABEL.get(label);
     }
     
-    public static Ld4lType get(String label) {
-        return LOOKUP_BY_LABEL.get(label);
+    public static Ld4lType getByLocalName(String localname) {
+        return LOOKUP_BY_LOCAL_NAME.get(localname);
     }
 
     public Resource ontClass() {
