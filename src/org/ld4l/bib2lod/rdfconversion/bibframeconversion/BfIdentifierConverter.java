@@ -100,6 +100,9 @@ public class BfIdentifierConverter extends BfResourceConverter {
 //           Comparator.comparingInt(String::length));      
             new TreeMap<String, Ld4lType>(
                     Comparator.comparingInt(String::length)
+                    .reversed()
+                    // NB Without thenComparing(), only one key of a given
+                    // length is included in the Map.
                     .thenComparing(String.CASE_INSENSITIVE_ORDER));
 
             
@@ -162,19 +165,20 @@ public class BfIdentifierConverter extends BfResourceConverter {
                 
                 idValue = object.asLiteral().getLexicalForm();
 
+                LOGGER.debug("Identifier: " + subject.getURI());
                 // Parse the id value into prefix and value, if possible.
                 for (Map.Entry<String, Ld4lType> entry : 
                         IDENTIFIER_PREFIXES.entrySet()) {
                     String key = entry.getKey();
+                    LOGGER.debug("Prefix: " + key);
                     //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - oc + m45123880
                     //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - ocm + 45123880
                     if (idValue.startsWith(key)) {
                         prefix = key;
                         idValue = idValue.substring(key.length());                                                                
                         LOGGER.debug(prefix + " + " + idValue);   
-                        // break; ** break here once the sorting problem is fixed
-                    }
-                    
+                        break; 
+                    }                    
                 }
                 
                 outputModel.add(subject, RDF.value, idValue);
