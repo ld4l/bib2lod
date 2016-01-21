@@ -104,8 +104,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
             
     static {
-        // Many of these are not instantiated in the data, so it's a guess as
-        // to what the string value would be.
+// Not sure what types these represent.
 //        IDENTIFIER_PREFIXES.put("CStRLIN", );
 //        IDENTIFIER_PREFIXES.put("NIC", );        
         IDENTIFIER_PREFIXES.put("(OCoLC)", Ld4lType.OCLC_IDENTIFIER);
@@ -126,62 +125,74 @@ public class BfIdentifierConverter extends BfResourceConverter {
     }
     
     protected Model convertModel() {
-        
-//        LOGGER.debug("Identifier model: ");
-//        RdfProcessor.printModel(inputModel, Level.DEBUG);
 
         Resource relatedResource = linkingStatement.getSubject();
 
         if (isWorldcatUri(subject)) {
-            convertWorldcatIdentifier(relatedResource);
+            createWorldcatIdentifier(relatedResource);
             return outputModel;
         }
             
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
 
+        String[] idValues = getIdentifierValue();
+
+        getIdentifierType(relatedResource, idValues);
+
+        return outputModel;
+    }
+
+    private String[] getIdentifierValue() {
+
+        // E.g., (OCoLC)234567, ocm234567
+        String prefix = null;
+        String idValue = null; 
+        
         Statement identifierValueStmt = 
                 subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
 
-        RDFNode identifierValue = null;
-        String prefix = null;
-        String id = null;
-        String newIdentifierValue = null;
         if (identifierValueStmt != null) {
-            identifierValue = identifierValueStmt.getObject();
-            if (identifierValue.isLiteral()) {
-                newIdentifierValue = 
-                        identifierValue.asLiteral().getLexicalForm();
+            
+            RDFNode object = identifierValueStmt.getObject();
+            
+            // If object is a Resource, pass it through unmodified
+            // TODO Check to make sure this happens
+            if (object.isLiteral()) {
                 
+                idValue = object.asLiteral().getLexicalForm();
+
+                // Parse the id value into prefix and value, if possible.
                 for (Map.Entry<String, Ld4lType> entry : 
                         IDENTIFIER_PREFIXES.entrySet()) {
                     String key = entry.getKey();
                     //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - oc + m45123880
                     //2016-01-20 13:23:31.765 [main] DEBUG org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter line 162 - ocm + 45123880
-                    if (newIdentifierValue.startsWith(key)) {
+                    if (idValue.startsWith(key)) {
                         prefix = key;
-                        id = newIdentifierValue.substring(key.length());
-                        LOGGER.debug(prefix + " + " + id);                       
+                        idValue = idValue.substring(key.length());                                                                
+                        LOGGER.debug(prefix + " + " + idValue);   
+                        // break; ** break here once the sorting problem is fixed
                     }
                     
                 }
-            
-            // TODO Are there URIs for identifierValue, other than worldcat?
                 
-            // This is true of worldcat, but is it otherwise true?
-            // } else {
-            //   newIdentifierValue = 
-            //           identifierValue.asResource().getLocalName();
-            }
+                outputModel.add(subject, RDF.value, idValue);
+            }       
         }
         
+        return new String[] { prefix, idValue };       
+    }
+ 
+    
+    private void getIdentifierType(Resource relatedResource, String[] idValues) {
         
-        /*
-         * Identifier type
-         */
+        String prefix = idValues[0];
+        String value = idValues[1];
         
-        Ld4lType identifierType = 
-                getIdentifierTypeFromPredicate(relatedResource);
+        Ld4lType identifierType = null;
+        
+        identifierType = getIdentifierTypeFromPredicate(relatedResource);
         
         // Note that Biframe often redundantly specifies type with both a 
         // predicate and a scheme:
@@ -192,8 +203,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
         
         if (identifierType == null) {
-            identifierType = getIdentifierTypeFromIdentifierValue(prefix, 
-                        newIdentifierValue);
+            identifierType = 
+                    getIdentifierTypeFromIdentifierValue(prefix, value);                       
         }
   
         // We may want to assign the supertype in any case, to simplify the
@@ -205,39 +216,20 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         outputModel.add(subject, RDF.type, identifierType.ontClass());  
         
-        
-        /*
-         * Identifier value                                
-         */
-
-        if (newIdentifierValue != null) {
-            // If we've assigned a non-generic Identifier (i.e., a subclass of
-            // Identifier rather than the generic superclass), then remove any
-            // prefix from the value, since that is a type indicator rather 
-            // than part of the value.
-            if (prefix != null && 
-                    ! identifierType.equals(Ld4lType.IDENTIFIER)) {
-                newIdentifierValue = id;
-                
-            }
-            outputModel.add(subject, RDF.value, newIdentifierValue);
-            
-            // From string value "(OCoLC)449860683" create 
-            // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
-            // instances based on the identifier values.
+        // From string value "(OCoLC)449860683" create 
+        // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
+        // instances based on the identifier values.
+        if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER) && 
+                value != null) {
             Resource worldcatInstance = outputModel.createResource(
-                    Vocabulary.WORLDCAT.uri() + newIdentifierValue);
-            if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER)) {
-                outputModel.add(relatedResource, OWL.sameAs, worldcatInstance);
-            }
-            
-        }
+                    Vocabulary.WORLDCAT.uri() + value);
+            outputModel.add(relatedResource, OWL.sameAs, worldcatInstance);
+        }   
 
-        return outputModel;
     }
-   
 
-    private void convertWorldcatIdentifier(Resource relatedResource) {
+    
+    private void createWorldcatIdentifier(Resource relatedResource) {
         
         // Add an identifier object with the Worldcat id as its value.
         Resource identifier = outputModel.createResource(
@@ -247,7 +239,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(identifier, RDF.type, 
                 Ld4lType.OCLC_IDENTIFIER.ontClass());
         
-        // Jena doesn't recognize localname starting with digit.
+        // Jena doesn't recognize localname starting with digit, so we need to
+        // parse it ourselves.
         // outputModel.add(identifier, RDF.value, subject.getLocalName());
         String id = subject.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
         outputModel.add(identifier, RDF.value, id);
@@ -257,17 +250,19 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(relatedResource, OWL.sameAs, subject);
     }
 
+    
     private Ld4lType getIdentifierTypeFromIdentifierValue(
-            String prefix, String newIdentifierValue) {   
+            String prefix, String idValue) {   
             
         Ld4lType identifierType = null;
         
-        if (newIdentifierValue != null) {
+        if (idValue != null) {
             
             if (prefix != null) {               
                 identifierType = IDENTIFIER_PREFIXES.get(prefix);
-                
-            } else if (newIdentifierValue.matches("^\\d+$")
+            
+            // Not sure if this is true for Harvard and Stanford
+            } else if (idValue.matches("^\\d+$")
                     // Not sure if this condition is required
                     && linkingStatement.getPredicate().equals(
                             BfProperty.BF_SYSTEM_NUMBER.property())) {
