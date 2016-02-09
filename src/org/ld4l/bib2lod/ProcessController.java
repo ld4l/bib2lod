@@ -45,7 +45,7 @@ public class ProcessController {
         
         this.erase = erase;
         
-        // loadOntModels();
+        loadOntModels();
     }
     
     // TODO So far these are not used. Why aren't we using this instead of the
@@ -92,8 +92,9 @@ public class ProcessController {
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
                              
-            outputDir = new UriGenerator(
-                    localNamespace, newInputDir, mainOutputDir).process(); 
+            outputDir = new UriGenerator(bfOntModelInf, localNamespace, 
+                    newInputDir, mainOutputDir).process(); 
+                    
             newInputDir = deleteLastInputDir(newInputDir, outputDir);            
         }
         

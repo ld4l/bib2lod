@@ -157,7 +157,7 @@ public class RdfCleaner extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   
         
-        LOGGER.info("END RDF cleanup in all " + totalFileCount + " input "                
+        LOGGER.info("END RDF cleanup in total of " + totalFileCount + " input "                
                 + Bib2LodStringUtils.simplePlural("file", totalFileCount)
                 + ". " + TimerUtils.getDuration(processStart));
         

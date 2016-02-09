@@ -35,8 +35,8 @@ public enum BfType {
     BF_HELD_MATERIAL("HeldMaterial", Ld4lType.POLICY_SET),
     BF_HELD_ITEM("HeldItem", Ld4lType.ITEM),
     // Class is assigned in BfIdentifierConverter
-    BF_IDENTIFIER("Identifier"),
-    // BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER),    
+    // BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER), 
+    BF_IDENTIFIER("Identifier"),   
     BF_INSTANCE("Instance", Ld4lType.INSTANCE),    
     BF_INTEGRATING("Integrating", Ld4lType.INTEGRATING_RESOURCE), 
     BF_INTENDED_AUDIENCE("IntendedAudience", Ld4lType.AUDIENCE),

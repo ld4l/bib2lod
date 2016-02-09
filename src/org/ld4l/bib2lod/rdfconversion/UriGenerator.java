@@ -5,7 +5,7 @@ import java.time.Instant;
 import java.util.Arrays;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.graph.Node;
+import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
@@ -23,9 +24,9 @@ public class UriGenerator extends RdfProcessor {
     private static final Logger LOGGER = 
             LogManager.getLogger(UriGenerator.class);
 
-    public UriGenerator(String localNamespace, String inputDir,
-            String mainOutputDir) {
-        super(localNamespace, inputDir, mainOutputDir);
+    public UriGenerator(OntModel bfOntModelInf, String localNamespace, 
+            String inputDir, String mainOutputDir) {
+        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
     }
 
     @Override
@@ -94,7 +95,8 @@ public class UriGenerator extends RdfProcessor {
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
         
-        LOGGER.info("END URI generation in all " + totalFileCount + " input "                                
+        LOGGER.info("END URI generation in total of " + totalFileCount 
+                + " input "                                
                 + Bib2LodStringUtils.simplePlural("file", totalFileCount)
                 + ". " + TimerUtils.getDuration(processStart));
         
@@ -110,46 +112,39 @@ public class UriGenerator extends RdfProcessor {
         StmtIterator statements = inputModel.listStatements();
         while (statements.hasNext()) {
             Statement statement = statements.next();
-            Model newModel = generateUniqueUris(statement, inputModel);                    
-            outputModel.add(newModel);
+            Statement newStatement = generateUniqueUris(statement);                    
+            outputModel.add(newStatement);
         }  
         
         return outputModel;
     }
 
-    private Model generateUniqueUris(Statement statement, Model inputModel) {
-                          
-        Model outputModel = ModelFactory.createDefaultModel();
+    private Statement generateUniqueUris(Statement statement) {
+            
         Resource subject = statement.getSubject();
-        Resource newSubject = getUniqueUri(subject, inputModel);
+        Resource newSubject = getUniqueResource(subject);
         
         RDFNode object = statement.getObject();
-        RDFNode newObject;
-        if (object.isResource()) {
-            newObject = getUniqueUri(object.asResource(), inputModel);
-        } else {
-            // Literal object
-            newObject = object;
-        }
+        RDFNode newObject = object.isResource() ?
+                getUniqueResource(object.asResource()) :
+                    object;
         
-        outputModel.add(newSubject, statement.getPredicate(), newObject);
-        return outputModel;
-        
+        return ResourceFactory.createStatement(
+                newSubject, statement.getPredicate(), newObject);     
     }
 
-    private Resource getUniqueUri(Resource resource, Model inputModel) {
+    private Resource getUniqueResource(Resource resource) {
             
-        Resource newResource;
-        
-        if (resource.isAnon()) {
-            newResource = createUriResourceFromAnonNode(resource);
-        } else {
-            // newResource = createUniqueUri(resource, inputModel);
-            // Temporary: 
-            newResource = resource;
-        }
-        
-        return newResource;
+        String localname = resource.isAnon() ? 
+                getLocalNameFromAnonNode(resource) :
+                    getUniqueLocalNameForResource(resource);
+
+        // Does it matter whether we create the resource from a ResourceFactory
+        // rather than using outputModel.createResource()? Will the resource 
+        // still  belong to the output model once the statement is added? Does 
+        // it matter, since we're just outputting text in the end?
+        return ResourceFactory.createResource(localNamespace + localname);
+
     }
 
     /* Replace bnodes with URI resources. Aside from general difficulties with
@@ -157,16 +152,59 @@ public class UriGenerator extends RdfProcessor {
      * may duplicate bnode ids across files when the entities should be 
      * distinct. Assigning fixed URIs solves this problem.
      */
-    private Resource createUniqueUri(Resource resource, Model inputModel) {
+    private String getLocalNameFromAnonNode(Resource resource) {
+        return resource.asNode().getBlankNodeId().toString();
+    }
+    
+    /*
+     * This local name serves to dedupe the same resource across records,
+     * based on type-specific identifying data.
+     */
+    private String getUniqueLocalNameForResource(Resource resource) {
+            
+        // TEMPORARY! 
+        return resource.getLocalName();
+        
+//        // The resource type determines the query to get the identifying data.
+//        Resource type = getResourceType(resource);
+//        
+//        // Get the identifying data and flatten to a string
+//        String key = getUniqueKey(resource, type);
+//        
+//        // Hash the string to get the local name
+//        String localname = getHashCode(key);
+//              
+//        return localname;
+    }
+    
+    private Resource getResourceType(Resource resource) {
+        
+        Resource type = resource.hasProperty(RDF.type) ?
+                getType(resource) :
+                    inferTypeFromPredicates(resource);
+        return type;
+    }
+        
+    private Resource getType(Resource resource) {
+        return null;
+    }
+
+    private Resource inferTypeFromPredicates(Resource resource) {           
+        // TODO Auto-generated method stub
+        return null;
+    }
+    
+    /* Based on type of the resource, query the model for the values that will
+     * comprise the identifying key, and concatenate into a single string.
+     */
+    private String getUniqueKey(Resource resource, Resource type) {
         // TODO Auto-generated method stub
         return null;
     }
 
-    private Resource createUriResourceFromAnonNode(Resource resource) {
-        
-        Node node = resource.asNode();
-        String id = node.getBlankNodeId().toString();
-        return ResourceFactory.createResource(localNamespace + id); 
+    private String getHashCode(String key) {
+        // TODO Returns a 32-bit hash code. Use a stronger 64-bit hash instead?
+        return Integer.toString(key.hashCode());
     }
-    
+   
 }
