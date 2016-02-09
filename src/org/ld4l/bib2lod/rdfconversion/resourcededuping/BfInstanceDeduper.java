@@ -12,13 +12,10 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.OWL;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
-import org.ld4l.bib2lod.util.Bib2LodStringUtils;
-import org.ld4l.bib2lod.util.TimerUtils;
 
 /*
  * NB Possibly we only need to dedupe Instance URIs within a single bib record,

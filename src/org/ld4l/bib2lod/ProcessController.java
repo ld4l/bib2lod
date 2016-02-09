@@ -13,14 +13,11 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
-import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
-import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.rdfconversion.UriGenerator;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
-
 
 
 public class ProcessController {
@@ -94,31 +91,10 @@ public class ProcessController {
         }
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
-
-            // Resource deduping requires some prior processing steps.
-            
-            // This is now an independent action, so is handled above.
-            // outputDir = new RdfCleaner(
-            //        localNamespace, outputDir, mainOutputDir).process();
                              
-            /* Required since bnode ids are not guaranteed to be unique across
-             * input files, so Jena may create duplicate ids across files when
-             * reading into and writing out models. 
-             * NB Not including in RdfCleaner as a string replacement, since
-             * rdf/xml input doesn't contain explicit bnodes.
-             */
-            outputDir = new BnodeConverter(
+            outputDir = new UriGenerator(
                     localNamespace, newInputDir, mainOutputDir).process(); 
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            
-            // Strategy for handling deduping of large amounts of data by 
-            // reading only partial data (split by type) into memory.
-            outputDir = new TypeSplitter(newInputDir, mainOutputDir).process();
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
-
-            outputDir = new ResourceDeduper(
-                    newInputDir, mainOutputDir).process();
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);            
         }
         
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
@@ -126,54 +102,12 @@ public class ProcessController {
             outputDir = new BibframeConverter(localNamespace, newInputDir, 
                     mainOutputDir).process();
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-
         }
             
-        /* Previous approach where processors were called by looping through
-         * Action values. Switch to calling processors by name in order to
-         * express dependencies. Dependencies could be automated by defining
-         * them in the Action enum, but for now this is unnecessarily 
-         * complex. 
-         *
-        // Loop on defined Actions rather than selected Actions to ensure 
-        // correct order.
-        for (Action a : Action.values()) {
-            Class<?> c = a.processorClass();
-            if (selectedActions.contains(a)) {
-                Processor processor;
-                Constructor<?> constructor; 
-                try {
-                    constructor = c.getConstructor(
-                            OntModel.class, String.class, String.class, 
-                            String.class);
-                    processor = (Processor) constructor.newInstance(
-                            bfOntModelInf,localNamespace, newInputDir, 
-                            mainOutputDir);
-                } catch (NoSuchMethodException e) {
-                    try {
-                        constructor = c.getConstructor(String.class, 
-                                String.class, String.class);
-                        processor = (Processor) constructor.newInstance(
-                                localNamespace, newInputDir, mainOutputDir);          
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                        return null;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-                outputDir = processor.process();
-                newInputDir = outputDir;              
-            }
-        }
-        */
-
         LOGGER.info("END CONVERSION! Total duration to convert " + inputFiles 
                 + ": " + TimerUtils.formatMillis(start, Instant.now())
                 + ". Results in " + outputDir + ".");
         return outputDir;
- 
     }
     
     private String deleteLastInputDir(String lastInputDir, String newInputDir) {

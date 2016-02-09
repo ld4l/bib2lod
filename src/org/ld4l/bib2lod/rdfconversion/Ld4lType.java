@@ -3,7 +3,6 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.util.HashMap;
 import java.util.Map;
 
-import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.logging.log4j.LogManager;
