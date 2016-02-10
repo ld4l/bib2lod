@@ -214,17 +214,17 @@ public class UriGenerator extends RdfProcessor {
           
         // The resource type determines the query to get the identifying data.
         Resource type = getResourceType(resource, resourceSubModel);
+
+        // TEMPORARY!  
+        String key = resource.getLocalName();
 //        
 //        // Get the identifying data and flatten to a string
 //        String key = getUniqueKey(resource, type);
 //        
 //        // Hash the string to get the new local name
 //        String uniqueLocalName = getHashCode(key);
-//              
-      
-        // TEMPORARY!  
-        // Append "unique" just so we know this is working.
-        String uniqueLocalName = localName + "unique";
+//                    
+        String uniqueLocalName = "n" + getHashCode(key);
         
         uniqueLocalNames.put(localName, uniqueLocalName);
         return uniqueLocalName;
@@ -284,7 +284,7 @@ public class UriGenerator extends RdfProcessor {
     }
 
     private String getHashCode(String key) {
-        // TODO Returns a 32-bit hash code. Use a stronger 64-bit hash instead?
+        // TODO Returns a 32-bit hash code. Use a stronger 64-bit hash instead.
         return Integer.toString(key.hashCode());
     }
    
