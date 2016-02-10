@@ -191,10 +191,14 @@ public abstract class RdfProcessor extends Processor {
     }
     
     public static String mintUri(String namespace) {    
+        return namespace + mintLocalName();
+    }
+    
+    public static String mintLocalName() {
         // NB A digit is not a legal initial character of a local name in 
         // RDF/XML; see http://www.w3.org/TR/xml11/#NT-NameStartChar, so 
         // prefix a character to the UUID.
-        return namespace + "n" + UUID.randomUUID().toString();
+        return "n" + UUID.randomUUID().toString();
     }
 
 }

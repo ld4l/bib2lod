@@ -157,7 +157,7 @@ public class UriGenerator extends RdfProcessor {
         String localName;
         
         if (resource.isAnon()) {
-            localName = getLocalNameForAnonNode(resource);
+            localName = getLocalNameForAnonNode(resource, uniqueLocalNames);
             
         } else if (! resource.getNameSpace().equals(localNamespace)) {
             return resource;
@@ -178,8 +178,17 @@ public class UriGenerator extends RdfProcessor {
      * may duplicate bnode ids across files when the entities should be 
      * distinct. Assigning fixed URIs solves this problem.
      */
-    private String getLocalNameForAnonNode(Resource bnode) {
-        return bnode.asNode().getBlankNodeId().toString();
+    private String getLocalNameForAnonNode(
+            Resource bnode, Map<String, String> uniqueLocalNames) {
+        
+        String bnodeId = bnode.asNode().getBlankNodeId().toString();
+        if (uniqueLocalNames.containsKey(bnodeId)) {
+            return uniqueLocalNames.get(bnodeId);
+        }
+        
+        String uniqueLocalName = mintLocalName();
+        uniqueLocalNames.put(bnodeId, uniqueLocalName);
+        return uniqueLocalName;
     }
     
     /*
@@ -241,22 +250,27 @@ public class UriGenerator extends RdfProcessor {
     }
     
 
-    private Resource getResourceType(Resource resource, Model model) {
+    private Resource getResourceType(
+            Resource resource, Model resourceSubModel) {
         
         Resource type = resource.hasProperty(RDF.type) ?
-                getType(resource, model) :
-                    inferTypeFromPredicates(resource, model);
+                getPrimaryType(resource, resourceSubModel) :
+                    inferTypeFromPredicates(resource, resourceSubModel);
                 
         // TODO If the type had to be inferred, add it to the outputModel so 
-        // that it doesn't have to be re-inferred during Bibframe conversion.
+        // that it doesn't have to be re-inferred during Bibframe conversion?
+        // Will we need that statement? Is it costly to compute the inference?
         return type;
     }
         
-    private Resource getType(Resource resource, Model model) {
+    private Resource getPrimaryType(Resource resource, Model resourceSubModel) {
+        
+        
         return null;
     }
 
-    private Resource inferTypeFromPredicates(Resource resource, Model model) {           
+    private Resource inferTypeFromPredicates(
+            Resource resource, Model resourceSubModel) {           
         // TODO Auto-generated method stub
         return null;
     }
