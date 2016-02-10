@@ -15,8 +15,10 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAnnotationConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfAuthorityConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
@@ -39,23 +41,21 @@ public class BibframeConverter extends RdfProcessor {
       
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
-    // Commented out converters are called from another converter, so don't
-    // need to be included here. If they get called independently, need to be
-    // included in this mapping.
     static {
         CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
-//                BfAnnnotation.class);  
-//        CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, 
-//                BfCategoryConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
-//                BfClassificationConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
+                BfAnnotationConverter.class);  
+        // TODO Needs own converter
+        CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, 
+                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
+                BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
-//                BfIdentifierConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
+                BfIdentifierConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
                 BfAuthorityConverter.class);
@@ -65,19 +65,21 @@ public class BibframeConverter extends RdfProcessor {
                 BfAuthorityConverter.class);        
         CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
         // Temporal is an Authority subtype, but we don't want the bf:label =>
         // foaf:name conversion for Temporal entities.
         CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
-//      CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
+        CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
         // Maybe can just use BfAuthorityConverter for Topics?
         CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
-//                BfResourceConverter.class);
-//        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
-//                BfResourceConverter.class); 
+        
+        // TODO Need own converter
+        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
+                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
+                BfResourceConverter.class); 
     }
     
 
@@ -141,6 +143,8 @@ public class BibframeConverter extends RdfProcessor {
         
         String filename = file.getName();
         String basename = FilenameUtils.getBaseName(filename);
+        
+        
         
         // LOGGER.debug("FILENAME: " + filename);
         
