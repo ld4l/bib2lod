@@ -16,13 +16,14 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
+import org.ld4l.bib2lod.util.Crc64;
+import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class UriGenerator extends RdfProcessor {
@@ -211,25 +212,21 @@ public class UriGenerator extends RdfProcessor {
         // First, get the submodel containing all statements in which this
         // resource is either the subject or object.
         Model resourceSubModel = getResourceSubModel(resource);
-          
-        // The resource type determines the query to get the identifying data.
-        Resource type = getResourceType(resource, resourceSubModel);
+                 
+        String key = getUniqueKey(resource, resourceSubModel);
 
-        // TEMPORARY!  
-        String key = resource.getLocalName();
 //        
 //        // Get the identifying data and flatten to a string
 //        String key = getUniqueKey(resource, type);
 //        
 //        // Hash the string to get the new local name
 //        String uniqueLocalName = getHashCode(key);
-//                    
+//                      
         String uniqueLocalName = "n" + getHashCode(key);
         
         uniqueLocalNames.put(localName, uniqueLocalName);
         return uniqueLocalName;
     }
-    
     
     /*
      * Get the submodel of the input model consisting of statements in which 
@@ -249,6 +246,31 @@ public class UriGenerator extends RdfProcessor {
         return constructModel;
     }
     
+    /* Based on statements in which the resource is either a subject or object
+     * get the identifying key.
+     */
+    private String getUniqueKey(Resource resource, Model resourceSubModel) {
+
+        // TEMPORARY!  
+        String key = resource.getLocalName();
+        
+        // Use authorizedAccessPoint where it exists, and a hashable one if
+        // that exists.
+        
+        // TODO: QUESTION: should we make an inferencing model so that we can
+        // infer types from subtypes, domain/range, etc, rather than having to
+        // code these inferences. Figure out how to do it. Should the ontology
+        // be inferencing? - we're not reasoning on the ontology, but on the
+        // data on the basis of the ontology. See tests in javatest project.
+        
+        // Else use type
+        // Resource type = getResourceType(resource, resourceSubModel);        
+        
+        // If no explicit type, use predicates
+        // If we do reasoning on the data, may not need this
+        
+        return key;
+    }
 
     private Resource getResourceType(
             Resource resource, Model resourceSubModel) {
@@ -274,18 +296,12 @@ public class UriGenerator extends RdfProcessor {
         // TODO Auto-generated method stub
         return null;
     }
-    
-    /* Based on type of the resource, query the model for the values that will
-     * comprise the identifying key, and concatenate into a single string.
-     */
-    private String getUniqueKey(Resource resource, Resource type) {
-        // TODO Auto-generated method stub
-        return null;
-    }
 
     private String getHashCode(String key) {
-        // TODO Returns a 32-bit hash code. Use a stronger 64-bit hash instead.
-        return Integer.toString(key.hashCode());
+        // long hash64 = Crc64.checksum(key);
+        // long hash64 = Crc64Mod.checksum(key);
+        long hash64 = MurmurHash.hash64(key);
+        return String.valueOf(hash64);
     }
    
 }
