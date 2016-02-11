@@ -300,6 +300,8 @@ public class UriGenerator extends RdfProcessor {
     private String getHashCode(String key) {
         // long hash64 = Crc64.checksum(key);
         // long hash64 = Crc64Mod.checksum(key);
+        // See https://en.wikipedia.org/wiki/MurmurHash on various Murmur
+        // Hash algorithms.
         long hash64 = MurmurHash.hash64(key);
         return String.valueOf(hash64);
     }
