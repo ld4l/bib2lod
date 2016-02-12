@@ -15,7 +15,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -25,6 +24,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.MurmurHash;
+import org.ld4l.bib2lod.util.NacoNormalizer;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class UriGenerator extends RdfProcessor {
@@ -218,15 +218,8 @@ public class UriGenerator extends RdfProcessor {
         // resource are querying the submodel rather than the full model.
         Resource newResource = 
                 resourceSubModel.createResource(resource.getURI());
-        String key = getUniqueKey(newResource);
-
-//        
-//        // Get the identifying data and flatten to a string
-//        String key = getUniqueKey(resource, type);
-//        
-//        // Hash the string to get the new local name
-//        String uniqueLocalName = getHashCode(key);
-//                      
+        
+        String key = getUniqueKey(newResource);                    
         String uniqueLocalName = "n" + getHashCode(key);
         
         uniqueLocalNames.put(localName, uniqueLocalName);
@@ -261,6 +254,25 @@ public class UriGenerator extends RdfProcessor {
 
         // Use authorizedAccessPoint where it exists.
         key = getKeyFromAuthorizedAccessPoint(resource);
+        
+        if (key == null) {
+            key = getKeyFromAuthorityLabel(resource);
+        }
+
+        // TODO: QUESTION: should we make an inferencing model so that we can
+        // infer types from subtypes, domain/range, etc, rather than having to
+        // code these inferences. Figure out how to do it. Should the ontology
+        // be inferencing? - we're not reasoning on the ontology, but on the
+        // data on the basis of the ontology. See tests in javatest project.
+        // make inferencing model here, pass to next 2 methods.
+        
+        if (key == null) {
+            key = getKeyFromType(resource);
+        }
+        
+        if (key == null) {
+            key = getKeyFromPredicate(resource);
+        }
 
         if (key == null) {
             // TEMPORARY!  
@@ -268,25 +280,12 @@ public class UriGenerator extends RdfProcessor {
         }
 
         
-        // TODO: QUESTION: should we make an inferencing model so that we can
-        // infer types from subtypes, domain/range, etc, rather than having to
-        // code these inferences. Figure out how to do it. Should the ontology
-        // be inferencing? - we're not reasoning on the ontology, but on the
-        // data on the basis of the ontology. See tests in javatest project.
-        
-        // Else use type
-        // Resource type = getResourceType(resource, resourceSubModel);        
-        
-        // If no explicit type, use predicates
-        // If we do reasoning on the data, may not need this
-        
         return key;
     }
     
     private String getKeyFromAuthorizedAccessPoint(Resource resource) {
         
-        Property authAccessPoint = 
-                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property();
+        String authAccessPoint = null;
 
         StmtIterator stmts = resource.listProperties(
                 BfProperty.BF_AUTHORIZED_ACCESS_POINT.property());   
@@ -294,11 +293,39 @@ public class UriGenerator extends RdfProcessor {
             RDFNode object = stmts.nextStatement().getObject();
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
-                
+                authAccessPoint = literal.getLexicalForm();
+                String lang = literal.getLanguage();
+                if (lang.equals("x-bf-hash")) {
+                    // Don't look any further, and no need to normalize the
+                    // string.
+                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                            + " for resource " + resource.getURI());
+                    return authAccessPoint;
+                } else {  
+                    // If there is more than one here, we'll get the last one,
+                    // but doesn't matter if we have no selection criterion. 
+                }
             }
-            
         }
     
+        authAccessPoint = NacoNormalizer.normalize(authAccessPoint);
+        LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                + " for resource " + resource.getURI());
+        return authAccessPoint;
+    }
+    
+    private String getKeyFromAuthorityLabel(Resource resource) {
+        
+        String authorityLabel = null;
+        
+        return authorityLabel;
+    }
+    
+    private String getKeyFromType(Resource resource) {
+        return null;
+    }
+    
+    private String getKeyFromPredicate(Resource resource) {
         return null;
     }
 
@@ -330,9 +357,11 @@ public class UriGenerator extends RdfProcessor {
     private String getHashCode(String key) {
         // long hash64 = Crc64.checksum(key);
         // long hash64 = Crc64Mod.checksum(key);
-        // See https://en.wikipedia.org/wiki/MurmurHash on various algorithms.
-        // There are variants of Murmur Hash optimized for a 64-bit 
-        // architecture.
+        // See https://en.wikipedia.org/wiki/MurmurHash on various MurmurHash
+        // algorithms and 
+        // http://blog.reverberate.org/2012/01/state-of-hash-functions-2012.html
+        // for improved algorithms.There are variants of Murmur Hash optimized 
+        // for a 64-bit architecture. 
         long hash64 = MurmurHash.hash64(key);
         return Long.toHexString(hash64);
         
