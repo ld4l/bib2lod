@@ -12,8 +12,10 @@ import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -22,7 +24,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
-import org.ld4l.bib2lod.util.Crc64;
 import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.TimerUtils;
 
@@ -212,8 +213,12 @@ public class UriGenerator extends RdfProcessor {
         // First, get the submodel containing all statements in which this
         // resource is either the subject or object.
         Model resourceSubModel = getResourceSubModel(resource);
-                 
-        String key = getUniqueKey(resource, resourceSubModel);
+        
+        // Create a new resource in the submodel so that Java methods on the
+        // resource are querying the submodel rather than the full model.
+        Resource newResource = 
+                resourceSubModel.createResource(resource.getURI());
+        String key = getUniqueKey(newResource);
 
 //        
 //        // Get the identifying data and flatten to a string
@@ -225,6 +230,7 @@ public class UriGenerator extends RdfProcessor {
         String uniqueLocalName = "n" + getHashCode(key);
         
         uniqueLocalNames.put(localName, uniqueLocalName);
+        
         return uniqueLocalName;
     }
     
@@ -249,13 +255,18 @@ public class UriGenerator extends RdfProcessor {
     /* Based on statements in which the resource is either a subject or object
      * get the identifying key.
      */
-    private String getUniqueKey(Resource resource, Model resourceSubModel) {
+    private String getUniqueKey(Resource resource) {
 
-        // TEMPORARY!  
-        String key = resource.getLocalName();
-        
-        // Use authorizedAccessPoint where it exists, and a hashable one if
-        // that exists.
+        String key = null;
+
+        // Use authorizedAccessPoint where it exists.
+        key = getKeyFromAuthorizedAccessPoint(resource);
+
+        if (key == null) {
+            // TEMPORARY!  
+            key = resource.getLocalName();
+        }
+
         
         // TODO: QUESTION: should we make an inferencing model so that we can
         // infer types from subtypes, domain/range, etc, rather than having to
@@ -270,6 +281,25 @@ public class UriGenerator extends RdfProcessor {
         // If we do reasoning on the data, may not need this
         
         return key;
+    }
+    
+    private String getKeyFromAuthorizedAccessPoint(Resource resource) {
+        
+        Property authAccessPoint = 
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property();
+
+        StmtIterator stmts = resource.listProperties(
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property());   
+        while (stmts.hasNext()) {
+            RDFNode object = stmts.nextStatement().getObject();
+            if (object.isLiteral()) {
+                Literal literal = object.asLiteral();
+                
+            }
+            
+        }
+    
+        return null;
     }
 
     private Resource getResourceType(
