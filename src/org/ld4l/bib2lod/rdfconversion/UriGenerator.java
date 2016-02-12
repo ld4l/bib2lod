@@ -334,7 +334,8 @@ public class UriGenerator extends RdfProcessor {
         // There are variants of Murmur Hash optimized for a 64-bit 
         // architecture.
         long hash64 = MurmurHash.hash64(key);
-        return String.valueOf(hash64);
+        return Long.toHexString(hash64);
+        
     }
    
 }
