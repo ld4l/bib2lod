@@ -12,6 +12,8 @@ import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
@@ -32,12 +34,43 @@ public class UriGenerator extends RdfProcessor {
     private static final Logger LOGGER = 
             LogManager.getLogger(UriGenerator.class);
     
-    private static ParameterizedSparqlString pss = 
+    private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
-                    "CONSTRUCT { ?s ?p ?o } WHERE { " 
-                    + "?s ?p ?o "
-                    + "FILTER (?s = ?uri || ?o = ?uri)"
+                    "CONSTRUCT { ?s ?p1 ?o1 . "
+                    + " ?o1 ?p2 ?o2 . "
+                    + "} WHERE {  " 
+                    + "?s ?p1 ?o1 . "
+                    + "OPTIONAL { "
+                    + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
+                    + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+                    + "?o1 ?p2 ?o2 . "
+                    + "} FILTER (?s = ?uri || ?o1 = ?uri) "
                     + " }");
+    
+    /*
+    private static ParameterizedSparqlString authAccessPointPss = 
+            new ParameterizedSparqlString(
+                    "SELECT ?o WHERE { "
+                    + "?s " 
+                    + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
+                    + " ?o }");                    
+    */
+    
+    
+    /// ***TODO Need authorizedLabel both for resource and madsrdf:authority.
+    // need to differentiate by adding a string to the latter!!!!
+    // Use union in the query? or two separate queries?
+    private static ParameterizedSparqlString authLabelPss = 
+            new ParameterizedSparqlString(
+                  "SELECT ?authLabel WHERE { "
+                  + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
+                  + "?auth ."
+                  + "?auth a " 
+                  + BfType.MADSRDF_AUTHORITY.sparqlUri() + "; "
+                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "
+                  + "?authLabel "
+                  + "}");
+            
     
     public UriGenerator(OntModel bfOntModelInf, String localNamespace, 
             String inputDir, String mainOutputDir) {
@@ -49,7 +82,7 @@ public class UriGenerator extends RdfProcessor {
         
         Instant processStart = Instant.now();
         LOGGER.info("START unique URI generation.");
-        
+        LOGGER.debug(resourceSubModelPss.toString());
         String outputDir = getOutputDir();
 
         File[] inputFiles = new File(inputDir).listFiles();
@@ -235,13 +268,14 @@ public class UriGenerator extends RdfProcessor {
         
         Model inputModel = resource.getModel();
 
-        pss.setIri("uri", resource.getURI());
+        resourceSubModelPss.setIri("uri", resource.getURI());
         
-        Query query = pss.asQuery();
+        Query query = resourceSubModelPss.asQuery();
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
         
+        LOGGER.debug(constructModel);
         return constructModel;
     }
     
@@ -256,6 +290,8 @@ public class UriGenerator extends RdfProcessor {
         key = getKeyFromAuthorizedAccessPoint(resource);
         
         if (key == null) {
+            // Not sure if we ever get an authority label without an 
+            // authorized access point, so this may be redundant.
             key = getKeyFromAuthorityLabel(resource);
         }
 
@@ -282,7 +318,7 @@ public class UriGenerator extends RdfProcessor {
         
         return key;
     }
-    
+
     private String getKeyFromAuthorizedAccessPoint(Resource resource) {
         
         String authAccessPoint = null;
@@ -314,11 +350,80 @@ public class UriGenerator extends RdfProcessor {
         return authAccessPoint;
     }
     
+    /*
+     * Same as getKeyFromAuthorizedAccessPoint(), but uses SPARQL rather than
+     * Jena Resource API.
+     */
+    /*
+    private String getKeyFromAuthorizedAccessPointSparql(Resource resource) {
+        
+        String authAccessPoint = null;
+        
+        authAccessPointPss.setIri("s", resource.getURI());
+        LOGGER.debug(authAccessPointPss.toString());
+        Query query = authAccessPointPss.asQuery();
+
+        QueryExecution qexec = 
+                QueryExecutionFactory.create(query, resource.getModel());
+        ResultSet results = qexec.execSelect();
+        while (results.hasNext()) {
+            QuerySolution soln = results.next();
+            RDFNode node = soln.get("o");
+            if (node.isLiteral()) {
+                Literal literal = node.asLiteral();
+                authAccessPoint = literal.getLexicalForm();
+                String lang = literal.getLanguage();
+                if (lang.equals("x-bf-hash")) {
+                    // Don't look any further, and no need to normalize the
+                    // string.
+                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                            + " for resource " + resource.getURI());
+                    return authAccessPoint;
+                } else {  
+                    // If there is more than one here, we'll get the last one,
+                    // but doesn't matter if we have no selection criterion. 
+                }
+            }
+        }
+    
+        authAccessPoint = NacoNormalizer.normalize(authAccessPoint);
+        LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                + " for resource " + resource.getURI());
+        return authAccessPoint;
+
+    }
+    */
+   
     private String getKeyFromAuthorityLabel(Resource resource) {
         
         String authorityLabel = null;
         
+        /* 
+         * Use SPARQL query for simplicity when chaining two or more entities
+         * together. If just one entity, as in authoritativeLabel, it's about
+         * the same amount of complexity as iterating through statements.
+         */
+        authLabelPss.setIri("s", resource.getURI());
+        LOGGER.debug(authLabelPss.toString());
+        Query query = authLabelPss.asQuery();
+
+        QueryExecution qexec = 
+                QueryExecutionFactory.create(query, resource.getModel());
+        ResultSet results = qexec.execSelect();
+        while (results.hasNext()) {
+            QuerySolution soln = results.next();
+            RDFNode node = soln.get("authLabel");
+            if (node.isLiteral()) {
+                Literal literal = node.asLiteral();
+                authorityLabel = literal.getLexicalForm();
+            }
+        }
+    
+        authorityLabel = NacoNormalizer.normalize(authorityLabel);
+        LOGGER.debug("Got authLabel key " + authorityLabel
+                + " for resource " + resource.getURI());
         return authorityLabel;
+
     }
     
     private String getKeyFromType(Resource resource) {
