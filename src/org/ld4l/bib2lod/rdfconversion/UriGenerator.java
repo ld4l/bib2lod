@@ -48,7 +48,7 @@ public class UriGenerator extends RdfProcessor {
     public String process() {        
         
         Instant processStart = Instant.now();
-        LOGGER.info("START blank node conversion.");
+        LOGGER.info("START unique URI generation.");
         
         String outputDir = getOutputDir();
 
@@ -330,8 +330,9 @@ public class UriGenerator extends RdfProcessor {
     private String getHashCode(String key) {
         // long hash64 = Crc64.checksum(key);
         // long hash64 = Crc64Mod.checksum(key);
-        // See https://en.wikipedia.org/wiki/MurmurHash on various Murmur
-        // Hash algorithms.
+        // See https://en.wikipedia.org/wiki/MurmurHash on various algorithms.
+        // There are variants of Murmur Hash optimized for a 64-bit 
+        // architecture.
         long hash64 = MurmurHash.hash64(key);
         return String.valueOf(hash64);
     }
