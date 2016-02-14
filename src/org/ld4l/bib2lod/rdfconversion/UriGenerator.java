@@ -63,14 +63,24 @@ public class UriGenerator extends RdfProcessor {
     // Use union in the query? or two separate queries?
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
-                  "SELECT ?authLabel WHERE { "
+                  "SELECT ?authLabel WHERE { { "
                   + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
                   + "?auth ."
                   + "?auth a " 
                   + BfType.MADSRDF_AUTHORITY.sparqlUri() + "; "
                   + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "
-                  + "?authLabel "
-                  + "}");
+                  + "?authLabel . "
+                  + "} UNION { "
+                  + "?s a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + "; "
+                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri()
+                  // Append an additional string to label, else local name of 
+                  // the Authority will collide with the related resource.
+                  // Append to beginning, else period won't be final and 
+                  // won't be removed during normalization.
+                  // *** Are there other blank nodes that also need to be 
+                  // distinguished from the related resources?
+                  + " ?label BIND ('authority ' + ?label AS ?authLabel) "                 
+                  + "} }");
             
     
     public UriGenerator(OntModel bfOntModelInf, String localNamespace, 
@@ -83,7 +93,7 @@ public class UriGenerator extends RdfProcessor {
         
         Instant processStart = Instant.now();
         LOGGER.info("START unique URI generation.");
-        LOGGER.debug(resourceSubModelPss.toString());
+        // LOGGER.debug(resourceSubModelPss.toString());
         String outputDir = getOutputDir();
 
         File[] inputFiles = new File(inputDir).listFiles();
@@ -154,6 +164,7 @@ public class UriGenerator extends RdfProcessor {
     
     private Model processInputFile(File inputFile) {
         
+        LOGGER.debug("Processing input file " + inputFile.getName());
         Model inputModel = readModelFromFile(inputFile);    
         Model outputModel = ModelFactory.createDefaultModel();
         Map<String, String> uniqueLocalNames = new HashMap<String, String>();
@@ -220,19 +231,22 @@ public class UriGenerator extends RdfProcessor {
             // Same as: resource.asNode().getBlankNodeId().toString()
             // and: resource.asNode().getBlankNodeId().toString()
             localname = resource.getId().toString();
-            LOGGER.debug("Got bnode id " + localname);
-            String tempUri = localNamespace + localname;
+            // LOGGER.debug("Got bnode id " + localname);
+            String tempUri = localNamespace + "n" + localname;
             // Assign a temporary URI to the blank node, so that remaining 
-            // processing can be the same as for a URI resource.
+            // processing can be the same as for a URI resource. This method
+            // renames the resource throughout the model (here, the input 
+            // model).
             resource = ResourceUtils.renameResource(resource, tempUri);
-            LOGGER.debug("Renamed blank node " + localname + " to " 
-                    + resource.getURI());
-            LOGGER.debug(resource.isAnon() ? "Resource is still a bnode" : 
-                    "Resource is a URI resource");
+            // LOGGER.debug("Renamed blank node " + localname + " to " 
+            //       + resource.getURI());
+            // LOGGER.debug(resource.isURIResource() ? 
+            //       "Resource is now a URI resource" : 
+            //       "Resource is still a blank node");
       
         } else {
             localname = resource.getLocalName();
-            LOGGER.debug("Got local name " + localname + " for URI resource");
+            // LOGGER.debug("Got local name " + localname + " for URI resource");
         }
         
         // If we've encountered this local name before, return the hashed value
@@ -275,7 +289,7 @@ public class UriGenerator extends RdfProcessor {
                 query, inputModel);
         Model constructModel = qexec.execConstruct();
         
-        LOGGER.debug(constructModel);
+        // LOGGER.debug(constructModel);
         return constructModel;
     }
     
@@ -292,7 +306,7 @@ public class UriGenerator extends RdfProcessor {
         if (key == null) {
             // Not sure if we ever get an authority label without an 
             // authorized access point, so this may be redundant.
-            key = getKeyFromAuthorityLabel(resource);
+            key = getKeyFromAuthoritativeLabel(resource);
         }
 
         // TODO: QUESTION: should we make an inferencing model so that we can
@@ -395,9 +409,9 @@ public class UriGenerator extends RdfProcessor {
     }
     */
    
-    private String getKeyFromAuthorityLabel(Resource resource) {
+    private String getKeyFromAuthoritativeLabel(Resource resource) {
         
-        String authorityLabel = null;
+        String authorizedLabel = null;
         
         /* 
          * Use SPARQL query for simplicity when chaining two or more entities
@@ -405,7 +419,7 @@ public class UriGenerator extends RdfProcessor {
          * the same amount of complexity as iterating through statements.
          */
         authLabelPss.setIri("s", resource.getURI());
-        LOGGER.debug(authLabelPss.toString());
+        // LOGGER.debug("Authorized label: " + authLabelPss.toString());
         Query query = authLabelPss.asQuery();
 
         QueryExecution qexec = 
@@ -416,14 +430,14 @@ public class UriGenerator extends RdfProcessor {
             RDFNode node = soln.get("authLabel");
             if (node.isLiteral()) {
                 Literal literal = node.asLiteral();
-                authorityLabel = literal.getLexicalForm();
+                authorizedLabel = literal.getLexicalForm();
             }
         }
     
-        authorityLabel = NacoNormalizer.normalize(authorityLabel);
-        LOGGER.debug("Got authLabel key " + authorityLabel
+        authorizedLabel = NacoNormalizer.normalize(authorizedLabel);
+        LOGGER.debug("Got authLabel key " + authorizedLabel
                 + " for resource " + resource.getURI());
-        return authorityLabel;
+        return authorizedLabel;
 
     }
     
