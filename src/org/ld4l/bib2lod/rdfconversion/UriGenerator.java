@@ -4,6 +4,7 @@ import java.io.File;
 import java.time.Instant;
 import java.util.Arrays;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -20,7 +21,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -157,9 +158,8 @@ public class UriGenerator extends RdfProcessor {
         Model outputModel = ModelFactory.createDefaultModel();
         Map<String, String> uniqueLocalNames = new HashMap<String, String>();
 
-        StmtIterator statements = inputModel.listStatements();
-        while (statements.hasNext()) {
-            Statement statement = statements.next();
+        List<Statement> statements = inputModel.listStatements().toList();
+        for (Statement statement : statements) {
             Statement newStatement = generateUniqueUris(
                     statement, uniqueLocalNames, outputModel);                    
             outputModel.add(newStatement);
@@ -191,39 +191,21 @@ public class UriGenerator extends RdfProcessor {
             
         String localName;
         
-        if (resource.isAnon()) {
-            localName = getLocalNameForAnonNode(resource, uniqueLocalNames);
+        // Blank nodes (titles, authorities, etc.) also need to be deduped 
+        // rather than assigned a random local name.
+        if (resource.isAnon() || 
+                resource.getNameSpace().equals(localNamespace) ) {
+            localName = 
+                    getUniqueLocalNameForResource(resource, uniqueLocalNames);
             
-        } else if (! resource.getNameSpace().equals(localNamespace)) {
-            return resource;
-
         } else {
-            localName = getUniqueLocalNameForResource(
-                    resource, uniqueLocalNames);
+            // Don't dedupe URIs in an external namespace
+            return resource;
         }
-        
+
         // Model.createResource() may reuse an existing resource rather than
         // creating a new one.
         return outputModel.createResource(localNamespace + localName);
-
-    }
-
-    /* Replace bnodes with URI resources. Aside from general difficulties with
-     * blank nodes, uniqueness is not guaranteed across input files, so Jena
-     * may duplicate bnode ids across files when the entities should be 
-     * distinct. Assigning fixed URIs solves this problem.
-     */
-    private String getLocalNameForAnonNode(
-            Resource bnode, Map<String, String> uniqueLocalNames) {
-        
-        String bnodeId = bnode.asNode().getBlankNodeId().toString();
-        if (uniqueLocalNames.containsKey(bnodeId)) {
-            return uniqueLocalNames.get(bnodeId);
-        }
-        
-        String uniqueLocalName = mintLocalName();
-        uniqueLocalNames.put(bnodeId, uniqueLocalName);
-        return uniqueLocalName;
     }
     
     /*
@@ -233,12 +215,30 @@ public class UriGenerator extends RdfProcessor {
     private String getUniqueLocalNameForResource(
             Resource resource, Map<String, String> uniqueLocalNames) {
                 
-        String localName = resource.getLocalName();
+        String localname;
+        if (resource.isAnon()) {
+            // Same as: resource.asNode().getBlankNodeId().toString()
+            // and: resource.asNode().getBlankNodeId().toString()
+            localname = resource.getId().toString();
+            LOGGER.debug("Got bnode id " + localname);
+            String tempUri = localNamespace + localname;
+            // Assign a temporary URI to the blank node, so that remaining 
+            // processing can be the same as for a URI resource.
+            resource = ResourceUtils.renameResource(resource, tempUri);
+            LOGGER.debug("Renamed blank node " + localname + " to " 
+                    + resource.getURI());
+            LOGGER.debug(resource.isAnon() ? "Resource is still a bnode" : 
+                    "Resource is a URI resource");
+      
+        } else {
+            localname = resource.getLocalName();
+            LOGGER.debug("Got local name " + localname + " for URI resource");
+        }
         
         // If we've encountered this local name before, return the hashed value
         // from the map.
-        if (uniqueLocalNames.containsKey(localName)) {
-            return uniqueLocalNames.get(localName);
+        if (uniqueLocalNames.containsKey(localname)) {
+            return uniqueLocalNames.get(localname);
         }
         
         // Otherwise, compute a new hashed value.
@@ -255,7 +255,7 @@ public class UriGenerator extends RdfProcessor {
         String key = getUniqueKey(newResource);                    
         String uniqueLocalName = "n" + getHashCode(key);
         
-        uniqueLocalNames.put(localName, uniqueLocalName);
+        uniqueLocalNames.put(localname, uniqueLocalName);
         
         return uniqueLocalName;
     }
@@ -323,10 +323,11 @@ public class UriGenerator extends RdfProcessor {
         
         String authAccessPoint = null;
 
-        StmtIterator stmts = resource.listProperties(
-                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property());   
-        while (stmts.hasNext()) {
-            RDFNode object = stmts.nextStatement().getObject();
+        List<Statement> statements = resource.listProperties(
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property()).toList();
+
+        for (Statement statement : statements) {
+            RDFNode object = statement.getObject();
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
                 authAccessPoint = literal.getLexicalForm();
