@@ -38,49 +38,29 @@ public class UriGenerator extends RdfProcessor {
     private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?s ?p1 ?o1 . "
-                    + " ?o1 ?p2 ?o2 . "
-                    + "} WHERE {  " 
+                    + " ?o1 ?p2 ?o2 . "                
+                    + "} WHERE {  "                                                      
                     + "?s ?p1 ?o1 . "
                     + "OPTIONAL { "
-                    + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
+                    + "?s " 
+                    + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
                     + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
                     + "?o1 ?p2 ?o2 . "
                     + "} FILTER (?s = ?uri || ?o1 = ?uri) "
                     + " }");
-    
-    /*
-    private static ParameterizedSparqlString authAccessPointPss = 
-            new ParameterizedSparqlString(
-                    "SELECT ?o WHERE { "
-                    + "?s " 
-                    + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
-                    + " ?o }");                    
-    */
-    
-    
-    /// ***TODO Need authorizedLabel both for resource and madsrdf:authority.
-    // need to differentiate by adding a string to the latter!!!!
-    // Use union in the query? or two separate queries?
+                                                        
+
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
-                  "SELECT ?authLabel WHERE { { "
+                  "SELECT ?authLabel WHERE { "
                   + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
-                  + "?auth ."
+                  + "?auth . "
                   + "?auth a " 
-                  + BfType.MADSRDF_AUTHORITY.sparqlUri() + "; "
-                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "
+                  + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+                  + "?auth "
+                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
                   + "?authLabel . "
-                  + "} UNION { "
-                  + "?s a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + "; "
-                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri()
-                  // Append an additional string to label, else local name of 
-                  // the Authority will collide with the related resource.
-                  // Append to beginning, else period won't be final and 
-                  // won't be removed during normalization.
-                  // *** Are there other blank nodes that also need to be 
-                  // distinguished from the related resources?
-                  + " ?label BIND ('authority ' + ?label AS ?authLabel) "                 
-                  + "} }");
+                  + "} ");
             
     
     public UriGenerator(OntModel bfOntModelInf, String localNamespace, 
@@ -183,12 +163,12 @@ public class UriGenerator extends RdfProcessor {
             Map<String, String> uniqueLocalNames, Model outputModel) {
             
         Resource subject = statement.getSubject();
-        Resource newSubject = getUniqueResource(
+        Resource newSubject = getUniqueUri(
                 subject, uniqueLocalNames, outputModel);
         
         RDFNode object = statement.getObject();
         RDFNode newObject = object.isLiteral() ? object :
-                getUniqueResource(
+                getUniqueUri(
                         object.asResource(), uniqueLocalNames, outputModel);
      
         // Model.createStatement() may reuse an existing statement rather than
@@ -197,7 +177,7 @@ public class UriGenerator extends RdfProcessor {
                 newSubject, statement.getPredicate(), newObject);     
     }
 
-    private Resource getUniqueResource(Resource resource, 
+    private Resource getUniqueUri(Resource resource, 
             Map<String, String> uniqueLocalNames, Model outputModel) {
             
         String localName;
@@ -226,6 +206,8 @@ public class UriGenerator extends RdfProcessor {
     private String getUniqueLocalNameForResource(
             Resource resource, Map<String, String> uniqueLocalNames) {
                 
+        // boolean isBnode = false;
+        
         String localname;
         if (resource.isAnon()) {
             // Same as: resource.asNode().getBlankNodeId().toString()
@@ -243,6 +225,16 @@ public class UriGenerator extends RdfProcessor {
             // LOGGER.debug(resource.isURIResource() ? 
             //       "Resource is now a URI resource" : 
             //       "Resource is still a blank node");
+            
+            // Two reasons we may want this: (1) Prefix a string to the unique
+            // local name to avoid collisions with related resources; for 
+            // example, a madsrdf:Authority and its related resource are 
+            // initially assigned the same unique key, since they are derived 
+            // from identical data. Currently we prefix a string only for
+            // authorities, but possibly we need to do this for any blank nodes.
+            // (2) Pass to getUniqueKey() since this information may be used to
+            // determine how to get the unique key. 
+            // isBnode = true;
       
         } else {
             localname = resource.getLocalName();
@@ -266,7 +258,12 @@ public class UriGenerator extends RdfProcessor {
         Resource newResource = 
                 resourceSubModel.createResource(resource.getURI());
         
-        String key = getUniqueKey(newResource);                    
+        String key = getUniqueKey(newResource);  
+        
+        // if (isBnode) {
+        //     key = "bnode" + key;
+        // }
+
         String uniqueLocalName = "n" + getHashCode(key);
         
         uniqueLocalNames.put(localname, uniqueLocalName);
@@ -299,7 +296,12 @@ public class UriGenerator extends RdfProcessor {
     private String getUniqueKey(Resource resource) {
 
         String key = null;
-
+        
+        if (resource.hasProperty(RDF.type, 
+                BfType.MADSRDF_AUTHORITY.ontClass())) {
+            return getMadsAuthorityKey(resource);
+        }
+        
         // Use authorizedAccessPoint where it exists.
         key = getKeyFromAuthorizedAccessPoint(resource);
         
@@ -325,12 +327,51 @@ public class UriGenerator extends RdfProcessor {
         }
 
         if (key == null) {
-            // TEMPORARY!  
+            key = getKeyFromBfLabel(resource);
+        }
+        
+        if (key == null) {
+            // TEMPORARY! - or will this be the fallback?
             key = resource.getLocalName();
         }
-
-        
+       
         return key;
+    }
+
+    /*
+     * Get key for a madsrdf:Authority from the madsrdf:authoritativeLabel
+     * property. Note that other resources that get their key from the
+     * property chain bf:hasAuthority/madsrdf:authoritativeLabel are handled
+     * in getKeyFromAuthoritativeLabel.
+     */
+    private String getMadsAuthorityKey(Resource resource) {
+        
+        String authoritativeLabel = null;
+
+        List<Statement> statements = resource.listProperties(
+                BfProperty.MADSRDF_AUTHORITATIVE_LABEL.property()).toList();
+
+        for (Statement statement : statements) {
+            RDFNode object = statement.getObject();
+            if (object.isLiteral()) {
+                Literal literal = object.asLiteral();
+                authoritativeLabel = literal.getLexicalForm();
+                break;
+            }
+        }
+    
+        // Prefix an additional string to the label, else the local name of 
+        // the Authority will collide with that of the related resource, since
+        // generally the madsrdf:authorizedLabel of the Authority and the
+        // bf:authorizedAccessPoint of the related resource are identical.
+        // *** TODO Are there other blank nodes that also need to be 
+        // distinguished from the related resources?
+        authoritativeLabel = "authority "  
+                + NacoNormalizer.normalize(authoritativeLabel);
+        LOGGER.debug("Got authoritativeLabel key " + authoritativeLabel
+                + " for resource " + resource.getURI());
+        
+        return authoritativeLabel;
     }
 
     private String getKeyFromAuthorizedAccessPoint(Resource resource) {
@@ -347,14 +388,16 @@ public class UriGenerator extends RdfProcessor {
                 authAccessPoint = literal.getLexicalForm();
                 String lang = literal.getLanguage();
                 if (lang.equals("x-bf-hash")) {
-                    // Don't look any further, and no need to normalize the
-                    // string.
                     LOGGER.debug("Got authAccessPoint key " + authAccessPoint
                             + " for resource " + resource.getURI());
+                    // Don't look any further, and no need to normalize the
+                    // string.
                     return authAccessPoint;
                 } else {  
-                    // If there is more than one here, we'll get the last one,
-                    // but doesn't matter if we have no selection criterion. 
+                    // If there is more than one (which there shouldn't be), 
+                    // we'll get the first one, but doesn't matter if we have 
+                    // no selection criteria. 
+                    break;
                 }
             }
         }
@@ -362,85 +405,74 @@ public class UriGenerator extends RdfProcessor {
         authAccessPoint = NacoNormalizer.normalize(authAccessPoint);
         LOGGER.debug("Got authAccessPoint key " + authAccessPoint
                 + " for resource " + resource.getURI());
+        
         return authAccessPoint;
     }
     
     /*
-     * Same as getKeyFromAuthorizedAccessPoint(), but uses SPARQL rather than
-     * Jena Resource API.
+     * Get resource key from the associated madsrdf:Authority authorizedLabel.
+     * Getting the key for the madsrdf:Authority itself is done in 
+     * getMadsAuthorityKey().
      */
-    /*
-    private String getKeyFromAuthorizedAccessPointSparql(Resource resource) {
-        
-        String authAccessPoint = null;
-        
-        authAccessPointPss.setIri("s", resource.getURI());
-        LOGGER.debug(authAccessPointPss.toString());
-        Query query = authAccessPointPss.asQuery();
-
-        QueryExecution qexec = 
-                QueryExecutionFactory.create(query, resource.getModel());
-        ResultSet results = qexec.execSelect();
-        while (results.hasNext()) {
-            QuerySolution soln = results.next();
-            RDFNode node = soln.get("o");
-            if (node.isLiteral()) {
-                Literal literal = node.asLiteral();
-                authAccessPoint = literal.getLexicalForm();
-                String lang = literal.getLanguage();
-                if (lang.equals("x-bf-hash")) {
-                    // Don't look any further, and no need to normalize the
-                    // string.
-                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
-                            + " for resource " + resource.getURI());
-                    return authAccessPoint;
-                } else {  
-                    // If there is more than one here, we'll get the last one,
-                    // but doesn't matter if we have no selection criterion. 
-                }
-            }
-        }
-    
-        authAccessPoint = NacoNormalizer.normalize(authAccessPoint);
-        LOGGER.debug("Got authAccessPoint key " + authAccessPoint
-                + " for resource " + resource.getURI());
-        return authAccessPoint;
-
-    }
-    */
-   
     private String getKeyFromAuthoritativeLabel(Resource resource) {
         
         String authorizedLabel = null;
-        
-        /* 
-         * Use SPARQL query for simplicity when chaining two or more entities
-         * together. If just one entity, as in authoritativeLabel, it's about
-         * the same amount of complexity as iterating through statements.
-         */
+
+        // Easier to do this as a SPARQL query since we're jumping over the 
+        // intermediate madsrdf:Authority node.
         authLabelPss.setIri("s", resource.getURI());
-        // LOGGER.debug("Authorized label: " + authLabelPss.toString());
+        LOGGER.debug(authLabelPss.toString());
         Query query = authLabelPss.asQuery();
 
         QueryExecution qexec = 
                 QueryExecutionFactory.create(query, resource.getModel());
         ResultSet results = qexec.execSelect();
+        
+        // If there is more than one (which there shouldn't be), we'll get the
+        // first one, but doesn't matter if we have no selection criteria. 
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             RDFNode node = soln.get("authLabel");
             if (node.isLiteral()) {
                 Literal literal = node.asLiteral();
                 authorizedLabel = literal.getLexicalForm();
+                break;
             }
         }
     
         authorizedLabel = NacoNormalizer.normalize(authorizedLabel);
-        LOGGER.debug("Got authLabel key " + authorizedLabel
-                + " for resource " + resource.getURI());
+        LOGGER.debug("Got authorizedLabel key " + authorizedLabel
+                + " from madsrdf:Authority for resource " + resource.getURI());
+        
         return authorizedLabel;
-
     }
     
+    private String getKeyFromBfLabel(Resource resource) {
+        
+        String bfLabel = null;
+
+        List<Statement> statements = resource.listProperties(
+                BfProperty.BF_LABEL.property()).toList();
+
+        // If there is more than one (which there shouldn't be), we'll get the
+        // first one, but doesn't matter if we have no selection criteria. 
+        for (Statement statement : statements) {
+            RDFNode object = statement.getObject();
+            if (object.isLiteral()) {
+                Literal literal = object.asLiteral();
+                bfLabel = literal.getLexicalForm();
+                break;
+            }
+        }
+    
+        bfLabel = NacoNormalizer.normalize(bfLabel);
+        LOGGER.debug("Got bf:label key " + bfLabel + " for resource " 
+                + resource.getURI());
+                
+        return bfLabel;
+    }
+    
+
     private String getKeyFromType(Resource resource) {
         return null;
     }
