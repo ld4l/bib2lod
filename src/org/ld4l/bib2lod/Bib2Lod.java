@@ -37,7 +37,6 @@ public class Bib2Lod {
     public static void main(String[] args) {
 
         LOGGER.info("START CONVERSION.");
-        LOGGER.info("START application configuration.");
         
         // Define program options
         Options options = getOptions();
@@ -74,7 +73,6 @@ public class Bib2Lod {
         }
            
         // Log application configuration settings
-        LOGGER.info("END application configuration. Settings: "); 
         LOGGER.info("Settings: ");
         LOGGER.info("Local namespace: " + namespace);
         LOGGER.info("Input directory: " + absInputDir);
