@@ -6,10 +6,10 @@ import java.time.Instant;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.jena.ontology.OntDocumentManager;
 import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.riot.RiotException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
@@ -32,8 +32,8 @@ public class ProcessController {
     
     boolean erase;
     
-    private OntModel bfOntModelInf;
-    // private OntModel ld4lInf;
+    // private OntModel bfOntModel;
+    // private OntModel ld4lOntModel;
     
     public ProcessController(String localNamespace, String inputDir, 
             String outputDir, boolean erase) {
@@ -45,29 +45,27 @@ public class ProcessController {
         
         this.erase = erase;
         
-        loadOntModels();
+        // loadOntModels();
     }
     
-    // TODO So far these are not used. Why aren't we using this instead of the
-    // enums for ontology types and properties? Might be a more streamlined
-    // and clearer solution.
-    private void loadOntModels() {
 
-        OntDocumentManager mgr = new OntDocumentManager();
-        OntModelSpec spec = 
-                new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
-        spec.setDocumentManager(mgr);
-     
-        bfOntModelInf = ModelFactory.createOntologyModel(spec);
-        // TODO Figure out how to avoid hard-coding the ontology URI here. It
-        // would be nice to iterate through the files in the rdf directory and
-        // read them in, but we need to retain a reference to the ontology.
-        bfOntModelInf.read(OntNamespace.BIBFRAME.uri());
-              
-    }
+//    private void loadOntModels() {
+//
+//        bfOntModel = ModelFactory.createOntologyModel();
+//        try {
+//            bfOntModel.read(OntNamespace.BIBFRAME.uri());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }                     
+//    }
+
     
     public String processAll(Set<Action> selectedActions) {
 
+//        if (bfOntModel.isEmpty()) {
+//            return null;
+//        }
+        
         Instant start = Instant.now();
         int fileCount = new File(this.inputDir).listFiles().length;
         String inputFiles = fileCount + " input " 
@@ -92,7 +90,7 @@ public class ProcessController {
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
                              
-            outputDir = new UriGenerator(bfOntModelInf, localNamespace, 
+            outputDir = new UriGenerator(localNamespace, 
                     newInputDir, mainOutputDir).process(); 
                     
             newInputDir = deleteLastInputDir(newInputDir, outputDir);            

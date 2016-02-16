@@ -44,15 +44,15 @@ public abstract class RdfProcessor extends Processor {
     protected static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
             
     protected final String localNamespace;    
-    protected OntModel bfOntModelInf; 
+    // protected OntModel bfOntModel; 
 
        
-    public RdfProcessor(OntModel bfOntModelInf, String localNamespace,  
-            String inputDir, String mainOutputDir) {
-
-        this(localNamespace, inputDir, mainOutputDir);      
-        this.bfOntModelInf = bfOntModelInf;  
-    }
+//    public RdfProcessor(OntModel bfOntModel, String localNamespace,  
+//            String inputDir, String mainOutputDir) {
+//
+//        this(localNamespace, inputDir, mainOutputDir);      
+//        this.bfOntModel = bfOntModel;  
+//    }
     
     /**
      * Constructor for processors that don't use the loaded OntModel(s).
@@ -174,20 +174,30 @@ public abstract class RdfProcessor extends Processor {
         if (msg != null) {
             LOGGER.log(level, msg);
         }
+        int stmtCount = 0;
         StmtIterator statements = model.listStatements();   
         while (statements.hasNext()) {
+            stmtCount++;
             Statement statement = statements.nextStatement();
             // NB The level must be enabled for this class,  not the calling
             // class.
             // TODO Programmatically set LOGGER level to level, then set back
             // to previous level. Complicated because log4j2 doesn't have a
             // Logger.setLevel() method like log4j. 
-            LOGGER.log(level, statement.toString());
+            LOGGER.log(level, stmtCount + ". " + statement.toString());
         }     
     }
     
     public static void printModel(Model model, Level level) {
         printModel(model, level, null);
+    }
+    
+    public static void printModel(Model model) {
+        printModel(model, Level.DEBUG, null);
+    }
+    
+    public static void printModel(Model model, String msg) {
+        printModel(model, Level.DEBUG, msg);
     }
     
     public static String mintUri(String namespace) {    

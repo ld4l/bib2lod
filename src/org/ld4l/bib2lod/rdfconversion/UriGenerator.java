@@ -8,7 +8,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
@@ -63,9 +62,9 @@ public class UriGenerator extends RdfProcessor {
                   + "} ");
             
     
-    public UriGenerator(OntModel bfOntModelInf, String localNamespace, 
-            String inputDir, String mainOutputDir) {
-        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
+    public UriGenerator(String localNamespace, String inputDir, 
+            String mainOutputDir) {           
+        super(localNamespace, inputDir, mainOutputDir);
     }
 
     @Override
@@ -147,6 +146,14 @@ public class UriGenerator extends RdfProcessor {
         LOGGER.debug("Processing input file " + inputFile.getName());
         Model inputModel = readModelFromFile(inputFile);    
         Model outputModel = ModelFactory.createDefaultModel();
+        
+        // Create an inference model over the Bibframe ontology and the input
+        // data. Bibframe only contains RDFS-level axioms, and that is all we
+        // need here (subclass, subproperty, and domain/range inferencing).
+        // InfModel infModel = ModelFactory.createInfModel(
+        //     ReasonerRegistry.getRDFSReasoner(), bfOntModel, inputModel);       
+        // RdfProcessor.printModel(infModel, "infModel:");
+        
         Map<String, String> uniqueLocalNames = new HashMap<String, String>();
 
         List<Statement> statements = inputModel.listStatements().toList();
@@ -159,17 +166,18 @@ public class UriGenerator extends RdfProcessor {
         return outputModel;
     }
 
-    private Statement generateUniqueUris(Statement statement, 
-            Map<String, String> uniqueLocalNames, Model outputModel) {
-            
+    private Statement generateUniqueUris(Statement statement,  
+            Map<String, String> uniqueLocalNames, Model outputModel) { 
+
         Resource subject = statement.getSubject();
         Resource newSubject = getUniqueUri(
                 subject, uniqueLocalNames, outputModel);
         
         RDFNode object = statement.getObject();
         RDFNode newObject = object.isLiteral() ? object :
-                getUniqueUri(
-                        object.asResource(), uniqueLocalNames, outputModel);
+                getUniqueUri(object.asResource(), uniqueLocalNames,  
+                        outputModel);
+                        
      
         // Model.createStatement() may reuse an existing statement rather than
         // creating a new one.
@@ -186,8 +194,8 @@ public class UriGenerator extends RdfProcessor {
         // rather than assigned a random local name.
         if (resource.isAnon() || 
                 resource.getNameSpace().equals(localNamespace) ) {
-            localName = 
-                    getUniqueLocalNameForResource(resource, uniqueLocalNames);
+            localName = getUniqueLocalNameForResource(
+                    resource, uniqueLocalNames);
             
         } else {
             // Don't dedupe URIs in an external namespace
@@ -203,12 +211,13 @@ public class UriGenerator extends RdfProcessor {
      * This local name serves to dedupe the same resource across records,
      * based on type-specific identifying data.
      */
-    private String getUniqueLocalNameForResource(
-            Resource resource, Map<String, String> uniqueLocalNames) {
+    private String getUniqueLocalNameForResource(Resource resource, 
+            Map<String, String> uniqueLocalNames) {
                 
         // boolean isBnode = false;
         
         String localname;
+        
         if (resource.isAnon()) {
             // Same as: resource.asNode().getBlankNodeId().toString()
             // and: resource.asNode().getBlankNodeId().toString()
@@ -275,26 +284,92 @@ public class UriGenerator extends RdfProcessor {
      * Get the submodel of the input model consisting of statements in which 
      * this resource is either the subject or object.
      */
+    
+//    1. Get construct submodel for resource, make into an inference model
+//    2. Get inference model for file, build construct model by querying it
+    
     private Model getResourceSubModel(Resource resource) {
-        
-        Model inputModel = resource.getModel();
 
         resourceSubModelPss.setIri("uri", resource.getURI());
         
         Query query = resourceSubModelPss.asQuery();
         QueryExecution qexec = QueryExecutionFactory.create(
-                query, inputModel);
-        Model constructModel = qexec.execConstruct();
+                query, resource.getModel());
+        Model resourceSubModel = qexec.execConstruct();
         
-        // LOGGER.debug(constructModel);
-        return constructModel;
+        return resourceSubModel;  
+
+        /*
+         * Experiments with inference models. 
+         * 
+         * Bibframe only contains RDFS-level axioms, and that is all we need
+         * here (subclass, subproperty, and domain/range inferencing).
+         * 
+         * In the first scenario, we create an inference model for the entire 
+         * file, pass it here, and query it to build the submodel. This results
+         * in a small submodel that contains only the assertions and inferences
+         * related to the resource. This is the approach we would want.
+         * 
+         * In the second scenario, we build the construct model as above by 
+         * querying the input model, then construct an inference model from it.
+         * This results in a large submodel that contains the ontology and all
+         * the inferences on it, in addition to assertions and inferences 
+         * related to the resource.
+         * 
+         * For example, with an input model for one resource containing 7
+         * assertions, the final submodel in scenario 1 is 9 statements, while
+         * the final submodel in scenario 2 is a few thousand statements.
+         * 
+         * NB Sizes of inference models reported by InfModel.size() are not 
+         * accurate. It is necessary to look at the actual statements as output 
+         * by RdfProcessor.printModel().
+         * 
+         * Inferences from the Bibframe ontology are not always reliable. For
+         * example, consider:
+         <rdf:Property rdf:about="http://bibframe.org/vocab/subject">
+             <rdfs:domain rdf:resource="http://bibframe.org/vocab/Work"/>
+             <rdfs:label>Subject</rdfs:label>
+             <rdfs:range rdf:resource="http://bibframe.org/vocab/Authority"/>
+             <rdfs:range rdf:resource="http://bibframe.org/vocab/Work"/>
+             <rdfs:comment>Subject term(s) describing a resource.</rdfs:comment>
+         </rdf:Property>
+         * Now every object of bf:subject is inferred to be a Work. The object 
+         * of the range assertion should be the UNION of bf:Authority and 
+         * bf:Work, but of course since Bibframe is not an OWL ontology it 
+         * cannot use unionOf. 
+         *
+         LOGGER.debug("Submodel with no inferencing: ");
+         LOGGER.debug("Submodel size: " + resourceSubModel.size());
+         RdfProcessor.printModel(resourceSubModel, "Resource submodel: ");
+        
+         QueryExecution qexecInf = QueryExecutionFactory.create(
+                 query, infModel);
+         Model resourceSubModel1 = qexecInf.execConstruct();  
+         LOGGER.debug("Submodel built from querying the inference model that "
+                 + "is based on the entire file:");
+         LOGGER.debug("Submodel size: " + resourceSubModel1.size());
+         RdfProcessor.printModel(resourceSubModel1, "Resource submodel:");
+
+         InfModel resourceSubModel2 = ModelFactory.createInfModel(
+                 ReasonerRegistry.getRDFSReasoner(), bfOntModel, resourceSubModel);
+         LOGGER.debug("Submodel built from creating an inference model based on "
+                 + "the submodel built from querying the input model:");
+         LOGGER.debug("Submodel size: " + resourceSubModel2.size());
+         RdfProcessor.printModel(resourceSubModel2, "Resource submodel: ");
+         */
+
     }
     
     /* Based on statements in which the resource is either a subject or object
      * get the identifying key.
      */
     private String getUniqueKey(Resource resource) {
-
+        
+        //**** TODO need to do some type-specific stuff first. E.g., two topics
+        // will not be distinct just on the basis of the authoritativeLabel.
+        // Need to come before the authority treatment because topics are
+        // also authorities. Need to do the FAST stuff here.
+        
         String key = null;
         
         if (resource.hasProperty(RDF.type, 

@@ -83,18 +83,11 @@ public class BibframeConverter extends RdfProcessor {
     }
     
 
-
-    public BibframeConverter(OntModel bfOntModelInf,        
-            String localNamespace, String inputDir, String mainOutputDir) {
-        super(bfOntModelInf, localNamespace, inputDir, mainOutputDir);
-    }
-
     public BibframeConverter(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
     }
-
-    
+   
     @Override
     public String process() {
 
