@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -30,7 +31,7 @@ public enum BfType {
     BF_DATASET("Dataset", Ld4lType.DATASET),
     BF_ELECTRONIC("Electronic", Ld4lType.ELECTRONIC),
     BF_EVENT("Event", Ld4lType.EVENT),
-    BF_EXPRESSION("EXPRESSION", Ld4lType.WORK),
+    BF_EXPRESSION("Expression", Ld4lType.WORK),
     BF_FAMILY("Family", Ld4lType.FAMILY),
     BF_HELD_MATERIAL("HeldMaterial", Ld4lType.POLICY_SET),
     BF_HELD_ITEM("HeldItem", Ld4lType.ITEM),
@@ -194,8 +195,13 @@ public enum BfType {
         return LOOKUP_BY_JENA_ONTCLASS.get(ontClass);
     }
     
+    public static Map<Resource, BfType> typesForOntClasses() {
+        return LOOKUP_BY_JENA_ONTCLASS;
+    }
+    
     public static List<BfType> authorities() {
         return Arrays.asList(
+            BF_AGENT,
             BF_AUTHORITY,
             BF_FAMILY,
             BF_JURISDICTION,
@@ -209,6 +215,21 @@ public enum BfType {
     
     public boolean isAuthority() {
         return authorities().contains(this);
+    }
+    
+    public static boolean isAuthority(List<BfType> types) {
+        
+        /*
+        for (BfType type : types) {
+            if (authorities().contains(type)) {
+                return true;
+            }
+        }
+        return false;
+        */
+        
+        return ! Collections.disjoint(authorities(), types);
+
     }
     
     public Resource ontClass() {
@@ -256,8 +277,7 @@ public enum BfType {
             resources.add(type.ontClass);
         }
         
-        return resources;
-        
+        return resources;        
     }
     
 }

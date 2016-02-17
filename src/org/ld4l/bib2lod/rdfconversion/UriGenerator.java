@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -45,10 +46,9 @@ public class UriGenerator extends RdfProcessor {
                     + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
                     + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
                     + "?o1 ?p2 ?o2 . "
-                    + "} FILTER (?s = ?uri || ?o1 = ?uri) "
+                    + "} FILTER (?s = ?resource || ?o1 = ?resource) "
                     + " }");
                                                         
-
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
                   "SELECT ?authLabel WHERE { "
@@ -60,8 +60,11 @@ public class UriGenerator extends RdfProcessor {
                   + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
                   + "?authLabel . "
                   + "} ");
-            
     
+    // Using LinkedHashMap in case order of processing becomes important
+    private static final Map<Resource, BfType> TYPES_FOR_ONT_CLASSES =
+            BfType.typesForOntClasses();
+
     public UriGenerator(String localNamespace, String inputDir, 
             String mainOutputDir) {           
         super(localNamespace, inputDir, mainOutputDir);
@@ -194,7 +197,7 @@ public class UriGenerator extends RdfProcessor {
         // rather than assigned a random local name.
         if (resource.isAnon() || 
                 resource.getNameSpace().equals(localNamespace) ) {
-            localName = getUniqueLocalNameForResource(
+            localName = getUniqueLocalName(
                     resource, uniqueLocalNames);
             
         } else {
@@ -211,30 +214,18 @@ public class UriGenerator extends RdfProcessor {
      * This local name serves to dedupe the same resource across records,
      * based on type-specific identifying data.
      */
-    private String getUniqueLocalNameForResource(Resource resource, 
+    private String getUniqueLocalName(Resource resource, 
             Map<String, String> uniqueLocalNames) {
                 
         // boolean isBnode = false;
         
         String localname;
-        
+
+        // Assign a temporary URI to a blank node, so that remaining processing
+        // can be the same as for a URI resource. This method renames the
+        // resource throughout the model (here, the input model).
         if (resource.isAnon()) {
-            // Same as: resource.asNode().getBlankNodeId().toString()
-            // and: resource.asNode().getBlankNodeId().toString()
-            localname = resource.getId().toString();
-            // LOGGER.debug("Got bnode id " + localname);
-            String tempUri = localNamespace + "n" + localname;
-            // Assign a temporary URI to the blank node, so that remaining 
-            // processing can be the same as for a URI resource. This method
-            // renames the resource throughout the model (here, the input 
-            // model).
-            resource = ResourceUtils.renameResource(resource, tempUri);
-            // LOGGER.debug("Renamed blank node " + localname + " to " 
-            //       + resource.getURI());
-            // LOGGER.debug(resource.isURIResource() ? 
-            //       "Resource is now a URI resource" : 
-            //       "Resource is still a blank node");
-            
+            resource = assignTempLocalNameToBnode(resource);
             // Two reasons we may want this: (1) Prefix a string to the unique
             // local name to avoid collisions with related resources; for 
             // example, a madsrdf:Authority and its related resource are 
@@ -243,54 +234,89 @@ public class UriGenerator extends RdfProcessor {
             // authorities, but possibly we need to do this for any blank nodes.
             // (2) Pass to getUniqueKey() since this information may be used to
             // determine how to get the unique key. 
-            // isBnode = true;
-      
-        } else {
-            localname = resource.getLocalName();
-            // LOGGER.debug("Got local name " + localname + " for URI resource");
-        }
+            // isBnode = true; 
+     
+        } 
+            
+        localname = resource.getLocalName();
+        // LOGGER.debug("Got local name " + localname 
+        //         + " for URI resource");
         
-        // If we've encountered this local name before, return the hashed value
-        // from the map.
+        String uniqueLocalName;
+        // If we've encountered this local name before, return the value from
+        // the map.
         if (uniqueLocalNames.containsKey(localname)) {
-            return uniqueLocalNames.get(localname);
+            LOGGER.debug("Reusing unique local name previously generated "
+                    + "for resource " + resource.getURI());
+            uniqueLocalName = uniqueLocalNames.get(localname);
+        } else {
+            // Otherwise, compute a new value.
+            LOGGER.debug("Generating new unique local name for resource "
+                    + resource.getURI());
+            uniqueLocalName = getNewUniqueLocalName(resource);
+            // Add to the map so the value can be reused for other statements in
+            // the same record without having to recompute.
+            uniqueLocalNames.put(localname, uniqueLocalName);
+
         }
         
-        // Otherwise, compute a new hashed value.
+        return uniqueLocalName;        
+    }
+    
+    private String getNewUniqueLocalName(Resource resource) {
         
         // First, get the submodel containing all statements in which this
         // resource is either the subject or object.
         Model resourceSubModel = getResourceSubModel(resource);
         
-        // Create a new resource in the submodel so that Java methods on the
+        // Point to the resource in the submodel so that Java methods on the
         // resource are querying the submodel rather than the full model.
         Resource newResource = 
                 resourceSubModel.createResource(resource.getURI());
         
+        // Get a unique key based on relevant attributes of the resource.
         String key = getUniqueKey(newResource);  
         
         // if (isBnode) {
         //     key = "bnode" + key;
         // }
 
-        String uniqueLocalName = "n" + getHashCode(key);
+        // Hash the key, and prefix "n" so the local name doesn't start with a
+        // digit.
+        return "n" + getHashCode(key);
+    }
+    
+    /* 
+     * Assign a temporary URI to a blank node, so further processing can be the
+     * same as for a URI resource.
+     */
+    private Resource assignTempLocalNameToBnode(Resource bnode) {
         
-        uniqueLocalNames.put(localname, uniqueLocalName);
+        // Same as: resource.asNode().getBlankNodeId().toString()
+        // and: resource.getId().getBlankNodeId().toString()
+        String tempLocalName = "n" + bnode.getId().toString();
         
-        return uniqueLocalName;
+        // LOGGER.debug("Got bnode id " + localname);
+        String tempUri = localNamespace + tempLocalName;
+
+        bnode = ResourceUtils.renameResource(bnode, tempUri);
+        // LOGGER.debug("Renamed blank node " + tempLocalName + " to " 
+        //       + bnode.getURI());
+        // LOGGER.debug(resource.isURIResource() ? 
+        //       "Resource is now a URI resource" : 
+        //       "Resource is still a blank node");
+
+        return bnode;
     }
     
     /*
      * Get the submodel of the input model consisting of statements in which 
      * this resource is either the subject or object.
      */
-    
-//    1. Get construct submodel for resource, make into an inference model
-//    2. Get inference model for file, build construct model by querying it
-    
     private Model getResourceSubModel(Resource resource) {
 
-        resourceSubModelPss.setIri("uri", resource.getURI());
+        LOGGER.debug("Getting resource submodel for " + resource.getURI());
+        resourceSubModelPss.setIri("resource", resource.getURI());
         
         Query query = resourceSubModelPss.asQuery();
         QueryExecution qexec = QueryExecutionFactory.create(
@@ -365,37 +391,9 @@ public class UriGenerator extends RdfProcessor {
      */
     private String getUniqueKey(Resource resource) {
         
-        //**** TODO need to do some type-specific stuff first. E.g., two topics
-        // will not be distinct just on the basis of the authoritativeLabel.
-        // Need to come before the authority treatment because topics are
-        // also authorities. Need to do the FAST stuff here.
-        
         String key = null;
         
-        if (resource.hasProperty(RDF.type, 
-                BfType.MADSRDF_AUTHORITY.ontClass())) {
-            return getMadsAuthorityKey(resource);
-        }
-        
-        // Use authorizedAccessPoint where it exists.
-        key = getKeyFromAuthorizedAccessPoint(resource);
-        
-        if (key == null) {
-            // Not sure if we ever get an authority label without an 
-            // authorized access point, so this may be redundant.
-            key = getKeyFromAuthoritativeLabel(resource);
-        }
-
-        // TODO: QUESTION: should we make an inferencing model so that we can
-        // infer types from subtypes, domain/range, etc, rather than having to
-        // code these inferences. Figure out how to do it. Should the ontology
-        // be inferencing? - we're not reasoning on the ontology, but on the
-        // data on the basis of the ontology. See tests in javatest project.
-        // make inferencing model here, pass to next 2 methods.
-        
-        if (key == null) {
-            key = getKeyFromType(resource);
-        }
+        key = getKeyFromType(resource);
         
         if (key == null) {
             key = getKeyFromPredicate(resource);
@@ -411,42 +409,6 @@ public class UriGenerator extends RdfProcessor {
         }
        
         return key;
-    }
-
-    /*
-     * Get key for a madsrdf:Authority from the madsrdf:authoritativeLabel
-     * property. Note that other resources that get their key from the
-     * property chain bf:hasAuthority/madsrdf:authoritativeLabel are handled
-     * in getKeyFromAuthoritativeLabel.
-     */
-    private String getMadsAuthorityKey(Resource resource) {
-        
-        String authoritativeLabel = null;
-
-        List<Statement> statements = resource.listProperties(
-                BfProperty.MADSRDF_AUTHORITATIVE_LABEL.property()).toList();
-
-        for (Statement statement : statements) {
-            RDFNode object = statement.getObject();
-            if (object.isLiteral()) {
-                Literal literal = object.asLiteral();
-                authoritativeLabel = literal.getLexicalForm();
-                break;
-            }
-        }
-    
-        // Prefix an additional string to the label, else the local name of 
-        // the Authority will collide with that of the related resource, since
-        // generally the madsrdf:authorizedLabel of the Authority and the
-        // bf:authorizedAccessPoint of the related resource are identical.
-        // *** TODO Are there other blank nodes that also need to be 
-        // distinguished from the related resources?
-        authoritativeLabel = "authority "  
-                + NacoNormalizer.normalize(authoritativeLabel);
-        LOGGER.debug("Got authoritativeLabel key " + authoritativeLabel
-                + " for resource " + resource.getURI());
-        
-        return authoritativeLabel;
     }
 
     private String getKeyFromAuthorizedAccessPoint(Resource resource) {
@@ -484,14 +446,126 @@ public class UriGenerator extends RdfProcessor {
         return authAccessPoint;
     }
     
+
+    private String getKeyFromBfLabel(Resource resource) {
+        
+        String bfLabel = null;
+
+        List<Statement> statements = resource.listProperties(
+                BfProperty.BF_LABEL.property()).toList();
+
+        // If there is more than one (which there shouldn't be), we'll get the
+        // first one, but doesn't matter if we have no selection criteria. 
+        for (Statement statement : statements) {
+            RDFNode object = statement.getObject();
+            if (object.isLiteral()) {
+                bfLabel = object.asLiteral().getLexicalForm();
+                break;
+            }
+        }
+    
+        bfLabel = NacoNormalizer.normalize(bfLabel);
+        LOGGER.debug("Got bf:label key " + bfLabel + " for resource " 
+                + resource.getURI());
+                
+        return bfLabel;
+    }
+    
+
+    private String getKeyFromType(Resource resource) {
+        
+        String key = null;
+
+        // Get the BfTypes for this resource
+        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
+        List<BfType> types = new ArrayList<BfType>();
+        for (Statement stmt : typeStmts) {
+            Resource ontClass = stmt.getResource();
+            types.add(TYPES_FOR_ONT_CLASSES.get(ontClass));
+        }
+        
+        // Could turn into subclasses - but there would be only one method, the
+        // getKey method. Is there another more elegant way to do this?
+        
+        // NB Order is crucial. bf:Topic and bf:Person entities are also 
+        // bf:Authority entities.
+        if (types.contains(BfType.BF_TOPIC)) {
+            key = getBfTopicKey(resource);
+        } else if (types.contains(BfType.BF_PERSON)) {
+            key = getBfPersonKey(resource);  //?? Maybe just authority
+        } else if (BfType.isAuthority(types)) {  
+            key = getBfAuthorityKey(resource);
+        } else if (types.contains(BfType.BF_EVENT)) {
+            key = getBfResourceKey(resource);
+        } else if (types.contains(BfType.BF_HELD_ITEM)) {
+            key = getBfHeldItemKey(resource);
+        } else if (types.contains(BfType.BF_INSTANCE)) {
+            key = getBfInstanceKey(resource);
+        } else if (types.contains(BfType.BF_WORK)) {
+            key = getBfWorkKey(resource);
+        } else if (types.contains(BfType.BF_IDENTIFIER)) {
+            key = getBfIdentifierKey(resource);
+        } else if (types.contains(BfType.BF_ANNOTATION)) {
+            key = getBfAnnotationKey(resource);
+        } else if (types.contains(BfType.MADSRDF_AUTHORITY)) {
+            key = getMadsAuthorityKey(resource);
+        } else if (types.contains(BfType.BF_CLASSIFICATION)) {
+            key = getBfClassificationKey(resource);
+        } else if (types.contains(BfType.BF_LANGUAGE)) {
+            key = getBfLanguageKey(resource);
+        } else if (types.contains(BfType.BF_TITLE)) {
+            key = getBfTitleKey(resource);          
+        } else if (types.contains(BfType.BF_CATEGORY)) {
+                key = getBfCategoryKey(resource);  
+        } // TODO add other types as needed.
+        
+        return key; 
+    }
+    
+    private String getBfProviderKey(Resource resource) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getBfLanguageKey(Resource resource) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getBfClassificationKey(Resource resource) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getBfAnnotationKey(Resource resource) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+
+    private String getBfIdentifierKey(Resource resource) {
+        // TODO Auto-generated method stub
+        return null;
+    }
+  
+    private String getBfAuthorityKey(Resource resource) {
+ 
+        String key = getKeyFromAuthorizedAccessPoint(resource);
+        
+        if (key == null) {
+            key = getKeyFromAuthoritativeLabel(resource);
+        } 
+        
+        return key;
+    }
+    
     /*
      * Get resource key from the associated madsrdf:Authority authorizedLabel.
-     * Getting the key for the madsrdf:Authority itself is done in 
+     * NB Getting the key for the madsrdf:Authority itself is done in 
      * getMadsAuthorityKey().
      */
     private String getKeyFromAuthoritativeLabel(Resource resource) {
         
-        String authorizedLabel = null;
+        String authoritativeLabel = null;
 
         // Easier to do this as a SPARQL query since we're jumping over the 
         // intermediate madsrdf:Authority node.
@@ -510,68 +584,99 @@ public class UriGenerator extends RdfProcessor {
             RDFNode node = soln.get("authLabel");
             if (node.isLiteral()) {
                 Literal literal = node.asLiteral();
-                authorizedLabel = literal.getLexicalForm();
+                authoritativeLabel = literal.getLexicalForm();
                 break;
             }
         }
     
-        authorizedLabel = NacoNormalizer.normalize(authorizedLabel);
-        LOGGER.debug("Got authorizedLabel key " + authorizedLabel
+        authoritativeLabel = NacoNormalizer.normalize(authoritativeLabel);
+        LOGGER.debug("Got authorizedLabel key " + authoritativeLabel
                 + " from madsrdf:Authority for resource " + resource.getURI());
         
-        return authorizedLabel;
+        return authoritativeLabel;
     }
     
-    private String getKeyFromBfLabel(Resource resource) {
+
+
+    private String getBfResourceKey(Resource resource) {
+        return null;
+    }
+    
+    private String getBfHeldItemKey(Resource resource) {
+        return null;
+    }
+    
+    private String getBfInstanceKey(Resource resource) {
+        return null;
+    }
+    
+    private String getBfPersonKey(Resource resource) {
+        return null;
+    }
+    
+    private String getBfTopicKey(Resource resource) {
+        return null;
+    }
+    
+    private String getBfWorkKey(Resource resource) {
         
-        String bfLabel = null;
+        String key = null;
+        
+        key = getKeyFromAuthorizedAccessPoint(resource);
+        
+        // add other stuff here
+        if (key == null) {
+            
+        }
+        
+        return key;
+    }
+    
+    private String getBfTitleKey(Resource resource) {
+        return null;
+    }
+    
+    /*
+     * Get key for a madsrdf:Authority from the madsrdf:authoritativeLabel
+     * property. Note that other resources that get their key from the
+     * property chain bf:hasAuthority/madsrdf:authoritativeLabel are handled
+     * in getKeyFromAuthoritativeLabel.
+     */
+    private String getMadsAuthorityKey(Resource resource) {
+        
+        String authoritativeLabel = null;
 
         List<Statement> statements = resource.listProperties(
-                BfProperty.BF_LABEL.property()).toList();
+                BfProperty.MADSRDF_AUTHORITATIVE_LABEL.property()).toList();
 
-        // If there is more than one (which there shouldn't be), we'll get the
-        // first one, but doesn't matter if we have no selection criteria. 
         for (Statement statement : statements) {
             RDFNode object = statement.getObject();
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
-                bfLabel = literal.getLexicalForm();
+                authoritativeLabel = literal.getLexicalForm();
                 break;
             }
         }
     
-        bfLabel = NacoNormalizer.normalize(bfLabel);
-        LOGGER.debug("Got bf:label key " + bfLabel + " for resource " 
-                + resource.getURI());
-                
-        return bfLabel;
+        // Prefix an additional string to the label, else the local name of 
+        // the Authority will collide with that of the related resource, since
+        // generally the madsrdf:authorizedLabel of the Authority and the
+        // bf:authorizedAccessPoint of the related resource are identical.
+        // *** TODO Are there other blank nodes that also need to be 
+        // distinguished from the related resources?
+        authoritativeLabel = "authority "  
+                + NacoNormalizer.normalize(authoritativeLabel);
+        LOGGER.debug("Got authoritativeLabel key " + authoritativeLabel
+                + " for resource " + resource.getURI());
+        
+        return authoritativeLabel;
     }
     
-
-    private String getKeyFromType(Resource resource) {
+    private String getBfCategoryKey(Resource resource) {
         return null;
     }
     
     private String getKeyFromPredicate(Resource resource) {
-        return null;
-    }
-
-    private Resource getResourceType(
-            Resource resource, Model resourceSubModel) {
-        
-        Resource type = resource.hasProperty(RDF.type) ?
-                getPrimaryType(resource, resourceSubModel) :
-                    inferTypeFromPredicates(resource, resourceSubModel);
-                
-        // TODO If the type had to be inferred, add it to the outputModel so 
-        // that it doesn't have to be re-inferred during Bibframe conversion?
-        // Will we need that statement? Is it costly to compute the inference?
-        return type;
-    }
-        
-    private Resource getPrimaryType(Resource resource, Model resourceSubModel) {
-        
-        
         return null;
     }
 
@@ -580,7 +685,7 @@ public class UriGenerator extends RdfProcessor {
         // TODO Auto-generated method stub
         return null;
     }
-
+    
     private String getHashCode(String key) {
         // long hash64 = Crc64.checksum(key);
         // long hash64 = Crc64Mod.checksum(key);
@@ -590,8 +695,6 @@ public class UriGenerator extends RdfProcessor {
         // for improved algorithms.There are variants of Murmur Hash optimized 
         // for a 64-bit architecture. 
         long hash64 = MurmurHash.hash64(key);
-        return Long.toHexString(hash64);
-        
+        return Long.toHexString(hash64);        
     }
-   
 }
