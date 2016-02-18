@@ -100,9 +100,9 @@ public class UniqueKeyGetter {
                     return authAccessPoint;
                 } else {  
                     // If there is more than one (which there shouldn't be), 
-                    // we'll get the first one, but doesn't matter if we have 
-                    // no selection criteria. 
-                    break;
+                    // we'll get the last one, but doesn't matter if we have 
+                    // no selection criteria. Get last rather than first to
+                    // ensure getting the x-bf-hash value if there is one.
                 }
             }
         }
@@ -221,9 +221,17 @@ public class UniqueKeyGetter {
  
         String key = getKeyFromAuthorizedAccessPoint();
         
+        /*
+         * It never happens that we have one of these and no 
+         * bf:authorizedAccessPoint with the same value.
         if (key == null) {
             key = getKeyFromAuthoritativeLabel();
         } 
+        
+        if (key == null) {
+            key = getKeyFromBfLabel();
+        }
+        */
         
         return key;
     }
