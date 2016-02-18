@@ -395,10 +395,14 @@ public class UriGenerator extends RdfProcessor {
         
         key = getKeyFromType(resource);
         
+        // Not sure yet if we need this
         if (key == null) {
             key = getKeyFromPredicate(resource);
         }
 
+        // TODO Doesn't apply to bf:Instance. Either test for that or move into
+        // specific methods; or never send back null from the Instance method.
+        // (The latter may be error-prone.)
         if (key == null) {
             key = getKeyFromBfLabel(resource);
         }
@@ -491,12 +495,10 @@ public class UriGenerator extends RdfProcessor {
         // bf:Authority entities.
         if (types.contains(BfType.BF_TOPIC)) {
             key = getBfTopicKey(resource);
-        } else if (types.contains(BfType.BF_PERSON)) {
-            key = getBfPersonKey(resource);  //?? Maybe just authority
         } else if (BfType.isAuthority(types)) {  
             key = getBfAuthorityKey(resource);
         } else if (types.contains(BfType.BF_EVENT)) {
-            key = getBfResourceKey(resource);
+            key = getBfEventKey(resource);
         } else if (types.contains(BfType.BF_HELD_ITEM)) {
             key = getBfHeldItemKey(resource);
         } else if (types.contains(BfType.BF_INSTANCE)) {
@@ -516,9 +518,11 @@ public class UriGenerator extends RdfProcessor {
         } else if (types.contains(BfType.BF_TITLE)) {
             key = getBfTitleKey(resource);          
         } else if (types.contains(BfType.BF_CATEGORY)) {
-                key = getBfCategoryKey(resource);  
+            key = getBfCategoryKey(resource);  
+        } else if (types.contains(BfType.BF_PROVIDER)) {
+            key = getBfProviderKey(resource);
         } // TODO add other types as needed.
-        
+               
         return key; 
     }
     
@@ -596,26 +600,32 @@ public class UriGenerator extends RdfProcessor {
         return authoritativeLabel;
     }
     
+    private String getBfEventKey(Resource resource) {
 
-
-    private String getBfResourceKey(Resource resource) {
-        return null;
+        // The only data we have for a bf:Event is bf:eventDate and 
+        // bf:eventPlace. This isn't enough to reconcile resources; so 
+        // generate only unique Event URIs.
+        return resource.getLocalName();
     }
     
     private String getBfHeldItemKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     private String getBfInstanceKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     private String getBfPersonKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     private String getBfTopicKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     private String getBfWorkKey(Resource resource) {
@@ -633,7 +643,8 @@ public class UriGenerator extends RdfProcessor {
     }
     
     private String getBfTitleKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     /*
@@ -673,11 +684,13 @@ public class UriGenerator extends RdfProcessor {
     }
     
     private String getBfCategoryKey(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
     
     private String getKeyFromPredicate(Resource resource) {
-        return null;
+        String key = null;
+        return key;
     }
 
     private Resource inferTypeFromPredicates(

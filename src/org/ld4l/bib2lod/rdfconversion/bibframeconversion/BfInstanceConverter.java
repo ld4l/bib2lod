@@ -63,6 +63,8 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         
         LOGGER.debug("Converting instance " + subject.getURI());
         
+        // *** TODO Create the sameAs to the worldcat instance here
+        
         // Get the associated Work
         Statement instanceOf = 
                 subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
