@@ -30,18 +30,19 @@ public class UniqueKeyGetter {
 
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
-                  "SELECT ?authLabel WHERE { "
-                  + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
-                  + "?auth . "
-                  + "?auth a " 
-                  + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
-                  + "?auth "
-                  + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
-                  + "?authLabel . "
-                  + "} ");
-    
+                      "SELECT ?authLabel WHERE { "
+                      + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
+                      + "?auth . "
+                      + "?auth a " 
+                      + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+                      + "?auth "
+                      + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
+                      + "?authLabel . "
+                      + "} ");
+        
+        
     // Using LinkedHashMap in case order of processing becomes important
-    private static final Map<Resource, BfType> TYPES_FOR_ONT_CLASSES =
+    private static final Map<Resource, BfType> TYPES_FOR_BF_ONT_CLASSES =
             BfType.typesForOntClasses();
 
     private final Resource resource;
@@ -66,7 +67,7 @@ public class UniqueKeyGetter {
 
         // TODO Doesn't apply to bf:Instance. Either test for that or move into
         // specific methods; or never send back null from the Instance method.
-        // (The latter may be error-prone.)
+        // (The latter approach may be error-prone.)
         if (key == null) {
             key = getKeyFromBfLabel();
         }
@@ -91,20 +92,10 @@ public class UniqueKeyGetter {
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
                 authAccessPoint = literal.getLexicalForm();
-                String lang = literal.getLanguage();
-                if (lang.equals("x-bf-hash")) {
-                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
-                            + " for resource " + resource.getURI());
-                    // Don't look any further, and no need to normalize the
-                    // string.
-                    return authAccessPoint;
-                } else {  
-                    // If there is more than one (which there shouldn't be), 
-                    // we'll get the last one, but doesn't matter if we have 
-                    // no selection criteria. Get last rather than first to
-                    // ensure getting the x-bf-hash value if there is one.
-                }
-            }
+                break;
+            } // If there is more than one (which shouldn't happen) we'll get 
+              // the first, but doesn't matter if there are no selection
+              // criteria.                
         }
     
         authAccessPoint = NacoNormalizer.normalize(authAccessPoint);
@@ -149,18 +140,16 @@ public class UniqueKeyGetter {
         List<BfType> types = new ArrayList<BfType>();
         for (Statement stmt : typeStmts) {
             Resource ontClass = stmt.getResource();
-            types.add(TYPES_FOR_ONT_CLASSES.get(ontClass));
+            types.add(TYPES_FOR_BF_ONT_CLASSES.get(ontClass));
         }
         
         // Could turn into subclasses - but there would be only one method, the
         // getKey method. Is there another more elegant way to do this?
         // We can't use a map, since entities may have multiple types, and we
         // use the if-statement to specify the relevant type.
-        
-        // NB Order is crucial. bf:Topic entities are also  bf:Authority 
-        // entities.
+
         if (types.contains(BfType.BF_TOPIC)) {
-            key = getBfTopicKey();
+            key = getBfAuthorityKey();
         } else if (BfType.isAuthority(types)) {  
             key = getBfAuthorityKey();
         } else if (types.contains(BfType.BF_EVENT)) {
@@ -221,9 +210,8 @@ public class UniqueKeyGetter {
  
         String key = getKeyFromAuthorizedAccessPoint();
         
-        /*
-         * It never happens that we have one of these and no 
-         * bf:authorizedAccessPoint with the same value.
+        // Infrequently there a madsrdf:Authority or bf:label but no
+        // bf:authorizedAccessPoint.
         if (key == null) {
             key = getKeyFromAuthoritativeLabel();
         } 
@@ -231,7 +219,6 @@ public class UniqueKeyGetter {
         if (key == null) {
             key = getKeyFromBfLabel();
         }
-        */
         
         return key;
     }
@@ -291,25 +278,32 @@ public class UniqueKeyGetter {
         String key = null;
         return key;
     }
-
-    
-    private String getBfTopicKey() {
-        String key = null;
-        return key;
-    }
     
     private String getBfWorkKey() {
         
-        String key = null;
+        String authAccessPoint = null;
         
-        key = getKeyFromAuthorizedAccessPoint();
+        List<Statement> statements = resource.listProperties(
+                BfProperty.BF_AUTHORIZED_ACCESS_POINT.property()).toList();
         
-        // add other stuff here
-        if (key == null) {
-            
+        for (Statement s : statements) {
+            RDFNode object = s.getObject();
+            if (object.isLiteral()) {
+                Literal literal = object.asLiteral();
+                authAccessPoint = literal.getLexicalForm();
+                String lang = literal.getLanguage();
+                if (lang.equals("x-bf-hash")) {
+                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                            + " for resource " + resource.getURI());
+                }
+                // No need to look further, and no need to normalize. 
+                // In fact, in a large data sample there are no Works without
+                // an authorizedAccessPoint value with lang 'x-bf-hash'.
+                return authAccessPoint;
+            } 
         }
-        
-        return key;
+           
+        return NacoNormalizer.normalize(authAccessPoint);
     }
     
     private String getBfTitleKey() {
