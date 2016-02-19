@@ -6,14 +6,9 @@ import java.time.Instant;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.riot.RiotException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
-import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
 import org.ld4l.bib2lod.rdfconversion.UriGenerator;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;

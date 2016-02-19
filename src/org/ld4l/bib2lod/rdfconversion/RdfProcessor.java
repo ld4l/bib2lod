@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
