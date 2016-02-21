@@ -2,7 +2,6 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,9 +12,6 @@ import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
-import org.apache.jena.query.QuerySolution;
-import org.apache.jena.query.ResultSet;
-import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -25,10 +21,11 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.reconciliation.AuthorityReconciler;
+import org.ld4l.bib2lod.rdfconversion.reconciliation.TopicAuthorityReconciler;
 import org.ld4l.bib2lod.rdfconversion.uniquekey.UniqueKeyGetter;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.MurmurHash;
-import org.ld4l.bib2lod.util.NacoNormalizer;
 import org.ld4l.bib2lod.util.TimerUtils;
 
 public class UriGenerator extends RdfProcessor {
@@ -49,7 +46,7 @@ public class UriGenerator extends RdfProcessor {
                     + "?o1 ?p2 ?o2 . "
                     + "} FILTER (?s = ?resource || ?o1 = ?resource) "
                     + " }");
-                                                        
+    
     public UriGenerator(String localNamespace, String inputDir, 
             String mainOutputDir) {           
         super(localNamespace, inputDir, mainOutputDir);
@@ -165,8 +162,7 @@ public class UriGenerator extends RdfProcessor {
         RDFNode newObject = object.isLiteral() ? object :
                 getUniqueUri(object.asResource(), uniqueLocalNames,  
                         outputModel);
-                        
-     
+                            
         // Model.createStatement() may reuse an existing statement rather than
         // creating a new one.
         return outputModel.createStatement(
@@ -175,7 +171,16 @@ public class UriGenerator extends RdfProcessor {
 
     private Resource getUniqueUri(Resource resource, 
             Map<String, String> uniqueLocalNames, Model outputModel) {
-            
+        
+        if (resource.hasProperty(RDF.type, BfType.BF_TOPIC.ontClass())) {
+            AuthorityReconciler reconciler = 
+                    new TopicAuthorityReconciler(resource);
+            String uri = reconciler.reconcile();
+            if (uri != null) {
+                return outputModel.createResource(uri);
+            }
+        }
+                
         String localName;
         
         // Blank nodes (titles, authorities, etc.) also need to be deduped 
@@ -260,8 +265,8 @@ public class UriGenerator extends RdfProcessor {
         
         // Get a unique key based on relevant attributes of the resource. 
         UniqueKeyGetter keyGetter = new UniqueKeyGetter(newResource);
-        String key = keyGetter.getKey();
-        
+        String key = keyGetter.getUniqueKey();
+
         // if (isBnode) {
         //     key = "bnode" + key;
         // }
@@ -270,7 +275,7 @@ public class UriGenerator extends RdfProcessor {
         // digit.
         return "n" + getHashCode(key);
     }
-    
+
     /* 
      * Assign a temporary URI to a blank node, so further processing can be the
      * same as for a URI resource.
