@@ -18,6 +18,10 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemUriGetter.class);
 
+    // Order is crucial here
+    private static String[] keyTypes = 
+        { "lcc", "ddc", "nlm", "udc", "barcode", "id" };        
+
     private static String sparql = 
                 "SELECT ?item ?lcc ?ddc ?nlm ?udc ?barcode ?id "
                 + "?shelfMark ?scheme "
@@ -54,11 +58,6 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
 
     @Override
     protected String getUniqueKey() {
-        
-        String key = null;
-        
-        // Order is crucial here
-        String[] keys = { "lcc", "ddc", "nlm", "udc", "barcode", "id" };
 
         QueryExecution qexec = 
                 QueryExecutionFactory.create(sparql, resource.getModel());
@@ -69,7 +68,7 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
 
-            for (String k : keys) {
+            for (String k : keyTypes) {
                 Literal lit = soln.getLiteral(k);
                 if (lit != null) {
                     LOGGER.debug("Getting key of type " + k + " with value " 
