@@ -26,12 +26,10 @@ import org.ld4l.bib2lod.rdfconversion.urigetter.BfAnnotationUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfAuthorityUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfCategoryUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfClassificationUriGetter;
-import org.ld4l.bib2lod.rdfconversion.urigetter.BfEventUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfHeldItemUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfIdentifierUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfInstanceUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfLanguageUriGetter;
-import org.ld4l.bib2lod.rdfconversion.urigetter.BfProviderUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfTitleUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfTopicUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfWorkUriGetter;
@@ -220,14 +218,17 @@ public class UriGenerator extends RdfProcessor {
  
         // If we've encountered this URI, return the stored value from the map.
         if (uniqueUris.containsKey(uri)) {
-            LOGGER.debug("Reusing unique URI previously generated for resource "
-                    + resource.getURI());
             uniqueUri = uniqueUris.get(uri);
+            LOGGER.debug("Reusing unique URI " + uniqueUri 
+                    + " previously generated for resource " 
+                    + resource.getURI());
+
         } else {
             // Otherwise, compute a new value.
-            LOGGER.debug("Generating new unique URI for resource "
-                    + resource.getURI());
             uniqueUri = getNewUniqueUri(resource);
+            LOGGER.debug("Generated new unique URI " + uniqueUri 
+                    + " for resource " + resource.getURI());
+
             // Add to the map so the value can be reused for other resources in
             // the same record without having to recompute.
             uniqueUris.put(uri, uniqueUri);
@@ -377,8 +378,6 @@ public class UriGenerator extends RdfProcessor {
             uriGetterClass = BfTopicUriGetter.class;
         } else if (BfType.isAuthority(types)) {  
             uriGetterClass = BfAuthorityUriGetter.class;
-        } else if (types.contains(BfType.BF_EVENT)) {
-            uriGetterClass = BfEventUriGetter.class;
         } else if (types.contains(BfType.BF_HELD_ITEM)) {
             uriGetterClass = BfHeldItemUriGetter.class;
         } else if (types.contains(BfType.BF_INSTANCE)) {
@@ -399,8 +398,6 @@ public class UriGenerator extends RdfProcessor {
             uriGetterClass = BfTitleUriGetter.class;          
         } else if (types.contains(BfType.BF_CATEGORY)) {
             uriGetterClass = BfCategoryUriGetter.class; 
-        } else if (types.contains(BfType.BF_PROVIDER)) {
-            uriGetterClass = BfProviderUriGetter.class;
         } else {
             uriGetterClass = ResourceUriGetter.class;
         }

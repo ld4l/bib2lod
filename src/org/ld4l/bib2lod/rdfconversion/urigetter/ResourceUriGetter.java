@@ -40,17 +40,16 @@ public class ResourceUriGetter {
     // Subclasses should call super.getUniqueKey() if they have failed to 
     // identify another key.
     protected String getUniqueKey() {
-        // TODO Doesn't apply to bf:Instance. Either test for that or move into
-        // specific methods; or never send back null from the Instance method.
-        // (The latter approach may be error-prone.)
-        String key = getKeyFromBfLabel();
-
-        if (key == null) {
-            // TEMPORARY! - or will this be the fallback?
-            key = resource.getLocalName();
-        }
-       
-        return key;
+        
+        // Use for entity types that cannot be reconciled either because there
+        // is not currently enough data (e.g., Events, where we have only
+        // eventPlace and eventDate), or which are always unique (e.g., 
+        // Providers). In the latter case, Providers could only be the same
+        // if the related Instances were the same. This is (I think) unlikely to
+        // occur within a single catalog, and would require a second pass 
+        // after the Instances have been reconciled. Don't do that unless it is
+        // sufficiently justified.
+        return resource.getLocalName();
     }
 
     protected String getKeyFromBfLabel() {
