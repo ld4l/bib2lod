@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.uniquekey;
+package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
@@ -11,17 +11,17 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class BfWorkKeyGetter extends ResourceKeyGetter {
+public class BfWorkUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfWorkKeyGetter.class);
+            LogManager.getLogger(BfWorkUriGetter.class);
     
-    public BfWorkKeyGetter(Resource resource) {
-        super(resource);
+    public BfWorkUriGetter(Resource resource, String localNamespace) {
+        super(resource, localNamespace);
     }
 
     @Override
-    protected String getKey() {
+    protected String getUniqueKey() {
         
         String authAccessPoint = null;
         

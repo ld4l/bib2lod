@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.uniquekey;
+package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
@@ -11,17 +11,17 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class MadAuthorityKeyGetter extends ResourceKeyGetter {
+public class MadsAuthorityUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(MadAuthorityKeyGetter.class);
+            LogManager.getLogger(MadsAuthorityUriGetter.class);
     
-    public MadAuthorityKeyGetter(Resource resource) {
-        super(resource);
+    public MadsAuthorityUriGetter(Resource resource, String localNamespace) {
+        super(resource, localNamespace);
     }
 
     @Override
-    protected String getKey() {
+    protected String getUniqueKey() {
         
         String authoritativeLabel = null;
 

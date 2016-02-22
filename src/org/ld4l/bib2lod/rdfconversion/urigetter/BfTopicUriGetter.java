@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.uniquekey;
+package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
@@ -6,20 +6,20 @@ import org.apache.logging.log4j.Logger;
 
 // TODO Will need to treat topics differently - URI should come from schemes
 // like FAST. Will not just need to send back a key.
-public class BfTopicKeyGetter extends ResourceKeyGetter {
+public class BfTopicUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfTopicKeyGetter.class);
+            LogManager.getLogger(BfTopicUriGetter.class);
     
-    public BfTopicKeyGetter(Resource resource) {
-        super(resource);
+    public BfTopicUriGetter(Resource resource, String localNamespace) {
+        super(resource, localNamespace);
     }
 
     @Override
-    protected String getKey() {
+    public String getUniqueUri() {
         String key = null;
         if (key == null) {
-            key = super.getKey();
+            key = super.getUniqueUri();
         }
         return key;
     }

@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.uniquekey;
+package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
@@ -18,10 +18,10 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class BfAuthorityKeyGetter extends ResourceKeyGetter {
+public class BfAuthorityUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfAuthorityKeyGetter.class);
+            LogManager.getLogger(BfAuthorityUriGetter.class);
  
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
@@ -35,12 +35,12 @@ public class BfAuthorityKeyGetter extends ResourceKeyGetter {
                       + "?authLabel . "
                       + "} ");
     
-    public BfAuthorityKeyGetter(Resource resource) {
-        super(resource);
+    public BfAuthorityUriGetter(Resource resource, String localNamespace) {
+        super(resource, localNamespace);
     }
     
     @Override
-    protected String getKey() {
+    public String getUniqueKey() {
         
         String key = getKeyFromAuthorizedAccessPoint();
         
