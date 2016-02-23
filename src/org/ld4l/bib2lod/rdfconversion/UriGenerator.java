@@ -29,7 +29,6 @@ import org.ld4l.bib2lod.rdfconversion.urigetter.BfClassificationUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfHeldItemUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfIdentifierUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfInstanceUriGetter;
-import org.ld4l.bib2lod.rdfconversion.urigetter.BfLanguageUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfTitleUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfTopicUriGetter;
 import org.ld4l.bib2lod.rdfconversion.urigetter.BfWorkUriGetter;
