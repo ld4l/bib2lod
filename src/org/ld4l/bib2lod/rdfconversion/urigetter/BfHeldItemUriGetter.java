@@ -24,7 +24,7 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
 
     private static String sparql = 
                 "SELECT ?item ?lcc ?ddc ?nlm ?udc ?barcode ?id "
-                + "?shelfMark ?scheme "
+                + "?shelfMark ?scheme ?label "
                 + "WHERE { "
                 /*
                  * We really only want to use one of these OPTIONALS if 
@@ -49,7 +49,9 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
                 + "OPTIONAL { ?item " 
                 + BfProperty.BF_SHELF_MARK.sparqlUri() + " ?shelfMark ; "
                 + BfProperty.BF_SHELF_MARK_SCHEME.sparqlUri() 
-                + " ?scheme . } "        
+                + " ?scheme . } "   
+                + "OPTIONAL { ?item "
+                + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
     
     public BfHeldItemUriGetter(Resource resource, String localNamespace) {
@@ -66,7 +68,7 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
         // If there is more than one (which there shouldn't be), we'll get the
         // first one, but doesn't matter if we have no selection criteria. 
         while (results.hasNext()) {
-            QuerySolution soln = results.next();
+            QuerySolution soln = results.nextSolution();
 
             for (String k : keyTypes) {
                 Literal lit = soln.getLiteral(k);

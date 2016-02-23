@@ -34,6 +34,8 @@ public class ResourceUriGetter {
     
     private final String getUniqueLocalName() {
         String uniqueKey = getUniqueKey();
+        LOGGER.debug("Created unique key " + uniqueKey + " for resource "
+                + resource.getURI());
         return "n" + getHashCode(uniqueKey);
     }
  
