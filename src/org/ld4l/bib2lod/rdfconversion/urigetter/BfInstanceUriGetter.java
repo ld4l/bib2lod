@@ -4,11 +4,13 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfInstanceUriGetter extends ResourceUriGetter {
@@ -18,9 +20,9 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
 
     private static String sparql = 
             "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
-            + "PREFIX afn: <http://jena.apache.org/ARQ/function#>  "
+            // + "PREFIX afn: <http://jena.apache.org/ARQ/function#>  "
             + "SELECT ?instance ?worldcatId "
-            // + "?nonWorldCatId ?nonWorldCatIdScheme ?nonWorldCatIdValue "
+            + "?otherId ?otherIdScheme ?otherIdValue "
             + "WHERE { "
             + "?instance a " + BfType.BF_INSTANCE.sparqlUri() + " . "
             + "OPTIONAL { ?instance "
@@ -35,16 +37,14 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
             + "FILTER ( fn:starts-with(str(?worldcatId), "
             + "\"" + Vocabulary.WORLDCAT.uri() + "\"  ) ) } "
 
-            // + "OPTIONAL { ?instance "
-            // + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
-            // + "?nonWorldCatId . "
-            // + "?nonWorldCatId " 
-            // + BfProperty.BF_IDENTIFIER_SCHEME.sparqlUri() + " "
-            // + "?nonWorldCatIdScheme ; " 
-            // + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
-            // + " ?nonWorldCatIdValue ; "
-            // + "FILTER ( ! fn:starts-with(str(?nonWorldCatId), "
-            // + "\"" + WORLDCAT_NS + "\"  ) ) } "
+            + "OPTIONAL { ?instance "
+            + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+            + "?otherId . "
+            + "?otherId " 
+            + BfProperty.BF_IDENTIFIER_SCHEME.sparqlUri() + " "
+            + "?otherIdScheme ; " 
+            + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
+            + " ?otherIdValue . }  "
             + "}";
     
     
@@ -57,6 +57,8 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
         
         String key = null;
         
+        RdfProcessor.printModel(resource.getModel(), "Instance submodel;");
+        
         LOGGER.debug("Instance query: " + sparql);
         QueryExecution qexec = 
                 QueryExecutionFactory.create(sparql, resource.getModel());
@@ -66,12 +68,32 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
             QuerySolution soln = results.nextSolution();
             LOGGER.debug("Query solution for resource " + resource.getURI()
                     + ": " + soln.toString());
-            Resource worldcatId = soln.getResource("worldcatId");
-            if (worldcatId != null) {
-                key = worldcatId.getURI();
+            RDFNode worldcatId = soln.get("worldcatId");
+            if (worldcatId != null && worldcatId.isResource()) {
+                key = worldcatId.asResource().getURI();
+                LOGGER.debug("Got bf:Instance key from worldcat id " + key 
+                        + " for resource " + resource.getURI());
+                break;
             }
             
-            // TODO ELSE????
+            RDFNode otherId = soln.get("otherId");
+            if (otherId != null && otherId.isLiteral()) {
+                RDFNode idValue = soln.get("otherIdValue");
+                if (idValue != null && idValue.isLiteral()) {
+                    String id = idValue.asLiteral().getLexicalForm();
+                    RDFNode idScheme = soln.get("otherIdScheme");
+                    if (idScheme != null && idScheme.isResource()) {
+                        String scheme = idScheme.asResource().getURI();
+                        key = id + scheme;
+                        LOGGER.debug("Got bf:Instance key from id value " + id 
+                                + " and scheme "
+                                + scheme + " for resource " 
+                                + resource.getURI());
+                        break;
+                    }
+                }
+                
+            }
         }
         
         if (key == null) {
