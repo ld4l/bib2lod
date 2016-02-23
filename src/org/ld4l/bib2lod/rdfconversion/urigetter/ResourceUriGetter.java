@@ -47,7 +47,7 @@ public class ResourceUriGetter {
         // is not currently enough data (e.g., Events, where we have only
         // eventPlace and eventDate), or which are always unique (e.g., 
         // Providers). In the latter case, Providers could only be the same
-        // if the related Instances were the same. This is (I think) unlikely to
+        // if the related Instances were the same. This is (maybe) unlikely to
         // occur within a single catalog, and would require a second pass 
         // after the Instances have been reconciled. Don't do that unless it is
         // sufficiently justified.

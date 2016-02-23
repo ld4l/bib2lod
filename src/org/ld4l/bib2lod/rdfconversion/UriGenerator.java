@@ -403,8 +403,6 @@ public class UriGenerator extends RdfProcessor {
             uriGetterClass = MadsAuthorityUriGetter.class;
         } else if (types.contains(BfType.BF_CLASSIFICATION)) {
             uriGetterClass = BfClassificationUriGetter.class;
-        } else if (types.contains(BfType.BF_LANGUAGE)) {
-            uriGetterClass = BfLanguageUriGetter.class;
         } else if (types.contains(BfType.BF_TITLE)) {
             uriGetterClass = BfTitleUriGetter.class;          
         } else if (types.contains(BfType.BF_CATEGORY)) {
