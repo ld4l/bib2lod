@@ -74,6 +74,10 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
             // TODO ELSE????
         }
         
+        if (key == null) {
+            key = super.getUniqueKey();
+        }
+        
         return key;
 
     }
