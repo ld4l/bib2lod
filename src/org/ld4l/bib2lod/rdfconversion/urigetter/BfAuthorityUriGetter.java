@@ -22,11 +22,30 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAuthorityUriGetter.class);
- 
+
+    private static ParameterizedSparqlString resourceSubModelPss = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o . "
+                    + " ?s ?p2 ?resource . "  
+                    + " ?o " 
+                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "            
+                    + "?authLabel . "
+                    + "} WHERE {  { "                                                      
+                    + "?resource ?p1 ?o . "
+                    + " OPTIONAL { "
+                    + "?o a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+                    + "?o "
+                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
+                    + "?authLabel . } "
+                    + "} UNION { "
+                    + "?s ?p2 ?resource . "
+                    + "} } ");
+    
     private static ParameterizedSparqlString authLabelPss = 
             new ParameterizedSparqlString(
                       "SELECT ?authLabel WHERE { "
-                      + "?s " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
+                      + "?resource " 
+                      + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " "
                       + "?auth . "
                       + "?auth a " 
                       + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
@@ -37,6 +56,11 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
     
     public BfAuthorityUriGetter(Resource resource, String localNamespace) {
         super(resource, localNamespace);
+    }
+
+    @Override
+    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+        return resourceSubModelPss;
     }
     
     @Override
@@ -93,7 +117,7 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
 
         // Easier to do this as a SPARQL query since we're jumping over the 
         // intermediate madsrdf:Authority node.
-        authLabelPss.setIri("s", resource.getURI());
+        authLabelPss.setIri("resource", resource.getURI());
         LOGGER.debug(authLabelPss.toString());
         Query query = authLabelPss.asQuery();
 

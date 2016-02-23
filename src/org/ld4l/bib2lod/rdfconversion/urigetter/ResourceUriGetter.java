@@ -13,7 +13,6 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
@@ -87,6 +86,7 @@ public class ResourceUriGetter {
     private Model getResourceSubModel(Resource resource) {
 
         LOGGER.debug("Getting resource submodel for " + resource.getURI());
+        
         ParameterizedSparqlString pss = getResourceSubModelPss(resource);
         pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
                 OntNamespace.BIBFRAME.uri());

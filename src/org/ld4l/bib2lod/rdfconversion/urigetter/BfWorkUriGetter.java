@@ -16,10 +16,7 @@ public class BfWorkUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfWorkUriGetter.class);
-    
-    public BfWorkUriGetter(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
-    }
+
     
     ParameterizedSparqlString pss = new ParameterizedSparqlString(
             "SELECT ?authAccessPoint ?title WHERE {  "
@@ -28,7 +25,13 @@ public class BfWorkUriGetter extends ResourceUriGetter {
             + "} UNION { "
             + "?s " + BfProperty.BF_LABEL.sparqlUri() 
             + " } } ");
-            
+
+    
+    public BfWorkUriGetter(Resource resource, String localNamespace) {
+        super(resource, localNamespace);
+    }
+    
+    
     @Override
     protected String getUniqueKey() {
         

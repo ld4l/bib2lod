@@ -9,10 +9,6 @@ import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.query.ParameterizedSparqlString;
-import org.apache.jena.query.Query;
-import org.apache.jena.query.QueryExecution;
-import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -267,8 +263,6 @@ public class UriGenerator extends RdfProcessor {
 
         return bnode;
     }
-    
-
 
     private ResourceUriGetter getUriGetterByType(
             Resource resource, String localNamespace) {
@@ -308,6 +302,8 @@ public class UriGenerator extends RdfProcessor {
         } else {
             uriGetterClass = ResourceUriGetter.class;
         }
+        
+        LOGGER.debug("uriGetterClass = " + uriGetterClass.getName());
         
         ResourceUriGetter uriGetter = null;
         if (uriGetterClass != null) {

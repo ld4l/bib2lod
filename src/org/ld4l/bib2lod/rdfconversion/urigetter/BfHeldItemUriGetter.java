@@ -1,7 +1,5 @@
 package org.ld4l.bib2lod.rdfconversion.urigetter;
 
-import org.apache.jena.query.ParameterizedSparqlString;
-import org.apache.jena.query.Query;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
