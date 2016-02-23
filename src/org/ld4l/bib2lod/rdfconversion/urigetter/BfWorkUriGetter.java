@@ -2,6 +2,7 @@ package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
@@ -19,11 +20,43 @@ public class BfWorkUriGetter extends ResourceUriGetter {
     public BfWorkUriGetter(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
-
+    
+    ParameterizedSparqlString pss = new ParameterizedSparqlString(
+            "SELECT ?authAccessPoint ?title WHERE {  "
+            + "?s " + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
+            + "?authAccessPoint " 
+            + "} UNION { "
+            + "?s " + BfProperty.BF_LABEL.sparqlUri() 
+            + " } } ");
+            
     @Override
     protected String getUniqueKey() {
         
-        String authAccessPoint = null;
+        // All Cornell works and most Stanford and Harvard works have 
+        // bf:authorizedAccessPoint
+        String key = getKeyFromAuthorizedAccessPoint();
+        
+        // If no bf:authorizedAccessPoint, they usually have a bf:title
+        if (key == null) {
+            key = getKeyFromTitle();
+        }
+        
+        // Fallback to bf:label
+        if (key == null) {
+            key = getKeyFromBfLabel();
+        }
+        
+        // Final fallback to existing local name
+        if (key == null) {
+            key = resource.getLocalName();
+        }
+        
+        return key;
+    }
+    
+    private String getKeyFromAuthorizedAccessPoint() {
+
+        String key = null;
         
         List<Statement> statements = resource.listProperties(
                 BfProperty.BF_AUTHORIZED_ACCESS_POINT.property()).toList();
@@ -32,19 +65,38 @@ public class BfWorkUriGetter extends ResourceUriGetter {
             RDFNode object = s.getObject();
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
-                authAccessPoint = literal.getLexicalForm();
+                key = literal.getLexicalForm();
                 String lang = literal.getLanguage();
                 if (lang.equals("x-bf-hash")) {
-                    LOGGER.debug("Got authAccessPoint key " + authAccessPoint
+                    LOGGER.debug("Got authAccessPoint key " + key
                             + " for resource " + resource.getURI());
                 }
                 // No need to look further, and no need to normalize. 
                 // In fact, in a large data sample there are no Works without
                 // an authorizedAccessPoint value with lang 'x-bf-hash'.
-                return authAccessPoint;
+                return key;
             } 
         }
-           
-        return NacoNormalizer.normalize(authAccessPoint);
+                   
+        return NacoNormalizer.normalize(key);        
+    }
+    
+    private String getKeyFromTitle() {
+        
+        String key = null;
+
+        List<Statement> statements = resource.listProperties(
+                BfProperty.BF_TITLE.property()).toList();
+        
+        for (Statement s : statements) {
+            RDFNode object = s.getObject();
+            if (object.isLiteral()) {
+                Literal literal = object.asLiteral();
+                key = literal.getLexicalForm();
+                break;
+            } 
+        }
+                   
+        return NacoNormalizer.normalize(key); 
     }
 }
