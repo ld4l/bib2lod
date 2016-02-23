@@ -85,7 +85,7 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
         ResultSet results = qexec.execSelect();
         
         while (results.hasNext()) {
-            QuerySolution soln = results.nextSolution();
+            QuerySolution soln = results.next();
             LOGGER.debug("Query solution for resource " + resource.getURI()
                     + ": " + soln.toString());
             RDFNode worldcatId = soln.get("worldcatId");

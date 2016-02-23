@@ -5,6 +5,7 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -66,11 +67,12 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
         // If there is more than one (which there shouldn't be), we'll get the
         // first one, but doesn't matter if we have no selection criteria. 
         while (results.hasNext()) {
-            QuerySolution soln = results.nextSolution();
+            QuerySolution soln = results.next();
 
             for (String k : keyTypes) {
-                Literal lit = soln.getLiteral(k);
-                if (lit != null) {
+                RDFNode node = soln.get(k);
+                if (node != null && node.isLiteral()) {
+                    Literal lit = node.asLiteral();
                     LOGGER.debug("Getting key of type " + k + " with value " 
                             + lit.getLexicalForm());          
                     return lit.getLexicalForm();
@@ -80,13 +82,15 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
             }
             
             // If matching on shelf mark, the shelf mark scheme must also match.
-            Literal mark = soln.getLiteral("shelfMark");
-            if (mark != null) {
-                Literal scheme = soln.getLiteral("scheme");
-                if (scheme != null) {
+            RDFNode markNode = soln.get("shelfMark");
+            if (markNode != null && markNode.isLiteral()) {
+                String shelfMark = markNode.asLiteral().getLexicalForm();
+                RDFNode schemeNode = soln.get("scheme");
+                if (schemeNode != null && schemeNode.isLiteral()) {
+                    String scheme = schemeNode.asLiteral().getLexicalForm();
                     LOGGER.debug("Getting unique key from shelfMark and "
                             + "shelfMarkScheme");
-                    return scheme.getLexicalForm() + mark.getLexicalForm();
+                    return scheme + shelfMark;
                 } else {
                     LOGGER.debug("No value for shelfMark and shelfMarkScheme");
                 }

@@ -128,11 +128,10 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
         // If there is more than one (which there shouldn't be), we'll get the
         // first one, but doesn't matter if we have no selection criteria. 
         while (results.hasNext()) {
-            QuerySolution soln = results.nextSolution();
+            QuerySolution soln = results.next();
             RDFNode node = soln.get("authLabel");
-            if (node.isLiteral()) {
-                Literal literal = node.asLiteral();
-                authoritativeLabel = literal.getLexicalForm();
+            if (node != null && node.isLiteral()) {
+                authoritativeLabel = node.asLiteral().getLexicalForm();
                 break;
             }
         }
