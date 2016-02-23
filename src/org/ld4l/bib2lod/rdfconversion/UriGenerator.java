@@ -59,7 +59,7 @@ public class UriGenerator extends RdfProcessor {
                     + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
                     + "?o1 ?p2 ?o2 . "
                     + "} FILTER (?s = ?resource || ?o1 = ?resource) "
-                    + " }");
+                    + "}");
     
     public UriGenerator(String localNamespace, String inputDir, 
             String mainOutputDir) {           
@@ -247,17 +247,19 @@ public class UriGenerator extends RdfProcessor {
         // resource is either the subject or object.
         Model resourceSubModel = getResourceSubModel(resource);
         
+        // RdfProcessor.printModel(resourceSubModel, 
+        //         "Submodel for resource " + resource.getURI());
+        
         // Point to the resource in the submodel so that Java methods on the
         // resource are querying the submodel rather than the full model.
         Resource newResource = 
-                resourceSubModel.createResource(resource.getURI());
-        
+                resourceSubModel.createResource(resource.getURI());        
         ResourceUriGetter uriGetter = getUriGetterByType(
-                resource, localNamespace);
+                newResource, localNamespace);
+        
         String uri = uriGetter.getUniqueUri();
         
         return uri;
-
     }
 
     /* 
@@ -287,6 +289,15 @@ public class UriGenerator extends RdfProcessor {
      * Get the submodel of the input model consisting of statements in which 
      * this resource is either the subject or object.
      */
+    // **** TODO The type of the resource may determine the query. For example,
+    // with instances we need info about identifiers, etc. So we need to 
+    // get the type first, then get the resource sub model from the uri getter,
+    // with the default in ResourceUriGetter and subclasses overriding where
+    // needed. ****
+    // Also, if the input files are small enough, there may not be a need to
+    // get the submodel, rather than just querying the entire input model. It's
+    // not clear whether there would be a performance difference and in which
+    // direction. 
     private Model getResourceSubModel(Resource resource) {
 
         LOGGER.debug("Getting resource submodel for " + resource.getURI());
