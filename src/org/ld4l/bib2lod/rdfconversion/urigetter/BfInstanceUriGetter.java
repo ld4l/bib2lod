@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.urigetter;
 
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
@@ -18,6 +19,21 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceUriGetter.class);
 
+    private static ParameterizedSparqlString resourceSubModelPss = 
+                new ParameterizedSparqlString(
+                        "CONSTRUCT { ?resource ?p1 ?o1 . "
+                        + " ?s ?p2 ?resource . " 
+                        + " ?o1 ?p3 ?o2 "
+                        + "} WHERE { { "  
+                        + "?resource ?p1 ?o1 . "
+                        + "OPTIONAL { " 
+                        + "?o1 a " + BfType.BF_IDENTIFIER.sparqlUri() 
+                        + " . "
+                        + "?o1 ?p3 ?o2 . } "
+                        + "} UNION { "
+                        + "?s ?p2 ?resource . "
+                        + "} } ");
+    
     private static String sparql = 
             "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
             // + "PREFIX afn: <http://jena.apache.org/ARQ/function#>  "
@@ -37,9 +53,7 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
             + "FILTER ( fn:starts-with(str(?worldcatId), "
             + "\"" + Vocabulary.WORLDCAT.uri() + "\"  ) ) } "
 
-            + "OPTIONAL { ?instance "
-            + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
-            + "?otherId . "
+            + "OPTIONAL { ?instance ?p ?otherId . "
             + "?otherId " 
             + BfProperty.BF_IDENTIFIER_SCHEME.sparqlUri() + " "
             + "?otherIdScheme ; " 
@@ -52,6 +66,12 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
         super(resource, localNamespace);
     }
 
+    @Override
+    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+        LOGGER.debug(resourceSubModelPss);
+        return resourceSubModelPss;
+    }
+    
     @Override
     protected String getUniqueKey() {
         
@@ -76,23 +96,19 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
                 break;
             }
             
-            RDFNode otherId = soln.get("otherId");
-            if (otherId != null && otherId.isLiteral()) {
-                RDFNode idValue = soln.get("otherIdValue");
-                if (idValue != null && idValue.isLiteral()) {
-                    String id = idValue.asLiteral().getLexicalForm();
-                    RDFNode idScheme = soln.get("otherIdScheme");
-                    if (idScheme != null && idScheme.isResource()) {
-                        String scheme = idScheme.asResource().getURI();
-                        key = id + scheme;
-                        LOGGER.debug("Got bf:Instance key from id value " + id 
-                                + " and scheme "
-                                + scheme + " for resource " 
-                                + resource.getURI());
-                        break;
-                    }
+            RDFNode idValue = soln.get("otherIdValue");
+            if (idValue != null && idValue.isLiteral()) {
+                String id = idValue.asLiteral().getLexicalForm();
+                RDFNode idScheme = soln.get("otherIdScheme");
+                if (idScheme != null && idScheme.isResource()) {
+                    String scheme = idScheme.asResource().getURI();
+                    key = scheme + id;
+                    LOGGER.debug("Got bf:Instance key from id scheme " + scheme 
+                            + " and value "
+                            + id + " for resource " 
+                            + resource.getURI());
+                    break;
                 }
-                
             }
         }
         

@@ -24,20 +24,6 @@ public class ResourceUriGetter {
     private static final Logger LOGGER = 
             LogManager.getLogger(ResourceUriGetter.class);
     
-//    private static ParameterizedSparqlString resourceSubModelPss = 
-//            new ParameterizedSparqlString(
-//                    "CONSTRUCT { ?s ?p1 ?o1 . "
-//                    + " ?o1 ?p2 ?o2 . "                
-//                    + "} WHERE {  "                                                      
-//                    + "?s ?p1 ?o1 . "
-//                    + "OPTIONAL { "
-//                    + "?s " 
-//                    + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
-//                    + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
-//                    + "?o1 ?p2 ?o2 . "
-//                    + "} FILTER (?s = ?resource || ?o1 = ?resource) "
-//                    + "}");
-    
     // Default resource submodel is all the statements in which the resource is
     // either the subject or the object.
     private static ParameterizedSparqlString resourceSubModelPss = 
