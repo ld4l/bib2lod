@@ -2,12 +2,20 @@ package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
@@ -16,12 +24,39 @@ public class ResourceUriGetter {
     
     private static final Logger LOGGER = 
             LogManager.getLogger(ResourceUriGetter.class);
+    
+//    private static ParameterizedSparqlString resourceSubModelPss = 
+//            new ParameterizedSparqlString(
+//                    "CONSTRUCT { ?s ?p1 ?o1 . "
+//                    + " ?o1 ?p2 ?o2 . "                
+//                    + "} WHERE {  "                                                      
+//                    + "?s ?p1 ?o1 . "
+//                    + "OPTIONAL { "
+//                    + "?s " 
+//                    + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?o1 . "
+//                    + "?o1 a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+//                    + "?o1 ?p2 ?o2 . "
+//                    + "} FILTER (?s = ?resource || ?o1 = ?resource) "
+//                    + "}");
+    
+    // Default resource submodel is all the statements in which the resource is
+    // either the subject or the object.
+    private static ParameterizedSparqlString resourceSubModelPss = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o . "
+                    + " ?s ?p2 ?resource . "                
+                    + "} WHERE {  { "                                                      
+                    + "?resource ?p1 ?o . "
+                    + "} UNION { "
+                    + "?s ?p2 ?resource . "
+                    + "} } ");
 
     protected final Resource resource;
     protected final String localNamespace;
 
     public ResourceUriGetter(Resource resource, String localNamespace) {
-        this.resource = resource;
+        Model resourceSubModel = getResourceSubModel(resource);
+        this.resource = resourceSubModel.createResource(resource.getURI());
         this.localNamespace = localNamespace;
     }
 
@@ -30,6 +65,101 @@ public class ResourceUriGetter {
     public String getUniqueUri() {        
         String uniqueLocalName = getUniqueLocalName();
         return localNamespace + uniqueLocalName;
+    }
+    
+    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+        return resourceSubModelPss;
+    }
+
+    /*
+     * Get the submodel of the input model consisting of statements in which 
+     * this resource is either the subject or object.
+     */
+    // **** TODO The type of the resource may determine the query. For example,
+    // with instances we need info about identifiers, etc. So we need to 
+    // get the type first, then get the resource sub model from the uri getter,
+    // with the default in ResourceUriGetter and subclasses overriding where
+    // needed. ****
+    // Also, if the input files are small enough, there may not be a need to
+    // get the submodel, rather than just querying the entire input model. It's
+    // not clear whether there would be a performance difference and in which
+    // direction. 
+    private Model getResourceSubModel(Resource resource) {
+
+        LOGGER.debug("Getting resource submodel for " + resource.getURI());
+        ParameterizedSparqlString pss = getResourceSubModelPss(resource);
+        pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
+                OntNamespace.BIBFRAME.uri());
+        pss.setIri("resource", resource.getURI());
+        
+        Query query = pss.asQuery();
+        LOGGER.debug(query.toString());
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, resource.getModel());
+        Model resourceSubModel =  qexec.execConstruct();
+        RdfProcessor.printModel(resourceSubModel, 
+                "Submodel for resource " + resource.getURI());
+        return resourceSubModel;
+
+        /*
+         * Experiments with inference models. 
+         * 
+         * Bibframe only contains RDFS-level axioms, and that is all we need
+         * here (subclass, subproperty, and domain/range inferencing).
+         * 
+         * In the first scenario, we create an inference model for the entire 
+         * file, pass it here, and query it to build the submodel. This results
+         * in a small submodel that contains only the assertions and inferences
+         * related to the resource. This is the approach we would want.
+         * 
+         * In the second scenario, we build the construct model as above by 
+         * querying the input model, then construct an inference model from it.
+         * This results in a large submodel that contains the ontology and all
+         * the inferences on it, in addition to assertions and inferences 
+         * related to the resource.
+         * 
+         * For example, with an input model for one resource containing 7
+         * assertions, the final submodel in scenario 1 is 9 statements, while
+         * the final submodel in scenario 2 is a few thousand statements.
+         * 
+         * NB Sizes of inference models reported by InfModel.size() are not 
+         * accurate. It is necessary to look at the actual statements as output 
+         * by RdfProcessor.printModel().
+         * 
+         * Inferences from the Bibframe ontology are not always reliable. For
+         * example, consider:
+         <rdf:Property rdf:about="http://bibframe.org/vocab/subject">
+             <rdfs:domain rdf:resource="http://bibframe.org/vocab/Work"/>
+             <rdfs:label>Subject</rdfs:label>
+             <rdfs:range rdf:resource="http://bibframe.org/vocab/Authority"/>
+             <rdfs:range rdf:resource="http://bibframe.org/vocab/Work"/>
+             <rdfs:comment>Subject term(s) describing a resource.</rdfs:comment>
+         </rdf:Property>
+         * Now every object of bf:subject is inferred to be a Work. The object 
+         * of the range assertion should be the UNION of bf:Authority and 
+         * bf:Work, but of course since Bibframe is not an OWL ontology it 
+         * cannot use unionOf. 
+         *
+         LOGGER.debug("Submodel with no inferencing: ");
+         LOGGER.debug("Submodel size: " + resourceSubModel.size());
+         RdfProcessor.printModel(resourceSubModel, "Resource submodel: ");
+        
+         QueryExecution qexecInf = QueryExecutionFactory.create(
+                 query, infModel);
+         Model resourceSubModel1 = qexecInf.execConstruct();  
+         LOGGER.debug("Submodel built from querying the inference model that "
+                 + "is based on the entire file:");
+         LOGGER.debug("Submodel size: " + resourceSubModel1.size());
+         RdfProcessor.printModel(resourceSubModel1, "Resource submodel:");
+
+         InfModel resourceSubModel2 = ModelFactory.createInfModel(
+                 ReasonerRegistry.getRDFSReasoner(), bfOntModel, 
+                 resourceSubModel);
+         LOGGER.debug("Submodel built from creating an inference model based on "
+                 + "the submodel built from querying the input model:");
+         LOGGER.debug("Submodel size: " + resourceSubModel2.size());
+         RdfProcessor.printModel(resourceSubModel2, "Resource submodel: ");
+         */
     }
     
     private final String getUniqueLocalName() {
