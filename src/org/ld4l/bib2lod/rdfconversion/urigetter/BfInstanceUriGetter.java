@@ -27,8 +27,7 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
                         + "} WHERE { { "  
                         + "?resource ?p1 ?o1 . "
                         + "OPTIONAL { " 
-                        + "?o1 a " + BfType.BF_IDENTIFIER.sparqlUri() 
-                        + " . "
+                        + "?o1 a " + BfType.BF_IDENTIFIER.sparqlUri() + " . "
                         + "?o1 ?p3 ?o2 . } "
                         + "} UNION { "
                         + "?s ?p2 ?resource . "
@@ -111,6 +110,8 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
                 }
             }
         }
+        
+        qexec.close();
         
         if (key == null) {
             key = super.getUniqueKey();

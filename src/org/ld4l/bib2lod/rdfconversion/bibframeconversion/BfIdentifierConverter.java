@@ -225,7 +225,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }   
 
     }
-
     
     private void createWorldcatIdentifier(Resource relatedResource) {
         

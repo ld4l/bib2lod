@@ -136,6 +136,8 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
             }
         }
     
+        qexec.close();
+        
         authoritativeLabel = NacoNormalizer.normalize(authoritativeLabel);
         LOGGER.debug("Got authorizedLabel key " + authoritativeLabel
                 + " from madsrdf:Authority for resource " + resource.getURI());

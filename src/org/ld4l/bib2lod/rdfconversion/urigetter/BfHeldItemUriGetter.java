@@ -97,6 +97,8 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
             }
         }
         
+        qexec.close();
+        
         return super.getUniqueKey();
     }
 }

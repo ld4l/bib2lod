@@ -83,8 +83,11 @@ public class ResourceUriGetter {
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, resource.getModel());
         Model resourceSubModel =  qexec.execConstruct();
+        qexec.close();
+        
         RdfProcessor.printModel(resourceSubModel, 
                 "Submodel for resource " + resource.getURI());
+        
         return resourceSubModel;
 
         /*
@@ -133,6 +136,7 @@ public class ResourceUriGetter {
          QueryExecution qexecInf = QueryExecutionFactory.create(
                  query, infModel);
          Model resourceSubModel1 = qexecInf.execConstruct();  
+         qexecInf.close();
          LOGGER.debug("Submodel built from querying the inference model that "
                  + "is based on the entire file:");
          LOGGER.debug("Submodel size: " + resourceSubModel1.size());
