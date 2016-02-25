@@ -106,9 +106,9 @@ public class BfTopicUriGetter extends ResourceUriGetter {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             
-            uri = getUriFromMadsAuthority(soln);            
+            uri = getUriFromExternalAuth(soln);            
             if (uri != null) {  
-                LOGGER.debug("Got MADS Authority URI " + uri + " for "
+                LOGGER.debug("Got external authority URI " + uri + " for "
                         + "resource " + resource.getURI());
                 // Return the external authority URI unhashed
                 
@@ -130,9 +130,9 @@ public class BfTopicUriGetter extends ResourceUriGetter {
         return uri;
     }
     
-    private String getUriFromMadsAuthority(QuerySolution soln) {
+    private String getUriFromExternalAuth(QuerySolution soln) {
         
-        String madsAuthUri = null;
+        String externalAuthUri = null;
  
         RDFNode idNode = soln.get("id");
         if (idNode != null && idNode.isLiteral()) {
@@ -150,14 +150,14 @@ public class BfTopicUriGetter extends ResourceUriGetter {
                             SCHEME_PREFIXES.get(vocabId) : "";
                     String localName = prefix + id.substring(vocabId.length());
                             
-                    madsAuthUri = entry.getValue().uri() + localName; 
+                    externalAuthUri = entry.getValue().uri() + localName; 
                     LOGGER.debug("Topic URI from external scheme: " 
-                            + madsAuthUri);
+                            + externalAuthUri);
                 }        
             }
         }
         
-        return madsAuthUri;
+        return externalAuthUri;
     }
     
 }
