@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.urigetter;
+package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;

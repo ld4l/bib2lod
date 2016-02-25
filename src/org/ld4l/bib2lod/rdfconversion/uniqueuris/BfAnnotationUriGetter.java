@@ -1,20 +1,20 @@
-package org.ld4l.bib2lod.rdfconversion.urigetter;
+package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BfIdentifierUriGetter extends ResourceUriGetter {
+public class BfAnnotationUriGetter extends ResourceUriGetter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfIdentifierUriGetter.class);
+            LogManager.getLogger(BfAnnotationUriGetter.class);
     
-    public BfIdentifierUriGetter(Resource resource, String localNamespace) {
+    public BfAnnotationUriGetter(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 
     @Override
-    protected String getUniqueKey() {
+    public String getUniqueKey() {
         
         String key = null;
         if (key == null) {

@@ -1,4 +1,4 @@
-package org.ld4l.bib2lod.rdfconversion.urigetter;
+package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
 import java.util.HashMap;
 import java.util.Map;

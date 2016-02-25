@@ -1,18 +1,18 @@
-package org.ld4l.bib2lod.rdfconversion.urigetter;
+package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
 import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BfClassificationUriGetter extends ResourceUriGetter {
-    
-    private static final Logger LOGGER = 
-            LogManager.getLogger(BfClassificationUriGetter.class);
+public class BfCategoryUriGetter extends ResourceUriGetter {
 
-    public BfClassificationUriGetter(Resource resource, String localNamespace) {
+    private static final Logger LOGGER = 
+            LogManager.getLogger(BfCategoryUriGetter.class);
+    
+    public BfCategoryUriGetter(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
-    
+
     @Override
     public String getUniqueKey() {
         
@@ -22,5 +22,4 @@ public class BfClassificationUriGetter extends ResourceUriGetter {
         }
         return key;
     }
-
 }
