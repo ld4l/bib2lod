@@ -2,7 +2,6 @@ package org.ld4l.bib2lod.rdfconversion.urigetter;
 
 import java.util.List;
 
-import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
