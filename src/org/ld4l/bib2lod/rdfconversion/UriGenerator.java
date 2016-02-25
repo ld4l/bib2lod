@@ -146,6 +146,8 @@ public class UriGenerator extends RdfProcessor {
             outputModel.add(newStatement);
         }  
         
+        inputModel.close();
+
         return outputModel;
     }
 
@@ -158,13 +160,13 @@ public class UriGenerator extends RdfProcessor {
         
         RDFNode object = statement.getObject();
         RDFNode newObject = object.isLiteral() ? object :
-                getUniqueUri(object.asResource(), uniqueUris,  
-                        outputModel);
-                            
+                getUniqueUri(object.asResource(), uniqueUris, outputModel); 
+                                                    
         // Model.createStatement() may reuse an existing statement rather than
         // creating a new one.
         return outputModel.createStatement(
-                newSubject, statement.getPredicate(), newObject);     
+                newSubject, statement.getPredicate(), newObject);
+
     }
 
     /*
