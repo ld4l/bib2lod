@@ -130,6 +130,10 @@ public class BfTopicUriGetter extends ResourceUriGetter {
         return uri;
     }
     
+    /*
+     * Gets a Topic URI from an external Authority such as FAST. 
+     * Currently FAST is the only one in the data; later there could be others.
+     */
     private String getUriFromExternalAuth(QuerySolution soln) {
         
         String externalAuthUri = null;
