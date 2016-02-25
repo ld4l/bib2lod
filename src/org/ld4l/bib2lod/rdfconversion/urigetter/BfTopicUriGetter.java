@@ -40,7 +40,7 @@ public class BfTopicUriGetter extends ResourceUriGetter {
     private static ParameterizedSparqlString selectPss = 
             new ParameterizedSparqlString(
                     "SELECT ?authAccessPoint ?bfLabel ?madsAuthScheme "  
-                    + "?madsAuthLabel ?id "
+                    + "?madsAuthLabel ?id ?authSource "
                     + "WHERE { "
                     + "?topic a " + BfType.BF_TOPIC.sparqlUri() + " . "
                     + "OPTIONAL { ?topic "
@@ -52,16 +52,20 @@ public class BfTopicUriGetter extends ResourceUriGetter {
                     + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " ?madsAuth . "
                     + "?madsAuth " 
                     + BfProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri() 
-                    + " ?madsAuthScheme . " 
+                    + " "
+                    + "?madsAuthScheme . " 
                     + "?madsAuth " 
                     + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() 
                     + " ?madsAuthLabel . } "
                     + "OPTIONAL { ?topic "
-                    + BfProperty.BF_SYSTEM_NUMBER.sparqlUri()
-                    + " ?identifier . "
+                    + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+                    + "?identifier . "
                     + "?identifier a " 
                     + BfType.BF_IDENTIFIER.sparqlUri() + " ; " 
                     + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " ?id . "
+                    + "OPTIONAL { ?topic " 
+                    + BfProperty.BF_AUTHORITY_SOURCE.sparqlUri() + " " 
+                    + "?authSource } "
                     + "} }");
 
     private static final Map<String, Vocabulary> SCHEMES = 
