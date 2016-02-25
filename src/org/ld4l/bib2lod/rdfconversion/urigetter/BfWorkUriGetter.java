@@ -17,21 +17,11 @@ public class BfWorkUriGetter extends ResourceUriGetter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfWorkUriGetter.class);
 
-    
-    ParameterizedSparqlString pss = new ParameterizedSparqlString(
-            "SELECT ?authAccessPoint ?title WHERE {  "
-            + "?s " + BfProperty.BF_AUTHORIZED_ACCESS_POINT.sparqlUri() + " "
-            + "?authAccessPoint " 
-            + "} UNION { "
-            + "?s " + BfProperty.BF_LABEL.sparqlUri() 
-            + " } } ");
-
-    
+  
     public BfWorkUriGetter(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
-    
-    
+       
     @Override
     protected String getUniqueKey() {
         
@@ -44,7 +34,9 @@ public class BfWorkUriGetter extends ResourceUriGetter {
             key = getKeyFromTitle();
         }
         
-        // Fallback to bf:label
+        // TODO Do we ever need to use the bf:Title object and its properties?
+        
+        // Fall back to bf:label
         if (key == null) {
             key = getKeyFromBfLabel();
         }
