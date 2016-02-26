@@ -23,6 +23,7 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTitleConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
@@ -48,50 +49,57 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_WORK,  BfWorkConverter.class);
         
         CONVERTERS_BY_TYPE.put(BfType.BF_INSTANCE, BfInstanceConverter.class);
-
-        CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
-
+        
         CONVERTERS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemConverter.class);
-        
-        CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
-                BfAuthorityConverter.class);        
-        CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class);        
+
+        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
+
+        CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfTitleConverter.class);   
+
+        CONVERTERS_BY_TYPE.put(BfType.BF_PERSON, BfPersonConverter.class);
         CONVERTERS_BY_TYPE.put(BfType.BF_ORGANIZATION, 
                 BfAuthorityConverter.class);   
-        CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_FAMILY, BfAuthorityConverter.class); 
+        CONVERTERS_BY_TYPE.put(BfType.BF_JURISDICTION,  
+                BfAuthorityConverter.class);   
+        CONVERTERS_BY_TYPE.put(BfType.BF_AGENT, BfAuthorityConverter.class);
 
-        CONVERTERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_PLACE, BfAuthorityConverter.class);
         
         CONVERTERS_BY_TYPE.put(BfType.BF_MEETING, BfMeetingConverter.class);
-
+        
+        // Temporal is an Authority subtype, but we don't want the bf:label =>
+        // foaf:name conversion for Temporal entities.
+        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
+        
+        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
+        
+        CONVERTERS_BY_TYPE.put(BfType.BF_LANGUAGE, BfLanguageConverter.class);
+        
         CONVERTERS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
                 BfIdentifierConverter.class);
         
-        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
-                BfAnnotationConverter.class);  
+        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
         
         // TODO Needs own converter
         CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, 
                 BfResourceConverter.class);
+        
         CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
                 BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
-        // Temporal is an Authority subtype, but we don't want the bf:label =>
-        // foaf:name conversion for Temporal entities.
-        CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
-        CONVERTERS_BY_TYPE.put(BfType.BF_TITLE, BfResourceConverter.class);       
-        // Maybe can just use BfAuthorityConverter for Topics?
-        CONVERTERS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicConverter.class);
+
+        CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
+                BfAnnotationConverter.class);  
+
         // TODO Needs own converter
         CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
                 BfResourceConverter.class);       
         // Don't we just throw this away?
         // CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
                // BfResourceConverter.class); 
+        
+        CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
     }
     
 
@@ -193,22 +201,11 @@ public class BibframeConverter extends RdfProcessor {
             List<Resource> subjects = inputModel.listResourcesWithProperty(
                     RDF.type, bfType.ontClass()).toList();
             
-            // Iterate through the subjects of this type
+            // Iterate through the subjects of this type and convert
             for (Resource subject : subjects) {
                 subjectCount++;
                 
-//                // Get the subject's submodel to convert
-//                Model subjectModel = converter.getSubjectSubModel(subject);
-//                
-//                // Get a reference to the resource in the submodel that 
-//                // represents the same individual as the subject. We need this
-//                // so that when we call resource.getModel() in the converters
-//                // we are getting the submodel rather than the full input model.
-//                Resource newSubject = 
-//                        subjectModel.getResource(subject.getURI());
-                
-                // Convert the subject's submodel and add to the output model
-                // for the file.
+                // Convert the subject and add to the output model for the file.
                 Model convertedModel = converter.convert(subject);
                 outputModel.add(convertedModel);
                 

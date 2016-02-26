@@ -45,7 +45,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
         // modification of the label as well.
         convertPersonSubject();
         
-        List<Statement> statements = inputModel.listStatements().toList();     
+        List<Statement> statements = subject.listProperties().toList();     
         
         for (Statement statement : statements) {           
             Property predicate = statement.getPredicate();
@@ -92,7 +92,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     private void convertPersonSubject() {
         
-        List<Statement> statements = inputModel.listStatements(
+        List<Statement> statements = subject.getModel().listStatements(
                 null, BfProperty.BF_SUBJECT.property(), subject).toList();
        for (Statement stmt : statements) {
             Resource work = stmt.getSubject();

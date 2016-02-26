@@ -34,16 +34,10 @@ public class BfMeetingConverter extends BfAuthorityConverter {
     
     private void convertConferenceName() {
 
-        List<Statement> stmts = inputModel.listStatements(null, RDF.type, 
-                BfType.MADSRDF_CONFERENCE_NAME.ontClass()).toList();
-        for (Statement stmt : stmts) { 
+        if (subject.hasProperty(
+                RDF.type, BfType.MADSRDF_CONFERENCE_NAME.ontClass())) {
             outputModel.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
-            // Not retracting the original statement or any other statements
-            // about the madsrdf:Authority.
-            // retractions.add(stmt);
         }
-
     }
-
 
 }

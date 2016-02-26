@@ -70,8 +70,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
                     value, literal.getLanguage()));
         }
 
-        List<Statement> titles = inputModel.listStatements(subject, 
-                titleProp.property(), (RDFNode) null).toList();
+        List<Statement> titles 
+                = subject.listProperties(titleProp.property()).toList();
         for (Statement stmt : titles) {
             convertTitle(stmt, titleLiterals);
         }

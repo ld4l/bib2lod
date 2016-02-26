@@ -47,7 +47,8 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // Copy statements to a list and loop through the list rather than
         // using the iterator. This allows us to modify the model inside the
         // loop.
-        List<Statement> statements = inputModel.listStatements().toList();     
+        List<Statement> statements = 
+                subject.getModel().listStatements().toList();     
         
         for (Statement statement : statements) {
             

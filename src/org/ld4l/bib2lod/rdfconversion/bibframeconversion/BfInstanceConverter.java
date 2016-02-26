@@ -78,7 +78,8 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         // Shouldn't this be subject.listProperties().toList()?
         // Why do we want to iterate through other stmts? BUT when I try this,
         // the other stmts get lost. Same issue in BfWorkConverter
-        List<Statement> statements = inputModel.listStatements().toList();
+        List<Statement> statements = 
+                subject.getModel().listStatements().toList();
  
         for (Statement statement : statements) {
             

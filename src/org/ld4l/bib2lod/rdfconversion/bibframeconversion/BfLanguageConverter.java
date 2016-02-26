@@ -58,7 +58,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             
             if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
-                List<Statement> langStmts = inputModel.listStatements(              
+                List<Statement> langStmts = subject.getModel().listStatements(              
                         null, langProp, subject).toList();
                 
                 // There should be only one statement, since each local language 
