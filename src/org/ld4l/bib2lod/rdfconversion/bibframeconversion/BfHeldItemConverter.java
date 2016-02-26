@@ -52,14 +52,14 @@ public class BfHeldItemConverter extends BfResourceConverter {
         SHELF_MARK_VOCABS.put(BfProperty.BF_SHELF_MARK_UDC, Vocabulary.UDC);
     }
     
-    public BfHeldItemConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfHeldItemConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         convertShelfMark();
-        return super.convertModel();
+        return super.convert();
     }
     
     

@@ -48,18 +48,18 @@ public class BfContributorConverter extends BfResourceConverter {
 
     protected BfContributorConverter(
             String localNamespace, Statement statement) {
-        super(localNamespace, statement);
+        super(localNamespace);
     } 
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         
         createContribution();
       
       // If there were retractions, we should apply them to the model here,
       // so that super.convertModel() doesn't reprocess them.
       
-      return super.convertModel();
+      return super.convert();
     }
 
     private void createContribution() {
@@ -67,33 +67,35 @@ public class BfContributorConverter extends BfResourceConverter {
         // Linking statement = :work <contributorPredicate> :agent
         // where contributorPredicate is one of PROPERTY_TO_TYPE.keySet()
         // and :agent is a bf:Agent type (bf:Person, bf:Organization, etc.)
-        Resource work = linkingStatement.getSubject();
-        Property contributorProp = linkingStatement.getPredicate();
-        Resource agent = linkingStatement.getResource();
         
-        LOGGER.debug(contributorProp.getURI());
-        BfProperty bfProp = BfProperty.get(contributorProp);
-
-        // TODO Generate a more specific creator type based on the type of 
-        // work. I.e., in :work bf:creator :agent 
-        // if :work is a bf:Text, then create an AuthorContribution; if
-        // :work is bf:NotatedMusic, create a ComposerContribution, etc.
-        Ld4lType newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
-                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.CONTRIBUTION;
-
-        Resource contribution = 
-                outputModel.createResource(RdfProcessor.mintUri(localNamespace));
-        outputModel.add(contribution, RDF.type, newType.ontClass());
-        
-        if (newType.label() != null) {
-            outputModel.add(contribution, RDFS.label, newType.label());
-        }
-        
-        outputModel.add(contribution, Ld4lProperty.HAS_AGENT.property(), agent);
-        
-        outputModel.add(
-                work, Ld4lProperty.HAS_CONTRIBUTION.property(), contribution);
-        retractions.add(linkingStatement);
+//        // TODO *** Use queries to get these instead.
+//        Resource work = linkingStatement.getSubject();
+//        Property contributorProp = linkingStatement.getPredicate();
+//        Resource agent = linkingStatement.getResource();
+//        
+//        LOGGER.debug(contributorProp.getURI());
+//        BfProperty bfProp = BfProperty.get(contributorProp);
+//
+//        // TODO Generate a more specific creator type based on the type of 
+//        // work. I.e., in :work bf:creator :agent 
+//        // if :work is a bf:Text, then create an AuthorContribution; if
+//        // :work is bf:NotatedMusic, create a ComposerContribution, etc.
+//        Ld4lType newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
+//                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.CONTRIBUTION;
+//
+//        Resource contribution = 
+//                outputModel.createResource(RdfProcessor.mintUri(localNamespace));
+//        outputModel.add(contribution, RDF.type, newType.ontClass());
+//        
+//        if (newType.label() != null) {
+//            outputModel.add(contribution, RDFS.label, newType.label());
+//        }
+//        
+//        outputModel.add(contribution, Ld4lProperty.HAS_AGENT.property(), agent);
+//        
+//        outputModel.add(
+//                work, Ld4lProperty.HAS_CONTRIBUTION.property(), contribution);
+//        // retractions.add(linkingStatement);
     }
     
 }

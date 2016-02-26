@@ -31,8 +31,8 @@ public class BfTopicConverter extends BfAuthorityConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.PREFERRED_LABEL);
     }
 
-    public BfTopicConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfTopicConverter(String localNamespace) {
+        super(localNamespace);
     }
 
 

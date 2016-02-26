@@ -117,32 +117,33 @@ public class BfIdentifierConverter extends BfResourceConverter {
     }
     
 
-    public BfIdentifierConverter(String localNamespace, Statement statement) {
-        super(localNamespace, statement);
+    public BfIdentifierConverter(String localNamespace) {
+        super(localNamespace);
     }
 
     public static List<Property> getIdentifierProps() {
         return IDENTIFIER_PROPS;
     }
     
-    protected Model convertModel() {
+    protected Model convert() {
 
-        Resource relatedResource = linkingStatement.getSubject();
-
-        if (isWorldcatUri(subject)) {
-            createWorldcatIdentifier(relatedResource);
-            return outputModel;
-        }
-            
-        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
-                subject);
-
-        String[] idValues = getIdentifierValue();
-
-        getIdentifierType(relatedResource, idValues);
-
-        LOGGER.debug("Identifier: " + subject.getURI());
-        RdfProcessor.printModel(outputModel, Level.DEBUG);
+        // TODO Need a query for this instead
+//        Resource relatedResource = linkingStatement.getSubject();
+//
+//        if (isWorldcatUri(subject)) {
+//            createWorldcatIdentifier(relatedResource);
+//            return outputModel;
+//        }
+//            
+//        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
+//                subject);
+//
+//        String[] idValues = getIdentifierValue();
+//
+//        getIdentifierType(relatedResource, idValues);
+//
+//        LOGGER.debug("Identifier: " + subject.getURI());
+//        RdfProcessor.printModel(outputModel, Level.DEBUG);
         return outputModel;
     }
 
@@ -253,22 +254,23 @@ public class BfIdentifierConverter extends BfResourceConverter {
             
         Ld4lType identifierType = null;
         
-        if (idValue != null) {
-            
-            if (prefix != null) {               
-                identifierType = IDENTIFIER_PREFIXES.get(prefix);
-            
-            // If no subtype has been identified, and the value is all digits,
-            // assume a local ILS identifer.
-            // TODO Check if this is true for Harvard and Stanford
-            } else if (idValue.matches("^\\d+$")
-                    // Not sure if this condition is required
-                    && linkingStatement.getPredicate().equals(
-                            BfProperty.BF_SYSTEM_NUMBER.property())) {
-
-                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
-            }
-        }
+        // TODO - REDO!
+//        if (idValue != null) {
+//            
+//            if (prefix != null) {               
+//                identifierType = IDENTIFIER_PREFIXES.get(prefix);
+//            
+//            // If no subtype has been identified, and the value is all digits,
+//            // assume a local ILS identifer.
+//            // TODO Check if this is true for Harvard and Stanford
+//            } else if (idValue.matches("^\\d+$")
+//                    // Not sure if this condition is required
+//                    && linkingStatement.getPredicate().equals(
+//                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+//
+//                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+//            }
+//        }
         
         return identifierType;
     }
@@ -305,21 +307,22 @@ public class BfIdentifierConverter extends BfResourceConverter {
     private Ld4lType getIdentifierTypeFromPredicate(Resource relatedResource) {
             
         Ld4lType identifierType = null;
-            
-        Property predicate = linkingStatement.getPredicate();
         
-        BfProperty bfProp = BfProperty.get(predicate);
-                    
-        if (bfProp == null) {
-            // This would be an oversight; log for review.
-            LOGGER.warn("No handling defined for property " 
-                    + predicate.getURI() + " linking " 
-                    + relatedResource.getURI() + " to its identifier "
-                    + subject.getURI() + ".");   
-            
-        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
-        }
+        // TODO - REDO
+//        Property predicate = linkingStatement.getPredicate();
+//        
+//        BfProperty bfProp = BfProperty.get(predicate);
+//                    
+//        if (bfProp == null) {
+//            // This would be an oversight; log for review.
+//            LOGGER.warn("No handling defined for property " 
+//                    + predicate.getURI() + " linking " 
+//                    + relatedResource.getURI() + " to its identifier "
+//                    + subject.getURI() + ".");   
+//            
+//        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+//            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
+//        }
            
         return identifierType;        
     }

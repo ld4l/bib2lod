@@ -16,19 +16,19 @@ public class BfMeetingConverter extends BfAuthorityConverter {
             LogManager.getLogger(BfMeetingConverter.class);
 
     
-    public BfMeetingConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfMeetingConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         convertConferenceName();
         
         // TODO ** What to do with Identifier, Authority, since we're changing
         // Meeting from an Authority to an Event?
         
-        return super.convertModel();        
+        return super.convert();        
     }
    
     
@@ -40,7 +40,7 @@ public class BfMeetingConverter extends BfAuthorityConverter {
             outputModel.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
             // Not retracting the original statement or any other statements
             // about the madsrdf:Authority.
-            retractions.add(stmt);
+            // retractions.add(stmt);
         }
 
     }

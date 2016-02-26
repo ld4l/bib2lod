@@ -38,10 +38,10 @@ public class BfTitleConverter extends BfResourceConverter {
     
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         
       convertTitleValue();
-      return super.convertModel();
+      return super.convert();
     }
     
     private void convertTitleValue() {
@@ -51,7 +51,7 @@ public class BfTitleConverter extends BfResourceConverter {
         
         if (titleValueStmt != null) {
 
-            retractions.add(titleValueStmt);
+            // retractions.add(titleValueStmt);
 
             // bf:titleValue string and language
             String titleValueString = 
@@ -87,7 +87,7 @@ public class BfTitleConverter extends BfResourceConverter {
                     subject.getProperty(BfProperty.BF_SUBTITLE.property());            
             if (subtitleStmt != null) {
                 
-                retractions.add(subtitleStmt);
+               //retractions.add(subtitleStmt);
                 
                 // Create the subtitle element
                 String subtitleValue = normalizeTitle(subtitleStmt.getString());

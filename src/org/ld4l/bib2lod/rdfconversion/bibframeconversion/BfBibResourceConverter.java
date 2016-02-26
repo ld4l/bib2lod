@@ -33,8 +33,8 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         TITLE_DATATYPE_PROPS.add(BfProperty.BF_TITLE_STATEMENT);
     }
     
-    public BfBibResourceConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfBibResourceConverter(String localNamespace) {
+        super(localNamespace);
     }
   
     // titleProp is either workTitle or instanceTitle
@@ -52,7 +52,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             }
         }
         
-        retractions.add(titleDatatypeStmts);
+        //retractions.add(titleDatatypeStmts);
         
         // Convert list to set to eliminate duplicates. Can't use a set above
         // because a set can't be added to a model.
@@ -88,7 +88,7 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             createTitle(literal);            
         }
         
-        applyRetractions(inputModel, retractions);           
+        //applyRetractions(inputModel, retractions);           
     }
 
     private void convertTitle(Statement statement, 
@@ -99,7 +99,9 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         
         // Identify the title resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource title = getSubjectModelToConvert(statement.getResource());
+        Resource title = statement.getResource();
+        Model titleInputModel = getResourceSubModel(title);
+        title = titleInputModel.createResource(title.getURI());
                 
         Model titleModel = converter.convert(title);
         outputModel.add(titleModel);

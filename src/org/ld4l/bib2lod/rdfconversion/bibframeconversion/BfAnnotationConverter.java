@@ -7,7 +7,6 @@ import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfAnnotationConverter extends BfResourceConverter {
@@ -16,17 +15,17 @@ public class BfAnnotationConverter extends BfResourceConverter {
             LogManager.getLogger(BfAnnotationConverter.class);
   
     
-    protected BfAnnotationConverter(
-            String localNamespace, Statement statement) {
-        super(localNamespace, statement);
+    protected BfAnnotationConverter(String localNamespace) {      
+        super(localNamespace );
     }
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         
-        Resource relatedWork = linkingStatement.getResource();
-        outputModel.add(
-                relatedWork, Ld4lProperty.HAS_ANNOTATION.property(), subject);
+        // TODO FIX
+//        Resource relatedWork = linkingStatement.getResource();
+//        outputModel.add(
+//                relatedWork, Ld4lProperty.HAS_ANNOTATION.property(), subject);
 
         convertAnnotationBody();
         
@@ -40,7 +39,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
         
         // TODO handle CoverArt, TableOfContents
 
-        return super.convertModel();
+        return super.convert();
     }
     
     private void convertAnnotationBody() {
@@ -53,7 +52,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
         }
         
         Resource body = bodyStmt.getResource();
-        retractions.add(bodyStmt);
+        // retractions.add(bodyStmt);
         outputModel.add(body, RDF.type, Ld4lType.TEXT_CONTENT.ontClass());
         // It's not clear what predicate in Bibframe links the body Resource
         // to the text content, so can't at this point find the content of the

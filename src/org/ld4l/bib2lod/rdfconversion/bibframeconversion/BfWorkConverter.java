@@ -35,12 +35,12 @@ public class BfWorkConverter extends BfBibResourceConverter {
         ANNOTATION_TARGET_PROPERTIES.add(BfProperty.BF_SUMMARY_OF);
     }
 
-    public BfWorkConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfWorkConverter(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override 
-    protected Model convertModel() {
+    protected Model convert() {
         
         convertTitles(BfProperty.BF_WORK_TITLE);
 
@@ -81,7 +81,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
             }          
         }
 
-        return super.convertModel();
+        return super.convert();
 
     }
     
@@ -92,12 +92,14 @@ public class BfWorkConverter extends BfBibResourceConverter {
         
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource contributor = 
-                getSubjectModelToConvert(statement.getResource());
-                       
+        Resource contributor = statement.getResource();
+        Model contributorModel = getResourceSubModel(contributor);
+                
+        Resource newContributor = 
+                contributorModel.createResource(contributor.getURI());           
         // Add BfContributorConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        Model convert = converter.convert(contributor);
+        Model convert = converter.convert(newContributor);
 		outputModel.add(convert);
 		convert.close();
         
@@ -108,17 +110,20 @@ public class BfWorkConverter extends BfBibResourceConverter {
     private void convertAnnotation(Statement statement) {
         
         BfResourceConverter converter = 
-                new BfAnnotationConverter(localNamespace, statement);
+                new BfAnnotationConverter(localNamespace);
 
         // Identify the annotation resource and build its associated model 
         // (i.e., statements in which it is the subject or object).
-        Resource annotation = getSubjectModelToConvert(statement.getSubject());
+        Resource annotation = statement.getSubject();
+        Model annotationModel = getResourceSubModel(annotation);
+        Resource newAnnotation = 
+                annotationModel.createResource(annotation.getURI());
                         
         // Add BfAnnotationConverter model to this converter's outputModel 
         // model, so they get added to the BibframeConverter output model.
-        Model convert = converter.convert(annotation);
-		outputModel.add(convert);
-		convert.close();
+        Model convertedModel = converter.convert(newAnnotation);
+		outputModel.add(convertedModel);
+		convertedModel.close();
     }
     
 }

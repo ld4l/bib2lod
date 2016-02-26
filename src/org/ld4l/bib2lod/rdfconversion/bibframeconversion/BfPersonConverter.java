@@ -34,12 +34,12 @@ public class BfPersonConverter extends BfAuthorityConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
 
-    public BfPersonConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfPersonConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override 
-    protected Model convertModel() {
+    protected Model convert() {
         
         // Must do before the iteration on model statements, since it requires
         // modification of the label as well.
@@ -57,7 +57,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
 
         }
         
-        return super.convertModel();
+        return super.convert();
     }
 
     /** 
@@ -73,7 +73,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
         String label = labelLiteral.getLexicalForm();
         String language = labelLiteral.getLanguage();
         parseLabel(label, language);
-        retractions.add(statement);
+        //retractions.add(statement);
     }
     
     private void parseLabel(String label, String language) {
@@ -103,7 +103,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
             }
             
         }
-        applyRetractions();
+        //applyRetractions();
     }
     
     private void convertPersonSubjectLabel(
@@ -148,7 +148,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
                
         // TODO handle fast uri - need to call Identifier converter
                 
-        retractions.add(labelStatement);
+        //retractions.add(labelStatement);
     }
     
     /**

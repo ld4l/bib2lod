@@ -21,8 +21,8 @@ public class BfAuthorityConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
 
-    public BfAuthorityConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfAuthorityConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override

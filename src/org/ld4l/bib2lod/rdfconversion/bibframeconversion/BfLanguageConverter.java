@@ -19,15 +19,15 @@ public class BfLanguageConverter extends BfResourceConverter {
             LogManager.getLogger(BfLanguageConverter.class);
     
     
-    public BfLanguageConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfLanguageConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         convertOriginalLanguage();
         assignExternalUri();
-        return super.convertModel();  
+        return super.convert();  
     }
 
     /**
@@ -73,7 +73,7 @@ public class BfLanguageConverter extends BfResourceConverter {
                     // subject's URI may need to be changed in 
                     // assignExternalUri().
                     outputModel.add(work, originalLangProp, subject);
-                    retractions.add(langStmt);
+                    //retractions.add(langStmt);
                 }      
                 
             } else {
@@ -81,10 +81,10 @@ public class BfLanguageConverter extends BfResourceConverter {
                 // now log them and remove them.  
                 LOGGER.debug("Found value of bf:resourcePart " + value);
             }
-            retractions.add(resourcePartStmt);
+            //retractions.add(resourcePartStmt);
         }
         
-        applyRetractions(inputModel, retractions);
+        //applyRetractions(inputModel, retractions);
     }
     
 }

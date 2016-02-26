@@ -32,11 +32,8 @@ public class BfInstanceConverter extends BfBibResourceConverter {
             ));
                         
     /*
-     * This case is problematic, since, unlike the Work, we do not have links to
-     * the Instance's Items here. However, in the TypeSplitter we could create
-     * the inverse outputModel (Instance to Item) and add those to the Instance
-     * file. The real problem is: if the Instance has more than one Item, how 
-     * would we know which of the Instance's Items are Manuscripts? 
+     * This case is problematic, since if the Instance has more than one Item, 
+     * how would we know which of the Instance's Items are Manuscripts? 
      private static final Map<Resource, Resource> NEW_ITEM_TYPES =
             BfType.typeMap(Arrays.asList(
                     BfType.BF_MANUSCRIPT
@@ -54,12 +51,12 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         PROVIDER_PROPERTIES.add(BfProperty.BF_PUBLICATION);
     }
     
-    public BfInstanceConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    public BfInstanceConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override 
-    protected Model convertModel() {
+    protected Model convert() {
         
         LOGGER.debug("Converting instance " + subject.getURI());
         
@@ -90,7 +87,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
             if (predicate.equals(RDF.type)) {
                 if (convertInstanceTypeToWorkType(
                         statement.getResource(), relatedWork)) {
-                    retractions.add(statement);
+                    //retractions.add(statement);
                 }
                 
                 // Handle conversion to Item type here, when we know how...
@@ -122,14 +119,14 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                         // :instance a Monograph
                         outputModel.add(relatedWork, RDF.type, 
                                 Ld4lType.MONOGRAPH.ontClass());
-                        retractions.add(statement);
+                        //retractions.add(statement);
                     }        
                                     
                 }
             }          
         }
 
-        return super.convertModel();
+        return super.convert();
     }
   
     private boolean convertInstanceTypeToWorkType(
@@ -148,12 +145,14 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     
     private void convertProvider(Statement statement) {
         
-        BfResourceConverter converter = new BfProviderConverter(
-                this.localNamespace, statement);
+        BfResourceConverter converter = 
+                new BfProviderConverter(this.localNamespace);
      
         // Identify the provider resource and build its associated model (i.e.,
         // statements in which it is the subject or object).
-        Resource provider = getSubjectModelToConvert(statement.getResource());
+        Resource resource = statement.getResource();
+        Model providerModel = getResourceSubModel(resource);
+        Resource provider = providerModel.createResource(resource.getURI());
                       
         // Add BfProviderConverter model to this converter's outputModel model,
         // so they get added to the BibframeConverter output model.

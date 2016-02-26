@@ -36,61 +36,61 @@ public class BfProviderConverter extends BfResourceConverter {
     }
     
 
-    protected BfProviderConverter(String localNamespace, Statement statement) {
-        super(localNamespace, statement);
+    protected BfProviderConverter(String localNamespace) {
+        super(localNamespace);
     }   
     
     @Override
-    protected Model convertModel() {
+    protected Model convert() {
         
       createProvision();
       
-      return super.convertModel();
+      return super.convert();
     }
 
     private void createProvision() {
         
-        Property providerProp = linkingStatement.getPredicate();
-        LOGGER.debug(providerProp.getURI());
-        BfProperty bfProp = BfProperty.get(providerProp);
-        Resource instance = linkingStatement.getSubject();
-        
-        Ld4lType newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
-                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.PROVISION;
-   
-        /*
-         * TODO bf:providerRole
-         * If bf:providerRole is specified, this should be replaced with a
-         * specific Provision subtype. If it doesn't match any of the existing
-         * subtypes, convert to a label on the generic ld4l:Provision. Need to
-         * analyze what values, if any, are generated.
-         *
-         * TODO bf:providerStatement
-         * For now will move to legacy namespace. If the statement exists 
-         * without the provider and its object properties, should parse the 
-         * providerStatement to construct these. If it occurs alongside the 
-         * provider and object properties, and the data is the same, it should 
-         * be discarded.
-        */
-
-        // Remove type statement that gets converted to Provision superclass
-        // in super.convertModel()
-// Don't need - doing now by removing mapping in BfType
-//        StmtIterator stmts = inputModel.listStatements(
-//                subject, RDF.type, BfType.BF_PROVIDER.ontClass());
-//        retractions.add(stmts);
-        
-        outputModel.add(subject, RDF.type, newType.ontClass());
-        
-        if (newType.label() != null) {
-            outputModel.add(subject, RDFS.label, newType.label());
-        }
-
-        // Could also let these fall through to super.convertModel(), but might
-        // as well do it now.
-        outputModel.add(
-                instance, Ld4lProperty.HAS_PROVISION.property(), subject);
-        retractions.add(linkingStatement);
+//        Property providerProp = linkingStatement.getPredicate();
+//        LOGGER.debug(providerProp.getURI());
+//        BfProperty bfProp = BfProperty.get(providerProp);
+//        Resource instance = linkingStatement.getSubject();
+//        
+//        Ld4lType newType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
+//                PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.PROVISION;
+//   
+//        /*
+//         * TODO bf:providerRole
+//         * If bf:providerRole is specified, this should be replaced with a
+//         * specific Provision subtype. If it doesn't match any of the existing
+//         * subtypes, convert to a label on the generic ld4l:Provision. Need to
+//         * analyze what values, if any, are generated.
+//         *
+//         * TODO bf:providerStatement
+//         * For now will move to legacy namespace. If the statement exists 
+//         * without the provider and its object properties, should parse the 
+//         * providerStatement to construct these. If it occurs alongside the 
+//         * provider and object properties, and the data is the same, it should 
+//         * be discarded.
+//        */
+//
+//        // Remove type statement that gets converted to Provision superclass
+//        // in super.convertModel()
+//// Don't need - doing now by removing mapping in BfType
+////        StmtIterator stmts = inputModel.listStatements(
+////                subject, RDF.type, BfType.BF_PROVIDER.ontClass());
+////        retractions.add(stmts);
+//        
+//        outputModel.add(subject, RDF.type, newType.ontClass());
+//        
+//        if (newType.label() != null) {
+//            outputModel.add(subject, RDFS.label, newType.label());
+//        }
+//
+//        // Could also let these fall through to super.convertModel(), but might
+//        // as well do it now.
+//        outputModel.add(
+//                instance, Ld4lProperty.HAS_PROVISION.property(), subject);
+//        retractions.add(linkingStatement);
 
     }
 

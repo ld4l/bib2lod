@@ -5,6 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
@@ -16,6 +20,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.OntNamespace;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfResourceConverter {
@@ -32,34 +38,49 @@ public class BfResourceConverter {
      * converter of the related primary resource, not from here. It's also the
      * set of types that TypeSplitter adds to the file of the primary type.
      * TODO Couldl use this fact to streamline the queries in TypeSplitter and
-     * building a subjectModel in getSubjectModelToConvert() below.
+     * building a subjectModel in getResourceSubmodel() below.
      */
-    protected static final List<Resource> SECONDARY_TYPES = 
-            new ArrayList<Resource>();
-    static {
-        SECONDARY_TYPES.add(BfType.BF_ANNOTATION.ontClass());
-        SECONDARY_TYPES.add(BfType.BF_CATEGORY.ontClass());
-        SECONDARY_TYPES.add(BfType.BF_CLASSIFICATION.ontClass());
-        SECONDARY_TYPES.add(BfType.BF_IDENTIFIER.ontClass());
-        SECONDARY_TYPES.add(BfType.BF_PROVIDER.ontClass());
-        SECONDARY_TYPES.add(BfType.BF_TITLE.ontClass());
-        SECONDARY_TYPES.add(BfType.MADSRDF_AUTHORITY.ontClass());   
-    }
+//    protected static final List<Resource> SECONDARY_TYPES = 
+//            new ArrayList<Resource>();
+//    static {
+//        SECONDARY_TYPES.add(BfType.BF_ANNOTATION.ontClass());
+//        SECONDARY_TYPES.add(BfType.BF_CATEGORY.ontClass());
+//        SECONDARY_TYPES.add(BfType.BF_CLASSIFICATION.ontClass());
+//        SECONDARY_TYPES.add(BfType.BF_IDENTIFIER.ontClass());
+//        SECONDARY_TYPES.add(BfType.BF_PROVIDER.ontClass());
+//        SECONDARY_TYPES.add(BfType.BF_TITLE.ontClass());
+//        SECONDARY_TYPES.add(BfType.MADSRDF_AUTHORITY.ontClass());   
+//    }
+    
+    // Default resource submodel is all the statements in which the resource is
+    // either the subject or the object.
+    private static ParameterizedSparqlString resourceSubModelPss = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o . "
+                    + " ?s ?p2 ?resource . "                
+                    + "} WHERE {  { "                                                      
+                    + "?resource ?p1 ?o . "
+                    + "} UNION { "
+                    + "?s ?p2 ?resource . "
+                    + "} } ");
+
     
     protected Resource subject;
     protected Model inputModel;
-    protected BfType bfType;
+    // protected BfType bfType;
     protected Model outputModel;
-    protected Model retractions;
+    // protected Model retractions;
     protected String localNamespace;
-    protected Statement linkingStatement;
+    // protected Statement linkingStatement;
 
-    public BfResourceConverter(BfType bfType, String localNamespace) {
-        this(localNamespace);     
-        this.bfType = bfType;
-    }
+//    public BfResourceConverter(BfType bfType, String localNamespace) {
+//        this(localNamespace);     
+//        this.bfType = bfType;
+//    }
     
-    protected BfResourceConverter(String localNamespace) {
+    // TODO: This was protected. How would that work? It gets called from
+    // BibframeConverter.
+    public BfResourceConverter(String localNamespace) {
         this.localNamespace = localNamespace;
     }
 
@@ -72,30 +93,37 @@ public class BfResourceConverter {
      * converters handle only a single type. Add the parameter, or another 
      * constructor, if needed later.  
      */
-    protected BfResourceConverter(String localNamespace, Statement statement) {
-        this(localNamespace);
-        this.linkingStatement = statement;
-    }
+//    protected BfResourceConverter(String localNamespace, Statement statement) {
+//        this(localNamespace);
+//        this.linkingStatement = statement;
+//    }
 
     /*
      * Public interface method. 
      */
     public final Model convert(Resource subject) {         
-        init(subject);       
-        return convertModel();
-    }
-    
-    // Reset converter for processing of new subject
-    private void init(Resource subject) {
 
-        this.subject = subject;
-        this.inputModel = subject.getModel();
+        // Initialize converter for processing of new subject
+        this.inputModel = getResourceSubModel(subject);
+        
+        // Get the resource in the submodel with the same URI as the input
+        // subject, so that references to subject.getModel() will return the
+        // submodel rather than the full input model.
+        // NB Model.createResource() may return an existing resource rather
+        // than creating a new one.
+        this.subject = inputModel.createResource(subject.getURI());
         
         // Start with new, empty models for each conversion
         this.outputModel = ModelFactory.createDefaultModel();
-        this.retractions = ModelFactory.createDefaultModel();  
+        // this.retractions = ModelFactory.createDefaultModel();  
+        
+        convert();
+        
+        inputModel.close();
+        
+        return outputModel;
     }
-    
+ 
     /* 
      * Default conversion method. Subclasses may override.
      * 
@@ -110,12 +138,12 @@ public class BfResourceConverter {
      * the results will not be affected.) A retractions model has been defined
      * anyway, to give the subclasses more flexibility.
      */
-    protected Model convertModel() {
+    protected Model convert() {
         
         // If this method is called from a subclass method which neglected to
         // apply retractions to the model, apply them now, so that they are not
         // reprocessed here.
-        applyRetractions();
+        // applyRetractions();
 
         // Map of Bibframe to LD4L types.
         Map<Resource, Resource> typeMap = buildTypeMap();
@@ -123,13 +151,13 @@ public class BfResourceConverter {
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = buildPropertyMap();
         
-        List<Property> identifierProps = 
-                BfIdentifierConverter.getIdentifierProps();
+//        List<Property> identifierProps = 
+//                BfIdentifierConverter.getIdentifierProps();
     
         // Remove resources designated for removal so that statements containing
         // these resources are not processed in the iteration through the 
         // model statements.
-        removeResources(getResourcesToRemove());
+        // removeResources(getResourcesToRemove());
 
         List<Statement> stmts = inputModel.listStatements().toList();
             
@@ -158,8 +186,8 @@ public class BfResourceConverter {
                     outputModel.add(subject, RDF.type, typeMap.get(type));
                 }
   
-           } else if (identifierProps.contains(predicate)) {               
-                convertIdentifier(stmt);
+//           } else if (identifierProps.contains(predicate)) {               
+//                convertIdentifier(stmt);
 
             } else if (propertyMap.containsKey(predicate)) {               
                 outputModel.add(subject, propertyMap.get(predicate), object);                
@@ -174,7 +202,11 @@ public class BfResourceConverter {
         
         return outputModel;  
     }   
-           
+
+    protected ParameterizedSparqlString getResourceSubModelPss() {
+        return resourceSubModelPss;
+    }
+    
     /*
      * Resources to remove are expressed as a list of properties, because it is
      * easiest to identify the objects of those properties and remove all the
@@ -244,45 +276,66 @@ public class BfResourceConverter {
      * the resource that is the object of the property from the model.
      * @param props
      */
-    protected void removeResources(List<Property> props, Model model) {
-        for (Property prop : props) {
-            Resource resource = 
-                    subject.getPropertyResourceValue(prop);
-            if (resource != null) {
-                removeResource(resource, model);
-            }
-        }
-    }
+//    protected void removeResources(List<Property> props, Model model) {
+//        for (Property prop : props) {
+//            Resource resource = 
+//                    subject.getPropertyResourceValue(prop);
+//            if (resource != null) {
+//                removeResource(resource, model);
+//            }
+//        }
+//    }
     
-    protected void removeResources(List<Property> props) {
-        removeResources(props, inputModel);
-    }
+//    protected void removeResources(List<Property> props) {
+//        removeResources(props, inputModel);
+//    }
     
     /**
      * Convenience methods to remove a resource from a Jena model. In Jena, this
      * is accomplished by removing all statements in which the resource is the
      * subject or the object.
      */
-    protected void removeResource(Resource resource, Model model) {
-        model.removeAll(resource, null, null);
-        model.removeAll(null, null, resource);
-    }
+//    protected void removeResource(Resource resource, Model model) {
+//        model.removeAll(resource, null, null);
+//        model.removeAll(null, null, resource);
+//    }
     
     
-    protected void applyRetractions() {
-        applyRetractions(inputModel, retractions);
-    }
+//    protected void applyRetractions() {
+//        applyRetractions(inputModel, retractions);
+//    }
     
     /*
      * Empty retractions model after adding to model, so if another conversion
      * process adds new retractions, the original statements don't get 
      * re-retracted.
      */
-    protected void applyRetractions(Model model, Model retractions) {
-        model.remove(retractions);
-        retractions.removeAll();  
-    }
+//    protected void applyRetractions(Model model, Model retractions) {
+//        model.remove(retractions);
+//        retractions.removeAll();  
+//    }
     
+    protected Model getResourceSubModel(Resource resource) {
+
+        LOGGER.debug("Getting resource submodel for " + resource.getURI());
+        
+        ParameterizedSparqlString pss = getResourceSubModelPss();
+        pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
+                OntNamespace.BIBFRAME.uri());
+        pss.setIri("resource", resource.getURI());
+        
+        Query query = pss.asQuery();
+        LOGGER.debug(query.toString());
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, resource.getModel());
+        Model resourceSubModel =  qexec.execConstruct();
+        qexec.close();
+        
+        RdfProcessor.printModel(resourceSubModel, 
+                "Submodel for resource " + resource.getURI());
+        
+        return resourceSubModel;    
+    }
     /*
      * Construct a subset of the input model that pertains to the specified 
      * resource. This includes statements where the resource is the subject
@@ -292,84 +345,83 @@ public class BfResourceConverter {
      * TypeSplitter, since some statements that meet the criteria below have
      * already been written to different files.
      */
-    public Resource getSubjectModelToConvert(Resource resource) {
-        
-        LOGGER.debug("Getting model for subject " + resource.getURI());
-            
-        // LOGGER.debug("Constructing subject model for " + resource.getURI());
-        Model inputModel = resource.getModel();
-        
-        // Create the new model of statements related to this subject
-        Model modelForSubject = ModelFactory.createDefaultModel();
-        
-        // Start with statements of which this resource is the subject
-        List<Statement> resourceAsSubjectStmts = 
-                resource.listProperties().toList();
-        modelForSubject.add(resourceAsSubjectStmts);
-    
-        /* 
-         * If the object of one of these statements is of a "secondary"  
-         * type, add statements with the object as subject to the model. 
-         * I.e., DON'T include statements about a work which, is, say the 
-         * object of a :work bf:relatedWork :work statement - these should
-         * be handled when that work is converted (i.e., on another 
-         * iteration of the main loop over subjects in the input model. DO 
-         * include statements about Identifiers, Titles, Annotations, etc. 
-         * which are objects of statements about the current subject 
-         * resource. Note that the statements of this sort that are 
-         * included in the current inputModel have already been constrained 
-         * in TypeSplitter.
-         */ 
-        for (Statement stmt : resourceAsSubjectStmts) {
-            modelForSubject.add(getRelatedResourceStmts(stmt.getObject()));              
-        }                
-        
-        // Then add statements with the current resource as object. Examples:
-        // In BfLanguageConverter: :work bf:language :language
-        // In BfWorkConverter: :annotation bf:annotates :work
-        // However, note that in :work1 [related-work-predicate] :work2, the
-        // statement gets added to the model for whichever work is processed
-        // first. We must be prepared to handle the statement in either case -
-        // i.e., from the subject or object point of view, OR override this
-        // method in BfWorkConverter if we must ensure that it goes with the 
-        // subject work or the object work.
-        List<Statement> resourceAsObjectStmts = 
-                inputModel.listStatements(null, null, resource).toList();
-        
-        if (! resourceAsObjectStmts.isEmpty()) {
-            modelForSubject.add(resourceAsObjectStmts);
-
-            /* 
-             * If the subject of one of these statements is of a "secondary"  
-             * type, add statements with the subject as subject to the model. 
-             * I.e., DON'T include statements about a work which, is, say the 
-             * object of a :work bf:relatedWork :work statement - these should
-             * be handled when that work is converted (i.e., on another 
-             * iteration of the main loop over subjects in the input model). DO 
-             * include statements about Identifiers, Titles, Annotations, etc. 
-             * which are objects of statements about the current subject 
-             * resource. Note that the statements of this sort that are 
-             * included in the current inputModel have already been constrained 
-             * in TypeSplitter.
-             */           
-            for (Statement stmt : resourceAsObjectStmts) {
-				Model related = getRelatedResourceStmts(stmt.getSubject());
-				modelForSubject.add(related);
-				related.close();
-            }  
-        }
-        
-        // Other converters will not need to process these statements, so they 
-        // can be removed from the input model.
-        inputModel.remove(modelForSubject);
-        
-        // RdfProcessor.printModel(modelForSubject, Level.DEBUG);
-           
-        // NB At this point, resource.getModel() is the inputModel, not 
-        // the modelForSubject. Get the subject of the modelForSubject 
-        // instead.            
-        return modelForSubject.getResource(resource.getURI());               
-    } 
+//    private Model getResourceSubModel(Resource resource) {
+//        
+//        LOGGER.debug("Constructing submodel for " + resource.getURI());
+//        ParameterizedSparqlString pss = getResourceSubModelPss();
+//        
+//        
+//        // Create the new model of statements related to this subject
+//        Model subjectSubModel = ModelFactory.createDefaultModel();
+//        
+//        // Start with statements of which this resource is the subject
+//        List<Statement> resourceAsSubjectStmts = 
+//                resource.listProperties().toList();
+//        subjectSubModel.add(resourceAsSubjectStmts);
+//    
+//        /* 
+//         * If the object of one of these statements is of a "secondary"  
+//         * type, add statements with the object as subject to the model. 
+//         * I.e., DON'T include statements about a work which, is, say the 
+//         * object of a :work bf:relatedWork :work statement - these should
+//         * be handled when that work is converted (i.e., on another 
+//         * iteration of the main loop over subjects in the input model. DO 
+//         * include statements about Identifiers, Titles, Annotations, etc. 
+//         * which are objects of statements about the current subject 
+//         * resource. Note that the statements of this sort that are 
+//         * included in the current inputModel have already been constrained 
+//         * in TypeSplitter.
+//         */ 
+//        for (Statement stmt : resourceAsSubjectStmts) {
+//            subjectSubModel.add(getRelatedResourceStmts(stmt.getObject()));              
+//        }                
+//        
+//        // Then add statements with the current resource as object. Examples:
+//        // In BfLanguageConverter: :work bf:language :language
+//        // In BfWorkConverter: :annotation bf:annotates :work
+//        // However, note that in :work1 [related-work-predicate] :work2, the
+//        // statement gets added to the model for whichever work is processed
+//        // first. We must be prepared to handle the statement in either case -
+//        // i.e., from the subject or object point of view, OR override this
+//        // method in BfWorkConverter if we must ensure that it goes with the 
+//        // subject work or the object work.
+//        List<Statement> resourceAsObjectStmts = 
+//                inputModel.listStatements(null, null, resource).toList();
+//        
+//        if (! resourceAsObjectStmts.isEmpty()) {
+//            subjectSubModel.add(resourceAsObjectStmts);
+//
+//            /* 
+//             * If the subject of one of these statements is of a "secondary"  
+//             * type, add statements with the subject as subject to the model. 
+//             * I.e., DON'T include statements about a work which, is, say the 
+//             * object of a :work bf:relatedWork :work statement - these should
+//             * be handled when that work is converted (i.e., on another 
+//             * iteration of the main loop over subjects in the input model). DO 
+//             * include statements about Identifiers, Titles, Annotations, etc. 
+//             * which are objects of statements about the current subject 
+//             * resource. Note that the statements of this sort that are 
+//             * included in the current inputModel have already been constrained 
+//             * in TypeSplitter.
+//             */           
+//            for (Statement stmt : resourceAsObjectStmts) {
+//              Model related = getRelatedResourceStmts(stmt.getSubject());
+//              subjectSubModel.add(related);
+//              related.close();
+//            }  
+//        }
+//        
+//        // Other converters will not need to process these statements, so they 
+//        // can be removed from the input model.
+//        inputModel.remove(subjectSubModel);
+//        
+//        // RdfProcessor.printModel(modelForSubject, Level.DEBUG);
+//           
+//        // NB At this point, resource.getModel() is the inputModel, not 
+//        // the modelForSubject. Get the subject of the modelForSubject 
+//        // instead.            
+//        return subjectSubModel;               
+//    } 
     
     /* 
      * RDFNode node is a node related to the current subject, either by a 
@@ -388,64 +440,64 @@ public class BfResourceConverter {
      * with the same label exists. That requires having all the Instance's
      * title information together when converting the Instance.
      */
-    protected Model getRelatedResourceStmts(RDFNode node) {
-            
-        Model model = ModelFactory.createDefaultModel();
-        
-        if (! node.isResource()) {
-            return model;
-        }
-         
-        Resource resource = node.asResource();
-
-        // If this method is called from a converter that is passing off
-        // processing of a secondary type, we don't need to collect further
-        // statements about that primary resource. If this method is called
-        // from BibframeConverter for a primary resource, this.subject is null.
-        if (this.subject != null && resource.equals(this.subject)) {
-            return model;
-        }
-        
-        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
-        for (Statement typeStmt : typeStmts) {
-            Resource type = typeStmt.getResource();
-            if (SECONDARY_TYPES.contains(type)) {
-                model.add(resource.listProperties());     
-                break;
-            }
-        }
-        
-        return model;
-    }
+//    protected Model getRelatedResourceStmts(RDFNode node) {
+//            
+//        Model model = ModelFactory.createDefaultModel();
+//        
+//        if (! node.isResource()) {
+//            return model;
+//        }
+//         
+//        Resource resource = node.asResource();
+//
+//        // If this method is called from a converter that is passing off
+//        // processing of a secondary type, we don't need to collect further
+//        // statements about that primary resource. If this method is called
+//        // from BibframeConverter for a primary resource, this.subject is null.
+//        if (this.subject != null && resource.equals(this.subject)) {
+//            return model;
+//        }
+//        
+//        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
+//        for (Statement typeStmt : typeStmts) {
+//            Resource type = typeStmt.getResource();
+//            if (SECONDARY_TYPES.contains(type)) {
+//                model.add(resource.listProperties());     
+//                break;
+//            }
+//        }
+//        
+//        return model;
+//    }
    
-    protected void convertIdentifier(Statement statement) {
-        
-        /*
-         * Bibframe has:
-         * <http://draft.ld4l.org/cornell/102063topic10> <http://bibframe.org/vocab/systemNumber> _:bnode130102063 . 
-         * _:bnode130102063 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Identifier> . 
-         * _:bnode130102063 <http://bibframe.org/vocab/identifierValue> "(OCoLC)fst00853831" . 
-         * 
-         * In ResourceDeduper, we've replaced the local Topic URI with a FAST
-         * URI, so we don't need the identifier statements.
-         */
-        if (statement.getSubject().getNameSpace().equals(
-                Vocabulary.FAST.uri())) {
-            return;
-        }
-        
-       
-        BfResourceConverter converter = new BfIdentifierConverter(
-                this.localNamespace, statement);
-     
-        // Identify the identifier resource and build its associated model 
-        // (i.e., statements in which it is the subject or object).
-        Resource identifier = getSubjectModelToConvert(statement.getResource());
-                      
-        // Add BfIdentifierConverter model to this converter's outputModel 
-        // model.
-        Model convert = converter.convert(identifier);
-		outputModel.add(convert);
-		convert.close();
-    }
+//    protected void convertIdentifier(Statement statement) {
+//        
+//        /*
+//         * Bibframe has:
+//         * <http://draft.ld4l.org/cornell/102063topic10> <http://bibframe.org/vocab/systemNumber> _:bnode130102063 . 
+//         * _:bnode130102063 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Identifier> . 
+//         * _:bnode130102063 <http://bibframe.org/vocab/identifierValue> "(OCoLC)fst00853831" . 
+//         * 
+//         * In ResourceDeduper, we've replaced the local Topic URI with a FAST
+//         * URI, so we don't need the identifier statements.
+//         */
+//        if (statement.getSubject().getNameSpace().equals(
+//                Vocabulary.FAST.uri())) {
+//            return;
+//        }
+//        
+//       
+//        BfResourceConverter converter = new BfIdentifierConverter(
+//                this.localNamespace, statement);
+//     
+//        // Identify the identifier resource and build its associated model 
+//        // (i.e., statements in which it is the subject or object).
+//        Resource identifier = getResourceSubModel(statement.getResource());
+//                      
+//        // Add BfIdentifierConverter model to this converter's outputModel 
+//        // model.
+//        Model convert = converter.convert(identifier);
+//      outputModel.add(convert);
+//      convert.close();
+//    }
 }
