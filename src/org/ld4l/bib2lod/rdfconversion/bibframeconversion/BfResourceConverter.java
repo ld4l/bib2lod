@@ -15,6 +15,7 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -91,9 +92,10 @@ public class BfResourceConverter {
         // Map of Bibframe to LD4L properties.
         Map<Property, Property> propertyMap = buildPropertyMap();
 
-        List<Statement> stmts = subject.getModel().listStatements().toList();
+        StmtIterator stmts = subject.getModel().listStatements();
             
-        for (Statement stmt : stmts) {
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.nextStatement();
             Property predicate = stmt.getPredicate();
             RDFNode object = stmt.getObject();
             

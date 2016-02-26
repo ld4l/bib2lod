@@ -1,16 +1,14 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.List;
-
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
 public class BfLanguageConverter extends BfResourceConverter {
@@ -58,13 +56,13 @@ public class BfLanguageConverter extends BfResourceConverter {
             
             if (value.equals("original")) {                   
                 Property langProp = BfProperty.BF_LANGUAGE.property();
-                List<Statement> langStmts = subject.getModel().listStatements(              
-                        null, langProp, subject).toList();
+                StmtIterator langStmts = subject.getModel().listStatements(              
+                        null, langProp, subject);
                 
                 // There should be only one statement, since each local language 
                 // URI is unique to the Work.
-                for (Statement langStmt : langStmts) {
-                    Resource work = langStmt.getSubject();
+                while (langStmts.hasNext()) {
+                    Resource work = langStmts.nextStatement().getSubject();
                     Property originalLangProp = 
                             Ld4lProperty.HAS_ORIGINAL_LANGUAGE.property();
                     // OK to alter model here, since we're not continuing the 

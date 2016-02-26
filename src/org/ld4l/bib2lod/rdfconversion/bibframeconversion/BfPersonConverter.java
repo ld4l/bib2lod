@@ -13,11 +13,11 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
@@ -45,16 +45,14 @@ public class BfPersonConverter extends BfAuthorityConverter {
         // modification of the label as well.
         convertPersonSubject();
         
-        List<Statement> statements = subject.listProperties().toList();     
+        StmtIterator statements = subject.getModel().listStatements();     
         
-        for (Statement statement : statements) {           
-            Property predicate = statement.getPredicate();
-            
+        while (statements.hasNext()) {
+            Statement statement = statements.nextStatement();
+            Property predicate = statement.getPredicate();           
             if (predicate.equals(BfProperty.BF_LABEL.property())) {
-                convertBfLabel(statement);
-            
+                convertBfLabel(statement);           
             } 
-
         }
         
         return super.convert();
@@ -92,14 +90,16 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     private void convertPersonSubject() {
         
-        List<Statement> statements = subject.getModel().listStatements(
-                null, BfProperty.BF_SUBJECT.property(), subject).toList();
-       for (Statement stmt : statements) {
-            Resource work = stmt.getSubject();
-            List<Statement> labelStmts = 
-                    subject.listProperties(BfProperty.BF_LABEL.property()).toList();
-            for (Statement labelStmt : labelStmts) {
-                convertPersonSubjectLabel(labelStmt, work);
+        StmtIterator statements = subject.getModel().listStatements(
+                null, BfProperty.BF_SUBJECT.property(), subject);
+       
+       while (statements.hasNext()) {
+           
+            Resource work = statements.nextStatement().getSubject();
+            StmtIterator labelStmts = 
+                    subject.listProperties(BfProperty.BF_LABEL.property());
+            while (labelStmts.hasNext()) {
+                convertPersonSubjectLabel(labelStmts.nextStatement(), work);
             }
             
         }

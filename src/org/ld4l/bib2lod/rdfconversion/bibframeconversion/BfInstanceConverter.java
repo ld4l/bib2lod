@@ -9,6 +9,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -71,17 +72,10 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         
         convertTitles(BfProperty.BF_INSTANCE_TITLE);
 
-        // Copy statements to a list and loop through the list rather than
-        // using the iterator. This allows modifying the model inside the
-        // loop.
-        
-        // Shouldn't this be subject.listProperties().toList()?
-        // Why do we want to iterate through other stmts? BUT when I try this,
-        // the other stmts get lost. Same issue in BfWorkConverter
-        List<Statement> statements = 
-                subject.getModel().listStatements().toList();
+        StmtIterator stmts = subject.getModel().listStatements();
  
-        for (Statement statement : statements) {
+        while (stmts.hasNext()) {
+            Statement statement = stmts.nextStatement();
             
             Property predicate = statement.getPredicate();
     

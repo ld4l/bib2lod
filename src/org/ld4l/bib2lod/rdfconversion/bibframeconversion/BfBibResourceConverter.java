@@ -7,15 +7,14 @@ import java.util.Set;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 
 /*
  * Provides conversions shared by Works and Instances - e.g., Title conversion
@@ -45,10 +44,10 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
         // to object property statements with a Title as the object.
         List<Statement> titleDatatypeStmts = new ArrayList<Statement>();
         for (BfProperty bfProp : TITLE_DATATYPE_PROPS) {
-            List<Statement> stmts = 
-                    subject.listProperties(bfProp.property()).toList();
-            if (! stmts.isEmpty()) {
-                titleDatatypeStmts.addAll(stmts);
+            StmtIterator stmts = 
+                    subject.listProperties(bfProp.property());
+            if (stmts.hasNext()) {
+                titleDatatypeStmts.addAll(stmts.toList());
             }
         }
         
@@ -70,10 +69,10 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
                     value, literal.getLanguage()));
         }
 
-        List<Statement> titles 
-                = subject.listProperties(titleProp.property()).toList();
-        for (Statement stmt : titles) {
-            convertTitle(stmt, titleLiterals);
+        StmtIterator titleStmts 
+                = subject.listProperties(titleProp.property());
+        while (titleStmts.hasNext()) {
+            convertTitle(titleStmts.nextStatement(), titleLiterals);
         }
          
         // Create a new title object for any titleStatement literals that 

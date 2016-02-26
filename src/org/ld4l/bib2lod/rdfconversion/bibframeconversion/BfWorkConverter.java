@@ -7,6 +7,7 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -47,11 +48,11 @@ public class BfWorkConverter extends BfBibResourceConverter {
         // Copy statements to a list and loop through the list rather than
         // using the iterator. This allows us to modify the model inside the
         // loop.
-        List<Statement> statements = 
-                subject.getModel().listStatements().toList();     
-        
-        for (Statement statement : statements) {
+        StmtIterator statements = subject.getModel().listStatements();
+
+        while (statements.hasNext()) {
             
+            Statement statement = statements.nextStatement();
             Property predicate = statement.getPredicate();
     
             if (predicate.equals(RDF.type)) {
