@@ -20,4 +20,8 @@ public class Bib2LodStringUtils {
         // 0 takes plural
         return simplePlural(noun, (long) count);
     }
+    
+    public static final String count(String noun, long count) {
+        return count + " " + simplePlural(noun, count);
+    }
 }
