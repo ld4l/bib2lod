@@ -4,15 +4,15 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BfTitleUriGetter extends ResourceUriGetter {
+public class BfIdentifierUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfTitleUriGetter.class);
+            LogManager.getLogger(BfIdentifierUriGenerator.class);
     
-    public BfTitleUriGetter(Resource resource, String localNamespace) {
+    public BfIdentifierUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
-    
+
     @Override
     protected String getUniqueKey() {
         
@@ -22,5 +22,4 @@ public class BfTitleUriGetter extends ResourceUriGetter {
         }
         return key;
     }
-
 }

@@ -18,18 +18,18 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAnnotationUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAuthorityUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfCategoryUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfClassificationUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfHeldItemUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfIdentifierUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfInstanceUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTitleUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTopicUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfWorkUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.MadsAuthorityUriGetter;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.ResourceUriGetter;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAnnotationUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAuthorityUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfCategoryUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfClassificationUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfHeldItemUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfIdentifierUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfInstanceUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTitleUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTopicUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfWorkUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.MadsAuthorityUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.ResourceUriGenerator;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
@@ -237,7 +237,7 @@ public class UriGenerator extends RdfProcessor {
 //        // resource are querying the submodel rather than the full model.
 //        Resource newResource = 
 //                resourceSubModel.createResource(resource.getURI());        
-        ResourceUriGetter uriGetter = getUriGetterByType(
+        ResourceUriGenerator uriGetter = getUriGetterByType(
                 resource, localNamespace);
         
         return uriGetter.getUniqueUri();
@@ -266,7 +266,7 @@ public class UriGenerator extends RdfProcessor {
         return bnode;
     }
 
-    private ResourceUriGetter getUriGetterByType(
+    private ResourceUriGenerator getUriGetterByType(
             Resource resource, String localNamespace) {
 
         // Get the BfTypes for this resource
@@ -280,37 +280,37 @@ public class UriGenerator extends RdfProcessor {
         Class<?> uriGetterClass = null;
 
         if (types.contains(BfType.BF_TOPIC)) {
-            uriGetterClass = BfTopicUriGetter.class;
+            uriGetterClass = BfTopicUriGenerator.class;
         } else if (BfType.isAuthority(types)) {  
-            uriGetterClass = BfAuthorityUriGetter.class;
+            uriGetterClass = BfAuthorityUriGenerator.class;
         } else if (types.contains(BfType.BF_HELD_ITEM)) {
-            uriGetterClass = BfHeldItemUriGetter.class;
+            uriGetterClass = BfHeldItemUriGenerator.class;
         } else if (types.contains(BfType.BF_INSTANCE)) {
-            uriGetterClass = BfInstanceUriGetter.class;
+            uriGetterClass = BfInstanceUriGenerator.class;
         } else if (types.contains(BfType.BF_WORK)) {
-            uriGetterClass = BfWorkUriGetter.class;
+            uriGetterClass = BfWorkUriGenerator.class;
         } else if (types.contains(BfType.BF_IDENTIFIER)) {
-            uriGetterClass = BfIdentifierUriGetter.class;
+            uriGetterClass = BfIdentifierUriGenerator.class;
         } else if (types.contains(BfType.BF_ANNOTATION)) {
-            uriGetterClass = BfAnnotationUriGetter.class;
+            uriGetterClass = BfAnnotationUriGenerator.class;
         } else if (types.contains(BfType.MADSRDF_AUTHORITY)) {
-            uriGetterClass = MadsAuthorityUriGetter.class;
+            uriGetterClass = MadsAuthorityUriGenerator.class;
         } else if (types.contains(BfType.BF_CLASSIFICATION)) {
-            uriGetterClass = BfClassificationUriGetter.class;
+            uriGetterClass = BfClassificationUriGenerator.class;
         } else if (types.contains(BfType.BF_TITLE)) {
-            uriGetterClass = BfTitleUriGetter.class;          
+            uriGetterClass = BfTitleUriGenerator.class;          
         } else if (types.contains(BfType.BF_CATEGORY)) {
-            uriGetterClass = BfCategoryUriGetter.class; 
+            uriGetterClass = BfCategoryUriGenerator.class; 
         } else {
-            uriGetterClass = ResourceUriGetter.class;
+            uriGetterClass = ResourceUriGenerator.class;
         }
         
         LOGGER.debug("uriGetterClass = " + uriGetterClass.getName());
         
-        ResourceUriGetter uriGetter = null;
+        ResourceUriGenerator uriGetter = null;
         if (uriGetterClass != null) {
             try {
-                uriGetter = (ResourceUriGetter) uriGetterClass
+                uriGetter = (ResourceUriGenerator) uriGetterClass
                         .getConstructor(Resource.class, String.class)
                         .newInstance(resource, localNamespace);                        
             } catch (Exception e) {

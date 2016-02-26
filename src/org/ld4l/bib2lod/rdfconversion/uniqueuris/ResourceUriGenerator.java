@@ -19,10 +19,10 @@ import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
 // If not needed as a fallback KeyGetter, make abstract.
-public class ResourceUriGetter {
+public class ResourceUriGenerator {
     
     private static final Logger LOGGER = 
-            LogManager.getLogger(ResourceUriGetter.class);
+            LogManager.getLogger(ResourceUriGenerator.class);
     
     // Default resource submodel is all the statements in which the resource is
     // either the subject or the object.
@@ -39,7 +39,7 @@ public class ResourceUriGetter {
     protected final Resource resource;
     protected final String localNamespace;
 
-    public ResourceUriGetter(Resource resource, String localNamespace) {
+    public ResourceUriGenerator(Resource resource, String localNamespace) {
         Model resourceSubModel = getResourceSubModel(resource);
         this.resource = resourceSubModel.createResource(resource.getURI());
         this.localNamespace = localNamespace;
@@ -63,7 +63,7 @@ public class ResourceUriGetter {
     // **** TODO The type of the resource may determine the query. For example,
     // with instances we need info about identifiers, etc. So we need to 
     // get the type first, then get the resource sub model from the uri getter,
-    // with the default in ResourceUriGetter and subclasses overriding where
+    // with the default in ResourceUriGenerator and subclasses overriding where
     // needed. ****
     // Also, if the input files are small enough, there may not be a need to
     // get the submodel, rather than just querying the entire input model. It's

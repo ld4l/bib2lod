@@ -4,12 +4,12 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BfCategoryUriGetter extends ResourceUriGetter {
+public class BfCategoryUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfCategoryUriGetter.class);
+            LogManager.getLogger(BfCategoryUriGenerator.class);
     
-    public BfCategoryUriGetter(Resource resource, String localNamespace) {
+    public BfCategoryUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

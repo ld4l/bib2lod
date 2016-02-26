@@ -14,10 +14,10 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
-public class BfInstanceUriGetter extends ResourceUriGetter {
+public class BfInstanceUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfInstanceUriGetter.class);
+            LogManager.getLogger(BfInstanceUriGenerator.class);
 
     private static ParameterizedSparqlString resourceSubModelPss = 
                 new ParameterizedSparqlString(
@@ -61,7 +61,7 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
             + "}";
     
     
-    public BfInstanceUriGetter(Resource resource, String localNamespace) {
+    public BfInstanceUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

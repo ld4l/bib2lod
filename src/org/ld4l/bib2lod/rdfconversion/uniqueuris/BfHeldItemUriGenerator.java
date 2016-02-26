@@ -12,10 +12,10 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 
-public class BfHeldItemUriGetter extends ResourceUriGetter {
+public class BfHeldItemUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfHeldItemUriGetter.class);
+            LogManager.getLogger(BfHeldItemUriGenerator.class);
 
     // Order is crucial here
     private static String[] keyTypes = 
@@ -53,7 +53,7 @@ public class BfHeldItemUriGetter extends ResourceUriGetter {
                 + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
     
-    public BfHeldItemUriGetter(Resource resource, String localNamespace) {
+    public BfHeldItemUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

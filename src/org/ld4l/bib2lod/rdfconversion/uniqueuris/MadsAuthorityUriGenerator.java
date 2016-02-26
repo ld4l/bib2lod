@@ -11,12 +11,12 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class MadsAuthorityUriGetter extends ResourceUriGetter {
+public class MadsAuthorityUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(MadsAuthorityUriGetter.class);
+            LogManager.getLogger(MadsAuthorityUriGenerator.class);
     
-    public MadsAuthorityUriGetter(Resource resource, String localNamespace) {
+    public MadsAuthorityUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

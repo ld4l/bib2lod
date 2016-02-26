@@ -20,10 +20,10 @@ import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 // TODO Will need to treat topics differently - URI should come from schemes
 // like FAST. Will not just need to send back a key.
-public class BfTopicUriGetter extends ResourceUriGetter {
+public class BfTopicUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfTopicUriGetter.class);
+            LogManager.getLogger(BfTopicUriGenerator.class);
 
     private static ParameterizedSparqlString constructPss = 
             new ParameterizedSparqlString(
@@ -81,7 +81,7 @@ public class BfTopicUriGetter extends ResourceUriGetter {
     }
     
     
-    public BfTopicUriGetter(Resource resource, String localNamespace) {
+    public BfTopicUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

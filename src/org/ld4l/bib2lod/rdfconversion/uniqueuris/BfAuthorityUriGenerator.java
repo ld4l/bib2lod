@@ -18,10 +18,10 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class BfAuthorityUriGetter extends ResourceUriGetter {
+public class BfAuthorityUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfAuthorityUriGetter.class);
+            LogManager.getLogger(BfAuthorityUriGenerator.class);
 
     private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
@@ -54,7 +54,7 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
                       + "?authLabel . "
                       + "} ");
     
-    public BfAuthorityUriGetter(Resource resource, String localNamespace) {
+    public BfAuthorityUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
 

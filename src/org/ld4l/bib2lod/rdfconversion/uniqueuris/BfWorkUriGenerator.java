@@ -11,13 +11,13 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class BfWorkUriGetter extends ResourceUriGetter {
+public class BfWorkUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfWorkUriGetter.class);
+            LogManager.getLogger(BfWorkUriGenerator.class);
 
   
-    public BfWorkUriGetter(Resource resource, String localNamespace) {
+    public BfWorkUriGenerator(Resource resource, String localNamespace) {
         super(resource, localNamespace);
     }
        
