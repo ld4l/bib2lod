@@ -59,7 +59,7 @@ public class BfAuthorityUriGetter extends ResourceUriGetter {
     }
 
     @Override
-    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+    protected ParameterizedSparqlString getResourceSubModelPss() {
         return resourceSubModelPss;
     }
     

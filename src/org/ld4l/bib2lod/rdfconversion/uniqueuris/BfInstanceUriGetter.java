@@ -66,7 +66,7 @@ public class BfInstanceUriGetter extends ResourceUriGetter {
     }
 
     @Override
-    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+    protected ParameterizedSparqlString getResourceSubModelPss() {
         LOGGER.debug(resourceSubModelPss);
         return resourceSubModelPss;
     }

@@ -87,7 +87,7 @@ public class BfTopicUriGetter extends ResourceUriGetter {
 
     
     @Override
-    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+    protected ParameterizedSparqlString getResourceSubModelPss() {
         LOGGER.debug(constructPss);
         return constructPss;
     }

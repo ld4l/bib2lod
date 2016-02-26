@@ -52,7 +52,7 @@ public class ResourceUriGetter {
         return localNamespace + uniqueLocalName;
     }
     
-    ParameterizedSparqlString getResourceSubModelPss(Resource resource) {
+    protected ParameterizedSparqlString getResourceSubModelPss() {
         return resourceSubModelPss;
     }
 
@@ -73,7 +73,7 @@ public class ResourceUriGetter {
 
         LOGGER.debug("Getting resource submodel for " + resource.getURI());
         
-        ParameterizedSparqlString pss = getResourceSubModelPss(resource);
+        ParameterizedSparqlString pss = getResourceSubModelPss();
         pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
                 OntNamespace.BIBFRAME.uri());
         pss.setIri("resource", resource.getURI());
