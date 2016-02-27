@@ -17,7 +17,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class BfAuthorityUriGenerator extends ResourceUriGenerator {
+public class BfAuthorityUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAuthorityUriGenerator.class);

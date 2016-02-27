@@ -20,7 +20,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
  * Provides conversions shared by Works and Instances - e.g., Title conversion
  * methods.
  */
-public abstract class BfBibResourceConverter extends ResourceConverter {
+public abstract class BfBibResourceConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfBibResourceConverter.class);
@@ -93,7 +93,7 @@ public abstract class BfBibResourceConverter extends ResourceConverter {
     private void convertTitle(Statement statement, 
             Set<Literal> titleLiterals) {
 
-        ResourceConverter converter = 
+        BfResourceConverter converter = 
                 new BfTitleConverter(this.localNamespace);
         
         // Identify the title resource and build its associated model (i.e.,

@@ -29,7 +29,7 @@ import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTitleUriGenerator;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfTopicUriGenerator;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfWorkUriGenerator;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.MadsAuthorityUriGenerator;
-import org.ld4l.bib2lod.rdfconversion.uniqueuris.ResourceUriGenerator;
+import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfResourceUriGenerator;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
@@ -237,7 +237,7 @@ public class UriGenerator extends RdfProcessor {
 //        // resource are querying the submodel rather than the full model.
 //        Resource newResource = 
 //                resourceSubModel.createResource(resource.getURI());        
-        ResourceUriGenerator uriGenerator = getUriGeneratorByType(
+        BfResourceUriGenerator uriGenerator = getUriGeneratorByType(
                 resource, localNamespace);
         
         return uriGenerator.getUniqueUri(resource);
@@ -266,7 +266,7 @@ public class UriGenerator extends RdfProcessor {
         return bnode;
     }
 
-    private ResourceUriGenerator getUriGeneratorByType(
+    private BfResourceUriGenerator getUriGeneratorByType(
             Resource resource, String localNamespace) {
 
         // Get the BfTypes for this resource
@@ -302,19 +302,19 @@ public class UriGenerator extends RdfProcessor {
         } else if (types.contains(BfType.BF_CATEGORY)) {
             uriGeneratorClass = BfCategoryUriGenerator.class; 
         } else {
-            uriGeneratorClass = ResourceUriGenerator.class;
+            uriGeneratorClass = BfResourceUriGenerator.class;
         }
         
         LOGGER.debug("uriGeneratorClass = " + uriGeneratorClass.getName());
         
-        ResourceUriGenerator uriGenerator = null;
+        BfResourceUriGenerator uriGenerator = null;
         if (uriGeneratorClass != null) {
             try {
-                uriGenerator = (ResourceUriGenerator) uriGeneratorClass
+                uriGenerator = (BfResourceUriGenerator) uriGeneratorClass
                         .getConstructor(String.class)
                         .newInstance(localNamespace);                        
             } catch (Exception e) {
-                LOGGER.trace("Could not create ResourceUriGenerator of type " 
+                LOGGER.trace("Could not create BfResourceUriGenerator of type " 
                         + uriGeneratorClass.getName());
                 e.printStackTrace();
             } 

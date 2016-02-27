@@ -9,7 +9,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
-public class BfAnnotationConverter extends ResourceConverter {
+public class BfAnnotationConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAnnotationConverter.class);

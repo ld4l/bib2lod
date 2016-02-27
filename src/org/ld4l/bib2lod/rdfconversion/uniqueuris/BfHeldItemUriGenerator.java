@@ -12,7 +12,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 
-public class BfHeldItemUriGenerator extends ResourceUriGenerator {
+public class BfHeldItemUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemUriGenerator.class);

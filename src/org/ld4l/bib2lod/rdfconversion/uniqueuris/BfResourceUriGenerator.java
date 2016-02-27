@@ -19,10 +19,10 @@ import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
 // If not needed as a fallback URI generator, make abstract.
-public class ResourceUriGenerator {
+public class BfResourceUriGenerator {
     
     private static final Logger LOGGER = 
-            LogManager.getLogger(ResourceUriGenerator.class);
+            LogManager.getLogger(BfResourceUriGenerator.class);
 
     // Default resource submodel consists of all the statements in which the 
     // resource is either the subject or the object. Subclasses may define a 
@@ -41,7 +41,7 @@ public class ResourceUriGenerator {
     protected final String localNamespace;
     protected Resource resource;
 
-    public ResourceUriGenerator(String localNamespace) {
+    public BfResourceUriGenerator(String localNamespace) {
         this.localNamespace = localNamespace;
     }
    

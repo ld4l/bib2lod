@@ -4,7 +4,7 @@ import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 
-public class BfCategoryUriGenerator extends ResourceUriGenerator {
+public class BfCategoryUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfCategoryUriGenerator.class);

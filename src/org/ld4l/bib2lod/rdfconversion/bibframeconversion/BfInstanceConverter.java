@@ -140,7 +140,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     
     private void convertProvider(Statement statement) {
         
-        ResourceConverter converter = 
+        BfResourceConverter converter = 
                 new BfProviderConverter(this.localNamespace);
      
         // Identify the provider resource and build its associated model (i.e.,

@@ -14,7 +14,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
-public class BfInstanceUriGenerator extends ResourceUriGenerator {
+public class BfInstanceUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceUriGenerator.class);

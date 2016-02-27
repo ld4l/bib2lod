@@ -24,21 +24,21 @@ public class BibframeConverterFactory {
     private static final Map<BfType, Class<?>> BF_CONVERTERS =
             new HashMap<BfType, Class<?>>();
     static {
-        // Assign temporarily to ResourceConverter till start implementing
+        // Assign temporarily to BfResourceConverter till start implementing
         // type-specific class
-        BF_CONVERTERS.put(BfType.BF_EVENT, ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_FAMILY, ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_INSTANCE, ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_JURISDICTION,  ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_MEETING,  ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_ORGANIZATION,  ResourceConverter.class);        
+        BF_CONVERTERS.put(BfType.BF_EVENT, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_FAMILY, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_INSTANCE, BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_JURISDICTION,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_MEETING,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_ORGANIZATION,  BfResourceConverter.class);        
         BF_CONVERTERS.put(BfType.BF_PERSON,  BfPersonConverter.class);
-        BF_CONVERTERS.put(BfType.BF_PLACE,  ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_TOPIC,  ResourceConverter.class);
-        BF_CONVERTERS.put(BfType.BF_WORK,  ResourceConverter.class);            
+        BF_CONVERTERS.put(BfType.BF_PLACE,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_TOPIC,  BfResourceConverter.class);
+        BF_CONVERTERS.put(BfType.BF_WORK,  BfResourceConverter.class);            
     }
     
-    public static ResourceConverter createBfResourceConverter(
+    public static BfResourceConverter createBfResourceConverter(
             File inputFile) {
 
         // This case shouldn't occur since the file comes from an iteration on 
@@ -68,8 +68,8 @@ public class BibframeConverterFactory {
  
         try {
             Constructor<?> c = converterClass.getConstructor(BfType.class);
-            ResourceConverter converter = 
-                    (ResourceConverter) c.newInstance(type);
+            BfResourceConverter converter = 
+                    (BfResourceConverter) c.newInstance(type);
             return converter;
         } catch (Exception e) {
             // TODO Auto-generated catch block
@@ -78,9 +78,9 @@ public class BibframeConverterFactory {
         }
     }
    
-// If we want to turn the iteration around in ResourceConverter and iterate
+// If we want to turn the iteration around in BfResourceConverter and iterate
 // over types rather than files, implement this.
-//    public static ResourceConverter createBfResourceConverter(
+//    public static BfResourceConverter createBfResourceConverter(
 //            BfType type, String inputDir) {
 //        // Get file basename from type (return null if null)
 //        // Get converter class from TYPE_converterS (return null if null)

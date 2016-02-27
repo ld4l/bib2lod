@@ -11,7 +11,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-public class MadsAuthorityUriGenerator extends ResourceUriGenerator {
+public class MadsAuthorityUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(MadsAuthorityUriGenerator.class);

@@ -20,7 +20,7 @@ import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 // TODO Will need to treat topics differently - URI should come from schemes
 // like FAST. Will not just need to send back a key.
-public class BfTopicUriGenerator extends ResourceUriGenerator {
+public class BfTopicUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicUriGenerator.class);
