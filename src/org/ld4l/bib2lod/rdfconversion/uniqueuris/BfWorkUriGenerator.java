@@ -17,8 +17,8 @@ public class BfWorkUriGenerator extends ResourceUriGenerator {
             LogManager.getLogger(BfWorkUriGenerator.class);
 
   
-    public BfWorkUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public BfWorkUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
        
     @Override

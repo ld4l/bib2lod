@@ -10,7 +10,6 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -22,23 +21,17 @@ public class BfAuthorityUriGenerator extends ResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAuthorityUriGenerator.class);
-    
+
     private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
-                    "CONSTRUCT { ?resource ?p1 ?o . "
-                    + " ?s ?p2 ?resource . "  
-                    + " ?o " 
-                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "            
-                    + "?authLabel . "
-                    + "} WHERE {  { "                                                      
-                    + "?resource ?p1 ?o . "
-                    + " OPTIONAL { "
-                    + "?o a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
-                    + "?o "
-                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
-                    + "?authLabel . } "
-                    + "} UNION { "
-                    + "?s ?p2 ?resource . "
+                    "CONSTRUCT { ?resource ?p1 ?o1 . "
+                    + " ?o1 ?p2 ?o2 . "
+                    + " ?s ?p3 ?resource . " 
+                    + "} WHERE { { "  
+                    + "?resource ?p1 ?o1 . "
+                    + "OPTIONAL { ?o1 ?p2 ?o2 . } "
+                    + "} UNION { " 
+                    + "?s ?p3 ?resource . "
                     + "} } ");
     
     private static ParameterizedSparqlString authLabelPss = 
@@ -54,12 +47,13 @@ public class BfAuthorityUriGenerator extends ResourceUriGenerator {
                       + "?authLabel . "
                       + "} ");
     
-    public BfAuthorityUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    
+    public BfAuthorityUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override
-    public ParameterizedSparqlString getResourceSubModelPss() {
+    protected ParameterizedSparqlString getResourceSubModelPss() {
         return resourceSubModelPss;
     }
     

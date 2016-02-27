@@ -16,8 +16,8 @@ public class MadsAuthorityUriGenerator extends ResourceUriGenerator {
     private static final Logger LOGGER = 
             LogManager.getLogger(MadsAuthorityUriGenerator.class);
     
-    public MadsAuthorityUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public MadsAuthorityUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override

@@ -18,14 +18,15 @@ import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
-// If not needed as a fallback KeyGetter, make abstract.
+// If not needed as a fallback URI generator, make abstract.
 public class ResourceUriGenerator {
     
     private static final Logger LOGGER = 
             LogManager.getLogger(ResourceUriGenerator.class);
-    
-    // Default resource submodel is all the statements in which the resource is
-    // either the subject or the object.
+
+    // Default resource submodel consists of all the statements in which the 
+    // resource is either the subject or the object. Subclasses may define a 
+    // more complex query.
     private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o . "
@@ -36,20 +37,26 @@ public class ResourceUriGenerator {
                     + "?s ?p2 ?resource . "
                     + "} } ");
 
-    protected final Resource resource;
-    protected final String localNamespace;
 
-    public ResourceUriGenerator(Resource resource, String localNamespace) {
-        Model resourceSubModel = getResourceSubModel(resource);
-        this.resource = resourceSubModel.createResource(resource.getURI());
+    protected final String localNamespace;
+    protected Resource resource;
+
+    public ResourceUriGenerator(String localNamespace) {
         this.localNamespace = localNamespace;
     }
-
-    // Subclasses that may not generate a URI within the local namespace should
+   
+    // Subclasses that may generate URI outside the local namespace should
     // override this method. Otherwise, they need only override getUniqueKey().
-    public String getUniqueUri() {        
+    // For example, BfTopicUriGenerator assigns FAST URIs.
+    public String getUniqueUri(Resource resource) {     
+        this.resource = getResourceWithSubModel(resource);
         String uniqueLocalName = getUniqueLocalName();
         return localNamespace + uniqueLocalName;
+    }
+    
+    protected Resource getResourceWithSubModel(Resource resource) {
+        Model resourceSubModel = getResourceSubModel(resource);
+        return resourceSubModel.createResource(resource.getURI());        
     }
     
     protected ParameterizedSparqlString getResourceSubModelPss() {
@@ -60,15 +67,6 @@ public class ResourceUriGenerator {
      * Get the submodel of the input model consisting of statements in which 
      * this resource is either the subject or object.
      */
-    // **** TODO The type of the resource may determine the query. For example,
-    // with instances we need info about identifiers, etc. So we need to 
-    // get the type first, then get the resource sub model from the uri getter,
-    // with the default in ResourceUriGenerator and subclasses overriding where
-    // needed. ****
-    // Also, if the input files are small enough, there may not be a need to
-    // get the submodel, rather than just querying the entire input model. It's
-    // not clear whether there would be a performance difference and in which
-    // direction. 
     private Model getResourceSubModel(Resource resource) {
 
         LOGGER.debug("Getting resource submodel for " + resource.getURI());

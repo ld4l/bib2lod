@@ -20,18 +20,19 @@ public class BfInstanceUriGenerator extends ResourceUriGenerator {
             LogManager.getLogger(BfInstanceUriGenerator.class);
 
     private static ParameterizedSparqlString resourceSubModelPss = 
-                new ParameterizedSparqlString(
-                        "CONSTRUCT { ?resource ?p1 ?o1 . "
-                        + " ?s ?p2 ?resource . " 
-                        + " ?o1 ?p3 ?o2 "
-                        + "} WHERE { { "  
-                        + "?resource ?p1 ?o1 . "
-                        + "OPTIONAL { " 
-                        + "?o1 a " + BfType.BF_IDENTIFIER.sparqlUri() + " . "
-                        + "?o1 ?p3 ?o2 . } "
-                        + "} UNION { "
-                        + "?s ?p2 ?resource . "
-                        + "} } ");
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o1 . "
+                    + " ?s ?p2 ?resource . " 
+                    + " ?o1 ?p3 ?o2 "
+                    + "} WHERE { { "  
+                    + "?resource ?p1 ?o1 . "
+                    + "OPTIONAL { " 
+                    + "?o1 a " + BfType.BF_IDENTIFIER.sparqlUri() + " . "
+                    + "?o1 ?p3 ?o2 . } "
+                    + "} UNION { "
+                    + "?s ?p2 ?resource . "
+                    + "} } ");
+    
     
     private static String sparql = 
             "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
@@ -61,8 +62,8 @@ public class BfInstanceUriGenerator extends ResourceUriGenerator {
             + "}";
     
     
-    public BfInstanceUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public BfInstanceUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override

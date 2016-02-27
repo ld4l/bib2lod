@@ -25,7 +25,7 @@ public class BfTopicUriGenerator extends ResourceUriGenerator {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicUriGenerator.class);
 
-    private static ParameterizedSparqlString constructPss = 
+    private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o1 . "
                     + " ?o1 ?p2 ?o2 . "
@@ -37,6 +37,7 @@ public class BfTopicUriGenerator extends ResourceUriGenerator {
                     + "?s ?p3 ?resource . "
                     + "} } ");
 
+    
     private static ParameterizedSparqlString selectPss = 
             new ParameterizedSparqlString(
                     "SELECT ?authAccessPoint ?bfLabel ?madsAuthScheme "  
@@ -81,19 +82,20 @@ public class BfTopicUriGenerator extends ResourceUriGenerator {
     }
     
     
-    public BfTopicUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public BfTopicUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
-
     
     @Override
     protected ParameterizedSparqlString getResourceSubModelPss() {
-        LOGGER.debug(constructPss);
-        return constructPss;
+        return resourceSubModelPss;
     }
     
     @Override
-    public String getUniqueUri() {
+    public String getUniqueUri(Resource originalResource) {
+        
+        this.resource = getResourceWithSubModel(originalResource);
+        
         String uri = null;
         
         selectPss.setIri("topic", resource.getURI());   
@@ -125,7 +127,7 @@ public class BfTopicUriGenerator extends ResourceUriGenerator {
         qexec.close();
         
         if (uri == null) {
-            uri = super.getUniqueUri();
+            uri = super.getUniqueUri(originalResource);
         }
         return uri;
     }

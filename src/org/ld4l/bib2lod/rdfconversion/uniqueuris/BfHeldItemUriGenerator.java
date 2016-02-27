@@ -53,8 +53,8 @@ public class BfHeldItemUriGenerator extends ResourceUriGenerator {
                 + BfProperty.BF_LABEL.sparqlUri() + " ?label . } "
                 + "}";
     
-    public BfHeldItemUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public BfHeldItemUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override

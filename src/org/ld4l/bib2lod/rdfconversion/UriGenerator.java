@@ -237,10 +237,10 @@ public class UriGenerator extends RdfProcessor {
 //        // resource are querying the submodel rather than the full model.
 //        Resource newResource = 
 //                resourceSubModel.createResource(resource.getURI());        
-        ResourceUriGenerator uriGetter = getUriGetterByType(
+        ResourceUriGenerator uriGenerator = getUriGeneratorByType(
                 resource, localNamespace);
         
-        return uriGetter.getUniqueUri();
+        return uriGenerator.getUniqueUri(resource);
     }
 
     /* 
@@ -266,7 +266,7 @@ public class UriGenerator extends RdfProcessor {
         return bnode;
     }
 
-    private ResourceUriGenerator getUriGetterByType(
+    private ResourceUriGenerator getUriGeneratorByType(
             Resource resource, String localNamespace) {
 
         // Get the BfTypes for this resource
@@ -277,50 +277,50 @@ public class UriGenerator extends RdfProcessor {
             types.add(TYPES_FOR_BF_ONT_CLASSES.get(ontClass));
         }
         
-        Class<?> uriGetterClass = null;
+        Class<?> uriGeneratorClass = null;
 
         if (types.contains(BfType.BF_TOPIC)) {
-            uriGetterClass = BfTopicUriGenerator.class;
+            uriGeneratorClass = BfTopicUriGenerator.class;
         } else if (BfType.isAuthority(types)) {  
-            uriGetterClass = BfAuthorityUriGenerator.class;
+            uriGeneratorClass = BfAuthorityUriGenerator.class;
         } else if (types.contains(BfType.BF_HELD_ITEM)) {
-            uriGetterClass = BfHeldItemUriGenerator.class;
+            uriGeneratorClass = BfHeldItemUriGenerator.class;
         } else if (types.contains(BfType.BF_INSTANCE)) {
-            uriGetterClass = BfInstanceUriGenerator.class;
+            uriGeneratorClass = BfInstanceUriGenerator.class;
         } else if (types.contains(BfType.BF_WORK)) {
-            uriGetterClass = BfWorkUriGenerator.class;
+            uriGeneratorClass = BfWorkUriGenerator.class;
         } else if (types.contains(BfType.BF_IDENTIFIER)) {
-            uriGetterClass = BfIdentifierUriGenerator.class;
+            uriGeneratorClass = BfIdentifierUriGenerator.class;
         } else if (types.contains(BfType.BF_ANNOTATION)) {
-            uriGetterClass = BfAnnotationUriGenerator.class;
+            uriGeneratorClass = BfAnnotationUriGenerator.class;
         } else if (types.contains(BfType.MADSRDF_AUTHORITY)) {
-            uriGetterClass = MadsAuthorityUriGenerator.class;
+            uriGeneratorClass = MadsAuthorityUriGenerator.class;
         } else if (types.contains(BfType.BF_CLASSIFICATION)) {
-            uriGetterClass = BfClassificationUriGenerator.class;
+            uriGeneratorClass = BfClassificationUriGenerator.class;
         } else if (types.contains(BfType.BF_TITLE)) {
-            uriGetterClass = BfTitleUriGenerator.class;          
+            uriGeneratorClass = BfTitleUriGenerator.class;          
         } else if (types.contains(BfType.BF_CATEGORY)) {
-            uriGetterClass = BfCategoryUriGenerator.class; 
+            uriGeneratorClass = BfCategoryUriGenerator.class; 
         } else {
-            uriGetterClass = ResourceUriGenerator.class;
+            uriGeneratorClass = ResourceUriGenerator.class;
         }
         
-        LOGGER.debug("uriGetterClass = " + uriGetterClass.getName());
+        LOGGER.debug("uriGeneratorClass = " + uriGeneratorClass.getName());
         
-        ResourceUriGenerator uriGetter = null;
-        if (uriGetterClass != null) {
+        ResourceUriGenerator uriGenerator = null;
+        if (uriGeneratorClass != null) {
             try {
-                uriGetter = (ResourceUriGenerator) uriGetterClass
-                        .getConstructor(Resource.class, String.class)
-                        .newInstance(resource, localNamespace);                        
+                uriGenerator = (ResourceUriGenerator) uriGeneratorClass
+                        .getConstructor(String.class)
+                        .newInstance(localNamespace);                        
             } catch (Exception e) {
-                LOGGER.trace("Could not create UriGetter of type " 
-                        + uriGetterClass.getName());
+                LOGGER.trace("Could not create ResourceUriGenerator of type " 
+                        + uriGeneratorClass.getName());
                 e.printStackTrace();
             } 
         }
                
-        return uriGetter; 
+        return uriGenerator; 
     }
 
 }

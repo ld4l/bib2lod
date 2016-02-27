@@ -9,8 +9,8 @@ public class BfIdentifierUriGenerator extends ResourceUriGenerator {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfIdentifierUriGenerator.class);
     
-    public BfIdentifierUriGenerator(Resource resource, String localNamespace) {
-        super(resource, localNamespace);
+    public BfIdentifierUriGenerator(String localNamespace) {
+        super(localNamespace);
     }
 
     @Override
