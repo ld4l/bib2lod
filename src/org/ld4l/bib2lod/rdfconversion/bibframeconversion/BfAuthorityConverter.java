@@ -8,7 +8,6 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 
 public class BfAuthorityConverter extends ResourceConverter {
@@ -24,25 +23,23 @@ public class BfAuthorityConverter extends ResourceConverter {
     
     private static ParameterizedSparqlString resourceSubModelPss = 
             new ParameterizedSparqlString(
-                    "CONSTRUCT { ?resource ?p1 ?o . "
-                    + " ?s ?p2 ?resource . "  
-                    + " ?o " 
-                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "            
-                    + "?authLabel . "
-                    + "} WHERE {  { "                                                      
-                    + "?resource ?p1 ?o . "
-                    + " OPTIONAL { "
-                    + "?o a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
-                    + "?o "
-                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "                                  
-                    + "?authLabel . } "
-                    + "} UNION { "
-                    + "?s ?p2 ?resource . "
+                    "CONSTRUCT { ?resource ?p1 ?o1 . "
+                    + " ?o1 ?p2 ?o2 . "
+                    + " ?s ?p3 ?resource . " 
+                    + "} WHERE { { "  
+                    + "?resource ?p1 ?o1 . "
+                    + "OPTIONAL { ?o1 ?p2 ?o2 . } "
+                    + "} UNION { " 
+                    + "?s ?p3 ?resource . "
                     + "} } ");
     
-
     public BfAuthorityConverter(String localNamespace) {
         super(localNamespace);
+    }
+
+    @Override
+    protected ParameterizedSparqlString getResourceSubModelPss() {
+        return resourceSubModelPss;
     }
     
     @Override

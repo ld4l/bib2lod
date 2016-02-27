@@ -1,9 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.List;
-
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -25,8 +22,21 @@ public class BfMeetingConverter extends BfAuthorityConverter {
     protected Model convert() {
         convertConferenceName();
         
-        // TODO ** What to do with Identifier, Authority, since we're changing
-        // Meeting from an Authority to an Event?
+        /* 
+         * TODO ** What to do with Identifier, Authority, since we're changing
+         * Meeting from an Authority to an Event?
+         * Predicates of which Meetings are subjects:
+         * bf:authoritySource
+         * bf:authorizedAccessPoint
+         * bf:hasAuthority
+         * bf:systemNumber
+         * Predicates of which Meetings are objects:
+         * bf:contributor
+         * bf:creator
+         * bf:subject
+         */
+        
+        
         
         return super.convert();        
     }

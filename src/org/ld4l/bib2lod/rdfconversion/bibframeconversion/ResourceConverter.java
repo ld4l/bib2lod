@@ -28,7 +28,7 @@ public class ResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(ResourceConverter.class);
-    
+
     // Default resource submodel consists of all the statements in which the 
     // resource is either the subject or the object. Subclasses may define a 
     // more complex query.
@@ -41,7 +41,6 @@ public class ResourceConverter {
                     + "} UNION { "
                     + "?s ?p2 ?resource . "
                     + "} } ");
-
 
     protected String localNamespace;
     protected Resource subject;
@@ -61,25 +60,28 @@ public class ResourceConverter {
     public final Model convert(Resource subject) {         
 
         // Initialize converter for processing of new subject
-        Model subjectSubModel = getResourceSubModel(subject);
-        
-        // Get the resource in the submodel with the same URI as the input
-        // subject, so that references to subject.getModel() will return the
-        // submodel rather than the full input model.
-        // NB Model.createResource() may return an existing resource rather
-        // than creating a new one.
-        this.subject = subjectSubModel.createResource(subject.getURI());
+        this.subject = getResourceWithSubModel(subject);        
         
         // Start with a new output model for each subject conversion.
         this.outputModel = ModelFactory.createDefaultModel();
         
         convert();
         
-        subjectSubModel.close();
+        this.subject.getModel().close();
         
         return outputModel;
     }
- 
+
+    protected Resource getResourceWithSubModel(Resource subject) {
+        Model resourceSubModel = getResourceSubModel(subject);
+        
+        // Get the resource in the submodel with the same URI as the input
+        // subject, so that references to subject.getModel() will return the
+        // submodel rather than the full input model.
+        // NB Model.createResource() may return an existing resource rather
+        // than creating a new one.
+        return resourceSubModel.createResource(subject.getURI());        
+    }
     /* 
      * Default conversion method. Subclasses may override.
      */
@@ -198,7 +200,7 @@ public class ResourceConverter {
 
     // TODO Consider whether this is even needed. The input models are not very
     // large, assuming a small input file size. Does the time taken to build
-    // the submodel offset the gain of faster select queries? On the other hand,
+    // the submodel offset the gain of faster select uriGeneratorClass? On the other hand,
     // we may not want to depend on input file sizes below a threshold.
     // 
     protected Model getResourceSubModel(Resource resource) {

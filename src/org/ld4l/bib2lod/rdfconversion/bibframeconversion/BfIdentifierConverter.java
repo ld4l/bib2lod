@@ -207,7 +207,7 @@ public class BfIdentifierConverter extends ResourceConverter {
         }
   
         // We may want to assign the supertype in any case, to simplify the
-        // queries used to build the search index, since there's no reasoner to
+        // query used to build the search index, since there's no reasoner to
         // infer the supertype.
         if (identifierType == null) {
             identifierType = Ld4lType.IDENTIFIER;

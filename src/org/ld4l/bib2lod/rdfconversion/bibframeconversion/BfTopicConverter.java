@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Property;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -16,6 +17,19 @@ public class BfTopicConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfTopicConverter.class);
+
+    private static ParameterizedSparqlString constructPss = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o1 . "
+                    + " ?o1 ?p2 ?o2 . "
+                    + " ?s ?p3 ?resource . " 
+                    + "} WHERE { { "  
+                    + "?resource ?p1 ?o1 . "
+                    + "OPTIONAL { ?o1 ?p2 ?o2 . } "
+                    + "} UNION { " 
+                    + "?s ?p3 ?resource . "
+                    + "} } ");
+
     
     private static final List<BfProperty> FAST_PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
@@ -33,7 +47,6 @@ public class BfTopicConverter extends BfAuthorityConverter {
     public BfTopicConverter(String localNamespace) {
         super(localNamespace);
     }
-
 
     /* 
      * FAST topics don't need a system number, since the FAST URI replaces it,
