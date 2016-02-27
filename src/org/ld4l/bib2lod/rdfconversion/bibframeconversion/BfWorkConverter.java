@@ -88,7 +88,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
     
     private void convertContributor(Statement statement) {
         
-        BfResourceConverter converter = new BfContributorConverter(
+        ResourceConverter converter = new BfContributorConverter(
                 this.localNamespace, statement);
         
         // Identify the provider resource and build its associated model (i.e.,
@@ -110,7 +110,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
     
     private void convertAnnotation(Statement statement) {
         
-        BfResourceConverter converter = 
+        ResourceConverter converter = 
                 new BfAnnotationConverter(localNamespace);
 
         // Identify the annotation resource and build its associated model 

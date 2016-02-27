@@ -18,7 +18,7 @@ import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
-public class BfHeldItemConverter extends BfResourceConverter {
+public class BfHeldItemConverter extends ResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfHeldItemConverter.class);

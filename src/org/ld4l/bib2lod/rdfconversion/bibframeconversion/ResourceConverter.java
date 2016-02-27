@@ -24,10 +24,10 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
-public class BfResourceConverter {
+public class ResourceConverter {
 
     private static final Logger LOGGER = 
-            LogManager.getLogger(BfResourceConverter.class);
+            LogManager.getLogger(ResourceConverter.class);
     
     // Default resource submodel consists of all the statements in which the 
     // resource is either the subject or the object. Subclasses may define a 
@@ -51,7 +51,7 @@ public class BfResourceConverter {
     // more data than we got in the subject submodel. 
     // protected Model inputModel;
 
-    public BfResourceConverter(String localNamespace) {
+    public ResourceConverter(String localNamespace) {
         this.localNamespace = localNamespace;
     }
 
