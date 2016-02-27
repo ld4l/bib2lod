@@ -77,7 +77,7 @@ public class TypeSplitter extends RdfProcessor {
         // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
+                Bib2LodStringUtils.simplePlural(totalFileCount, "file") + ". "
                         + TimerUtils.getDuration(processStart)); 
         
         int fileCount = 0;
@@ -94,7 +94,7 @@ public class TypeSplitter extends RdfProcessor {
             LOGGER.info("Splitting triples by type in file " + filename
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                     + ").");
             
             processInputFile(inputFile, outputFilesByType);
@@ -108,7 +108,7 @@ public class TypeSplitter extends RdfProcessor {
             if (timerFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
                 LOGGER.trace("Split " + timerFileCount + " "
-                        + Bib2LodStringUtils.simplePlural("file", timerFileCount)
+                        + Bib2LodStringUtils.simplePlural(timerFileCount, "file")
                         + " by resource type. " 
                         + TimerUtils.getDuration(fileStart));
                 timerFileCount = 0;
@@ -119,13 +119,13 @@ public class TypeSplitter extends RdfProcessor {
         if (timerFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
             LOGGER.trace("Split " + timerFileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", timerFileCount)
+                    + Bib2LodStringUtils.simplePlural(timerFileCount, "file")
                     + " by resource type. " 
                     + TimerUtils.getDuration(fileStart)); 
         }   
         
         LOGGER.info("END splitting all " + totalFileCount + " input " 
-                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                 + " by resource type. " 
                 + TimerUtils.getDuration(processStart));
         

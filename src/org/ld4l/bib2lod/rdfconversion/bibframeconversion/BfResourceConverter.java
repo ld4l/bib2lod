@@ -117,7 +117,8 @@ public class BfResourceConverter {
                 }
 
             } else if (propertyMap.containsKey(predicate)) {               
-                outputModel.add(stmtSubject, propertyMap.get(predicate), object);                
+                outputModel.add(
+                        stmtSubject, propertyMap.get(predicate), object);                
             }
         }
         

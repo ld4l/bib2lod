@@ -3,13 +3,14 @@ package org.ld4l.bib2lod.rdfconversion;
 import java.io.File;
 import java.time.Instant;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.LinkedHashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
@@ -106,27 +107,49 @@ public class BibframeConverter extends RdfProcessor {
     public BibframeConverter(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
+        
+        // TODO Define own exception classand throw that
         createConverters();
+
     }
    
     private void createConverters() {
 
+        Map<Class<?>, BfResourceConverter> instantiatedClasses = 
+                new HashMap<Class<?>, BfResourceConverter>();
+        
         for (Map.Entry<BfType, Class<?>> entry : 
                 CONVERTERS_BY_TYPE.entrySet()) {
+            
             BfType bfType = entry.getKey();
             Class<?> converterClass = entry.getValue();
-            try {
-                BfResourceConverter converter = 
-                        (BfResourceConverter) converterClass
-                        .getConstructor(BfType.class, String.class)
-                        .newInstance(bfType, localNamespace);   
-                // LOGGER.debug("Got converter for type " + bfType);
-                converters.put(bfType, converter);
-            } catch (Exception e) {
-                LOGGER.warn("Can't instantiate class " 
-                        + converterClass.getName());
-                e.printStackTrace();
-            }             
+            
+            BfResourceConverter converter;
+            
+            if (! instantiatedClasses.keySet().contains(converterClass)) {
+                
+                try {
+                    converter = (BfResourceConverter) converterClass                            
+                            .getConstructor(String.class)
+                            .newInstance(localNamespace);   
+                    LOGGER.debug("Created converter for type " + bfType);
+    
+                } catch (Exception e) {
+                    LOGGER.warn("Can't instantiate class " 
+                            + converterClass.getName());
+                    e.printStackTrace();
+                    return;
+                }   
+                
+                instantiatedClasses.put(converterClass, converter);
+                
+            } else {
+                LOGGER.debug("Converter for class " + converterClass 
+                        + " already created.");
+                converter = instantiatedClasses.get(converterClass);
+            }
+            
+            converters.put(bfType, converter);
         }
     }
 
@@ -142,7 +165,7 @@ public class BibframeConverter extends RdfProcessor {
 
         LOGGER.info("END Bibframe RDF conversion in all input files. Converted " 
                 + totalSubjectCount + " "     
-                + Bib2LodStringUtils.simplePlural("resource", totalSubjectCount)
+                + Bib2LodStringUtils.simplePlural(totalSubjectCount, "resource")
                 + " . " + TimerUtils.getDuration(processStart));
 
         return outputDir;        
@@ -184,7 +207,7 @@ public class BibframeConverter extends RdfProcessor {
 
         LOGGER.info("Start converting Bibframe RDF in file " + filename 
                 + " containing " + Bib2LodStringUtils.count(
-                        "triple", inputModel.size()) + ".");
+                        inputModel.size(), "triple") + ".");
 
         Instant fileStart = Instant.now();
 
@@ -198,12 +221,13 @@ public class BibframeConverter extends RdfProcessor {
             BfResourceConverter converter = entry.getValue();
             
             // Get all the subjects of this type
-            List<Resource> subjects = inputModel.listResourcesWithProperty(
-                    RDF.type, bfType.ontClass()).toList();
+            ResIterator subjects = inputModel.listResourcesWithProperty(
+                    RDF.type, bfType.ontClass());
             
             // Iterate through the subjects of this type and convert
-            for (Resource subject : subjects) {
+            while (subjects.hasNext()) {
                 subjectCount++;
+                Resource subject = subjects.nextResource();
                 
                 // Convert the subject and add to the output model for the file.
                 Model convertedModel = converter.convert(subject);
@@ -219,9 +243,11 @@ public class BibframeConverter extends RdfProcessor {
         String outputFile = FilenameUtils.getBaseName(file.toString());
         writeModelToFile(outputModel, outputFile); 
         
-        LOGGER.info("Converted " + subjectCount + " subjects in file "
+        LOGGER.info("Converted " 
+                + Bib2LodStringUtils.count(subjectCount, "subject") 
+                + " in file "
                 + filename + " resulting in " + Bib2LodStringUtils.count(
-                        "triple", outputModel.size()) + "." 
+                        outputModel.size(), "triple") + "." 
                 + TimerUtils.getDuration(fileStart));
 
         

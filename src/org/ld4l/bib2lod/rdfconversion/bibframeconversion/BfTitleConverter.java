@@ -30,9 +30,8 @@ public class BfTitleConverter extends BfResourceConverter {
         NON_SORT_STRINGS.add("The ");
         // TODO Are there others?
     }
-    
-    
-    protected BfTitleConverter(String localNamespace) {
+        
+    public BfTitleConverter(String localNamespace) {
         super(localNamespace);
     }
     

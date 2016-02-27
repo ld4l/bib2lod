@@ -51,7 +51,7 @@ public class BnodeConverter extends RdfProcessor {
         // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
+                Bib2LodStringUtils.simplePlural(totalFileCount, "file") + ". "
                         + TimerUtils.getDuration(processStart)); 
         
         for ( File file : inputFiles ) {
@@ -65,7 +65,7 @@ public class BnodeConverter extends RdfProcessor {
             LOGGER.info("Converting blank nodes in file " + filename
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                     + ").");
             
             Model outputModel = processInputFile(file);
@@ -84,7 +84,7 @@ public class BnodeConverter extends RdfProcessor {
             if (timeFileCount == TimerUtils.NUM_FILES_TO_TIME) {
                 // TODO Define TIMER logging level between info and debug
                 LOGGER.trace("Converted blank nodes in " + timeFileCount + " "
-                        + Bib2LodStringUtils.simplePlural("file", timeFileCount)
+                        + Bib2LodStringUtils.simplePlural(timeFileCount, "file")
                         + ". " + TimerUtils.getDuration(fileStart));
                 timeFileCount = 0;
                 fileStart = Instant.now();   
@@ -94,13 +94,13 @@ public class BnodeConverter extends RdfProcessor {
         if (timeFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
             LOGGER.trace("Converted blank nodes in " + timeFileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", timeFileCount)
+                    + Bib2LodStringUtils.simplePlural(timeFileCount, "file")
                     + ". " + TimerUtils.getDuration(fileStart));    
         } 
         
         LOGGER.info("END blank node conversion in total of " + totalFileCount                 
                 + " input " 
-                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                 + ". " + TimerUtils.getDuration(processStart));
         
         return outputDir;

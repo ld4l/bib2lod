@@ -46,7 +46,7 @@ public class BfContributorConverter extends BfResourceConverter {
     }
     
 
-    protected BfContributorConverter(
+    public BfContributorConverter(
             String localNamespace, Statement statement) {
         super(localNamespace);
     } 

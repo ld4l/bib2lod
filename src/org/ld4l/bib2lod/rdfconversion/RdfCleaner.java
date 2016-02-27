@@ -98,7 +98,7 @@ public class RdfCleaner extends RdfProcessor {
         // files).
         Arrays.sort(inputFiles);
         LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
+                Bib2LodStringUtils.simplePlural(totalFileCount, "file") + ". "
                         + TimerUtils.getDuration(processStart));                
 
         int fileCount = 0;
@@ -128,7 +128,7 @@ public class RdfCleaner extends RdfProcessor {
             LOGGER.info("Cleaning up RDF in file " + filename
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                     + ").");
             
             replaceLinesInFile(file, outputDir); 
@@ -143,7 +143,7 @@ public class RdfCleaner extends RdfProcessor {
                 // TODO Define TIMER logging level between info and debug
                 LOGGER.trace("Cleaned RDF in " + timerFileCount + " " 
                         + Bib2LodStringUtils.simplePlural(
-                                "file", timerFileCount)
+                                timerFileCount, "file")
                         + ". " + TimerUtils.getDuration(fileStart));
                 timerFileCount = 0;
                 fileStart = Instant.now();   
@@ -153,12 +153,12 @@ public class RdfCleaner extends RdfProcessor {
         if (timerFileCount > 0) {
             // TODO Define TIMER logging level between info and debug
             LOGGER.trace("Cleaned RDF in " + timerFileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", timerFileCount)
+                    + Bib2LodStringUtils.simplePlural(timerFileCount, "file")
                     + ". " + TimerUtils.getDuration(fileStart));    
         }   
         
         LOGGER.info("END RDF cleanup in total of " + totalFileCount + " input "                
-                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
                 + ". " + TimerUtils.getDuration(processStart));
         
         return outputDir;

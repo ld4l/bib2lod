@@ -36,7 +36,7 @@ public class BfProviderConverter extends BfResourceConverter {
     }
     
 
-    protected BfProviderConverter(String localNamespace) {
+    public BfProviderConverter(String localNamespace) {
         super(localNamespace);
     }   
     

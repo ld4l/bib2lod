@@ -245,7 +245,7 @@ public class ResourceDeduper extends RdfProcessor {
                 if (uriCount == TimerUtils.NUM_ITEMS_TO_TIME) {
                     // TODO Define TIMER logging level between info and debug
                     LOGGER.trace("Substituted " + uriCount + " unique "
-                            + Bib2LodStringUtils.simplePlural("URI", uriCount) 
+                            + Bib2LodStringUtils.simplePlural(uriCount, "URI") 
                             + " for duplicate URIs in file " + filename + ". "
                             + TimerUtils.getDuration(uriStart));    
                     uriCount = 0;
@@ -256,7 +256,7 @@ public class ResourceDeduper extends RdfProcessor {
             if (uriCount > 0) {
                 // TODO Define TIMER logging level between info and debug
                 LOGGER.trace("Substituted " + uriCount + " unique "
-                        + Bib2LodStringUtils.simplePlural("URI", uriCount) 
+                        + Bib2LodStringUtils.simplePlural(uriCount, "URI") 
                          + " for duplicate URIs in file " + filename + ". "
                         + TimerUtils.getDuration(uriStart));       
             }

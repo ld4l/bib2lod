@@ -40,6 +40,7 @@ public enum BfProperty {
     BF_DESCRIPTION_SOURCE("descriptionSource"),
     BF_DIMENSIONS("dimensions", Ld4lProperty.DIMENSIONS),
     BF_DISTRIBUTION("distribution", Ld4lProperty.HAS_PROVISION),
+    BF_EVENT_DATE("eventDate", Ld4lProperty.DATE),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_EXPRESSION_OF("expressionOf", Ld4lProperty.IS_EXPRESSION_OF),
     BF_EXTENT("extent", Ld4lProperty.EXTENT),

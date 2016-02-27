@@ -64,7 +64,7 @@ public class ProcessController {
         Instant start = Instant.now();
         int fileCount = new File(this.inputDir).listFiles().length;
         String inputFiles = fileCount + " input " 
-                + Bib2LodStringUtils.simplePlural("file", fileCount);
+                + Bib2LodStringUtils.simplePlural(fileCount, "file");
         LOGGER.info("Start converting " + inputFiles + " in " + this.inputDir 
                 + ".");           
    

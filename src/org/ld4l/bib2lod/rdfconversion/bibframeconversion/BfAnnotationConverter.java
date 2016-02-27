@@ -15,7 +15,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
             LogManager.getLogger(BfAnnotationConverter.class);
   
     
-    protected BfAnnotationConverter(String localNamespace) {      
+    public BfAnnotationConverter(String localNamespace) {      
         super(localNamespace );
     }
     
