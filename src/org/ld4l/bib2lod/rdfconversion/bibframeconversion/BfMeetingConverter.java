@@ -1,16 +1,33 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfMeetingConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfMeetingConverter.class);
+
+
+    ParameterizedSparqlString askPss = new ParameterizedSparqlString(
+            "ASK { "
+            + "?meeting " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " " 
+            + "?madsAuth . "
+            + "?madsAuth a " + BfType.MADSRDF_CONFERENCE_NAME.sparqlUri()
+            + "}");
 
     
     public BfMeetingConverter(String localNamespace) {
@@ -20,6 +37,7 @@ public class BfMeetingConverter extends BfAuthorityConverter {
     
     @Override
     protected Model convert() {
+        RdfProcessor.printModel(subject.getModel(), "Meeting construct model:");
         convertConferenceName();
         
         /* 
@@ -35,19 +53,25 @@ public class BfMeetingConverter extends BfAuthorityConverter {
          * bf:creator
          * bf:subject
          */
-        
-        
-        
+
         return super.convert();        
     }
-   
-    
+      
     private void convertConferenceName() {
 
-        if (subject.hasProperty(
-                RDF.type, BfType.MADSRDF_CONFERENCE_NAME.ontClass())) {
-            outputModel.add(subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
+        askPss.setIri("meeting", subject.getURI());
+        Query query = askPss.asQuery();
+        LOGGER.debug(query.toString());
+        QueryExecution qexec = 
+                QueryExecutionFactory.create(query, subject.getModel());
+        Boolean isConfName = qexec.execAsk();
+        if (isConfName) {
+                outputModel.add(
+                        subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
         }
+        
+        qexec.close();
+        
     }
 
 }

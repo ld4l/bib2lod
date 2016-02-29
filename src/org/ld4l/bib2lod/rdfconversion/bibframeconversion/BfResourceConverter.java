@@ -41,6 +41,7 @@ public class BfResourceConverter {
                     + "} UNION { "
                     + "?s ?p2 ?resource . "
                     + "} } ");
+    
 
     protected String localNamespace;
     protected Resource subject;
