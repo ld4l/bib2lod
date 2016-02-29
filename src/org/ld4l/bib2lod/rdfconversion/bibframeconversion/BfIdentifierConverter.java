@@ -115,6 +115,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
         IDENTIFIER_PREFIXES.put("ocn", Ld4lType.OCLC_IDENTIFIER);
     }
     
+    // Submodel needs to get ?s bf:subject ?o; ?o systemNumber ?id
+    // where ?id a fast id. Then add a sameas from ?o to ?id
+    // See email from Steven re meetings. Same for any other non-Topic
+    // subject. check on how to determine whether it's a fast id
 
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);
@@ -331,6 +335,18 @@ public class BfIdentifierConverter extends BfResourceConverter {
         // a digit.
         // if (resource.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
         return resource.getURI().startsWith(Vocabulary.WORLDCAT.uri());
+    }
+    
+    protected String getFastUri(String identifierValue) {
+        String fastValue = null;
+        
+        // if value starts with a fast prefix, strip off and return fast
+        // uri. else return null
+        
+        // see how this works with meetings. Should be the same for all
+        // non-topics as subjects.
+        
+        return fastValue;
     }
     
 
