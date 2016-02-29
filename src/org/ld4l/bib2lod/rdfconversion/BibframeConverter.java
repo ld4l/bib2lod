@@ -108,9 +108,7 @@ public class BibframeConverter extends RdfProcessor {
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
         
-        // TODO Define own exception classand throw that
         createConverters();
-
     }
    
     private void createConverters() {
@@ -234,8 +232,7 @@ public class BibframeConverter extends RdfProcessor {
                 outputModel.add(convertedModel);
                 
                 convertedModel.close();                
-            }
-            
+            }           
         }
 
         inputModel.close();
@@ -255,6 +252,5 @@ public class BibframeConverter extends RdfProcessor {
         
         return subjectCount;
     }
-
 
 }
