@@ -48,15 +48,15 @@ public class BfMeetingConverter extends BfResourceConverter {
             + "?madsAuth a " + BfType.MADSRDF_CONFERENCE_NAME.sparqlUri()
             + "}");
     
-    ParameterizedSparqlString selectPss = new ParameterizedSparqlString(
-            "SELECT ?idValue WHERE {"
-            + "?work + " + BfProperty.BF_SUBJECT.sparqlUri() + " "
-            + "?meeting . "
-            + "?meeting " + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
-            + "?identifier . "
-            + "?identifier " + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
-            + "?idValue . "
-            + "}");
+//    ParameterizedSparqlString selectPss = new ParameterizedSparqlString(
+//            "SELECT ?idValue WHERE {"
+//            + "?work + " + BfProperty.BF_SUBJECT.sparqlUri() + " "
+//            + "?meeting . "
+//            + "?meeting " + BfProperty.BF_SYSTEM_NUMBER.sparqlUri() + " "
+//            + "?identifier . "
+//            + "?identifier " + BfProperty.BF_IDENTIFIER_VALUE.sparqlUri() + " "
+//            + "?idValue . "
+//            + "}");
 
     
     public BfMeetingConverter(String localNamespace) {
