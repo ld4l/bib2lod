@@ -64,17 +64,17 @@ public class BfHeldItemConverter extends BfResourceConverter {
     
     private void convertShelfMark() {
         
-        Property newProp = Ld4lProperty.HAS_SHELF_MARK.property();
+        Property ld4lProp = Ld4lProperty.HAS_SHELF_MARK.property();
 
         // Iterate through the Bibframe shelf mark properties
         for (BfProperty bfShelfMarkProp 
                 : SHELF_MARK_PROP_TO_SUBCLASS.keySet()) {
            
-            Property oldProp = bfShelfMarkProp.property();
-            Statement stmt = subject.getProperty(oldProp);
+            Property bfProp = bfShelfMarkProp.property();
+            Statement stmt = subject.getProperty(bfProp);
 
             // If there's a statement using this property
-            if (stmt != null ) {
+            if (stmt != null) {
                 
                 // Get the object of the statement
                 Literal shelfMarkLiteral = stmt.getLiteral();
@@ -94,22 +94,20 @@ public class BfHeldItemConverter extends BfResourceConverter {
                 if (bfShelfMarkProp.equals(BfProperty.BF_SHELF_MARK)) {
                     // Add to outputModel model rather than main model, so the
                     // statement doesn't get reprocessed.
-                    outputModel.add(subject, newProp, shelfMarkLiteral);
+                    outputModel.add(subject, ld4lProp, shelfMarkLiteral);
                 } else {
                     String shelfMarkUri = mintShelfMarkUri(bfShelfMarkProp);                           
                     Resource shelfMark = 
                             outputModel.createResource(shelfMarkUri); 
                     // Add to outputModel model rather than main model, so the
                     // statements don't get reprocessed.
-                    outputModel.add(subject, newProp, shelfMark);
+                    outputModel.add(subject, ld4lProp, shelfMark);
                     Ld4lType shelfMarkType = 
                             SHELF_MARK_PROP_TO_SUBCLASS.get(bfShelfMarkProp);
                     outputModel.add(shelfMark, RDF.type, 
                             shelfMarkType.ontClass());
                     outputModel.add(shelfMark, RDF.value, shelfMarkLiteral);
                 }
-                
-                subject.removeAll(oldProp);
             }
         }        
     }
@@ -143,16 +141,12 @@ public class BfHeldItemConverter extends BfResourceConverter {
         
     }
     
-    /**
-     * Mint a URI for a specific shelf mark using the URI of the vocabulary 
-     * plus an arbitrary label constructed from the shelf mark string value.
-     * This localname is intended to be temporary! Are the shelf mark values
-     * institution-specific or common to all instances of a holding?
-     * @param shelfMarkProp
-     * @return
-     */
     private String mintShelfMarkUri(BfProperty shelfMarkProp) {
         
+        // These namespaces don't create resolvable URIs; they are just a 
+        // stand-in for possible future vocabularies.
+        // Are shelf marks for a resource the same across libraries, or are 
+        // they catalog-specific?
         String namespace = SHELF_MARK_VOCABS.get(shelfMarkProp).uri();
         return RdfProcessor.mintUri(namespace);
     }
