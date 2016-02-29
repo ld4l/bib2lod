@@ -21,6 +21,7 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.MadsAuthorityConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
@@ -95,10 +96,7 @@ public class BibframeConverter extends RdfProcessor {
 
         // TODO Needs own converter
         CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
-                BfResourceConverter.class);       
-        // Don't we just throw this away?
-        // CONVERTERS_BY_TYPE.put(BfType.MADSRDF_COMPLEX_SUBJECT,  
-               // BfResourceConverter.class); 
+                MadsAuthorityConverter.class);       
         
         CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
     }
