@@ -118,7 +118,21 @@ public class BfIdentifierConverter extends BfResourceConverter {
     // Submodel needs to get ?s bf:subject ?o; ?o systemNumber ?id
     // where ?id a fast id. Then add a sameas from ?o to ?id
     // See email from Steven re meetings. Same for any other non-Topic
-    // subject. check on how to determine whether it's a fast id
+    // subject? check on how to determine whether it's a fast id
+    // see whether it's always bf:systemNumber that relates the resource
+    // to the fast identifier
+    // Other implementation options: 
+    // 1. Handle only in madsrdf authority converter. Then don't have to do 
+    // twice, once in meeting and once in authority. Then ordering is crucial - 
+    // must do meeting first. In general, it probably works to  handle all 
+    // "primary" types before "secondary" ones. But it's possible we'd get into
+    // ordering paradoxes if we rely on ordering. But then the authority has to
+    // remove from the output model.
+    // 2. Give converters access to input model and remove statements so they
+    // don't get reprocessed. Kind of messy. And still have to rely on ordering
+    // to make sure we get the removal before the other type is processed.
+    // For now, do original design - just handle twice. If there are many such
+    // cases, we can re-consider.
 
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);

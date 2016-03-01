@@ -54,7 +54,8 @@ public class BfTopicConverter extends BfAuthorityConverter {
      * They are also not authorities, so we remove the MADS Authority from the
      * model. 
      * Note that Topics with local URIs retain these related resources.
-     */    
+     */   
+    // MUST NOT WORK! This method is never called
     @Override
     protected List<Property> getResourcesToRemove() {
         String namespace = subject.getNameSpace();
