@@ -74,6 +74,9 @@ public class BibframeConverter extends RdfProcessor {
         
         // Temporal is an Authority subtype, but we don't want the bf:label =>
         // foaf:name conversion for Temporal entities.
+        // However, if there are later features that should be derived from
+        // BfAuthorityConverter, create a subtype of BfAuthorityConverter, 
+        // and add a mapping BfProperty.BF_LABEL => Ld4lProperty.LABEL.
         CONVERTERS_BY_TYPE.put(BfType.BF_TEMPORAL, BfResourceConverter.class);
         
         CONVERTERS_BY_TYPE.put(BfType.BF_EVENT, BfResourceConverter.class);
