@@ -128,7 +128,7 @@ public class BibframeConverter extends RdfProcessor {
                     converter = (BfResourceConverter) converterClass                            
                             .getConstructor(String.class)
                             .newInstance(localNamespace);   
-                    LOGGER.debug("Created converter for type " + bfType);
+                    // LOGGER.debug("Created converter for type " + bfType);
     
                 } catch (Exception e) {
                     LOGGER.warn("Can't instantiate class " 
@@ -140,8 +140,8 @@ public class BibframeConverter extends RdfProcessor {
                 instantiatedClasses.put(converterClass, converter);
                 
             } else {
-                LOGGER.debug("Converter for class " + converterClass 
-                        + " already created.");
+                // LOGGER.debug("Converter for class " + converterClass 
+                //         + " already created.");
                 converter = instantiatedClasses.get(converterClass);
             }
             
