@@ -1,8 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.query.ParameterizedSparqlString;
@@ -83,16 +81,53 @@ public class BfResourceConverter {
         // than creating a new one.
         return resourceSubModel.createResource(subject.getURI());        
     }
+    
+    // TODO Consider whether this is even needed. The input models are not very
+    // large, assuming a small input file size. Does the time taken to build
+    // the submodel offset the gain of faster select uriGeneratorClass? This
+    // approach also introduces complexity: (a) constructing the type-specific
+    // submodel, and (b) converters don't have direct access to the original
+    // input model to delete statements - though it could, of course, be saved
+    // by them as the input model of the resource they are passed, before they
+    // create the submodel and new resource. On the other hand, we may not want 
+    // to rely on input file sizes being below a specific threshold value.
+    protected Model getResourceSubModel(Resource resource) {
+
+        LOGGER.debug("Getting resource submodel for " + resource.getURI());
+        
+        ParameterizedSparqlString pss = getResourceSubModelPss();
+        pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
+                OntNamespace.BIBFRAME.uri());
+        pss.setIri("resource", resource.getURI());
+        
+        Query query = pss.asQuery();
+        LOGGER.debug(query.toString());
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, resource.getModel());
+        Model resourceSubModel =  qexec.execConstruct();
+        qexec.close();
+        
+        RdfProcessor.printModel(resourceSubModel, 
+                "Submodel for resource " + resource.getURI());
+        
+        return resourceSubModel;    
+    }
+    
+    protected ParameterizedSparqlString getResourceSubModelPss() {
+        return resourceSubModelPss;
+    }
+    
+    
     /* 
      * Default conversion method. Subclasses may override.
      */
     protected Model convert() {
 
         // Map of Bibframe to LD4L types.
-        Map<Resource, Resource> typeMap = buildTypeMap();
+        Map<Resource, Resource> typeMap = getTypeMap();
         
         // Map of Bibframe to LD4L properties.
-        Map<Property, Property> propertyMap = buildPropertyMap();
+        Map<Property, Property> propertyMap = getPropertyMap();
 
         StmtIterator stmts = subject.getModel().listStatements();
             
@@ -127,103 +162,46 @@ public class BfResourceConverter {
         return outputModel;  
     }   
 
-    protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
-    }
+
     
     /*
      * Resources to remove are expressed as a list of properties, because it is
      * easiest to identify the objects of those properties and remove all the
      * statements it occurs in either as subject or object. 
      */
-    protected List<Property> getResourcesToRemove() {
-        return new ArrayList<Property>();
-    }
+    // Currently not used. Assumes access to original input model.
+//    protected List<Property> getResourcesToRemove() {
+//        return new ArrayList<Property>();
+//    }
       
-    private Map<Resource, Resource> buildTypeMap() {
+    protected Map<Resource, Resource> getTypeMap() {
         
         // WRONG - alters map returned by BfType.typeMap()
         // Map<Resource, Resource> typeMap = BfType.typeMap();
-        // typeMap.putAll(getTypeMap());
-        
+        // typeMap.putAll(getTypeMap());        
         Map<Resource, Resource> typeMap = new HashMap<Resource, Resource>();
+        
         // Get default mapping from Bibframe to LD4L properties
         typeMap.putAll(BfType.typeMap());
-        // Type-specific mappings override the default mapping
-        typeMap.putAll(getTypeMap());
-        
-        // If a child converter needs to delete rather than convert a type,
-        // remove it from the map. For example, FAST topics remove the 
-        // relationship to a madsrdf:Authority, whereas it is retained by 
-        // default.
-        List<Resource> typesToRetract = getTypesToRetract();
-        typeMap.keySet().removeAll(typesToRetract);
         
         return typeMap;
     }
     
-    protected Map<Resource, Resource> getTypeMap() {
-        return new HashMap<Resource, Resource>();
-    }
-
-    protected List<Resource> getTypesToRetract() {
-        return new ArrayList<Resource>();
-    }
-    
-    private Map<Property, Property> buildPropertyMap() {
+    // Default. Subclasses may override.
+    protected Map<Property, Property> getPropertyMap() {
         
         // WRONG - alters map returned by BfProperty.propertyMap()
         // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
         // propertyMap.putAll(getPropertyMap());
-
         Map<Property, Property> propertyMap = new HashMap<Property, Property>();
         
         // Get default mapping from Bibframe to LD4L properties
         propertyMap.putAll(BfProperty.propertyMap());
-        // Type-specific mapping override the defaults
-        propertyMap.putAll(getPropertyMap());
-
-        // If a child converter needs to delete rather than convert a property,
-        // remove it from the map. 
-        List<Property> propertiesToRetract = getPropertiesToRetract();
-        propertyMap.keySet().removeAll(propertiesToRetract);
         
         return propertyMap;
     }
+    
 
-    protected Map<Property, Property> getPropertyMap() {
-        return new HashMap<Property, Property>();
-    }
 
-    protected List<Property> getPropertiesToRetract() {
-        return new ArrayList<Property>();
-    }
-
-    // TODO Consider whether this is even needed. The input models are not very
-    // large, assuming a small input file size. Does the time taken to build
-    // the submodel offset the gain of faster select uriGeneratorClass? On the other hand,
-    // we may not want to depend on input file sizes below a threshold.
-    // 
-    protected Model getResourceSubModel(Resource resource) {
-
-        LOGGER.debug("Getting resource submodel for " + resource.getURI());
-        
-        ParameterizedSparqlString pss = getResourceSubModelPss();
-        pss.setNsPrefix(OntNamespace.BIBFRAME.prefix(),
-                OntNamespace.BIBFRAME.uri());
-        pss.setIri("resource", resource.getURI());
-        
-        Query query = pss.asQuery();
-        LOGGER.debug(query.toString());
-        QueryExecution qexec = QueryExecutionFactory.create(
-                query, resource.getModel());
-        Model resourceSubModel =  qexec.execConstruct();
-        qexec.close();
-        
-        RdfProcessor.printModel(resourceSubModel, 
-                "Submodel for resource " + resource.getURI());
-        
-        return resourceSubModel;    
-    }
    
 }

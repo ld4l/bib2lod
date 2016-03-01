@@ -304,8 +304,7 @@ public enum BfProperty {
             properties.add(bfProp.property);
         }
         
-        return properties;
-        
+        return properties;        
     }
    
 }

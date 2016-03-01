@@ -1,7 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.Query;
@@ -100,8 +102,20 @@ public class BfMeetingConverter extends BfResourceConverter {
     
     
     @Override
-    protected List<Property> getPropertiesToRetract() {
-        return BfProperty.properties(propertiesToRetract);
+    protected Map<Property, Property> getPropertyMap() {
+        // WRONG - alters map returned by BfProperty.propertyMap()
+        // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
+        // propertyMap.putAll(getPropertyMap());
+        Map<Property, Property> propertyMap = new HashMap<Property, Property>();
+        
+        // Get default mapping from Bibframe to LD4L properties
+        propertyMap.putAll(BfProperty.propertyMap());
+        
+        // For Meetings, these properties are dropped rather than converted.
+        propertyMap.keySet().removeAll(
+                BfProperty.properties(propertiesToRetract));
+        
+        return propertyMap;
     }
     
 //    private void convertFastIdentifier() {
