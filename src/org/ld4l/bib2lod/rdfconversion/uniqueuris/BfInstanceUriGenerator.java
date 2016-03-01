@@ -6,7 +6,6 @@ import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -34,7 +33,7 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
                     + "} } ");
     
     
-    private static String sparql = 
+    private static String SPARQL = 
             "PREFIX fn: <http://www.w3.org/2005/xpath-functions#>  " 
             // + "PREFIX afn: <http://jena.apache.org/ARQ/function#>  "
             + "SELECT ?instance ?worldcatId "
@@ -79,9 +78,9 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
         
         RdfProcessor.printModel(resource.getModel(), "Instance submodel;");
         
-        LOGGER.debug("Instance query: " + sparql);
+        LOGGER.debug("Instance query: " + SPARQL);
         QueryExecution qexec = 
-                QueryExecutionFactory.create(sparql, resource.getModel());
+                QueryExecutionFactory.create(SPARQL, resource.getModel());
         ResultSet results = qexec.execSelect();
         
         while (results.hasNext()) {

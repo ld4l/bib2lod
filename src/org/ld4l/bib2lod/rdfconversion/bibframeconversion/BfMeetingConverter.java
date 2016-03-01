@@ -18,27 +18,29 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfMeetingConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfMeetingConverter.class);
 
-    private static List<BfProperty> propertiesToRetract = 
+    private static List<BfProperty> PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        propertiesToRetract.add(BfProperty.BF_AUTHORITY_SOURCE);
-        propertiesToRetract.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
-        propertiesToRetract.add(BfProperty.BF_HAS_AUTHORITY);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORITY_SOURCE);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_HAS_AUTHORITY);
     }
     
-    ParameterizedSparqlString askPss = new ParameterizedSparqlString(
-            "ASK { "
-            + "?meeting " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() + " " 
-            + "?madsAuth . "
-            + "?madsAuth a " + BfType.MADSRDF_CONFERENCE_NAME.sparqlUri()
-            + "}");
+    private final ParameterizedSparqlString ASK_PSS = 
+            new ParameterizedSparqlString(
+                    "ASK { "
+                    + "?meeting " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() 
+                    + " " 
+                    + "?madsAuth . "
+                    + "?madsAuth a " 
+                    + BfType.MADSRDF_CONFERENCE_NAME.sparqlUri()
+                    + "}");
     
 //    ParameterizedSparqlString selectPss = new ParameterizedSparqlString(
 //            "SELECT ?idValue WHERE {"
@@ -73,8 +75,8 @@ public class BfMeetingConverter extends BfAuthorityConverter {
       
     private void convertConferenceName() {
 
-        askPss.setIri("meeting", subject.getURI());
-        Query query = askPss.asQuery();
+        ASK_PSS.setIri("meeting", subject.getURI());
+        Query query = ASK_PSS.asQuery();
         LOGGER.debug(query.toString());
         QueryExecution qexec = 
                 QueryExecutionFactory.create(query, subject.getModel());
@@ -100,7 +102,7 @@ public class BfMeetingConverter extends BfAuthorityConverter {
         
         // For Meetings, these properties are dropped rather than converted.
         propertyMap.keySet().removeAll(
-                BfProperty.properties(propertiesToRetract));
+                BfProperty.properties(PROPERTIES_TO_RETRACT));
         
         return propertyMap;
     }

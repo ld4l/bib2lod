@@ -38,7 +38,7 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
                     + "} } ");
 
     
-    private static ParameterizedSparqlString selectPss = 
+    private static ParameterizedSparqlString SELECT_PSS = 
             new ParameterizedSparqlString(
                     "SELECT ?authAccessPoint ?bfLabel ?madsAuthScheme "  
                     + "?madsAuthLabel ?id ?authSource "
@@ -98,8 +98,8 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
         
         String uri = null;
         
-        selectPss.setIri("topic", resource.getURI());   
-        Query query = selectPss.asQuery();
+        SELECT_PSS.setIri("topic", resource.getURI());   
+        Query query = SELECT_PSS.asQuery();
         // LOGGER.debug(query.toString());
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, resource.getModel());

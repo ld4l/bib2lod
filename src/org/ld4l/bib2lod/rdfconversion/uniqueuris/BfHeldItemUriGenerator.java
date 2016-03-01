@@ -6,7 +6,6 @@ import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.Resource;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -18,10 +17,10 @@ public class BfHeldItemUriGenerator extends BfResourceUriGenerator {
             LogManager.getLogger(BfHeldItemUriGenerator.class);
 
     // Order is crucial here
-    private static String[] keyTypes = 
+    private static String[] KEY_TYPES = 
         { "lcc", "ddc", "nlm", "udc", "barcode", "id" };        
 
-    private static String sparql = 
+    private static final String SPARQL = 
                 "SELECT ?item ?lcc ?ddc ?nlm ?udc ?barcode ?id "
                 + "?shelfMark ?scheme ?label "
                 + "WHERE { "
@@ -61,7 +60,7 @@ public class BfHeldItemUriGenerator extends BfResourceUriGenerator {
     protected String getUniqueKey() {
 
         QueryExecution qexec = 
-                QueryExecutionFactory.create(sparql, resource.getModel());
+                QueryExecutionFactory.create(SPARQL, resource.getModel());
         ResultSet results = qexec.execSelect();
         
         // If there is more than one (which there shouldn't be), we'll get the
@@ -69,7 +68,7 @@ public class BfHeldItemUriGenerator extends BfResourceUriGenerator {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
 
-            for (String k : keyTypes) {
+            for (String k : KEY_TYPES) {
                 RDFNode node = soln.get(k);
                 if (node != null && node.isLiteral()) {
                     Literal lit = node.asLiteral();

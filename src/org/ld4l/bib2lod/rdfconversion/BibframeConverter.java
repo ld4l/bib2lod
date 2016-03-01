@@ -29,7 +29,6 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTitleConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.MadsAuthorityConverter;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
@@ -44,7 +43,7 @@ public class BibframeConverter extends RdfProcessor {
             LogManager.getLogger(BibframeConverter.class);
 
     // Order may matter, so use LinkedHashMap
-    private static Map<BfType, BfResourceConverter> converters =
+    private static Map<BfType, BfResourceConverter> CONVERTERS =
             new LinkedHashMap<BfType, BfResourceConverter>();
     
     private static final Map<BfType, Class<?>> CONVERTERS_BY_TYPE =
@@ -87,8 +86,8 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_PROVIDER, BfResourceConverter.class);
         
         // TODO Needs own converter
-        CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, 
-                BfResourceConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_CATEGORY, BfResourceConverter.class);
+                
         
         CONVERTERS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
                 BfResourceConverter.class);
@@ -96,9 +95,9 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
                 BfAnnotationConverter.class);  
 
-        // TODO Needs own converter
+        // TODO Needs own converter?
         CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
-                MadsAuthorityConverter.class);       
+                BfResourceConverter.class);       
         
         CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
     }
@@ -146,7 +145,7 @@ public class BibframeConverter extends RdfProcessor {
                 converter = instantiatedClasses.get(converterClass);
             }
             
-            converters.put(bfType, converter);
+            CONVERTERS.put(bfType, converter);
         }
     }
 
@@ -214,7 +213,7 @@ public class BibframeConverter extends RdfProcessor {
         
         // Iterate through the types in the specified order
         for (Map.Entry<BfType, BfResourceConverter> entry: 
-                converters.entrySet()) {
+                CONVERTERS.entrySet()) {
             
             // ADD HERE - method call convertResourceType(entry)
             

@@ -17,10 +17,10 @@ public class BfAuthorityConverter extends BfResourceConverter {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAuthorityConverter.class);
        
-    private static final Map<BfProperty, Ld4lProperty> propertyMap = 
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        propertyMap.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
     
     private static ParameterizedSparqlString resourceSubModelPss = 
@@ -48,8 +48,8 @@ public class BfAuthorityConverter extends BfResourceConverter {
     @Override
     protected Map<Property, Property> getPropertyMap() {
         // WRONG - alters map returned by BfProperty.propertyMap()
-        // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
-        // propertyMap.putAll(getPropertyMap());
+        // Map<Property, Property> PROPERTY_MAP = BfProperty.propertyMap();      
+        // PROPERTY_MAP.putAll(getPropertyMap());
         Map<Property, Property> map = new HashMap<Property, Property>();
         
         // Get default mapping from Bibframe to LD4L properties
@@ -57,7 +57,7 @@ public class BfAuthorityConverter extends BfResourceConverter {
         
         // These properties have a non-default conversion for bf:Authorities.
         map.putAll(
-                BfProperty.propertyMap(propertyMap));
+                BfProperty.propertyMap(PROPERTY_MAP));
         
         return map;        
     }

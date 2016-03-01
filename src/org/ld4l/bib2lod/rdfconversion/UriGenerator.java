@@ -18,7 +18,6 @@ import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAnnotationUriGenerator;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfAuthorityUriGenerator;
 import org.ld4l.bib2lod.rdfconversion.uniqueuris.BfCategoryUriGenerator;

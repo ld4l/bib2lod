@@ -30,17 +30,17 @@ public class BfTopicConverter extends BfAuthorityConverter {
                     + "} } ");
 
     
-    private static final List<BfProperty> fastPropertiesToRetract = 
+    private static final List<BfProperty> FAST_PROPERTIES_TO_RETRACT = 
             new ArrayList<BfProperty>();
     static {
-        fastPropertiesToRetract.add(BfProperty.BF_HAS_AUTHORITY);
-       // fastPropertiesToRetract.add(BfProperty.BF_SYSTEM_NUMBER);
+        FAST_PROPERTIES_TO_RETRACT.add(BfProperty.BF_HAS_AUTHORITY);
+       // FAST_PROPERTIES_TO_RETRACT.add(BfProperty.BF_SYSTEM_NUMBER);
     }
     
-    private static final Map<BfProperty, Ld4lProperty> propertyMap = 
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
             new HashMap<BfProperty, Ld4lProperty>();
     static {
-        propertyMap.put(BfProperty.BF_LABEL, Ld4lProperty.PREFERRED_LABEL);
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.PREFERRED_LABEL);
     }
 
     public BfTopicConverter(String localNamespace) {
@@ -59,7 +59,7 @@ public class BfTopicConverter extends BfAuthorityConverter {
 //    protected List<Property> getResourcesToRemove() {
 //        String namespace = subject.getNameSpace();
 //        if (namespace.equals(Vocabulary.FAST.uri())) {
-//            return BfProperty.properties(fastPropertiesToRetract);
+//            return BfProperty.properties(FAST_PROPERTIES_TO_RETRACT);
 //        }
 //        return new ArrayList<Property>();        
 //    }
@@ -76,10 +76,10 @@ public class BfTopicConverter extends BfAuthorityConverter {
         
         // For Topics, these properties have a non-default conversion.
         map.putAll(
-                BfProperty.propertyMap(propertyMap));
+                BfProperty.propertyMap(PROPERTY_MAP));
         
         // And these properties are removed rather than converted.
-        map.keySet().removeAll(fastPropertiesToRetract);
+        map.keySet().removeAll(FAST_PROPERTIES_TO_RETRACT);
         
         return map;        
     }

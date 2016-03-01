@@ -14,7 +14,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
