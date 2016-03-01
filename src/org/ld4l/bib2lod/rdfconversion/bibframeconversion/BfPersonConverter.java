@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -34,6 +35,12 @@ public class BfPersonConverter extends BfAuthorityConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
 
+    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_LABEL);
+    }
+    
     public BfPersonConverter(String localNamespace) {
         super(localNamespace);
     }
@@ -181,5 +188,13 @@ public class BfPersonConverter extends BfAuthorityConverter {
         return props;   
     }
     
-
+    protected Map<Property, Property> getPropertyMap() {
+        
+        Map<Property, Property> map = super.getPropertyMap();
+        
+        // These properties are removed rather than converted.
+        map.keySet().removeAll(BfProperty.properties(PROPERTIES_TO_RETRACT));
+        
+        return map;
+    }
 }
