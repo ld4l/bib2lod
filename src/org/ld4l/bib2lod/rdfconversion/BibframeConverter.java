@@ -2,9 +2,11 @@ package org.ld4l.bib2lod.rdfconversion;
 
 import java.io.File;
 import java.time.Instant;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.commons.io.FilenameUtils;
@@ -21,13 +23,13 @@ import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfHeldItemConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfInstanceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfLanguageConverter;
-import org.ld4l.bib2lod.rdfconversion.bibframeconversion.MadsAuthorityConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfMeetingConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfPersonConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfResourceConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTitleConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfTopicConverter;
 import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfWorkConverter;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.MadsAuthorityConverter;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
 
@@ -101,7 +103,6 @@ public class BibframeConverter extends RdfProcessor {
         CONVERTERS_BY_TYPE.put(BfType.BF_RESOURCE, BfResourceConverter.class);
     }
     
-
     public BibframeConverter(String localNamespace, String inputDir,
             String mainOutputDir) {
         super(localNamespace, inputDir, mainOutputDir);
@@ -209,9 +210,13 @@ public class BibframeConverter extends RdfProcessor {
 
         Model outputModel = ModelFactory.createDefaultModel();
 
+        List<Resource> resourcesToRemove = new ArrayList<Resource>();
+        
         // Iterate through the types in the specified order
         for (Map.Entry<BfType, BfResourceConverter> entry: 
                 converters.entrySet()) {
+            
+            // ADD HERE - method call convertResourceType(entry)
             
             BfType bfType = entry.getKey();
             BfResourceConverter converter = entry.getValue();
@@ -219,17 +224,38 @@ public class BibframeConverter extends RdfProcessor {
             // Get all the subjects of this type
             ResIterator subjects = inputModel.listResourcesWithProperty(
                     RDF.type, bfType.ontClass());
-            
+
             // Iterate through the subjects of this type and convert
             while (subjects.hasNext()) {
                 subjectCount++;
                 Resource subject = subjects.nextResource();
                 
-                // Convert the subject and add to the output model for the file.
-                Model convertedModel = converter.convert(subject);
-                outputModel.add(convertedModel);
+                // add here: call to convertSubject(subject, resourcesToRemove)
                 
-                convertedModel.close();                
+                if (resourcesToRemove.contains(subject)) {
+                    // If a previous converter has designated this resource for
+                    // removal, do not process it, and do not add it to the 
+                    // output model. Example: a Meeting removes the associated
+                    // madsrdf:Authority, since in LD4L a Meeting is an Event
+                    // rather than an Authority.
+                    LOGGER.debug("Removing subject " + subject.getURI());
+                    resourcesToRemove.remove(subject);  
+                    
+                } else {
+                
+                    LOGGER.debug("Processing subject " + subject.getURI());
+                    
+                    // Convert the subject and add to the output model for the file.
+                    Model convertedModel = converter.convert(subject);
+                    outputModel.add(convertedModel);
+                    convertedModel.close();  
+                    
+                    // Get the resources the converter has designated for 
+                    // removal. These will be tested on subsequent iterations
+                    // through the subjects iterator, and if it is in the list,
+                    // conversion will be skipped over.
+                    resourcesToRemove.addAll(converter.getResourcesToRemove());
+                }
             }           
         }
 
@@ -250,5 +276,6 @@ public class BibframeConverter extends RdfProcessor {
         
         return subjectCount;
     }
+    
 
 }

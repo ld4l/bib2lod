@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.query.ParameterizedSparqlString;
@@ -44,6 +46,7 @@ public class BfResourceConverter {
     protected String localNamespace;
     protected Resource subject;
     protected Model outputModel;
+    protected List<Resource> resourcesToRemove;
     
     // This would be the full input model for the file. Pass it in if we need
     // more data than we got in the subject submodel. 
@@ -58,17 +61,21 @@ public class BfResourceConverter {
      */
     public final Model convert(Resource subject) {         
 
-        // Initialize converter for processing of new subject
-        this.subject = getResourceWithSubModel(subject);        
-        
-        // Start with a new output model for each subject conversion.
-        this.outputModel = ModelFactory.createDefaultModel();
-        
+        // Initialize instance variables for processing of new subject
+        init(subject);
+
         convert();
         
         this.subject.getModel().close();
         
         return outputModel;
+    }
+    
+    private void init(Resource subject) {
+
+        this.subject = getResourceWithSubModel(subject);               
+        this.outputModel = ModelFactory.createDefaultModel();
+        this.resourcesToRemove = new ArrayList<Resource>();       
     }
 
     protected Resource getResourceWithSubModel(Resource subject) {
@@ -201,7 +208,24 @@ public class BfResourceConverter {
         return propertyMap;
     }
     
-
+    public List<Resource> getResourcesToRemove() {
+        return resourcesToRemove;
+    }
+    
+    // When this converter determines that another resource should be removed,
+    // add it to the list, and remove all statements pertaining to the resource
+    // from the subject submodel. The list resourcesToRemove will be used to
+    // remove a resource during the resource iteration in BibframeConverter.
+    protected void removeResource(Resource resource) {            
+        Model model = subject.getModel();
+        
+        model.removeAll(resource, null, null);
+        model.removeAll(null, null, resource);
+        
+        resourcesToRemove.add(resource);
+        
+        LOGGER.debug("Adding resource to remove: " + resource.getURI());
+    }
 
    
 }

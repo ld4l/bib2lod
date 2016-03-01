@@ -35,6 +35,7 @@ public class BfAuthorityConverter extends BfResourceConverter {
                     + "?s ?p3 ?resource . "
                     + "} } ");
     
+    
     public BfAuthorityConverter(String localNamespace) {
         super(localNamespace);
     }
@@ -60,6 +61,12 @@ public class BfAuthorityConverter extends BfResourceConverter {
         
         return map;        
     }
-
+    
+    protected void removeMadsAuthority() {
+        Statement statement = 
+                subject.getProperty(BfProperty.BF_HAS_AUTHORITY.property());
+        Resource madsAuthority = statement.getResource();
+        removeResource(madsAuthority);
+    }
 
 }

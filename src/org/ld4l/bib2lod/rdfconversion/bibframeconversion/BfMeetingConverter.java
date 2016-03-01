@@ -11,14 +11,16 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
-public class BfMeetingConverter extends BfResourceConverter {
+public class BfMeetingConverter extends BfAuthorityConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfMeetingConverter.class);
@@ -30,18 +32,6 @@ public class BfMeetingConverter extends BfResourceConverter {
         propertiesToRetract.add(BfProperty.BF_AUTHORIZED_ACCESS_POINT);
         propertiesToRetract.add(BfProperty.BF_HAS_AUTHORITY);
     }
-    
-    private static ParameterizedSparqlString resourceSubModelPss = 
-            new ParameterizedSparqlString(
-                    "CONSTRUCT { ?resource ?p1 ?o1 . "
-                    + " ?o1 ?p2 ?o2 . "
-                    + " ?s ?p3 ?resource . " 
-                    + "} WHERE { { "  
-                    + "?resource ?p1 ?o1 . "
-                    + "OPTIONAL { ?o1 ?p2 ?o2 . } "
-                    + "} UNION { " 
-                    + "?s ?p3 ?resource . "
-                    + "} } ");
     
     ParameterizedSparqlString askPss = new ParameterizedSparqlString(
             "ASK { "
@@ -65,15 +55,12 @@ public class BfMeetingConverter extends BfResourceConverter {
         super(localNamespace);
     }
     
-    @Override 
-    protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
-    }
-    
-    
     @Override
     protected Model convert() {
+
         convertConferenceName();
+        
+        removeMadsAuthority();
         
         // Do with the identifier - will be common to other types
         // convertFastIdentifier();
@@ -116,6 +103,10 @@ public class BfMeetingConverter extends BfResourceConverter {
                 BfProperty.properties(propertiesToRetract));
         
         return propertyMap;
+    }
+    
+    public List<Resource> getResourcesToRemove() {
+        return resourcesToRemove;
     }
     
 //    private void convertFastIdentifier() {
