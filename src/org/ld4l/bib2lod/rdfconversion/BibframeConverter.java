@@ -182,14 +182,6 @@ public class BibframeConverter extends RdfProcessor {
             totalSubjectCount += convertFile(file);
         }  
 
-        /*
-         * Possibly we need other steps here: go back through files to do URI
-         * replacements. This entails keeping separate models for statements 
-         * that shouldn't undergo URI replacement: e.g., the new statements
-         * we create linking ld4l entities to bf entities, where the latter
-         * shouldn't undergo URI replacement.
-         */
-        
         return totalSubjectCount;
     }
 
@@ -214,48 +206,13 @@ public class BibframeConverter extends RdfProcessor {
         // Iterate through the types in the specified order
         for (Map.Entry<BfType, BfResourceConverter> entry: 
                 CONVERTERS.entrySet()) {
-            
-            // ADD HERE - method call convertResourceType(entry)
-            
+ 
             BfType bfType = entry.getKey();
             BfResourceConverter converter = entry.getValue();
             
-            // Get all the subjects of this type
-            ResIterator subjects = inputModel.listResourcesWithProperty(
-                    RDF.type, bfType.ontClass());
+            subjectCount += convertResourceType(bfType, converter, inputModel, 
+                    outputModel, resourcesToRemove);
 
-            // Iterate through the subjects of this type and convert
-            while (subjects.hasNext()) {
-                subjectCount++;
-                Resource subject = subjects.nextResource();
-                
-                // add here: call to convertSubject(subject, resourcesToRemove)
-                
-                if (resourcesToRemove.contains(subject)) {
-                    // If a previous converter has designated this resource for
-                    // removal, do not process it, and do not add it to the 
-                    // output model. Example: a Meeting removes the associated
-                    // madsrdf:Authority, since in LD4L a Meeting is an Event
-                    // rather than an Authority.
-                    LOGGER.debug("Removing subject " + subject.getURI());
-                    resourcesToRemove.remove(subject);  
-                    
-                } else {
-                
-                    LOGGER.debug("Processing subject " + subject.getURI());
-                    
-                    // Convert the subject and add to the output model for the file.
-                    Model convertedModel = converter.convert(subject);
-                    outputModel.add(convertedModel);
-                    convertedModel.close();  
-                    
-                    // Get the resources the converter has designated for 
-                    // removal. These will be tested on subsequent iterations
-                    // through the subjects iterator, and if it is in the list,
-                    // conversion will be skipped over.
-                    resourcesToRemove.addAll(converter.getResourcesToRemove());
-                }
-            }           
         }
 
         inputModel.close();
@@ -276,5 +233,52 @@ public class BibframeConverter extends RdfProcessor {
         return subjectCount;
     }
     
+    private int convertResourceType(
+            BfType bfType, BfResourceConverter converter, Model inputModel, 
+            Model outputModel, List<Resource> resourcesToRemove) {
+    
+        int subjectCount = 0;
+        
+        // Get all the subjects of this type
+        ResIterator subjects = inputModel.listResourcesWithProperty(
+                RDF.type, bfType.ontClass());
 
+        // Iterate through the subjects of this type and convert
+        while (subjects.hasNext()) {
+            subjectCount++;
+            Resource subject = subjects.nextResource();
+            convertSubject(subject, converter, outputModel, resourcesToRemove);
+        }                   
+
+        return subjectCount;
+    }
+    
+    private void convertSubject(Resource subject, BfResourceConverter converter,
+            Model outputModel, List<Resource> resourcesToRemove) {
+
+        if (resourcesToRemove.contains(subject)) {
+            // If a previous converter has designated this resource for
+            // removal, do not process it, and do not add it to the 
+            // output model. Example: a Meeting removes the associated
+            // madsrdf:Authority, since in LD4L a Meeting is an Event
+            // rather than an Authority.
+            LOGGER.debug("Removing subject " + subject.getURI());
+            resourcesToRemove.remove(subject);  
+            
+        } else {
+        
+            LOGGER.debug("Processing subject " + subject.getURI());
+            
+            // Convert the subject and add to the output model for the file.
+            Model convertedModel = converter.convert(subject);
+            outputModel.add(convertedModel);
+            convertedModel.close();  
+            
+            // Get the resources the converter has designated for 
+            // removal. These will be tested on subsequent iterations
+            // through the subjects iterator, and if it is in the list,
+            // conversion will be skipped over.
+            resourcesToRemove.addAll(converter.getResourcesToRemove());
+        }
+    }
 }
