@@ -75,11 +75,11 @@ public class BfTopicConverter extends BfAuthorityConverter {
         map.putAll(BfProperty.propertyMap());
         
         // For Topics, these properties have a non-default conversion.
-        map.putAll(
-                BfProperty.propertyMap(PROPERTY_MAP));
-        
+        map.putAll(BfProperty.propertyMap(PROPERTY_MAP));
+
         // And these properties are removed rather than converted.
-        map.keySet().removeAll(FAST_PROPERTIES_TO_RETRACT);
+        map.keySet().removeAll(
+                BfProperty.properties(FAST_PROPERTIES_TO_RETRACT));
         
         return map;        
     }
