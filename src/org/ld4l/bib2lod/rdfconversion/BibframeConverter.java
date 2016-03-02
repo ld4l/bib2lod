@@ -162,10 +162,9 @@ public class BibframeConverter extends RdfProcessor {
 
         int totalSubjectCount = convertFiles(inputDir, outputDir);
 
-        LOGGER.info("END Bibframe RDF conversion in all input files. Converted " 
-                + totalSubjectCount + " "     
-                + Bib2LodStringUtils.simplePlural(totalSubjectCount, "resource")
-                + " . " + TimerUtils.getDuration(processStart));
+        LOGGER.info("END Bibframe RDF conversion in all input files. Converted "    
+                + Bib2LodStringUtils.count(totalSubjectCount, "resource")
+                + ". Duration: " + TimerUtils.getDuration(processStart) + ".");
 
         return outputDir;        
     }
@@ -224,13 +223,11 @@ public class BibframeConverter extends RdfProcessor {
         writeModelToFile(outputModel, outputFile); 
         
         LOGGER.info("Converted " 
-                + Bib2LodStringUtils.count(subjectCount, "subject") 
-                + " in file "
-                + filename + " resulting in " + Bib2LodStringUtils.count(
-                        outputModel.size(), "triple") + "." 
-                + TimerUtils.getDuration(fileStart));
+                + Bib2LodStringUtils.count(subjectCount, "subject") + " to "                 
+                + Bib2LodStringUtils.count(outputModel.size(), "triple")
+                + " in file " + filename + ". Duration: "                 
+                + TimerUtils.getDuration(fileStart) + ".");
 
-        
         outputModel.close();
         
         return subjectCount;

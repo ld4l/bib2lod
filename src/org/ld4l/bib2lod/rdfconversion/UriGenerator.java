@@ -138,30 +138,23 @@ public class UriGenerator extends RdfProcessor {
 
         File[] inputFiles = new File(inputDir).listFiles();
         int totalFileCount = inputFiles.length;
-        
-        int fileCount = 0;
-        int timeFileCount = 0;
-        Instant fileStart = Instant.now();
 
         // For consistent ordering. Helps locate errors if program exits
         // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
         // files).
         Arrays.sort(inputFiles);
-        LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural(totalFileCount, "file") + ". "
-                        + TimerUtils.getDuration(processStart)); 
-        
-        for ( File file : inputFiles ) {
 
+        int fileCount = 0;
+        for ( File file : inputFiles ) {
+            
+            Instant fileStartTime = Instant.now();
             fileCount++;
-            timeFileCount++;
             
             String filename = file.getName();
             
             LOGGER.info("Start unique URI generation in file " + filename
-                    + " (file " + fileCount + " of " + totalFileCount  
-                    + " input "
-                    + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
+                    + " (file " + fileCount + " of "
+                    + Bib2LodStringUtils.count(totalFileCount, "input file")
                     + ").");
             
             Model outputModel = processInputFile(file);
@@ -172,32 +165,15 @@ public class UriGenerator extends RdfProcessor {
             outputModel.close();
             
             LOGGER.info("End unique URI generation in file " + filename
-                    + " (file " + fileCount + " of " + totalFileCount  
-                    + " input "
-                    + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
-                    + ").");
-            
-            if (timeFileCount == TimerUtils.NUM_FILES_TO_TIME) {
-                // TODO Define TIMER logging level between info and debug
-                LOGGER.trace("Generated unique URIs in " + timeFileCount + " "
-                        + Bib2LodStringUtils.simplePlural(timeFileCount, "file")
-                        + ". " + TimerUtils.getDuration(fileStart));
-                timeFileCount = 0;
-                fileStart = Instant.now();   
-            }
+                    + " (file " + fileCount + " of " 
+                    + Bib2LodStringUtils.count(totalFileCount, "input file")
+                    + "). Duration: " 
+                    + TimerUtils.getDuration(fileStartTime) + ".");
         }   
-
-        if (timeFileCount > 0) {
-            // TODO Define TIMER logging level between info and debug
-            LOGGER.trace("Generated unique URIs in " + timeFileCount + " "
-                    + Bib2LodStringUtils.simplePlural(timeFileCount, "file")
-                    + ". " + TimerUtils.getDuration(fileStart));    
-        } 
-        
-        LOGGER.info("END URI generation in total of " + totalFileCount 
-                + " input "                                
-                + Bib2LodStringUtils.simplePlural(totalFileCount, "file")
-                + ". " + TimerUtils.getDuration(processStart));
+       
+        LOGGER.info("END URI generation in total of "       
+                + Bib2LodStringUtils.count(totalFileCount, "input file")
+                + ". Duration: " + TimerUtils.getDuration(processStart) + ".");
         
         return outputDir;
     }

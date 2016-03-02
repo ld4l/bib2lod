@@ -63,11 +63,10 @@ public class ProcessController {
         
         Instant start = Instant.now();
         int fileCount = new File(this.inputDir).listFiles().length;
-        String inputFiles = fileCount + " input " 
-                + Bib2LodStringUtils.simplePlural(fileCount, "file");
-        LOGGER.info("Start converting " + inputFiles + " in " + this.inputDir 
-                + ".");           
-   
+        LOGGER.info("Start converting " 
+                + Bib2LodStringUtils.count(fileCount, "input file") 
+                + " in " + this.inputDir + "."); 
+                          
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
@@ -98,7 +97,8 @@ public class ProcessController {
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
         }
             
-        LOGGER.info("END CONVERSION! Total duration to convert " + inputFiles 
+        LOGGER.info("END CONVERSION! Total duration to convert " 
+                + Bib2LodStringUtils.count(fileCount, "input file") 
                 + ": " + TimerUtils.formatMillis(start, Instant.now())
                 + ". Results in " + outputDir + ".");
         return outputDir;

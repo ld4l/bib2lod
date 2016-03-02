@@ -7,11 +7,6 @@ import java.util.concurrent.TimeUnit;
 public final class TimerUtils {
 
     private TimerUtils() {}
-    
-    // Time processing of this many files or other items (URIs, resources, 
-    // etc.). Individual classes may choose to define their own limits.
-    public static final int NUM_FILES_TO_TIME = 10000;
-    public static final int NUM_ITEMS_TO_TIME = 10000;
 
     public static String formatSeconds(Instant start, Instant end) {
         return formatSeconds(Duration.between(start, end));
@@ -64,9 +59,7 @@ public final class TimerUtils {
     }
     
     public static String getDuration(Instant start) {
-        return "Duration: " + formatMillis(start, Instant.now()) + ".";
+        return formatMillis(start, Instant.now());
     }
-    
-
-    
+  
 }
