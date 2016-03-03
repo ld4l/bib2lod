@@ -29,8 +29,11 @@ public enum BfProperty {
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode", Ld4lProperty.BARCODE),
     BF_CHANGE_DATE("changeDate"),
-    BF_CONTRIBUTOR("contributor", Ld4lProperty.HAS_CONTRIBUTION),
-    BF_CREATOR("creator", Ld4lProperty.HAS_CONTRIBUTION),
+    // DON'T map to Ld4lProperty.HAS_CONTRIBUTION here, else object will be
+    // the original agent rather than the new ld4l:Contribution entity. This is
+    // handled in BfWorkConverter.
+    BF_CONTRIBUTOR("contributor"),
+    BF_CREATOR("creator"),
     // LD4L uses the derivedFrom predicate to relate Titles to Titles and
     // Works to Works, but the Bibframe property is used to relate a Work or 
     // Instance to a marcxml record, so should be removed.
@@ -116,19 +119,22 @@ public enum BfProperty {
             "isMemberOfMADSScheme", 
             Ld4lProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME),
 
-    // Add others as appropriate
+    // Add others as appropriate.
+    // DON'T map to Ld4lProperty.HAS_CONTRIBUTION here, else object will be
+    // the original agent rather than the new ld4l:Contribution entity. This is
+    // handled in BfWorkConverter.
     RELATORS_AUTHOR(
-            OntNamespace.RELATORS, "aut", Ld4lProperty.HAS_CONTRIBUTION), 
+            OntNamespace.RELATORS, "aut"), 
     RELATORS_COMPOSER(
-            OntNamespace.RELATORS, "cmp", Ld4lProperty.HAS_CONTRIBUTION),  
+            OntNamespace.RELATORS, "cmp"),  
     RELATORS_CONDUCTOR(
-            OntNamespace.RELATORS, "cnd", Ld4lProperty.HAS_CONTRIBUTION),  
+            OntNamespace.RELATORS, "cnd"),  
     RELATORS_EDITOR(
-            OntNamespace.RELATORS, "edt", Ld4lProperty.HAS_CONTRIBUTION),  
+            OntNamespace.RELATORS, "edt"),  
     RELATORS_NARRATOR(
-            OntNamespace.RELATORS, "nrt", Ld4lProperty.HAS_CONTRIBUTION),  
+            OntNamespace.RELATORS, "nrt"),  
     RELATORS_PERFORMER(
-            OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION), 
+            OntNamespace.RELATORS, "prf"), 
     
     // Subproperties of bf:identifier
     BF_ANSI("ansi"),
