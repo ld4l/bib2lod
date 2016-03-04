@@ -160,52 +160,45 @@ public class BibframeConverter extends RdfProcessor {
         
         String outputDir = getOutputDir();  
 
-        int totalSubjectCount = convertFiles(inputDir, outputDir);
-
-        LOGGER.info("END Bibframe RDF conversion in all input files. Converted "    
-                + Bib2LodStringUtils.count(totalSubjectCount, "resource")
-                + ". Duration: " + TimerUtils.getDuration(processStart) + ".");
-
-        return outputDir;        
-    }
-    
-    private int convertFiles(String inputDir, String outputDir) {
-        
         File[] inputFiles = new File(inputDir).listFiles();
+        int totalFileCount = inputFiles.length;
         
         // For consistent ordering. Helps locate errors if program exits
         // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
         // files).
         Arrays.sort(inputFiles);
-
-        int totalSubjectCount = 0;
         
-        for ( File file : inputFiles ) {
-            totalSubjectCount += convertFile(file);
+        int fileCount = 0;
+        for ( File file : inputFiles ) {            
+            fileCount++;
+            convertFile(file, fileCount, totalFileCount);          
         }  
 
-        return totalSubjectCount;
-    }
+        LOGGER.info("END Bibframe RDF conversion of all input files. "
+                + "Duration: " + TimerUtils.getDuration(processStart) + ".");
 
-    private int convertFile(File file) {
+        return outputDir;        
+    }
+    
+    private void convertFile(File file, int fileCount, int totalFileCount) {
         
         String filename = file.getName();
 
-        Model inputModel = readModelFromFile(file);
-        
-        int subjectCount = 0;
-
-        LOGGER.info("Start converting Bibframe RDF in file " + filename 
-                + " containing " + Bib2LodStringUtils.count(
-                        inputModel.size(), "triple") + ".");
+        LOGGER.info("Start Bibframe RDF conversion of file "                
+                + filename + " (file " + fileCount + " of " 
+                + Bib2LodStringUtils.count(totalFileCount, "input file")
+                + ").");
 
         Instant fileStart = Instant.now();
+        
+        Model inputModel = readModelFromFile(file);
 
         Model outputModel = ModelFactory.createDefaultModel();
 
         List<Resource> resourcesToRemove = new ArrayList<Resource>();
         
         // Iterate through the types in the specified order
+        int subjectCount = 0;
         for (Map.Entry<BfType, BfResourceConverter> entry: 
                 CONVERTERS.entrySet()) {
  
@@ -214,23 +207,23 @@ public class BibframeConverter extends RdfProcessor {
             
             subjectCount += convertResourceType(bfType, converter, inputModel, 
                     outputModel, resourcesToRemove);
-
         }
-
-        inputModel.close();
+   
+        String basename = FilenameUtils.getBaseName(file.toString());
+        writeModelToFile(outputModel, basename); 
         
-        String outputFile = FilenameUtils.getBaseName(file.toString());
-        writeModelToFile(outputModel, outputFile); 
-        
-        LOGGER.info("Converted " 
+        LOGGER.info("End Bibframe RDF conversion of file " + filename 
+                + " (file " + fileCount + " of " 
+                + Bib2LodStringUtils.count(totalFileCount, "input file") + "). "
+                + "Converted "
+                + Bib2LodStringUtils.count(inputModel.size(), "triple") + " "
+                + "with "
                 + Bib2LodStringUtils.count(subjectCount, "subject") + " to "                 
-                + Bib2LodStringUtils.count(outputModel.size(), "triple")
-                + " in file " + filename + ". Duration: "                 
-                + TimerUtils.getDuration(fileStart) + ".");
-
+                + Bib2LodStringUtils.count(outputModel.size(), "triple") + ". "                     
+                + "Duration: " + TimerUtils.getDuration(fileStart) + ".");               
+                
+        inputModel.close();
         outputModel.close();
-        
-        return subjectCount;
     }
     
     private int convertResourceType(
