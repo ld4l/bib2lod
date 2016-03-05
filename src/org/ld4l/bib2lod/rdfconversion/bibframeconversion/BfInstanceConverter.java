@@ -1,12 +1,13 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
-import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -15,31 +16,33 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfInstanceConverter extends BfBibResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceConverter.class);
     
- 
-    private static final Map<Resource, Resource> NEW_WORK_TYPES = 
-            BfType.typeMap(Arrays.asList(
-                    BfType.BF_COLLECTION,
-                    BfType.BF_INTEGRATING,
-                    BfType.BF_MONOGRAPH,
-                    BfType.BF_MULTIPART_MONOGRAPH,
-                    BfType.BF_SERIAL
-            ));
-                        
-    /*
-     * This case is problematic, since if the Instance has more than one Item, 
-     * how would we know which of the Instance's Items are Manuscripts? 
-     private static final Map<Resource, Resource> NEW_ITEM_TYPES =
-            BfType.typeMap(Arrays.asList(
-                    BfType.BF_MANUSCRIPT
-            ));
-     */
+    private static final Map<BfType, Ld4lType> WORK_TYPES = 
+            new HashMap<BfType, Ld4lType>();
+    static {
+        WORK_TYPES.put(BfType.BF_COLLECTION, Ld4lType.COLLECTION);
+        WORK_TYPES.put(BfType.BF_INTEGRATING, Ld4lType.INTEGRATING_RESOURCE);
+        WORK_TYPES.put(BfType.BF_MONOGRAPH, Ld4lType.MONOGRAPH);
+        WORK_TYPES.put(BfType.BF_MULTIPART_MONOGRAPH, 
+                Ld4lType.MULTIPART_MONOGRAPH);
+        WORK_TYPES.put(BfType.BF_SERIAL, Ld4lType.SERIAL);
+    }
+    private static final Map<Resource, Resource> WORK_TYPE_MAP = 
+            BfType.typeMap(WORK_TYPES);
 
+    private static final Map<BfType, Ld4lType> ITEM_TYPES = 
+            new HashMap<BfType, Ld4lType>();
+    static {
+        ITEM_TYPES.put(BfType.BF_MANUSCRIPT, Ld4lType.MANUSCRIPT);
+    }
+    private static final Map<Resource, Resource> ITEM_TYPE_MAP = 
+            BfType.typeMap(ITEM_TYPES);
 
     private static final List<BfProperty> PROVIDER_PROPERTIES = 
             new ArrayList<BfProperty>();
@@ -68,6 +71,14 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         // Probably can't be null
         Resource relatedWork = 
                 instanceOf != null ? instanceOf.getResource() : null;
+                               
+        // Get any associated Items
+        List<Statement> hasHolding = subject.getModel().listStatements(
+                null, BfProperty.BF_HOLDING_FOR.property(), subject).toList();
+        // Assign relatedItem only if there's just one. Otherwise, we don't
+        // know which Item the transformations should apply to.
+        Resource relatedItem = hasHolding.size() == 1 ? 
+                hasHolding.get(0).getSubject() : null;
         
         // TODO Figure out whether to do here or within the StmtIterator
         convertTitles(BfProperty.BF_INSTANCE_TITLE);
@@ -75,16 +86,19 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         StmtIterator stmts = subject.getModel().listStatements();
  
         while (stmts.hasNext()) {
-            Statement statement = stmts.nextStatement();
-            
+            Statement statement = stmts.nextStatement();            
             Property predicate = statement.getPredicate();
+            RDFNode object = statement.getObject();
     
             if (predicate.equals(RDF.type)) {
-                if (convertInstanceTypeToWorkType(
-                        statement.getResource(), relatedWork)) {
-                }
                 
-                // Handle conversion to Item type here, when we know how...
+                if (moveTypeToRelatedResource(
+                        object.asResource(), relatedWork, WORK_TYPE_MAP)) {
+                
+                } else if (moveTypeToRelatedResource(
+                        object.asResource(), relatedItem, ITEM_TYPE_MAP)) {
+                    
+                } // else default conversions handled in super.convert()
               
             } else {
                 
@@ -99,44 +113,27 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                 }
                 
 //                if (bfProp.equals(BfProperty.BF_INSTANCE_TITLE)) {
-//                    convertTitles(bfProp);
+//                    convertTitle(bfProp);
 //                }
-                
-                // RDFNode object = statement.getObject();
-                
-                // TODO Do we ever get a providerStatement instead of a 
-                // Provider object? If so, we need to parse the literal value 
-                // to create the Provision and its associated properties (cf.
-                // titleStatement).
-                // Do with the provider subject
-//                if (PROVIDER_PROPERTIES.contains(bfProp)) {
-//                    convertProvider(statement);
- 
-//                } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
-//                    if (relatedWork != null) {
-//                        // Probably also added from conversion of statement
-//                        // :instance a Monograph
-//                        outputModel.add(relatedWork, RDF.type, 
-//                                Ld4lType.MONOGRAPH.ontClass());
-//                    }                                            
+                                       
             }          
         }
-
         return super.convert();
     }
-  
-    private boolean convertInstanceTypeToWorkType(
-            Resource type, Resource relatedWork) {
 
-        if (NEW_WORK_TYPES.containsKey(type)) {
-            if (relatedWork != null) {
+    private boolean moveTypeToRelatedResource(Resource type, 
+            Resource relatedResource, Map<Resource, Resource> typeMap) {
+        
+        if (relatedResource != null) {
+            if (typeMap.containsKey(type)) {
                 outputModel.add(
-                        relatedWork, RDF.type, NEW_WORK_TYPES.get(type));
+                        relatedResource, RDF.type, typeMap.get(type));
+                return true;
             }
-            return true;
+            
         }
- 
-        return false;
+        return false;        
+        
     }
     
     private void convertProvider(Statement statement) {

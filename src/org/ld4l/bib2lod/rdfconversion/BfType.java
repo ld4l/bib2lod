@@ -32,7 +32,10 @@ public enum BfType {
     BF_CARTOGRAPHY("Cartography", Ld4lType.CARTOGRAPHY),
     BF_CATEGORY("Category"),
     BF_CLASSIFICATION("Classification", Ld4lType.CLASSIFICATION),
-    BF_COLLECTION("Collection", Ld4lType.COLLECTION),
+    // ld4l:Collection has domain Work rather than Instance, so we don't want a
+    // direct conversion.
+    // BF_COLLECTION("Collection", Ld4lType.COLLECTION),
+    BF_COLLECTION("Collection"),
     BF_DATASET("Dataset", Ld4lType.DATASET),
     BF_ELECTRONIC("Electronic", Ld4lType.ELECTRONIC),
     BF_EVENT("Event", Ld4lType.EVENT),
@@ -43,8 +46,11 @@ public enum BfType {
     // Class is assigned in BfIdentifierConverter
     // BF_IDENTIFIER("Identifier", Ld4lType.IDENTIFIER), 
     BF_IDENTIFIER("Identifier"),   
-    BF_INSTANCE("Instance", Ld4lType.INSTANCE),    
-    BF_INTEGRATING("Integrating", Ld4lType.INTEGRATING_RESOURCE), 
+    BF_INSTANCE("Instance", Ld4lType.INSTANCE),   
+    // ld4l:IntegratingResource has domain Work rather than Instance, so we 
+    // don't want a direct conversion.
+    // BF_INTEGRATING("Integrating", Ld4lType.INTEGRATING_RESOURCE),
+    BF_INTEGRATING("Integrating"), 
     BF_INTENDED_AUDIENCE("IntendedAudience", Ld4lType.AUDIENCE),
     BF_JURISDICTION("Jurisdiction", Ld4lType.GOVERNMENT_ORGANIZATION),  
     BF_LANGUAGE("Language"),
