@@ -123,8 +123,7 @@ public class BfResourceConverter {
     protected ParameterizedSparqlString getResourceSubModelPss() {
         return resourceSubModelPss;
     }
-    
-    
+        
     /* 
      * Default conversion method. Subclasses may override.
      */

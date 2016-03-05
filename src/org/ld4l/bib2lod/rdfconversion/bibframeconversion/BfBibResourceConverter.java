@@ -51,8 +51,6 @@ public abstract class BfBibResourceConverter extends BfResourceConverter {
             }
         }
         
-        //retractions.add(titleDatatypeStmts);
-        
         // Convert list to set to eliminate duplicates. Can't use a set above
         // because a set can't be added to a model.
         Set<Statement> uniqueTitleDatatypeStmts = 

@@ -15,7 +15,6 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
-import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 
 public class BfInstanceConverter extends BfBibResourceConverter {
 
@@ -70,6 +69,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         Resource relatedWork = 
                 instanceOf != null ? instanceOf.getResource() : null;
         
+        // TODO Figure out whether to do here or within the StmtIterator
         convertTitles(BfProperty.BF_INSTANCE_TITLE);
 
         StmtIterator stmts = subject.getModel().listStatements();
@@ -82,7 +82,6 @@ public class BfInstanceConverter extends BfBibResourceConverter {
             if (predicate.equals(RDF.type)) {
                 if (convertInstanceTypeToWorkType(
                         statement.getResource(), relatedWork)) {
-                    //retractions.add(statement);
                 }
                 
                 // Handle conversion to Item type here, when we know how...
@@ -99,25 +98,27 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                     continue;
                 }
                 
+//                if (bfProp.equals(BfProperty.BF_INSTANCE_TITLE)) {
+//                    convertTitles(bfProp);
+//                }
+                
                 // RDFNode object = statement.getObject();
                 
                 // TODO Do we ever get a providerStatement instead of a 
                 // Provider object? If so, we need to parse the literal value 
                 // to create the Provision and its associated properties (cf.
                 // titleStatement).
-                if (PROVIDER_PROPERTIES.contains(bfProp)) {
-                    convertProvider(statement);
+                // Do with the provider subject
+//                if (PROVIDER_PROPERTIES.contains(bfProp)) {
+//                    convertProvider(statement);
  
-                } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
-                    if (relatedWork != null) {
-                        // Probably also added from conversion of statement
-                        // :instance a Monograph
-                        outputModel.add(relatedWork, RDF.type, 
-                                Ld4lType.MONOGRAPH.ontClass());
-                        //retractions.add(statement);
-                    }        
-                                    
-                }
+//                } else if (bfProp.equals(BfProperty.BF_MODE_OF_ISSUANCE)) {
+//                    if (relatedWork != null) {
+//                        // Probably also added from conversion of statement
+//                        // :instance a Monograph
+//                        outputModel.add(relatedWork, RDF.type, 
+//                                Ld4lType.MONOGRAPH.ontClass());
+//                    }                                            
             }          
         }
 
