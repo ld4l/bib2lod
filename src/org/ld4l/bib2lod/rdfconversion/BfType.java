@@ -18,6 +18,11 @@ import org.apache.logging.log4j.Logger;
  */
 public enum BfType {
 
+    // CAUTION: Ld4l type mappings should NOT always be included. Some need
+    // special treatment from either the object or subject end, but if there's
+    // also a default conversion that will get included when processing the
+    // resource on the opposite side. Include the default mapping only where
+    // there is no special processing required.
     BF_AGENT("Agent", Ld4lType.AGENT),
     BF_ANNOTATION("Annotation", Ld4lType.ANNOTATION),
     BF_ARCHIVAL("Archival"),
@@ -42,7 +47,7 @@ public enum BfType {
     BF_INTEGRATING("Integrating", Ld4lType.INTEGRATING_RESOURCE), 
     BF_INTENDED_AUDIENCE("IntendedAudience", Ld4lType.AUDIENCE),
     BF_JURISDICTION("Jurisdiction", Ld4lType.GOVERNMENT_ORGANIZATION),  
-    BF_LANGUAGE("Language", Ld4lType.LANGUAGE),
+    BF_LANGUAGE("Language"),
     // ld4l:Manuscript has domain Item rather than Instance, so we don't want a
     // direct conversion.
     // BF_MANUSCRIPT("Manuscript", Ld4lType.MANUSCRIPT), 

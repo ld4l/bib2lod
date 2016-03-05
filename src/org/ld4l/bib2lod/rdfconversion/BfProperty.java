@@ -19,6 +19,11 @@ import org.apache.logging.log4j.Logger;
  */
 public enum BfProperty {
     
+    // CAUTION: Ld4l property mappings should NOT always be included. Some need
+    // special treatment from either the object or subject end, but if there's
+    // also a default conversion that will get included when processing the
+    // resource on the opposite side. Include the default mapping only where
+    // there is no special processing of the property required.
     BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
     BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
             Ld4lProperty.ANNOTATED_BY),
@@ -67,8 +72,8 @@ public enum BfProperty {
     BF_INSTANCE_TITLE("instanceTitle", Ld4lProperty.HAS_TITLE),
     BF_ITEM_ID("itemId", Ld4lProperty.IDENTIFIED_BY),
     BF_LABEL("label", Ld4lProperty.LABEL),
-    BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
-    BF_LANGUAGE_OF_PART("languageOfPart", Ld4lProperty.LABEL), 
+    BF_LANGUAGE("language"),
+    BF_LANGUAGE_OF_PART("languageOfPart"), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
     BF_MANUFACTURE("manufacture", Ld4lProperty.HAS_PROVISION),
     BF_MODE_OF_ISSUANCE("modeOfIssuance"),

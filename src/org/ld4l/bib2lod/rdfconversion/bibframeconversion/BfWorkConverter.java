@@ -7,6 +7,7 @@ import java.util.Map;
 
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
@@ -18,6 +19,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
+import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfWorkConverter extends BfBibResourceConverter {
 
@@ -79,6 +81,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
             
             Statement statement = statements.nextStatement();
             Property predicate = statement.getPredicate();
+            RDFNode object = statement.getObject();
             
             BfProperty bfProp = BfProperty.get(predicate);
 
@@ -90,7 +93,11 @@ public class BfWorkConverter extends BfBibResourceConverter {
                 continue;
             }
             
-            if (CONTRIBUTOR_PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+            if (bfProp.equals(BfProperty.BF_LANGUAGE)) {
+                convertLanguage(object);
+            }
+            
+            else if (CONTRIBUTOR_PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
                 convertContributor(statement);
             }   
 //                } else if (ANNOTATION_TARGET_PROPERTIES.contains(bfProp)) {
@@ -99,7 +106,19 @@ public class BfWorkConverter extends BfBibResourceConverter {
         }
 
         return super.convert();
-
+    }
+    
+    private void convertLanguage(RDFNode language) {
+        // Languages with local URIs are handled differently - see 
+        // BfLanguageConverter. The languages in the external vocabulary 
+        // handled here will not go to BfLanguageConverter, because they never
+        // serve as subjects.
+        if (language.isResource() 
+                && language.asResource().getURI().startsWith(
+                        Vocabulary.LANGUAGE.uri())) {
+            outputModel.add(
+                    subject, Ld4lProperty.HAS_LANGUAGE.property(), language);
+        }
     }
     
     private void convertContributor(Statement statement) {
