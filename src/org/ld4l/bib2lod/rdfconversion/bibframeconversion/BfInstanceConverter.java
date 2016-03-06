@@ -11,12 +11,14 @@ import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
+import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfInstanceConverter extends BfBibResourceConverter {
 
@@ -110,6 +112,19 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                             + predicate.getURI()
                             + "; deleting statement.");
                     continue;
+                }
+                
+                // Add owl:sameAs to a WorldCat URI
+                if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
+                    Resource identifier = object.asResource();
+                    String uri = identifier.getURI();
+                    // Can't use identifier.getNameSpace() because Jena doesn't
+                    // recognize namespace when localname starts with a digit.
+                    if (uri.startsWith(Vocabulary.WORLDCAT.uri())) {
+                        LOGGER.debug("Adding " + subject.getURI() 
+                                + " owl:sameAs " + uri);
+                        outputModel.add(subject, OWL.sameAs, identifier);
+                    }
                 }
                 
 //                if (bfProp.equals(BfProperty.BF_INSTANCE_TITLE)) {
