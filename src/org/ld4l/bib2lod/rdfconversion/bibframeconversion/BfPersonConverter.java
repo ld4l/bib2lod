@@ -146,7 +146,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
                 outputModel.add(work, Ld4lProperty.HAS_SUBJECT.property(),
                         newSubject);
                 outputModel.add(
-                        newSubject, RDF.type, Ld4lType.TOPIC.ontClass());
+                        newSubject, RDF.type, Ld4lType.TOPIC.type());
                 outputModel.add(newSubject, 
                         Ld4lProperty.PREFERRED_LABEL.property(), literal);
             }

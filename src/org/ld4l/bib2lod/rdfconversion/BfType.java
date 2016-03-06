@@ -113,7 +113,7 @@ public enum BfType {
     private final String filename;
     private final String prefixed;
     private final String sparqlUri;
-    private final Resource ontClass;
+    private final Resource type;
     private final Ld4lType ld4lType;
 
     BfType(String localname) {
@@ -145,10 +145,10 @@ public enum BfType {
         this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
 
-        // Create the Jena ontClass in the constructor to avoid repeated
+        // Create the Jena type in the constructor to avoid repeated
         // entity creation; presumably a performance optimization, but should
         // test.
-        this.ontClass = ResourceFactory.createResource(this.uri);
+        this.type = ResourceFactory.createResource(this.uri);
 
     }
 
@@ -182,7 +182,7 @@ public enum BfType {
    
     private static final Map<String, BfType> LOOKUP_BY_FILENAME = 
             new HashMap<String, BfType>();
-    private static final Map<Resource, BfType> LOOKUP_BY_JENA_ONTCLASS = 
+    private static final Map<Resource, BfType> LOOKUP_BY_JENA_TYPE = 
             new HashMap<Resource, BfType>();
     private static final Map<Resource, Resource> TYPE_MAP = 
             new HashMap<Resource, Resource>();
@@ -191,9 +191,9 @@ public enum BfType {
         for (BfType bfType : values()) {
             LOOKUP_BY_FILENAME.put(bfType.filename, bfType);
             if (bfType.ld4lType != null) {
-                TYPE_MAP.put(bfType.ontClass, bfType.ld4lType.ontClass());
+                TYPE_MAP.put(bfType.type, bfType.ld4lType.type());
             }
-            LOOKUP_BY_JENA_ONTCLASS.put(bfType.ontClass, bfType);
+            LOOKUP_BY_JENA_TYPE.put(bfType.type, bfType);
         }
     }
     
@@ -202,12 +202,12 @@ public enum BfType {
         return LOOKUP_BY_FILENAME.get(basename);
     }
     
-    public static BfType typeForOntClass(Resource ontClass) {
-        return LOOKUP_BY_JENA_ONTCLASS.get(ontClass);
+    public static BfType typeForOntClass(Resource type) {
+        return LOOKUP_BY_JENA_TYPE.get(type);
     }
     
     public static Map<Resource, BfType> typesForOntClasses() {
-        return LOOKUP_BY_JENA_ONTCLASS;
+        return LOOKUP_BY_JENA_TYPE;
     }
     
     public static List<BfType> authorities() {
@@ -231,8 +231,8 @@ public enum BfType {
     public static boolean isAuthority(List<BfType> types) {
         
         /*
-        for (BfType type : types) {
-            if (authorities().contains(type)) {
+        for (BfType bfType : types) {
+            if (authorities().contains(bfType)) {
                 return true;
             }
         }
@@ -243,8 +243,8 @@ public enum BfType {
 
     }
     
-    public Resource ontClass() {
-        return ontClass;
+    public Resource type() {
+        return type;
     }
     
     public Ld4lType ld4lType() {
@@ -261,7 +261,7 @@ public enum BfType {
         
         for (Map.Entry<BfType, Ld4lType> entry : map.entrySet()) {
             typeMap.put(
-                    entry.getKey().ontClass, entry.getValue().ontClass());
+                    entry.getKey().type, entry.getValue().type());
         }
                 
         return typeMap;
@@ -274,7 +274,7 @@ public enum BfType {
         for (BfType bfType : bfTypes) {
             Ld4lType ld4lType = bfType.ld4lType;
             if (ld4lType != null) {
-                typeMap.put(bfType.ontClass, ld4lType.ontClass());                    
+                typeMap.put(bfType.type, ld4lType.type());                    
             }
         }
                 
@@ -284,8 +284,8 @@ public enum BfType {
     public static List<Resource> types(List<BfType> bfTypes) {
         
         List<Resource> resources = new ArrayList<Resource>();
-        for (BfType type : bfTypes) {
-            resources.add(type.ontClass);
+        for (BfType bfType : bfTypes) {
+            resources.add(bfType.type);
         }
         
         return resources;        

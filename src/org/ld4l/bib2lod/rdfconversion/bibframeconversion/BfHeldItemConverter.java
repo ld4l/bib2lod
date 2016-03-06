@@ -105,7 +105,7 @@ public class BfHeldItemConverter extends BfResourceConverter {
                     Ld4lType shelfMarkType = 
                             SHELF_MARK_PROP_TO_SUBCLASS.get(bfShelfMarkProp);
                     outputModel.add(shelfMark, RDF.type, 
-                            shelfMarkType.ontClass());
+                            shelfMarkType.type());
                     outputModel.add(shelfMark, RDF.value, shelfMarkLiteral);
                 }
             }

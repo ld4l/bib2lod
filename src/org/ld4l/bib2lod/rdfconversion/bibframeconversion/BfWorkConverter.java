@@ -133,7 +133,7 @@ public class BfWorkConverter extends BfBibResourceConverter {
         
         Resource contribution = outputModel.createResource(
                 RdfProcessor.mintUri(localNamespace));
-        outputModel.add(contribution, RDF.type, ld4lType.ontClass());
+        outputModel.add(contribution, RDF.type, ld4lType.type());
 
         
         if (ld4lType.label() != null) {

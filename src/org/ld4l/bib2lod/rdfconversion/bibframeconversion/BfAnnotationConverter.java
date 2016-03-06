@@ -39,7 +39,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
     private void convertAnnotationSubType() {
         
         Resource type = subject.getPropertyResourceValue(RDF.type);
-        if (type.equals(BfType.BF_ANNOTATION.ontClass())) {
+        if (type.equals(BfType.BF_ANNOTATION.type())) {
             return;
         }
         
@@ -51,7 +51,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
         // respectively, is also assigned, so we don't need to look for the
         // predicate.
         Resource motivation;
-        if (type.equals(BfType.BF_REVIEW.ontClass())) {
+        if (type.equals(BfType.BF_REVIEW.type())) {
             motivation = Ld4lIndividual.MOTIVATION_REVIEWING.individual();
         } else if (type.equals(BfType.BF_SUMMARY)) {
             motivation = Ld4lIndividual.MOTIVATION_SUMMARIZING.individual();
@@ -90,7 +90,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
         Resource bodyResource = outputModel.createResource(
                 RdfProcessor.mintUri(localNamespace));
         outputModel.add(bodyResource, RDF.type, 
-                    Ld4lType.TEXT_CONTENT.ontClass());
+                    Ld4lType.TEXT_CONTENT.type());
         outputModel.add(bodyResource, Ld4lProperty.CHARS.property(), body);
     }
     

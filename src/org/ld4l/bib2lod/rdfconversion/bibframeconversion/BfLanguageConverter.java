@@ -114,7 +114,7 @@ public class BfLanguageConverter extends BfResourceConverter {
             // Bibframe language string value.
             Resource newWork = outputModel.createResource(
                     RdfProcessor.mintUri(localNamespace));
-            outputModel.add(newWork, RDF.type, Ld4lType.WORK.ontClass());
+            outputModel.add(newWork, RDF.type, Ld4lType.WORK.type());
             outputModel.add(work, Ld4lProperty.HAS_PART.property(), newWork);
             
             Resource langResource;
@@ -132,7 +132,7 @@ public class BfLanguageConverter extends BfResourceConverter {
                 langResource = outputModel.createResource(
                         RdfProcessor.mintUri(localNamespace));
                 outputModel.add(
-                        langResource, RDF.type, Ld4lType.LANGUAGE.ontClass());
+                        langResource, RDF.type, Ld4lType.LANGUAGE.type());
                 // Note sure if rdfs:label is the property we want here.
                 outputModel.add(langResource, Ld4lProperty.LABEL.property(),
                         langLiteral);           

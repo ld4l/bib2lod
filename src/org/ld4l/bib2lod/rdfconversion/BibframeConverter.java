@@ -236,7 +236,7 @@ public class BibframeConverter extends RdfProcessor {
         
         // Get all the subjects of this type
         ResIterator subjects = inputModel.listResourcesWithProperty(
-                RDF.type, bfType.ontClass());
+                RDF.type, bfType.type());
 
         // Iterate through the subjects of this type and convert
         while (subjects.hasNext()) {

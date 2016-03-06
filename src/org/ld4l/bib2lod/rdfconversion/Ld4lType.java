@@ -132,7 +132,7 @@ public enum Ld4lType {
     // private final String filename;
     private final String prefixed;
     private final String sparqlUri;
-    private final Resource ontClass;
+    private final Resource type;
     private String label;
 
     Ld4lType(String localname) {
@@ -158,13 +158,12 @@ public enum Ld4lType {
         // this.filename = prefix + this.localname; 
         this.prefixed = prefix + ":" + this.localname;
 
-        // Create the Jena ontClass in the constructor to avoid repeated
+        // Create the Jena type in the constructor to avoid repeated
         // entity creation; presumably a performance optimization, but should
         // test.
-        this.ontClass = ResourceFactory.createResource(uri);
+        this.type = ResourceFactory.createResource(uri);
     }
     
-
     public OntNamespace namespace() {
         return namespace;
     }
@@ -195,6 +194,10 @@ public enum Ld4lType {
     
     public String sparqlUri() {
         return sparqlUri;
+    }
+    
+    public Resource type() {
+        return type;
     }
    
 //    private static final Map<String, Ld4lType> LOOKUP_BY_FILENAME = 
@@ -227,8 +230,6 @@ public enum Ld4lType {
         return LOOKUP_BY_LOCAL_NAME.get(localname);
     }
 
-    public Resource ontClass() {
-        return ontClass;
-    }
+
     
 }

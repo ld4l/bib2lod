@@ -83,7 +83,7 @@ public class BfMeetingConverter extends BfAuthorityConverter {
         Boolean isConfName = qexec.execAsk();
         if (isConfName) {
                 outputModel.add(
-                        subject, RDF.type, Ld4lType.CONFERENCE.ontClass());
+                        subject, RDF.type, Ld4lType.CONFERENCE.type());
         }
         
         qexec.close();        

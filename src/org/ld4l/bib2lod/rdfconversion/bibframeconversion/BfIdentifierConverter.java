@@ -231,7 +231,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             identifierType = Ld4lType.IDENTIFIER;
         }
         
-        outputModel.add(subject, RDF.type, identifierType.ontClass());  
+        outputModel.add(subject, RDF.type, identifierType.type());  
         
         // From string value "(OCoLC)449860683" create 
         // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
@@ -252,7 +252,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), 
                 identifier);
         outputModel.add(identifier, RDF.type, 
-                Ld4lType.OCLC_IDENTIFIER.ontClass());
+                Ld4lType.OCLC_IDENTIFIER.type());
         
         // Jena doesn't recognize localname starting with digit, so we need to
         // parse it ourselves.

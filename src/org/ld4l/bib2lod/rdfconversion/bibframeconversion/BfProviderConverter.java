@@ -69,7 +69,7 @@ public class BfProviderConverter extends BfResourceConverter {
                 BfProperty bfProp = BfProperty.get(property);
                 Ld4lType provisionType = PROPERTY_TO_TYPE.containsKey(bfProp) ? 
                         PROPERTY_TO_TYPE.get(bfProp) : Ld4lType.PROVISION;
-                outputModel.add(subject, RDF.type, provisionType.ontClass());
+                outputModel.add(subject, RDF.type, provisionType.type());
                 if (provisionType.label() != null) {
                     outputModel.add(subject, RDFS.label, provisionType.label());
                 }

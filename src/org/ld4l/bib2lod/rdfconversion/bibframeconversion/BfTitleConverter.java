@@ -162,7 +162,7 @@ public class BfTitleConverter extends BfResourceConverter {
                 model.createResource(RdfProcessor.mintUri(localNamespace));
         model.add(title, Ld4lProperty.HAS_PART.property(), titleElement);
         model.add(titleElement, RDFS.label, value, language);
-        model.add(titleElement, RDF.type, titleElementType.ontClass());
+        model.add(titleElement, RDF.type, titleElementType.type());
         
         return titleElement;                  
     }
@@ -219,7 +219,7 @@ public class BfTitleConverter extends BfResourceConverter {
         Model model = ModelFactory.createDefaultModel();
         Resource title = 
                 model.createResource(RdfProcessor.mintUri(localNamespace));
-        model.add(title, RDF.type, Ld4lType.TITLE.ontClass());        
+        model.add(title, RDF.type, Ld4lType.TITLE.type());        
         model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
         
         String titleStatementString = 

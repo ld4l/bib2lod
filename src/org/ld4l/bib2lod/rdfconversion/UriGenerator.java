@@ -309,8 +309,8 @@ public class UriGenerator extends RdfProcessor {
         List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
         List<BfType> types = new ArrayList<BfType>();
         for (Statement stmt : typeStmts) {
-            Resource ontClass = stmt.getResource();
-            types.add(BF_TYPES_FOR_ONT_CLASSES.get(ontClass));
+            Resource type = stmt.getResource();
+            types.add(BF_TYPES_FOR_ONT_CLASSES.get(type));
         }
         
         BfResourceUriGenerator uriGenerator;
