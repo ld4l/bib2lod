@@ -63,6 +63,7 @@ public enum Ld4lProperty {
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),
+    MOTIVATED_BY(OntNamespace.OA, "motivatedBy"),
     NAME(OntNamespace.FOAF, "name"),
     OWL_SAME_AS(OntNamespace.OWL, "sameAs"),
     PRECEDES("precedes"),

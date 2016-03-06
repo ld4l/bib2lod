@@ -98,8 +98,9 @@ public class BibframeConverter extends RdfProcessor {
 
         CONVERTERS_BY_TYPE.put(BfType.BF_ANNOTATION, 
                 BfAnnotationConverter.class);  
-
-        // TODO Needs own converter?
+        CONVERTERS_BY_TYPE.put(BfType.BF_REVIEW, BfAnnotationConverter.class);
+        CONVERTERS_BY_TYPE.put(BfType.BF_SUMMARY, BfAnnotationConverter.class);
+        
         CONVERTERS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
                 BfResourceConverter.class);       
         
