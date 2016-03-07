@@ -27,7 +27,7 @@ public enum BfProperty {
     BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
     BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
             Ld4lProperty.ANNOTATED_BY),
-    BF_ANNOTATION_BODY("annotationBody", Ld4lProperty.HAS_BODY),
+    BF_ANNOTATION_BODY("annotationBody"),
     BF_ASSERTION_DATE("assertionDate", Ld4lProperty.ANNOTATED_AT),
     BF_ANNOTATION_SOURCE("annotationSource", Ld4lProperty.HAS_CREATOR),
     BF_AUTHORITY_SOURCE("authoritySource"),
@@ -94,7 +94,7 @@ public enum BfProperty {
     BF_RELATOR("relator", Ld4lProperty.HAS_CONTRIBUTION),
     BF_REPRODUCTION("reproduction", Ld4lProperty.HAS_REPRODUCTION),
     BF_RESOURCE_PART("resourcePart"),
-    BF_REVIEW("review", Ld4lProperty.HAS_BODY),
+    BF_REVIEW("review", Ld4lProperty.HAS_ANNOTATION_BODY),
     BF_REVIEW_OF("reviewOf", Ld4lProperty.HAS_TARGET),
     // Don't include Ld4lProperty.HAS_SHELF_MARK here, since they need to be
     // handled differently in BfHeldItemConverter.
@@ -107,8 +107,8 @@ public enum BfProperty {
     BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
     BF_SUBTITLE("subtitle"),
     BF_SUCCEEDED_BY("succeededBy", Ld4lProperty.PRECEDES),    
-    BF_SUMMARY("review", Ld4lProperty.HAS_BODY),
-    BF_SUMMARY_OF("reviewOf", Ld4lProperty.HAS_TARGET),
+    BF_SUMMARY("summary", Ld4lProperty.HAS_ANNOTATION_BODY),
+    BF_SUMMARY_OF("summaryOf", Ld4lProperty.HAS_TARGET),
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_TITLE("title", Ld4lProperty.HAS_TITLE),

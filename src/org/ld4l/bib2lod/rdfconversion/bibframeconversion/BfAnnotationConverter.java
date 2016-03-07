@@ -53,14 +53,15 @@ public class BfAnnotationConverter extends BfResourceConverter {
         Resource motivation;
         if (type.equals(BfType.BF_REVIEW.type())) {
             motivation = Ld4lIndividual.MOTIVATION_REVIEWING.individual();
-        } else if (type.equals(BfType.BF_SUMMARY)) {
+        } else if (type.equals(BfType.BF_SUMMARY.type())) {
             motivation = Ld4lIndividual.MOTIVATION_SUMMARIZING.individual();
         } else {
             return;
         }
 
         outputModel.add(
-                subject, Ld4lProperty.MOTIVATED_BY.property(), motivation);  
+                subject, Ld4lProperty.MOTIVATED_BY.property(), motivation); 
+        
         // Handled in super.convert():
         // oa:Annotation type assertion 
         // Conversion of bf:summaryOf / bf:reviewOf to oa:hasTarget 
@@ -91,6 +92,7 @@ public class BfAnnotationConverter extends BfResourceConverter {
                 RdfProcessor.mintUri(localNamespace));
         outputModel.add(bodyResource, RDF.type, 
                     Ld4lType.TEXT_CONTENT.type());
+        outputModel.add(subject, Ld4lProperty.HAS_ANNOTATION_BODY.property(), bodyResource);
         outputModel.add(bodyResource, Ld4lProperty.CHARS.property(), body);
     }
     

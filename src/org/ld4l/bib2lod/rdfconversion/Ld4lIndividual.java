@@ -28,8 +28,8 @@ public enum Ld4lIndividual {
     Ld4lIndividual(OntNamespace namespace, String localname) {
         this.namespace = namespace;
         this.localname = localname;
-        this.uri = namespace + localname;
-        this.individual = ResourceFactory.createProperty(uri);
+        this.uri = namespace.uri() + localname;
+        this.individual = ResourceFactory.createResource(uri);
     }
     
     public String localname() {

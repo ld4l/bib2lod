@@ -29,7 +29,7 @@ public enum Ld4lProperty {
     FOLLOWS("follows"),
     HAS_AGENT(OntNamespace.PROV, "agent"),
     HAS_ANNOTATION("hasAnnotation"),
-    HAS_BODY(OntNamespace.OA, "hasBody"),
+    HAS_ANNOTATION_BODY(OntNamespace.OA, "hasBody"),
     HAS_CREATOR(OntNamespace.DCTERMS, "creator"),
     HAS_CONTRIBUTION("hasContribution"),
     HAS_EXPRESSION("hasExpression"),
