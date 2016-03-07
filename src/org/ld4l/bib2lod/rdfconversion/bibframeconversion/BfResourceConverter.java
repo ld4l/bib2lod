@@ -32,7 +32,7 @@ public class BfResourceConverter {
     // Default resource submodel consists of all the statements in which the 
     // resource is either the subject or the object. Subclasses may define a 
     // more complex query.
-    private static ParameterizedSparqlString resourceSubModelPss = 
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o . "
                     + " ?s ?p2 ?resource . "                
@@ -42,7 +42,6 @@ public class BfResourceConverter {
                     + "?s ?p2 ?resource . "
                     + "} } ");
     
-
     protected String localNamespace;
     protected Resource subject;
     protected Model outputModel;
@@ -72,7 +71,6 @@ public class BfResourceConverter {
     }
     
     private void init(Resource subject) {
-
         this.subject = getResourceWithSubModel(subject);               
         this.outputModel = ModelFactory.createDefaultModel();
         this.resourcesToRemove = new ArrayList<Resource>();       
@@ -121,7 +119,7 @@ public class BfResourceConverter {
     }
     
     protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
+        return RESOURCE_SUBMODEL_PSS;
     }
         
     /* 

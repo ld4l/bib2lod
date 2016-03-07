@@ -23,7 +23,7 @@ public class BfAuthorityConverter extends BfResourceConverter {
         PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.NAME);
     }
     
-    private static ParameterizedSparqlString resourceSubModelPss = 
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o1 . "
                     + " ?o1 ?p2 ?o2 . "
@@ -42,7 +42,7 @@ public class BfAuthorityConverter extends BfResourceConverter {
 
     @Override
     protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
+        return RESOURCE_SUBMODEL_PSS;
     }
     
     @Override

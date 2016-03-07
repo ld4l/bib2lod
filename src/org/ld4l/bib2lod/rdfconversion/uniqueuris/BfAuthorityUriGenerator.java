@@ -22,7 +22,7 @@ public class BfAuthorityUriGenerator extends BfResourceUriGenerator {
     private static final Logger LOGGER = 
             LogManager.getLogger(BfAuthorityUriGenerator.class);
 
-    private static ParameterizedSparqlString resourceSubModelPss = 
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o1 . "
                     + " ?o1 ?p2 ?o2 . "
@@ -54,7 +54,7 @@ public class BfAuthorityUriGenerator extends BfResourceUriGenerator {
 
     @Override
     protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
+        return RESOURCE_SUBMODEL_PSS;
     }
     
     @Override

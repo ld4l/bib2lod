@@ -26,7 +26,7 @@ public class BfResourceUriGenerator {
     // Default resource submodel consists of all the statements in which the 
     // resource is either the subject or the object. Subclasses may define a 
     // more complex query.
-    private static ParameterizedSparqlString resourceSubModelPss = 
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
             new ParameterizedSparqlString(
                     "CONSTRUCT { ?resource ?p1 ?o . "
                     + " ?s ?p2 ?resource . "                
@@ -59,7 +59,7 @@ public class BfResourceUriGenerator {
     }
     
     protected ParameterizedSparqlString getResourceSubModelPss() {
-        return resourceSubModelPss;
+        return RESOURCE_SUBMODEL_PSS;
     }
 
     /*
