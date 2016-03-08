@@ -42,6 +42,7 @@ public enum Ld4lProperty {
     HAS_PROVISION("hasProvision"),
     HAS_REPRODUCTION("hasReproduction"),
     HAS_SHELF_MARK("hasShelfMark"), // or hasLocator
+    HAS_SOURCE_STATUS("hasSourceStatus"),
     HAS_SUBJECT(OntNamespace.DCTERMS, "subject"),
     HAS_TARGET(OntNamespace.OA, "hasTarget"),
     HAS_TITLE("hasTitle"),

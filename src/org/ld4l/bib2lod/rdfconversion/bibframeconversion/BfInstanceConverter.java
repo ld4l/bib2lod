@@ -81,9 +81,6 @@ public class BfInstanceConverter extends BfBibResourceConverter {
         // know which Item the transformations should apply to.
         Resource relatedItem = hasHolding.size() == 1 ? 
                 hasHolding.get(0).getSubject() : null;
-        
-        // TODO Figure out whether to do here or within the StmtIterator
-        convertTitles(BfProperty.BF_INSTANCE_TITLE);
 
         StmtIterator stmts = subject.getModel().listStatements();
  
@@ -127,9 +124,13 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                     }
                 }
                 
-//                if (bfProp.equals(BfProperty.BF_INSTANCE_TITLE)) {
-//                    convertTitle(bfProp);
-//                }
+                // Only Instances have bf:titleStatement assertions
+                if (bfProp.equals(BfProperty.BF_TITLE_STATEMENT)) {
+                    Model titleModel = BfTitleConverter.convertBfTitleStatement(
+                            subject, object.asLiteral(), localNamespace);
+                    outputModel.add(titleModel);
+                    titleModel.close();             
+                }
                                        
             }          
         }

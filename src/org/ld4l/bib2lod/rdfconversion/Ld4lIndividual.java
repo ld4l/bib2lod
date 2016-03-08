@@ -8,8 +8,11 @@ import org.apache.logging.log4j.Logger;
 public enum Ld4lIndividual {
 
     MOTIVATION_REVIEWING("reviewing"),
-    MOTIVATION_SUMMARIZING("summarizing");
+    MOTIVATION_SUMMARIZING("summarizing"),
     
+    SOURCE_STATUS_SUPPLIED("supplied"),
+    SOURCE_STATUS_TRANSCRIBED("transcribed");
+
     
     private static final Logger LOGGER = 
             LogManager.getLogger(Ld4lIndividual.class);

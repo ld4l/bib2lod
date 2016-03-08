@@ -142,6 +142,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
         return IDENTIFIER_PROPS;
     }
     
+    @Override
     protected Model convert() {
 
         // TODO Need a query for this instead
