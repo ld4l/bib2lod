@@ -86,35 +86,30 @@ public class BfTitleConverter extends BfResourceConverter {
         
         // TODO Here we ignore the question of whether the titleStatement value
         // should be parsed into NonSortTitleElement and MainTitleElement.
-        Resource title = createTitle(titleValue, localNamespace);
+        Resource title = createSimpleTitle(titleValue, localNamespace);
         Model model = title.getModel();
         model.add(title, Ld4lProperty.HAS_SOURCE_STATUS.property(), 
                 Ld4lIndividual.SOURCE_STATUS_TRANSCRIBED.individual());
         return title;      
     }
 
-    // This is the simplest createTitle method: there are no title subparts
-    // other than the MainTitleElement.
-    private static Resource createTitle(
+    // This is the simplest createTitle method: there are no title sub-elements
+    // other than the MainTitleElement, which all Titles have.
+    private static Resource createSimpleTitle(
             Literal titleValue, String localNamespace) {
         
-        // Normalize the title string value
-        Literal normalizedTitleValue = normalizeTitle(titleValue);
+        titleValue = normalizeTitle(titleValue);
         
-        // Create the Title 
-        Model model = ModelFactory.createDefaultModel();
-        Resource title = 
-                model.createResource(RdfProcessor.mintUri(localNamespace)); 
-        model.add(title, RDF.type, Ld4lType.TITLE.type());
-        model.add(title, RDFS.label, normalizedTitleValue);
-
+        Resource title = createTitle(titleValue, localNamespace, false);
+        Model model = title.getModel();
+            
         // TODO Analyze the Title value for a NonSortElement too? In that case,
         // MainTitleElement is the title value minus the NonSortElement value.
         
         // Create the MainTitleElement; all Titles have at least this element.
         Resource mainTitleElement = 
                 createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-                        normalizedTitleValue, localNamespace, false);
+                        titleValue, localNamespace, false);
                         
         model.add(mainTitleElement.getModel());
         model.add(title, Ld4lProperty.HAS_PART.property(), mainTitleElement);
@@ -122,7 +117,25 @@ public class BfTitleConverter extends BfResourceConverter {
         return title;
     }
     
+    private static Resource createTitle(
+            Literal titleValue, String localNamespace, boolean normalize) {
 
+        // Normalize the title string value. Caller may pass in either a 
+        // normalized or unnormalized value.
+        if (normalize) {
+            titleValue = normalizeTitle(titleValue);
+        }
+        
+        // Create the Title 
+        Model model = ModelFactory.createDefaultModel();
+        Resource title = 
+                model.createResource(RdfProcessor.mintUri(localNamespace)); 
+        model.add(title, RDF.type, Ld4lType.TITLE.type());
+        model.add(title, RDFS.label, titleValue);
+        
+        return title;
+    }
+    
 
     private static Resource createTitleElement(
             Ld4lType titleElementType, Literal titleValue, 
@@ -170,11 +183,16 @@ public class BfTitleConverter extends BfResourceConverter {
         return title.replaceAll("[\\s.]+$", "");
     }
     
-
-    
+  
     protected static Model convertBfTitleProp(Resource bibResource) {
         Model model = ModelFactory.createDefaultModel();
         
+        // get the bf:title statements
+        // find the sort one and the other
+        // create a title element for the other
+        // (or in the case of bf:Title, we already have the title)
+        // for the sort: create a sort title element
+        // then if there's another, create a 
         return model;
     }
     
