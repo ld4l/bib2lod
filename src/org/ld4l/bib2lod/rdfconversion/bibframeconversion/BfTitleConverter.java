@@ -50,7 +50,7 @@ public class BfTitleConverter extends BfResourceConverter {
             new ArrayList<String>();
     static {
         // Language-dependent. Only handling English for now. However, an
-        // accomanying bf:title value with language x-bf-sort also allows 
+        // accompanying bf:title value with language x-bf-sort also allows 
         // identification of a non-sort string; but this is not always present.
         NON_SORT_STRINGS.add("A ");
         NON_SORT_STRINGS.add("An ");
@@ -127,18 +127,29 @@ public class BfTitleConverter extends BfResourceConverter {
      * @return
      */   
     private static void addTitleElement(Resource title, 
-            Ld4lType titleElementType, Literal titleElementValue,            
+            Ld4lType titleElementType, Literal titleElementLiteral,            
             String localNamespace, boolean normalize) {
 
         Model model = title.getModel();
         Resource titleElement = createTitleElement(titleElementType, 
-                titleElementValue, localNamespace, normalize);
+                titleElementLiteral, localNamespace, normalize);
         Model titleElementModel = titleElement.getModel();
         model.add(titleElementModel);
         model.add(title, Ld4lProperty.HAS_PART.property(), titleElement);
 
         titleElementModel.close();
     }
+    
+    private static void addTitleElement(Resource title, 
+            Ld4lType titleElementType, String titleElementString, 
+            String language, String localNamespace, boolean normalize) {
+        
+        Literal titleElementLiteral = ResourceFactory.createLangLiteral(
+                titleElementString, language);
+         addTitleElement(title, titleElementType, titleElementLiteral,
+                 localNamespace, normalize);
+    }
+    
     
     private static Resource createTitle(
             Literal titleValue, String localNamespace, boolean normalize) {
@@ -191,7 +202,7 @@ public class BfTitleConverter extends BfResourceConverter {
         return normalizedTitle;
     }
 
-    private static String normalizeTitle(String title) {
+    static String normalizeTitle(String title) {
         /*
          * Remove final period, final spaces, final ellipsis
          * Final ellipsis occurs in rare cases when the bf:label contains title 
@@ -239,13 +250,16 @@ public class BfTitleConverter extends BfResourceConverter {
         Literal titleLabel = title.getProperty(RDFS.label).getLiteral();
         String titleString = titleLabel.getLexicalForm();
         LOGGER.debug("title label: '" + titleString + "'");
+        String mainTitleString = titleString;
+        
         String language = titleLabel.getLanguage();
         
         String sortTitleString = null;
-        String mainTitleString = titleString;
+
         // If there's a sort title
         if (bfSortTitle != null) {
-            sortTitleString = normalizeTitle(bfSortTitle.getLexicalForm());
+            bfSortTitle = normalizeTitle(bfSortTitle);
+            sortTitleString = bfSortTitle.getLexicalForm();
             // Reverse the strings because StringUtils.difference() returns
             // the remainder of the second string, starting from where they
             // differ.
@@ -268,14 +282,17 @@ public class BfTitleConverter extends BfResourceConverter {
                 LOGGER.debug("Found main title string: '" 
                         + mainTitleString + "'");
                 difference = StringUtils.reverse(difference);
-                Literal nonSortTitleLiteral = ResourceFactory.createLangLiteral(
-                        difference, language);
                 addTitleElement(title,
-                        Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortTitleLiteral, 
+                        Ld4lType.NON_SORT_TITLE_ELEMENT, difference, language, 
                         localNamespace, false);
             }
             
         } else {
+            
+//            for (String nonSortString : NON_SORT_STRINGS) {
+//                if (mainTitleString)
+//            }
+            
             // TODO ** Else look for non-sort elements at front of mainTitleString
             // loop through the non-sort elements
             // if matches, create the nonsort element 
@@ -284,11 +301,9 @@ public class BfTitleConverter extends BfResourceConverter {
             // Use non-sort code above - move to a method
         }
         
-        LOGGER.debug("main title string: '" + mainTitleString + "'");
-        Literal mainTitleLiteral = ResourceFactory.createLangLiteral(
-                mainTitleString, language);
+        LOGGER.debug("Main title string: '" + mainTitleString + "'");
         addTitleElement(title, Ld4lType.MAIN_TITLE_ELEMENT, 
-                mainTitleLiteral, localNamespace, false);
+                mainTitleString, language, localNamespace, false);
         
         Model model = title.getModel();
         model.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
@@ -396,81 +411,81 @@ public class BfTitleConverter extends BfResourceConverter {
         return bibResource;    
     }
     
-    private void convertTitleValue() {
-        
-        Statement titleValueStmt = 
-                subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
-        
-        if (titleValueStmt != null) {
-
-            // bf:titleValue string and language
-            String titleValueString = 
-                    normalizeTitle(titleValueStmt.getString());
-            String titleValueLanguage = titleValueStmt.getLanguage();
-            
-            // This will be the rdfs:label of the Title
-            String fullTitleString = titleValueString;
-       
-            Resource nonSortElement = createNonSortTitleElement(
-                    titleValueString, titleValueLanguage, subject, outputModel);
-
-            // This will be the rdfs:label value of the MainTitleElement. In
-            // the absence of other title elements, it's the full bf:titleValue
-            // string. If there's a non-sort element, remove it from the full title
-            // title string to get the main title element string.         
-//            String mainTitleString = 
-//                    removeNonSortString(titleValueString, nonSortElement);
-               
-//            Resource mainTitleElement = 
-//                    createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-//                            mainTitleString, titleValueLanguage);
-            
-            // Non-sort element precedes main title element
-//            if (nonSortElement != null) {
-//                outputModel.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
-//                        mainTitleElement);
-//            }
-            
-            Resource subtitleElement = null;
-                         
-            Statement subtitleStmt = 
-                    subject.getProperty(BfProperty.BF_SUBTITLE.property());            
-            if (subtitleStmt != null) {
-
-                // Create the subtitle element
-                String subtitleValue = normalizeTitle(subtitleStmt.getString());
-                String language = subtitleStmt.getLanguage();
-//                subtitleElement = createTitleElement(
-//                        Ld4lType.SUBTITLE_ELEMENT, subtitleValue, language);
-                
-                // When there's a subtitle, the titleValue contains only the 
-                // main title, not the full title. The rdfs:label (full title)
-                // concatenates both main title and subtitle strings.
-                fullTitleString += " " + subtitleValue;
-                
-                // Order the mainTitleElement and subtitleElement
-//                outputModel.add(
-//                        mainTitleElement, Ld4lProperty.PRECEDES.property(), 
-//                        subtitleElement);
-          
-            } 
-            
-            // Add the rdfs:label of the Title
-            outputModel.add(
-                    subject, RDFS.label, fullTitleString, titleValueLanguage);
-            
-            // NB Some Title objects have both a bf:titleValue and a bf:label, 
-            // with different strings. We'll end up assigning two rdfs:labels.
-            // Ideally we should not have two rdfs:labels, but it's not clear
-            // how to resolve this case. In at least some cases the bf:label
-            // has extraneous, non-title text, but it's not clear whether that's
-            // always the case. E.g., record 2083918 has
-            // title5 bf:label "Hans Bethe papers, [ca. 1931]-1992."
-            // title5 bf:titleValue "Hans Bethe papers,"
-            
-            // TODO Part name/number elements
-        }
-    }
+//    private void convertTitleValue() {
+//        
+//        Statement titleValueStmt = 
+//                subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
+//        
+//        if (titleValueStmt != null) {
+//
+//            // bf:titleValue string and language
+//            String titleValueString = 
+//                    normalizeTitle(titleValueStmt.getString());
+//            String titleValueLanguage = titleValueStmt.getLanguage();
+//            
+//            // This will be the rdfs:label of the Title
+//            String fullTitleString = titleValueString;
+//       
+//            Resource nonSortElement = createNonSortTitleElement(
+//                    titleValueString, titleValueLanguage, subject, outputModel);
+//
+//            // This will be the rdfs:label value of the MainTitleElement. In
+//            // the absence of other title elements, it's the full bf:titleValue
+//            // string. If there's a non-sort element, remove it from the full title
+//            // title string to get the main title element string.         
+////            String mainTitleString = 
+////                    removeNonSortString(titleValueString, nonSortElement);
+//               
+////            Resource mainTitleElement = 
+////                    createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
+////                            mainTitleString, titleValueLanguage);
+//            
+//            // Non-sort element precedes main title element
+////            if (nonSortElement != null) {
+////                outputModel.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
+////                        mainTitleElement);
+////            }
+//            
+//            Resource subtitleElement = null;
+//                         
+//            Statement subtitleStmt = 
+//                    subject.getProperty(BfProperty.BF_SUBTITLE.property());            
+//            if (subtitleStmt != null) {
+//
+//                // Create the subtitle element
+//                String subtitleValue = normalizeTitle(subtitleStmt.getString());
+//                String language = subtitleStmt.getLanguage();
+////                subtitleElement = createTitleElement(
+////                        Ld4lType.SUBTITLE_ELEMENT, subtitleValue, language);
+//                
+//                // When there's a subtitle, the titleValue contains only the 
+//                // main title, not the full title. The rdfs:label (full title)
+//                // concatenates both main title and subtitle strings.
+//                fullTitleString += " " + subtitleValue;
+//                
+//                // Order the mainTitleElement and subtitleElement
+////                outputModel.add(
+////                        mainTitleElement, Ld4lProperty.PRECEDES.property(), 
+////                        subtitleElement);
+//          
+//            } 
+//            
+//            // Add the rdfs:label of the Title
+//            outputModel.add(
+//                    subject, RDFS.label, fullTitleString, titleValueLanguage);
+//            
+//            // NB Some Title objects have both a bf:titleValue and a bf:label, 
+//            // with different strings. We'll end up assigning two rdfs:labels.
+//            // Ideally we should not have two rdfs:labels, but it's not clear
+//            // how to resolve this case. In at least some cases the bf:label
+//            // has extraneous, non-title text, but it's not clear whether that's
+//            // always the case. E.g., record 2083918 has
+//            // title5 bf:label "Hans Bethe papers, [ca. 1931]-1992."
+//            // title5 bf:titleValue "Hans Bethe papers,"
+//            
+//            // TODO Part name/number elements
+//        }
+//    }
     
     private Resource createNonSortTitleElement(String titleString, 
             String titleLanguage, Resource title, Model model) {
