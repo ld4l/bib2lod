@@ -20,7 +20,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
-public class BfInstanceConverter extends BfBibResourceConverter {
+public class BfInstanceConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfInstanceConverter.class);
