@@ -3,6 +3,7 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -48,9 +49,11 @@ public class BfTitleConverter extends BfResourceConverter {
     private static final List<String> NON_SORT_STRINGS = 
             new ArrayList<String>();
     static {
-        // Language-dependent. Only handling English for now. However, bf:title
-        // with language x-bf-sort also helps identify a non-sort string.
+        // Language-dependent. Only handling English for now. However, an
+        // accomanying bf:title value with language x-bf-sort also allows 
+        // identification of a non-sort string; but this is not always present.
         NON_SORT_STRINGS.add("A ");
+        NON_SORT_STRINGS.add("An ");
         NON_SORT_STRINGS.add("The ");
     }
     
@@ -65,11 +68,11 @@ public class BfTitleConverter extends BfResourceConverter {
     }
     
     /* 
-     * Static methods designed for use both by BfTitleConverter and by 
+     * Static methods are designed for use both by BfTitleConverter and by 
      * BfInstanceConverter / BfWorkConverter, where we have no Title object.
      */
     
-    // bf:titleStatement is used only with an Instance. It indicates a 
+    // bf:titleStatement is used only with an Instance, and indicates a 
     // transcribed title. This is expressed in LD4L with the 
     // ld4l:hasSourceStatus predicate.
     protected static Model convertBfTitleStatement(
@@ -84,12 +87,13 @@ public class BfTitleConverter extends BfResourceConverter {
     private static Resource createTranscribedTitle(
             Literal titleValue, String localNamespace) {
         
-        // TODO Here we ignore the question of whether the titleStatement value
-        // should be parsed into NonSortTitleElement and MainTitleElement.
+        // TODO For now we ignore the question of whether the titleStatement 
+        // value should be parsed into NonSortTitleElement and MainTitleElement.
         Resource title = createSimpleTitle(titleValue, localNamespace);
         Model model = title.getModel();
         model.add(title, Ld4lProperty.HAS_SOURCE_STATUS.property(), 
                 Ld4lIndividual.SOURCE_STATUS_TRANSCRIBED.individual());
+        
         return title;      
     }
 
@@ -101,20 +105,39 @@ public class BfTitleConverter extends BfResourceConverter {
         titleValue = normalizeTitle(titleValue);
         
         Resource title = createTitle(titleValue, localNamespace, false);
-        Model model = title.getModel();
             
-        // TODO Analyze the Title value for a NonSortElement too? In that case,
+        // TODO Analyze the Title value for a NonSortElement. In that case,
         // MainTitleElement is the title value minus the NonSortElement value.
         
-        // Create the MainTitleElement; all Titles have at least this element.
-        Resource mainTitleElement = 
-                createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-                        titleValue, localNamespace, false);
-                        
-        model.add(mainTitleElement.getModel());
-        model.add(title, Ld4lProperty.HAS_PART.property(), mainTitleElement);
+        // Create the MainTitleElement and attach it to the title.
+        addTitleElement(title, Ld4lType.MAIN_TITLE_ELEMENT, 
+                titleValue, localNamespace, false);
 
         return title;
+    }
+    
+    /**
+     * Create a title element of the specified type, and attach it to the
+     * Title resource.
+     * @param title
+     * @param titleElementType
+     * @param titleValue
+     * @param localNamespace
+     * @param normalize
+     * @return
+     */   
+    private static void addTitleElement(Resource title, 
+            Ld4lType titleElementType, Literal titleElementValue,            
+            String localNamespace, boolean normalize) {
+
+        Model model = title.getModel();
+        Resource titleElement = createTitleElement(titleElementType, 
+                titleElementValue, localNamespace, normalize);
+        Model titleElementModel = titleElement.getModel();
+        model.add(titleElementModel);
+        model.add(title, Ld4lProperty.HAS_PART.property(), titleElement);
+
+        titleElementModel.close();
     }
     
     private static Resource createTitle(
@@ -149,6 +172,7 @@ public class BfTitleConverter extends BfResourceConverter {
             titleValue = normalizeTitle(titleValue);
         }
         
+        // Create the TitleElement                                                                                                                                                   
         Resource titleElement = 
                 model.createResource(RdfProcessor.mintUri(localNamespace));
         model.add(titleElement, RDF.type, titleElementType.type());
@@ -183,16 +207,91 @@ public class BfTitleConverter extends BfResourceConverter {
         return title.replaceAll("[\\s.]+$", "");
     }
     
-  
-    protected static Model convertBfTitleProp(Resource bibResource) {
-        Model model = ModelFactory.createDefaultModel();
+    /*
+     * Convert any bf:title statements, including sort title values. A sort
+     * title accompanies another title, expressed as either the object of 
+     * another bf:title statement, or as a bf:Title. Here we handle the former.
+     */
+    protected static Model convertBfTitleDataProp(
+            Resource bibResource, String localNamespace) {
         
-        // get the bf:title statements
-        // find the sort one and the other
-        // create a title element for the other
-        // (or in the case of bf:Title, we already have the title)
-        // for the sort: create a sort title element
-        // then if there's another, create a 
+        Literal bfSortTitle = null;
+        Literal bfTitle = null;
+        StmtIterator statements = 
+                bibResource.listProperties(BfProperty.BF_TITLE.property());
+        while (statements.hasNext()) {
+            Statement statement = statements.nextStatement();
+            Literal literal = statement.getLiteral();
+            if (isSortTitle(literal)) {
+                bfSortTitle = literal; 
+            } else {
+                bfTitle = literal;
+            }
+        }
+
+        if (bfTitle == null) {
+            return null;
+        }
+        
+        Resource title = createTitle(bfTitle, localNamespace, true);
+        // titleLabel may differ from the original value because the string
+        // has been normalized.
+        Literal titleLabel = title.getProperty(RDFS.label).getLiteral();
+        String titleString = titleLabel.getLexicalForm();
+        LOGGER.debug("title label: '" + titleString + "'");
+        String language = titleLabel.getLanguage();
+        
+        String sortTitleString = null;
+        String mainTitleString = titleString;
+        // If there's a sort title
+        if (bfSortTitle != null) {
+            sortTitleString = normalizeTitle(bfSortTitle.getLexicalForm());
+            // Reverse the strings because StringUtils.difference() returns
+            // the remainder of the second string, starting from where they
+            // differ.
+            String reverseSortTitleString = 
+                    StringUtils.reverse(sortTitleString);
+            LOGGER.debug("Reverse sort title: '" 
+                    + reverseSortTitleString + "'");
+            String reverseMainTitleString = 
+                    StringUtils.reverse(mainTitleString);
+            LOGGER.debug("reverse main title: '" 
+                    + reverseMainTitleString + "'");
+            LOGGER.debug("Found sort title: '" + sortTitleString + "'");
+            String difference = 
+                    StringUtils.difference(
+                            reverseSortTitleString, reverseMainTitleString);
+            if (! difference.isEmpty()) {
+                String nonSortString = StringUtils.reverse(difference);
+                LOGGER.debug("Found non sort string: '" + nonSortString + "'");
+                mainTitleString = sortTitleString;
+                LOGGER.debug("Found main title string: '" 
+                        + mainTitleString + "'");
+                difference = StringUtils.reverse(difference);
+                Literal nonSortTitleLiteral = ResourceFactory.createLangLiteral(
+                        difference, language);
+                addTitleElement(title,
+                        Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortTitleLiteral, 
+                        localNamespace, false);
+            }
+            
+        } else {
+            // TODO ** Else look for non-sort elements at front of mainTitleString
+            // loop through the non-sort elements
+            // if matches, create the nonsort element 
+            // subtract it from the main title string 
+            // create the main title element (below)
+            // Use non-sort code above - move to a method
+        }
+        
+        LOGGER.debug("main title string: '" + mainTitleString + "'");
+        Literal mainTitleLiteral = ResourceFactory.createLangLiteral(
+                mainTitleString, language);
+        addTitleElement(title, Ld4lType.MAIN_TITLE_ELEMENT, 
+                mainTitleLiteral, localNamespace, false);
+        
+        Model model = title.getModel();
+        model.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
         return model;
     }
     
@@ -430,50 +529,47 @@ public class BfTitleConverter extends BfResourceConverter {
 //  return ResourceFactory.createLangLiteral(value, language); 
 //}
     
-    public Model create(Resource subject, Literal titleStatementLiteral) {
-        
-        Model model = ModelFactory.createDefaultModel();
-        Resource title = 
-                model.createResource(RdfProcessor.mintUri(localNamespace));
-        model.add(title, RDF.type, Ld4lType.TITLE.type());        
-        model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
-        
-        String titleStatementString = 
-                normalizeTitle(titleStatementLiteral.getLexicalForm());
-        
-        String language = titleStatementLiteral.getLanguage();
-      
-        // The full bf:titleStatement string is the rdfs:label of the title
-        model.add(title, RDFS.label, titleStatementString);
-        
-        Resource nonSortElement = 
-                createNonSortTitleElement(
-                        titleStatementString, language, title, model);
-
-        // This will be the rdfs:label value of the MainTitleElement. In
-        // the absence of other title elements, it's the full bf:titleStatement
-        // string. If there's a non-sort element, remove it from the full title
-        // string to get the main title element string.
-//        String mainTitleString = 
-//                removeNonSortString(titleStatementString, nonSortElement);
-       
-        // TODO Perhaps try to parse into subtitle and part name elements - but 
-        // seems very error-prone.
-           
-//        Resource mainTitleElement = 
-//                createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-//                        mainTitleString, language, title, model);
-        
-        // Non-sort element precedes main title element
-//        if (nonSortElement != null) {
-//            model.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
-//                    mainTitleElement);
-//        }
-
-        return model;
-    }
-    
-
-
-    
+//    public Model create(Resource subject, Literal titleStatementLiteral) {
+//        
+//        Model model = ModelFactory.createDefaultModel();
+//        Resource title = 
+//                model.createResource(RdfProcessor.mintUri(localNamespace));
+//        model.add(title, RDF.type, Ld4lType.TITLE.type());        
+//        model.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
+//        
+//        String titleStatementString = 
+//                normalizeTitle(titleStatementLiteral.getLexicalForm());
+//        
+//        String language = titleStatementLiteral.getLanguage();
+//      
+//        // The full bf:titleStatement string is the rdfs:label of the title
+//        model.add(title, RDFS.label, titleStatementString);
+//        
+//        Resource nonSortElement = 
+//                createNonSortTitleElement(
+//                        titleStatementString, language, title, model);
+//
+//        // This will be the rdfs:label value of the MainTitleElement. In
+//        // the absence of other title elements, it's the full bf:titleStatement
+//        // string. If there's a non-sort element, remove it from the full title
+//        // string to get the main title element string.
+////        String mainTitleString = 
+////                removeNonSortString(titleStatementString, nonSortElement);
+//       
+//        // TODO Perhaps try to parse into subtitle and part name elements - but 
+//        // seems very error-prone.
+//           
+////        Resource mainTitleElement = 
+////                createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
+////                        mainTitleString, language, title, model);
+//        
+//        // Non-sort element precedes main title element
+////        if (nonSortElement != null) {
+////            model.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
+////                    mainTitleElement);
+////        }
+//
+//        return model;
+//    }
+ 
 }

@@ -64,9 +64,7 @@ public class BfInstanceConverter extends BfBibResourceConverter {
     protected Model convert() {
         
         LOGGER.debug("Converting instance " + subject.getURI());
-        
-        // *** TODO Create the sameAs to the worldcat instance here
-        
+
         // Get the associated Work
         Statement instanceOf = 
                 subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
@@ -84,6 +82,8 @@ public class BfInstanceConverter extends BfBibResourceConverter {
 
         StmtIterator stmts = subject.getModel().listStatements();
  
+        boolean bfTitlePropDone = false;
+        
         while (stmts.hasNext()) {
             Statement statement = stmts.nextStatement();            
             Property predicate = statement.getPredicate();
@@ -130,10 +130,29 @@ public class BfInstanceConverter extends BfBibResourceConverter {
                             subject, object.asLiteral(), localNamespace);
                     outputModel.add(titleModel);
                     titleModel.close();             
-                }
-                                       
+                
+                } else if (bfProp.equals(BfProperty.BF_TITLE)) {
+                    // If there are two bf:title statements, they are converted
+                    // together in BfTitleConverter.convertBfTitleProp(), so
+                    // don't reprocess the second one.
+                    if (!bfTitlePropDone) {
+                        // A resource may have only bf:title and no Title 
+                        // object, so it must be processed from the 
+                        // Work/Instance side as well as with the Title (in the 
+                        // latter case, because it contains the sort title).
+                        Model titleModel = 
+                                BfTitleConverter.convertBfTitleDataProp(subject,
+                                localNamespace);
+                        if (titleModel != null) {
+                            outputModel.add(titleModel);
+                            titleModel.close();
+                        }
+                        bfTitlePropDone = true;
+                    }
+                }                                       
             }          
         }
+        
         return super.convert();
     }
 

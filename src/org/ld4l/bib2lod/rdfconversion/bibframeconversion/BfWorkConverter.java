@@ -77,6 +77,8 @@ public class BfWorkConverter extends BfBibResourceConverter {
 
         StmtIterator statements = subject.getModel().listStatements();
 
+        boolean bfTitlePropDone = false;
+        
         while (statements.hasNext()) {
             
             Statement statement = statements.nextStatement();
@@ -95,14 +97,28 @@ public class BfWorkConverter extends BfBibResourceConverter {
             
             if (bfProp.equals(BfProperty.BF_LANGUAGE)) {
                 convertLanguage(object);
-            }
-            
-            else if (CONTRIBUTOR_PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+                
+            } else if (CONTRIBUTOR_PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
                 convertContributor(statement);
-            }   
-//                } else if (ANNOTATION_TARGET_PROPERTIES.contains(bfProp)) {
-//                    convertAnnotation(statement);                   
-//                }       
+            
+            } else if (bfProp.equals(BfProperty.BF_TITLE)) {
+                // If there are two bf:title statements, they are converted
+                // together in BfTitleConverter.convertBfTitleProp(), so
+                // don't reprocess the second one.
+                if (!bfTitlePropDone) {
+                    // A resource may have only bf:title and no Title 
+                    // object, so it must be processed from the 
+                    // Work/Instance side as well as with the Title (in the 
+                    // latter case, because it contains the sort title).
+                    Model titleModel = BfTitleConverter.convertBfTitleDataProp(
+                            subject, localNamespace);
+                    if (titleModel != null) {
+                        outputModel.add(titleModel);
+                        titleModel.close();
+                    }
+                    bfTitlePropDone = true;
+                }
+            }       
         }
 
         return super.convert();

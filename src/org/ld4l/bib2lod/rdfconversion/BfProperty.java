@@ -111,7 +111,7 @@ public enum BfProperty {
     BF_SUMMARY_OF("summaryOf", Ld4lProperty.HAS_TARGET),
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
-    BF_TITLE("title"), //, Ld4lProperty.HAS_TITLE),
+    BF_TITLE("title"), 
     BF_TITLE_STATEMENT("titleStatement"),
     BF_TITLE_VARIATION_DATE("titleVariationDate", Ld4lProperty.DATE),
     BF_TITLE_VALUE("titleValue"), //, Ld4lProperty.LABEL),
