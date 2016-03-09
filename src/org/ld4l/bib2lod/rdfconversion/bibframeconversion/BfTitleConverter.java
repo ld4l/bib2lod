@@ -52,8 +52,8 @@ public class BfTitleConverter extends BfResourceConverter {
         // Language-dependent. Only handling English for now. However, an
         // accompanying bf:title value with language x-bf-sort also allows 
         // identification of a non-sort string; but this is not always present.
-        NON_SORT_STRINGS.add("A ");
         NON_SORT_STRINGS.add("An ");
+        NON_SORT_STRINGS.add("A ");
         NON_SORT_STRINGS.add("The ");
     }
     
@@ -223,6 +223,8 @@ public class BfTitleConverter extends BfResourceConverter {
      * title accompanies another title, expressed as either the object of 
      * another bf:title statement, or as a bf:Title. Here we handle the former.
      */
+    // TODO - break into separate methods - both because the method is too long,
+    // and because some of it will also be used by the bf:Title conversion.
     protected static Model convertBfTitleDataProp(
             Resource bibResource, String localNamespace) {
         
@@ -289,9 +291,15 @@ public class BfTitleConverter extends BfResourceConverter {
             
         } else {
             
-//            for (String nonSortString : NON_SORT_STRINGS) {
-//                if (mainTitleString)
-//            }
+            for (String nonSortString : NON_SORT_STRINGS) {
+                if (mainTitleString.startsWith(nonSortString)) {
+                    mainTitleString = StringUtils.difference(
+                            nonSortString, mainTitleString);
+                    addTitleElement(title, Ld4lType.NON_SORT_TITLE_ELEMENT, 
+                            nonSortString, language, localNamespace, false);
+                    break;                            
+                }
+            }
             
             // TODO ** Else look for non-sort elements at front of mainTitleString
             // loop through the non-sort elements
@@ -364,13 +372,7 @@ public class BfTitleConverter extends BfResourceConverter {
 //            return mainTitleString;
 //        }
 //      }
-    
 
-    
-
-
-
-    
     public Model convert() {
         
         Model model = subject.getModel();
