@@ -3,14 +3,14 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 import org.junit.Assert;
 import org.junit.Test;
 
-public class BfTitleConverterTest {
+public class TitleUtilsTest {
 
     @Test
     public void testTitleNormalizationPeriod() {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice.";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
 
     @Test
@@ -18,7 +18,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
        
     @Test
@@ -26,7 +26,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice. ";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
 
     @Test
@@ -34,7 +34,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice . ";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
     
     @Test
@@ -42,7 +42,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice...";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
     
     @Test
@@ -50,7 +50,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice... ";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
 
 
@@ -59,7 +59,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ...";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
 
     @Test
@@ -67,7 +67,7 @@ public class BfTitleConverterTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ... ";
-        Assert.assertEquals(expected, BfTitleConverter.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
     }
     
 }

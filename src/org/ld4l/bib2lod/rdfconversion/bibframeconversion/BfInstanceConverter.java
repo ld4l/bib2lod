@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
@@ -17,6 +18,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
+import org.ld4l.bib2lod.rdfconversion.Ld4lIndividual;
+import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
@@ -126,10 +129,7 @@ public class BfInstanceConverter extends BfResourceConverter {
                 
                 // Only Instances have bf:titleStatement assertions
                 if (bfProp.equals(BfProperty.BF_TITLE_STATEMENT)) {
-                    Model titleModel = BfTitleConverter.convertBfTitleStatement(
-                            subject, object.asLiteral(), localNamespace);
-                    outputModel.add(titleModel);
-                    titleModel.close();             
+                    convertBfTitleStatement(object.asLiteral());            
                 
                 } else if (bfProp.equals(BfProperty.BF_TITLE)) {
                     // If there are two bf:title statements, they are converted
@@ -141,7 +141,7 @@ public class BfInstanceConverter extends BfResourceConverter {
                         // Work/Instance side as well as with the Title (in the 
                         // latter case, because it contains the sort title).
                         Model titleModel = 
-                                BfTitleConverter.convertBfTitleDataProp(subject,
+                                TitleUtils.convertBfTitleDataProp(subject,
                                 localNamespace);
                         if (titleModel != null) {
                             outputModel.add(titleModel);
@@ -171,22 +171,52 @@ public class BfInstanceConverter extends BfResourceConverter {
         
     }
     
-    private void convertProvider(Statement statement) {
-        
-        BfResourceConverter converter = 
-                new BfProviderConverter(this.localNamespace);
-     
-        // Identify the provider resource and build its associated model (i.e.,
-        // statements in which it is the subject or object).
-        Resource resource = statement.getResource();
-        Model providerModel = getResourceSubModel(resource);
-        Resource provider = providerModel.createResource(resource.getURI());
-                      
-        // Add BfProviderConverter model to this converter's outputModel model,
-        // so they get added to the BibframeConverter output model.
-        Model convert = converter.convert(provider);
-		outputModel.add(convert);
-		convert.close();
+//    private void convertProvider(Statement statement) {
+//        
+//        BfResourceConverter converter = 
+//                new BfProviderConverter(this.localNamespace);
+//     
+//        // Identify the provider resource and build its associated model (i.e.,
+//        // statements in which it is the subject or object).
+//        Resource resource = statement.getResource();
+//        Model providerModel = getResourceSubModel(resource);
+//        Resource provider = providerModel.createResource(resource.getURI());
+//                      
+//        // Add BfProviderConverter model to this converter's outputModel model,
+//        // so they get added to the BibframeConverter output model.
+//        Model convert = converter.convert(provider);
+//		outputModel.add(convert);
+//		convert.close();
+//    }
+    
+    /*
+     * bf:titleStatement is used only with an Instance, and indicates a 
+     * transcribed title. This is expressed in LD4L with the 
+     * ld4l:hasSourceStatus predicate.
+     */
+    private void convertBfTitleStatement(Literal value) {
+  
+        Resource title = createTranscribedTitle(value);
+        Model titleModel = title.getModel();
+        outputModel.add(titleModel);
+        outputModel.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
     }
 
+    /*
+     * Only an Instance may have a TranscribedTitle.
+     */
+    private Resource createTranscribedTitle(Literal titleValue) {
+                    
+        // TODO For now we ignore the question of whether the titleStatement 
+        // value should be parsed into NonSortTitleElement and MainTitleElement.
+        // This should be handled generally in TitleUtils.createTitle().
+        
+        Resource title = 
+                TitleUtils.createSimpleTitle(titleValue, localNamespace);
+        
+        title.addProperty(Ld4lProperty.HAS_SOURCE_STATUS.property(), 
+                Ld4lIndividual.SOURCE_STATUS_TRANSCRIBED.individual());
+        
+        return title;      
+    }
 }

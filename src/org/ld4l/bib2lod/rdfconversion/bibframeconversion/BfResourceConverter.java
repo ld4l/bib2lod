@@ -223,6 +223,5 @@ public class BfResourceConverter {
         
         LOGGER.debug("Adding resource to remove: " + resource.getURI());
     }
-
-   
+  
 }
