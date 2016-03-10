@@ -52,7 +52,7 @@ public final class TitleUtils {
      * Convert any bf:title statements attached to the Work or Instance, 
      * including sort title values. A sort title accompanies another title,
      * expressed as either the object of another bf:title statement, or as a
-     * bf:Title. Here we handle the former.
+     * bf:Title. Here we handle the former. A sort title never occurs 
      */
     
     // TODO **** break into separate methods - both because the method is too 
@@ -62,36 +62,47 @@ public final class TitleUtils {
     static Model convertBfTitleDataProp(
             Resource bibResource, String localNamespace) {
         
-        Literal bfSortTitle = null;
-        Literal bfTitle = null;
+        Literal bfSortTitleLiteral = null;
+        Literal bfTitleLiteral = null;
         StmtIterator statements = 
                 bibResource.listProperties(BfProperty.BF_TITLE.property());
         while (statements.hasNext()) {
             Statement statement = statements.nextStatement();
             Literal literal = statement.getLiteral();
             if (isSortTitle(literal)) {
-                bfSortTitle = literal; 
+                bfSortTitleLiteral = literal; 
             } else {
-                bfTitle = literal;
+                bfTitleLiteral = literal;
             }
         }
 
-        if (bfTitle == null) {
+        if (bfTitleLiteral == null) {
             return null;
         }
-        
-        Resource title = createTitle(bfTitle, localNamespace, true);
-        
-        // titleLabel may differ from the original value because the string
-        // gets normalized in createTitle().
-        Literal titleLabel = title.getProperty(RDFS.label).getLiteral();
-        String titleString = titleLabel.getLexicalForm();
-        LOGGER.debug("title label: \"" + titleString + "\"");
 
-        String language = titleLabel.getLanguage();
+        bfTitleLiteral = normalizeTitle(bfTitleLiteral);
+        String titleLabelString = bfTitleLiteral.getLexicalForm();
+        LOGGER.debug("title label: \"" + titleLabelString + "\"");
+        String titleLabelLanguage = bfTitleLiteral.getLanguage();
         
-        String mainTitleString = titleString;
+        Resource title = createTitle(bfTitleLiteral, localNamespace, false);
+        Model titleModel = title.getModel();
+        titleModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
 
+        // TODO *** When we're converting a bf:Title:
+        // But this isn't true if there's a subtitle or part name element.
+        // FIRST isolate the main title element from these. THEN remove the
+        // non-sort string and create the NonSortTitleElement
+        String mainTitleString = titleLabelString;
+
+        // Now: when we're dealing with a bf:Title rather than a bf:title:
+        // Get subtitle element
+        // get part name element
+        // remove these from maintitlestring
+        // do the non-sort stuff and remove further from maintitlestring
+        // create nonsort element
+        // create main title element
+        
         /*
          * Create a NonSortTitleElement if it exists, either as a bf:title
          * object with language "x-bf-sort", or by matching one of the 
@@ -101,9 +112,9 @@ public final class TitleUtils {
         String nonSortString = null;
         
         // If there's a sort title object of bf:title
-        if (bfSortTitle != null) {
-            bfSortTitle = normalizeTitle(bfSortTitle);
-            sortTitleString = bfSortTitle.getLexicalForm();
+        if (bfSortTitleLiteral != null) {
+            bfSortTitleLiteral = normalizeTitle(bfSortTitleLiteral);
+            sortTitleString = bfSortTitleLiteral.getLexicalForm();
             // Reverse the strings because StringUtils.difference() returns
             // the remainder of the second string, starting from where they
             // differ.
@@ -148,21 +159,34 @@ public final class TitleUtils {
         if (nonSortString != null) {
             Resource nonSortElement = 
                     createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-                    nonSortString, language, localNamespace, false);
-            title.addProperty(
-                    Ld4lProperty.HAS_TITLE.property(), nonSortElement);
+                    nonSortString, titleLabelLanguage, localNamespace, false);
+            title = addTitleElement(title, nonSortElement);           
         }
         
         // Create the MainTitleElement
         LOGGER.debug("Main title string: \"" + mainTitleString + "\"");
         Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleString, language, 
+                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleString, titleLabelLanguage, 
                 localNamespace, false);
         
+        title = addTitleElement(title, mainTitleElement);
         
-        Model model = title.getModel();
-        model.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
-        return model;
+        return titleModel;
+    }
+    
+    private static Resource addTitleElement(
+            Resource title, Resource titleElement) {
+        
+        // Combine the models
+        Model titleElementModel = titleElement.getModel();
+        Model titleModel = title.getModel();
+        titleModel.add(titleElementModel);
+        titleElementModel.close();
+        
+        // Attach the TitleElement to the Title
+        title.addProperty(Ld4lProperty.HAS_PART.property(), titleElement);
+        
+        return title;
     }
 
     /*
@@ -176,22 +200,17 @@ public final class TitleUtils {
         
         Resource title = createTitle(titleValue, localNamespace, false);
             
-        // TODO *** Analyze the Title value for a NonSortElement. In that case,
-        // MainTitleElement is the title value minus the NonSortElement value. 
-        // See convertBfTitleDataProp.
+        // TODO *** Analyze the Title value for a NonSortElement, using the
+        // NON_SORT_STRINGS. See convertBfTitleDataProp.
 
         // Create the MainTitleElement
+        // TODO - put this in a method
         Resource mainTitleElement = createTitleElement(
                 Ld4lType.MAIN_TITLE_ELEMENT, titleValue, localNamespace, 
                 false);
-
-        // Add the MainTitleElement statements to the Title's model
-        Model mainTitleElementModel = mainTitleElement.getModel();
-        title.getModel().add(mainTitleElementModel);
-        mainTitleElementModel.close();
         
         // Attach the MainTitleElement to the Title
-        title.addProperty(Ld4lProperty.HAS_PART.property(), mainTitleElement);
+        title = addTitleElement(title, mainTitleElement);
 
         return title;
     }
@@ -261,7 +280,6 @@ public final class TitleUtils {
         return (language != null && language.equals("x-bf-sort"));       
     }
     
- 
     private static Resource createTitle(
             Literal titleValue, String localNamespace, boolean normalize) {
 
