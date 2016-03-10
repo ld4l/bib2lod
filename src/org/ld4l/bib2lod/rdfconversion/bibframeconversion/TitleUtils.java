@@ -144,13 +144,13 @@ public final class TitleUtils {
             
             // Look for a match to one of the specified non-sort strings
             for (String string : NON_SORT_STRINGS) {
-                if (mainTitleString.startsWith(string)) {
-                    nonSortString = string;
+                if (mainTitleString.startsWith(string)) {                    
                     LOGGER.debug("Found match of main title \"" 
-                            + mainTitleString + "' to non-sort string \""
-                            + nonSortString + "\"");
+                            + mainTitleString + "\" to non-sort string \""
+                            + string + "\"");
                     mainTitleString = StringUtils.difference(
-                            nonSortString, mainTitleString);
+                            string, mainTitleString);
+                    nonSortString = string.trim();
                     break;                            
                 }
             }
