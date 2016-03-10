@@ -323,7 +323,7 @@ public final class TitleUtils {
         return nonSortElement;
     }
     
-    private static Literal normalizeTitle(Literal title) {
+    static Literal normalizeTitle(Literal title) {
         
         String language = title.getLanguage();
         String text = title.getLexicalForm();

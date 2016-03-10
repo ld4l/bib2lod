@@ -87,6 +87,15 @@ public class BfTitleConverter extends BfResourceConverter {
                 addTitleSubType(bibResource, bfProp);
                 continue;
             }
+            
+            if (bfProp == null) {
+                continue;
+            }
+            
+            if (bfProp.equals(BfProperty.BF_LABEL)) {
+                outputModel.add(subject, Ld4lProperty.LABEL.property(), 
+                        TitleUtils.normalizeTitle(object.asLiteral()));
+            }
 
 //            if (bfProp.equals(BfProperty.BF_TITLE_VALUE) {
 //                convertTitleValue();
@@ -109,7 +118,7 @@ public class BfTitleConverter extends BfResourceConverter {
     }
    
     /* 
-     * Get the Work or Instance of which this Title is the title.
+     * Get the Work or Instance related to the Title.
      */
     private Resource getRelatedBibResource() {
 
@@ -199,5 +208,24 @@ public class BfTitleConverter extends BfResourceConverter {
             // and partNumber property
 //        }
 //    }
+    
+    @Override
+    protected Map<Property, Property> getPropertyMap() {
+        
+        // WRONG - alters map returned by BfProperty.propertyMap()
+        // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
+        // propertyMap.putAll(getPropertyMap());
+        Map<Property, Property> propertyMap = new HashMap<Property, Property>();
+        
+        // Get default mapping from Bibframe to LD4L properties
+        propertyMap.putAll(BfProperty.propertyMap());
+        
+        // BfTitleConverter normalizes the label and adds an rdfs:label
+        // assertion to the outputModel. We don't want super.convert() to
+        // convert bf:label to rdfs:label with the original string value.
+        propertyMap.remove(BfProperty.BF_LABEL.property());
+        
+        return propertyMap;
+    }
 
 }
