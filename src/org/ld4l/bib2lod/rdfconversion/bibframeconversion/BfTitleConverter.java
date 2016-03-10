@@ -39,12 +39,12 @@ public class BfTitleConverter extends BfResourceConverter {
             new ParameterizedSparqlString(
             "CONSTRUCT { ?bib ?bibProp ?resource . "
             + "?resource ?titleProp ?titlePropObj . "
-            + "?bib ?bibDataProp ?dataVal . } "
+            + "?bib ?bfTitle ?titleVal . } "
             + "WHERE { { "
             + "?bib ?bibProp ?resource . "
             + "OPTIONAL { "
-            + "?bib ?bibDataProp ?dataVal . } "
-            + "FILTER (?bibDataProp = " + BfProperty.BF_TITLE.sparqlUri() + ") "
+            + "?bib ?bfTitle ?titleVal . "
+            + "FILTER (?bfTitle = " + BfProperty.BF_TITLE.sparqlUri() + ") } "
             + "} UNION { "
             + "?resource ?titleProp ?titlePropObj . "
             + "} }");
@@ -55,8 +55,8 @@ public class BfTitleConverter extends BfResourceConverter {
         PROPERTY_TO_TYPE.put(BfProperty.BF_ABBREVIATED_TITLE, 
                 Ld4lType.ABBREVIATED_TITLE);
         PROPERTY_TO_TYPE.put(BfProperty.BF_KEY_TITLE, Ld4lType.KEY_TITLE);
-        // There is also bf:variantTitle, but it's not clear what to do with
-        // that, so not assigning a subtype.
+        // TODO Skipping bf:titleVariation for now. Probably a Title-Title
+        // relationship.
     }
     
     public BfTitleConverter(String localNamespace) {

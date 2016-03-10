@@ -120,6 +120,7 @@ public enum BfProperty {
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
     BF_TITLE("title"), 
     BF_TITLE_STATEMENT("titleStatement"),
+    BF_TITLE_VARIATION("titleVariation", Ld4lProperty.HAS_TITLE),
     BF_TITLE_VARIATION_DATE("titleVariationDate", Ld4lProperty.DATE),
     BF_TITLE_VALUE("titleValue"), //, Ld4lProperty.LABEL),
     BF_TRANSLATION("translation", Ld4lProperty.TRANSLATED_AS),
