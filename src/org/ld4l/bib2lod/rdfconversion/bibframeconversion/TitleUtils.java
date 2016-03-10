@@ -155,22 +155,24 @@ public final class TitleUtils {
                 }
             }
         }
+ 
+        // Create the MainTitleElement
+        LOGGER.debug("Main title string: \"" + mainTitleString + "\"");
+        Resource mainTitleElement = createTitleElement(
+                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleString,  
+                titleLabelLanguage, localNamespace, false);       
+        title = addTitleElement(title, mainTitleElement);
         
+        // Create the NonSortTitleElement
         if (nonSortString != null) {
             Resource nonSortElement = 
                     createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
                     nonSortString, titleLabelLanguage, localNamespace, false);
+            nonSortElement.addProperty(
+                    Ld4lProperty.PRECEDES.property(), mainTitleElement);
             title = addTitleElement(title, nonSortElement);           
         }
-        
-        // Create the MainTitleElement
-        LOGGER.debug("Main title string: \"" + mainTitleString + "\"");
-        Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleString, titleLabelLanguage, 
-                localNamespace, false);
-        
-        title = addTitleElement(title, mainTitleElement);
-        
+ 
         return titleModel;
     }
     
@@ -204,7 +206,6 @@ public final class TitleUtils {
         // NON_SORT_STRINGS. See convertBfTitleDataProp.
 
         // Create the MainTitleElement
-        // TODO - put this in a method
         Resource mainTitleElement = createTitleElement(
                 Ld4lType.MAIN_TITLE_ELEMENT, titleValue, localNamespace, 
                 false);
@@ -232,21 +233,22 @@ public final class TitleUtils {
      * Creates a TitleElement based on a Bibframe property.
      */ 
     static Resource createTitleElement(Ld4lType titleElementType,
-            Literal titleValue, String localNamespace, boolean normalize) {
+            Literal titleElementValue, String localNamespace, 
+            boolean normalize) {
 
         Model model = ModelFactory.createDefaultModel();
         
         // If the literal was not already normalized in a previous step, 
         // normalize it now.
         if (normalize) {
-            titleValue = normalizeTitle(titleValue);
+            titleElementValue = normalizeTitle(titleElementValue);
         }
         
         // Create the TitleElement                                                                                                                                                   
         Resource titleElement = 
                 model.createResource(RdfProcessor.mintUri(localNamespace));
         model.add(titleElement, RDF.type, titleElementType.type());
-        model.add(titleElement, RDFS.label, titleValue);
+        model.add(titleElement, RDFS.label, titleElementValue);
 
         return titleElement;                  
     }
