@@ -17,6 +17,7 @@ import org.apache.logging.log4j.Logger;
  */
 public enum Ld4lType {
     
+    ABBREVIATED_TITLE("AbbreviatedTitle"),
     AGENT(OntNamespace.FOAF, "Agent"),
     ANNOTATION(OntNamespace.OA, "Annotation"),
     ANSI("Ansi"),
@@ -62,6 +63,7 @@ public enum Ld4lType {
     ISWC("Iswc"),
     ITEM("Item"),
     JURISDICTION("Jurisdiction"),
+    KEY_TITLE("KeyTitle"),
     LANGUAGE(OntNamespace.LINGVO, "Lingvo"),
     LC_OVERSEAS_ACQ_NUMBER("LcOverseasAcqNumber"),
     LCC_SHELF_MARK("LccShelfMark"),

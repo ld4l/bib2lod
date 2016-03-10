@@ -24,6 +24,12 @@ public enum BfProperty {
     // also a default conversion that will get included when processing the
     // resource on the opposite side. Include the default mapping only where
     // there is no special processing of the property required.
+    
+    // TODO Nice-to-have: add instance variable Ld4lType, where Bibframe
+    // properties are mapped to LD4L types. Currently these mappings are 
+    // contained in individual converters.
+    
+    BF_ABBREVIATED_TITLE("abbreviatedTitle"),
     BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
     BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
             Ld4lProperty.ANNOTATED_BY),
@@ -71,6 +77,7 @@ public enum BfProperty {
     BF_INSTANCE_OF("instanceOf", Ld4lProperty.IS_INSTANCE_OF),
     BF_INSTANCE_TITLE("instanceTitle", Ld4lProperty.HAS_TITLE),
     BF_ITEM_ID("itemId", Ld4lProperty.IDENTIFIED_BY),
+    BF_KEY_TITLE("keyTitle"),
     BF_LABEL("label", Ld4lProperty.LABEL),
     BF_LANGUAGE("language"),
     BF_LANGUAGE_OF_PART("languageOfPart"), 
@@ -129,19 +136,13 @@ public enum BfProperty {
     // DON'T map to Ld4lProperty.HAS_CONTRIBUTION here, else object will be
     // the original agent rather than the new ld4l:Contribution entity. This is
     // handled in BfWorkConverter.
-    RELATORS_AUTHOR(
-            OntNamespace.RELATORS, "aut"), 
-    RELATORS_COMPOSER(
-            OntNamespace.RELATORS, "cmp"),  
-    RELATORS_CONDUCTOR(
-            OntNamespace.RELATORS, "cnd"),  
-    RELATORS_EDITOR(
-            OntNamespace.RELATORS, "edt"),  
-    RELATORS_NARRATOR(
-            OntNamespace.RELATORS, "nrt"),  
-    RELATORS_PERFORMER(
-            OntNamespace.RELATORS, "prf"), 
-    
+    RELATORS_AUTHOR(OntNamespace.RELATORS, "aut"),             
+    RELATORS_COMPOSER(OntNamespace.RELATORS, "cmp"),              
+    RELATORS_CONDUCTOR(OntNamespace.RELATORS, "cnd"),              
+    RELATORS_EDITOR(OntNamespace.RELATORS, "edt"),              
+    RELATORS_NARRATOR(OntNamespace.RELATORS, "nrt"),              
+    RELATORS_PERFORMER(OntNamespace.RELATORS, "prf"),
+                 
     // Subproperties of bf:identifier
     BF_ANSI("ansi"),
     BF_CODEN("coden"),
