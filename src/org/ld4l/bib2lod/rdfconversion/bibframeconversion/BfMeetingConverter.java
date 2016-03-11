@@ -32,7 +32,7 @@ public class BfMeetingConverter extends BfAuthorityConverter {
         PROPERTIES_TO_RETRACT.add(BfProperty.BF_HAS_AUTHORITY);
     }
     
-    private final ParameterizedSparqlString ASK_PSS = 
+    private static final ParameterizedSparqlString ASK_PSS = 
             new ParameterizedSparqlString(
                     "ASK { "
                     + "?meeting " + BfProperty.BF_HAS_AUTHORITY.sparqlUri() 
