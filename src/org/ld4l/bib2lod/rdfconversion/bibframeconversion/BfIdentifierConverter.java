@@ -12,10 +12,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
+import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -115,6 +118,9 @@ public class BfIdentifierConverter extends BfResourceConverter {
         IDENTIFIER_PREFIXES.put("ocn", Ld4lType.OCLC_IDENTIFIER);
     }
     
+    private Resource relatedResource;
+    private Property linkingProperty;
+    
     // Submodel needs to get ?s bf:subject ?o; ?o systemNumber ?id
     // where ?id a fast id. Then add a sameas from ?o to ?id
     // See email from Steven re meetings. Same for any other non-Topic
@@ -145,25 +151,42 @@ public class BfIdentifierConverter extends BfResourceConverter {
     @Override
     protected Model convert() {
 
-        // TODO Need a query for this instead
-//        Resource relatedResource = linkingStatement.getSubject();
-//
-//        if (isWorldcatUri(subject)) {
-//            createWorldcatIdentifier(relatedResource);
-//            return outputModel;
-//        }
-//            
-//        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
-//                subject);
-//
-//        String[] idValues = getIdentifierValue();
-//
-//        getIdentifierType(relatedResource, idValues);
-//
-//        LOGGER.debug("Identifier: " + subject.getURI());
-//        RdfProcessor.printModel(outputModel, Level.DEBUG);
+        init();
+
+        if (isWorldcatUri(subject)) {
+            createWorldcatIdentifier();
+            return outputModel;
+        }
+            
+        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
+                subject);
+
+        String[] idValues = getIdentifierValue();
+
+        getIdentifierType(idValues);
+
+        LOGGER.debug("Identifier: " + subject.getURI());
+        RdfProcessor.printModel(outputModel, Level.DEBUG);
+        
         return outputModel;
     }
+    
+    private void init() {
+
+        StmtIterator stmts = 
+                subject.getModel().listStatements(null, null, subject);
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.next();
+            relatedResource = stmt.getSubject();
+            linkingProperty = stmt.getPredicate();
+        }
+    }
+    
+    
+//    @Override
+//    protected ParameterizedSparqlString getResourceSubModelPss() {
+//        // Probably can use BfResourceConverter query
+//    }
 
     private String[] getIdentifierValue() {
 
@@ -201,16 +224,15 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         return new String[] { prefix, idValue };       
     }
- 
     
-    private void getIdentifierType(Resource relatedResource, String[] idValues) {
+    private void getIdentifierType(String[] idValues) {
         
         String prefix = idValues[0];
         String value = idValues[1];
         
         Ld4lType identifierType = null;
         
-        identifierType = getIdentifierTypeFromPredicate(relatedResource);
+        identifierType = getIdentifierTypeFromPredicate();
         
         // Note that the Bibframe converter may redundantly specify type with 
         // both a predicate and a scheme:
@@ -245,7 +267,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
     }
     
-    private void createWorldcatIdentifier(Resource relatedResource) {
+    private void createWorldcatIdentifier() {
         
         // Add an identifier object with the Worldcat id as its value.
         Resource identifier = outputModel.createResource(
@@ -266,29 +288,28 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(relatedResource, OWL.sameAs, subject);
     }
 
-    
     private Ld4lType getIdentifierTypeFromIdentifierValue(
             String prefix, String idValue) {   
             
         Ld4lType identifierType = null;
-        
+ 
         // TODO - REDO!
-//        if (idValue != null) {
-//            
-//            if (prefix != null) {               
-//                identifierType = IDENTIFIER_PREFIXES.get(prefix);
-//            
-//            // If no subtype has been identified, and the value is all digits,
-//            // assume a local ILS identifer.
-//            // TODO Check if this is true for Harvard and Stanford
-//            } else if (idValue.matches("^\\d+$")
-//                    // Not sure if this condition is required
-//                    && linkingStatement.getPredicate().equals(
-//                            BfProperty.BF_SYSTEM_NUMBER.property())) {
-//
-//                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
-//            }
-//        }
+        if (idValue != null) {
+            
+            if (prefix != null) {               
+                identifierType = IDENTIFIER_PREFIXES.get(prefix);
+            
+            // If no subtype has been identified, and the value is all digits,
+            // assume a local ILS identifer.
+            // TODO **** Check if this is true for Harvard and Stanford
+            } else if (idValue.matches("^\\d+$")
+                    // Not sure if this condition is required
+                    && linkingProperty.equals(
+                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+
+                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+            }
+        }
         
         return identifierType;
     }
@@ -322,25 +343,22 @@ public class BfIdentifierConverter extends BfResourceConverter {
         return identifierType;
     }
 
-    private Ld4lType getIdentifierTypeFromPredicate(Resource relatedResource) {
+    private Ld4lType getIdentifierTypeFromPredicate() {
             
         Ld4lType identifierType = null;
-        
-        // TODO - REDO
-//        Property predicate = linkingStatement.getPredicate();
-//        
-//        BfProperty bfProp = BfProperty.get(predicate);
-//                    
-//        if (bfProp == null) {
-//            // This would be an oversight; log for review.
-//            LOGGER.warn("No handling defined for property " 
-//                    + predicate.getURI() + " linking " 
-//                    + relatedResource.getURI() + " to its identifier "
-//                    + subject.getURI() + ".");   
-//            
-//        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-//            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
-//        }
+ 
+        BfProperty bfProp = BfProperty.get(linkingProperty);
+                    
+        if (bfProp == null) {
+            // This would be an oversight; log for review.
+            LOGGER.warn("No handling defined for property " 
+                    + linkingProperty.getURI() + " linking " 
+                    + relatedResource.getURI() + " to its identifier "
+                    + subject.getURI() + ".");   
+            
+        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
+        }
            
         return identifierType;        
     }
