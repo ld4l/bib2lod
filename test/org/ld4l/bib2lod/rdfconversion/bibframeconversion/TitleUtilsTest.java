@@ -10,7 +10,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice.";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
 
     @Test
@@ -18,7 +18,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
        
     @Test
@@ -26,7 +26,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice. ";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
 
     @Test
@@ -34,7 +34,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice . ";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
     
     @Test
@@ -42,7 +42,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice...";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
     
     @Test
@@ -50,7 +50,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice... ";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
 
 
@@ -59,7 +59,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ...";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
 
     @Test
@@ -67,7 +67,7 @@ public class TitleUtilsTest {
         
         String expected = "Pride and Prejudice";
         String input = "Pride and Prejudice ... ";
-        Assert.assertEquals(expected, TitleUtils.normalizeTitle(input));        
+        Assert.assertEquals(expected, TitleUtils.normalize(input));        
     }
     
 }

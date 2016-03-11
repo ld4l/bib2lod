@@ -61,6 +61,7 @@ public enum Ld4lProperty {
     LEGACY_PROVIDER_ROLE(OntNamespace.LEGACY, "providerRole"),
     LEGACY_PROVIDER_STATEMENT(OntNamespace.LEGACY, "providerStatement"),
     LEGACY_SUPPLEMENTARY_CONTENT_NOTE(OntNamespace.LEGACY, "supplementaryContentNote"),
+    LEGACY_TITLE_TYPE(OntNamespace.LEGACY, "titleType"),
     MADSRDF_AUTHORITATIVE_LABEL(OntNamespace.MADSRDF, "authoritativeLabel"),
     MADSRDF_IS_MEMBER_OF_MADS_SCHEME(
             OntNamespace.MADSRDF, "isMemberOfMADSScheme"),

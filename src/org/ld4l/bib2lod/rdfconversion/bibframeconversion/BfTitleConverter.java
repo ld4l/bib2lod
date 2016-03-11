@@ -9,23 +9,18 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.jena.vocabulary.RDFS;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.Ld4lIndividual;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfTitleConverter extends BfResourceConverter {
 
@@ -49,14 +44,25 @@ public class BfTitleConverter extends BfResourceConverter {
             + "?resource ?titleProp ?titlePropObj . "
             + "} }");
 
-    private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE =
+    private static final Map<BfProperty, Ld4lType> TITLE_PROP_TO_TYPE =
             new HashMap<BfProperty, Ld4lType>();
     static {
-        PROPERTY_TO_TYPE.put(BfProperty.BF_ABBREVIATED_TITLE, 
+        TITLE_PROP_TO_TYPE.put(BfProperty.BF_ABBREVIATED_TITLE, 
                 Ld4lType.ABBREVIATED_TITLE);
-        PROPERTY_TO_TYPE.put(BfProperty.BF_KEY_TITLE, Ld4lType.KEY_TITLE);
+        TITLE_PROP_TO_TYPE.put(BfProperty.BF_KEY_TITLE, Ld4lType.KEY_TITLE);
         // TODO Skipping bf:titleVariation for now. Probably a Title-Title
         // relationship.
+    }
+    
+    private static final Map<BfProperty, Ld4lType> 
+            TITLE_ELEMENT_PROP_TO_TYPE = new HashMap<BfProperty, Ld4lType>();
+    static {
+        TITLE_ELEMENT_PROP_TO_TYPE.put(BfProperty.BF_SUBTITLE, 
+                Ld4lType.SUBTITLE_ELEMENT);
+        TITLE_ELEMENT_PROP_TO_TYPE.put(BfProperty.BF_PART_NUMBER, 
+                Ld4lType.PART_NUMBER_TITLE_ELEMENT);
+        TITLE_ELEMENT_PROP_TO_TYPE.put(BfProperty.BF_PART_TITLE, 
+                Ld4lType.PART_NAME_TITLE_ELEMENT);
     }
     
     public BfTitleConverter(String localNamespace) {
@@ -71,52 +77,16 @@ public class BfTitleConverter extends BfResourceConverter {
 
     public Model convert() {
         
-        Model model = subject.getModel();       
         Resource bibResource = getRelatedBibResource();
-
-        StmtIterator stmts = model.listStatements();
-        while (stmts.hasNext()) {
-            
-            Statement statement = stmts.nextStatement();
-            Resource stmtSubject = statement.getSubject();
-            Property property = statement.getPredicate();
-            RDFNode object = statement.getObject();
-            BfProperty bfProp = BfProperty.get(property);
-            
-            if (stmtSubject.equals(bibResource)) {
-                addTitleSubType(bibResource, bfProp);
-                continue;
-            }
-            
-            if (bfProp == null) {
-                continue;
-            }
-            
-            if (bfProp.equals(BfProperty.BF_LABEL)) {
-                outputModel.add(subject, Ld4lProperty.LABEL.property(), 
-                        TitleUtils.normalizeTitle(object.asLiteral()));
-            }
-
-//            if (bfProp.equals(BfProperty.BF_TITLE_VALUE) {
-//                convertTitleValue();
-//                
-//            } //else if (bfProp.equals)
-        }
         
+        addTitleSubType(bibResource);
+        addTitleElements(bibResource);
+        
+        // Do we need to call super.convert(). Add some logging to see what it's
+        // doing for title conversion.
         return super.convert();
     }
-    
-    private void addTitleSubType(Resource bibResource, BfProperty bfProp) {
 
-        if (PROPERTY_TO_TYPE.containsKey(bfProp)) {
-            Ld4lType titleType = PROPERTY_TO_TYPE.get(bfProp);
-            outputModel.add(subject, RDF.type, titleType.type());
-            outputModel.add(
-                    bibResource, Ld4lProperty.HAS_TITLE.property(), subject);
-        }           
-        // Type ld4l:Title will be assigned in super.convert();
-    }
-   
     /* 
      * Get the Work or Instance related to the Title.
      */
@@ -132,82 +102,301 @@ public class BfTitleConverter extends BfResourceConverter {
         return bibResource;    
     }
     
-//    private void convertTitleValue() {
-//        
-//        Statement titleValueStmt = 
-//                subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
-//        
-//        if (titleValueStmt != null) {
-//
-//            // bf:titleValue string and language
-//            String titleValueString = 
-//                    normalizeTitle(titleValueStmt.getString());
-//            String titleValueLanguage = titleValueStmt.getLanguage();
-//            
-//            // This will be the rdfs:label of the Title
-//            String fullTitleString = titleValueString;
-//       
-//            Resource nonSortElement = createNonSortTitleElement(
-//                    titleValueString, titleValueLanguage, subject, outputModel);
-//
-//            // This will be the rdfs:label value of the MainTitleElement. In
-//            // the absence of other title elements, it's the full bf:titleValue
-//            // string. If there's a non-sort element, remove it from the full title
-//            // title string to get the main title element string.         
-////            String mainTitleString = 
-////                    removeNonSortString(titleValueString, nonSortElement);
-//               
-////            Resource mainTitleElement = 
-////                    createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, 
-////                            mainTitleString, titleValueLanguage);
-//            
-//            // Non-sort element precedes main title element
-////            if (nonSortElement != null) {
-////                outputModel.add(nonSortElement, Ld4lProperty.PRECEDES.property(), 
-////                        mainTitleElement);
-////            }
-//            
-//            Resource subtitleElement = null;
-//                         
-//            Statement subtitleStmt = 
-//                    subject.getProperty(BfProperty.BF_SUBTITLE.property());            
-//            if (subtitleStmt != null) {
-//
-//                // Create the subtitle element
-//                String subtitleValue = normalizeTitle(subtitleStmt.getString());
-//                String language = subtitleStmt.getLanguage();
-////                subtitleElement = createTitleElement(
-////                        Ld4lType.SUBTITLE_ELEMENT, subtitleValue, language);
-//                
-//                // When there's a subtitle, the titleValue contains only the 
-//                // main title, not the full title. The rdfs:label (full title)
-//                // concatenates both main title and subtitle strings.
-//                fullTitleString += " " + subtitleValue;
-//                
-//                // Order the mainTitleElement and subtitleElement
-////                outputModel.add(
-////                        mainTitleElement, Ld4lProperty.PRECEDES.property(), 
-////                        subtitleElement);
-//          
-//            } 
-//            
-//            // Add the rdfs:label of the Title
-//            outputModel.add(
-//                    subject, RDFS.label, fullTitleString, titleValueLanguage);
-//            
-//            // NB Some Title objects have both a bf:titleValue and a bf:label, 
-//            // with different strings. We'll end up assigning two rdfs:labels.
-//            // Ideally we should not have two rdfs:labels, but it's not clear
-//            // how to resolve this case. In at least some cases the bf:label
-//            // has extraneous, non-title text, but it's not clear whether that's
-//            // always the case. E.g., record 2083918 has
-//            // title5 bf:label "Hans Bethe papers, [ca. 1931]-1992."
-//            // title5 bf:titleValue "Hans Bethe papers,"
-//            
-            // TODO ** Part name/number elements - use bf:partName property
-            // and partNumber property
-//        }
-//    }
+    private void addTitleSubType(Resource bibResource) {
+
+        Model model = subject.getModel();
+
+        StmtIterator stmts = model.listStatements(bibResource, null, subject);
+        
+        // There will be only one.
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.nextStatement();
+            BfProperty bfProp = BfProperty.get(stmt.getPredicate());
+            if (TITLE_PROP_TO_TYPE.containsKey(bfProp)) {
+                Ld4lType titleType = TITLE_PROP_TO_TYPE.get(bfProp);
+                outputModel.add(subject, RDF.type, titleType.type());
+                outputModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(),
+                        subject);
+            }   
+        }
+        // Type ld4l:Title will be assigned in super.convert();
+        // If we do it here, can we skip super.convert() altogether?
+    }
+   
+
+    // TODO Break this up into smaller methods
+    private void addTitleElements(Resource bibResource) {
+        
+        Literal labelLiteral = getNormalizedLabel();
+
+        // Create any TitleElements and add them to the model
+        // TODO For now we ignore multiple subtitles for a title. Not sure if
+        // they show up in the MARC record, anyway.
+
+        String mainTitleLabel = createMainTitleLabel(labelLiteral);
+ 
+        // TODO Following search for a nonSortLabel duplicates the TitleUtils
+        // method. Consolidate into a single method. Problem is the method
+        // alters both nonSortLabel and mainTitleLabel.
+        
+        // Look for a nonSortElement, either from a bf:title language 
+        // "x-bf-sort", or by matching the NON_SORT_STRINGS.              
+        String nonSortLabel = null;
+        String sortTitleLabel = getSortTitleLabel(bibResource);
+        if (sortTitleLabel != null) {
+            sortTitleLabel = TitleUtils.normalize(sortTitleLabel);
+            
+            // Get the difference between the sort title label and the
+            // main title label. The difference becomes the NonSortElement
+            // label and the sort title label becomes the main title label.
+            // Example: Original main title label (copy of title label): 
+            // "A Tree Grows in Brooklyn".
+            // Sort title: "Tree Grows in Brooklyn". =>
+            // Main title element:  "Tree Grows in Brooklyn".
+            // Non sort element: "A".
+
+            // Reverse the strings because StringUtils.difference() returns
+            // the remainder of the second string, starting from where they
+            // differ.
+            String reverseSortTitleString = 
+                    StringUtils.reverse(sortTitleLabel);
+            LOGGER.debug("Reverse sort title: \"" 
+                    + reverseSortTitleString + "\"");
+            String reverseMainTitleString = 
+                    StringUtils.reverse(mainTitleLabel);
+            LOGGER.debug("reverse main title: \"" 
+                    + reverseMainTitleString + "\"");
+            LOGGER.debug("Found sort title: \"" + sortTitleLabel + "\"");
+            String difference = 
+                    StringUtils.difference(
+                            reverseSortTitleString, reverseMainTitleString);
+            if (! difference.isEmpty()) {
+                nonSortLabel = StringUtils.reverse(difference);
+                LOGGER.debug("Found non sort string: \"" 
+                        + nonSortLabel + "\"");
+                mainTitleLabel = sortTitleLabel;
+                LOGGER.debug("Found main title string: \"" 
+                        + mainTitleLabel + "\"");   
+            }
+                      
+        } else {
+            
+            // Look for a match to one of the specified non-sort strings
+            for (String string : TitleUtils.getNonSortStrings()) {
+                if (mainTitleLabel.startsWith(string)) {
+                    
+                    LOGGER.debug("Found match of main title \"" 
+                            + mainTitleLabel + "\" to non-sort string \""
+                            + string + "\"");
+                    mainTitleLabel = StringUtils.difference(
+                            string, mainTitleLabel);
+                    nonSortLabel = string.trim();
+                    break;                            
+                }
+            }
+        }
+
+        // Add the elements to the model
+        List<Resource> titleElements = new ArrayList<Resource>();
+
+        // Order is critical here, so we get the right order in the 
+        // titleElements list, for precedence assignments.
+        if (nonSortLabel != null) {
+            titleElements.add(createTitleElement(
+                Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortLabel, titleElements));
+        }
+        
+        titleElements.add(createTitleElement(
+                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel, titleElements)); 
+             
+        titleElements.add(
+                createTitleElement(BfProperty.BF_SUBTITLE, titleElements));
+
+        titleElements.add(
+                createTitleElement(BfProperty.BF_PART_NUMBER, titleElements));
+        
+        titleElements.add(
+                createTitleElement(BfProperty.BF_PART_TITLE, titleElements));
+
+        addPrecedenceRelations(titleElements);
+  
+    }
+    
+    private void addPrecedenceRelations(List<Resource> titleElements) {
+  
+        int last = (titleElements.size()) - 1;
+        for (Resource titleElement : titleElements) {
+            if (titleElement != null) {
+                int index = titleElements.indexOf(titleElement);
+                if (index < last) {
+                    outputModel.add(
+                            titleElement, Ld4lProperty.PRECEDES.property(),
+                            titleElements.get(index + 1));                        
+                }
+            }
+        }         
+    }
+    
+    private Resource createTitleElement(Ld4lType type, String label, 
+            List<Resource> titleElements) {
+        
+        // Create the TitleElement
+        Resource titleElement = TitleUtils.createTitleElement(type, 
+                label, null, localNamespace, true);
+        
+        // Add the TitleElement statements to the output model
+        Model model = titleElement.getModel();
+        outputModel.add(model);
+        model.close();
+        
+        // Attach the TitleElement to the Title
+        outputModel.add(
+                subject, Ld4lProperty.HAS_PART.property(), titleElement);
+        
+        // Add the TitleElement to the list of elements
+        titleElements.add(titleElement);
+        
+        return titleElement;
+    }
+
+    private String getSortTitleLabel(Resource bibResource) {
+        
+        String label = null;
+        StmtIterator stmts = 
+                bibResource.listProperties(BfProperty.BF_TITLE.property());
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.nextStatement();
+            String language = stmt.getLanguage();
+            if (language != null && language.equals("x-bf-hash")) {
+                label = stmt.getString();
+                break;
+            }
+        }
+        return label;
+    }
+    
+    
+    private String getTitlePropLabel(BfProperty titleProp) {
+        
+        String label = null;
+        
+        // Find a statement using DatatypeProperty titleProp
+        Statement stmt = subject.getProperty(titleProp.property());
+
+        // Get the String object of the statement
+        if (stmt != null) {
+            label = stmt.getString();
+        }
+        
+        return label;            
+    }
+    
+    // Add the normalized label to the Title
+    private Literal getNormalizedLabel() {
+  
+        Literal labelLiteral = subject.getProperty(
+                BfProperty.BF_LABEL.property()).getLiteral();   
+        
+        if (labelLiteral == null) {
+            return null;
+        }
+ 
+        // Get new label literal with normalized string
+        String label = 
+                TitleUtils.normalize(labelLiteral.getLexicalForm());
+
+        Literal normalizedLiteral = ResourceFactory.createLangLiteral(
+                label, labelLiteral.getLanguage());
+        outputModel.add(
+                subject, Ld4lProperty.LABEL.property(), normalizedLiteral);
+
+        return normalizedLiteral;
+    }
+
+    
+    // TODO - combine with the code in convertBfTitleDataProp() - may just need
+    // to parameterize the title and the model. There the title is a local 
+    // resource, here it is the subject instance variable. There the model is 
+    // the subject's model, but here it is the output model.
+    private Resource createTitleElement(BfProperty titleProp, 
+            List<Resource> titleElements) {
+        
+        Resource titleElement = null;
+
+        // Find a statement using DatatypeProperty titelProp
+        Statement statement = 
+                subject.getProperty(titleProp.property());
+
+        // Get the String object of the statement
+        if (statement != null) {
+            String label = statement.getString();
+
+            // Find the LD4L type to create
+            Ld4lType type = 
+                    TITLE_ELEMENT_PROP_TO_TYPE.get(titleProp);
+            
+            titleElement = 
+                    createTitleElement(type, label, titleElements);           
+        }
+        
+        return titleElement;
+    }
+    
+    
+    private String createMainTitleLabel(Literal titleLabelLiteral) {
+               
+        String mainTitleLabel = null;
+        
+        // If there's a bf:titleValue, get the MainTitleElement value from it.
+        // The titleValue has subtitle, partNumberTitle, and partNameTitle
+        // stripped away.
+        Statement titleValueStmt = 
+                subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
+        if (titleValueStmt != null) {
+            Literal titleValueLiteral = titleValueStmt.getLiteral();
+            titleValueLiteral = TitleUtils.normalize(titleValueLiteral);
+            mainTitleLabel = titleValueLiteral.getLexicalForm();
+        }
+        
+        if (mainTitleLabel == null) {
+            if (titleLabelLiteral != null) {
+                // Start by assigning the Title label to the MainTitleElement
+                mainTitleLabel = titleLabelLiteral.getLexicalForm();
+                
+                // Get the non-normalized string values of the title props. 
+                // These will be stripped out of the label to create the 
+                // MainTitleElement string value. They should be non-normalized, 
+                // else stripping them away may leave stranded punctuation in 
+                // the MainTitleElement string.
+
+                mainTitleLabel = removeTitleElementLabel(mainTitleLabel, 
+                        BfProperty.BF_SUBTITLE);
+                mainTitleLabel = removeTitleElementLabel(mainTitleLabel, 
+                        BfProperty.BF_PART_NUMBER);
+                mainTitleLabel = removeTitleElementLabel(mainTitleLabel, 
+                        BfProperty.BF_PART_TITLE);                
+     
+                // Reduce sequences of whitespace left by the string removals. 
+                mainTitleLabel = 
+                        mainTitleLabel.replace("\\s+", " ");
+            }
+        }
+ 
+        return mainTitleLabel;
+    }
+    
+    private String removeTitleElementLabel(String mainTitleLabel, 
+            BfProperty bfTitleProp) {
+        
+        String titleElementLabel = getTitlePropLabel(bfTitleProp);
+                
+        if (titleElementLabel != null) {
+            mainTitleLabel = mainTitleLabel.replace(titleElementLabel, "");
+        }  
+        
+        return mainTitleLabel;
+    }
+
     
     @Override
     protected Map<Property, Property> getPropertyMap() {

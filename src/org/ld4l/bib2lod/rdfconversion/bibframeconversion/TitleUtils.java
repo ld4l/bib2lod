@@ -59,6 +59,10 @@ public final class TitleUtils {
     // long, and because some of it will also be used by BfTitleConverter; 
     // specifically, the non-sort title element creation.
 
+    static List<String> getNonSortStrings() {
+        return NON_SORT_STRINGS;
+    }
+    
     static Model convertBfTitleDataProp(
             Resource bibResource, String localNamespace) {
         
@@ -80,7 +84,7 @@ public final class TitleUtils {
             return null;
         }
 
-        bfTitleLiteral = normalizeTitle(bfTitleLiteral);
+        bfTitleLiteral = normalize(bfTitleLiteral);
         String titleLabelString = bfTitleLiteral.getLexicalForm();
         LOGGER.debug("title label: \"" + titleLabelString + "\"");
         String titleLabelLanguage = bfTitleLiteral.getLanguage();
@@ -89,31 +93,21 @@ public final class TitleUtils {
         Model titleModel = title.getModel();
         titleModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
 
-        // TODO *** When we're converting a bf:Title:
-        // But this isn't true if there's a subtitle or part name element.
-        // FIRST isolate the main title element from these. THEN remove the
-        // non-sort string and create the NonSortTitleElement
         String mainTitleString = titleLabelString;
-
-        // Now: when we're dealing with a bf:Title rather than a bf:title:
-        // Get subtitle element
-        // get part name element
-        // remove these from maintitlestring
-        // do the non-sort stuff and remove further from maintitlestring
-        // create nonsort element
-        // create main title element
         
         /*
          * Create a NonSortTitleElement if it exists, either as a bf:title
          * object with language "x-bf-sort", or by matching one of the 
          * NON_SORT_STRINGS.
          */
+        // TODO Combine with code in BfTitleConverter - they're doing the
+        // same thing
         String sortTitleString = null;
         String nonSortString = null;
         
         // If there's a sort title object of bf:title
         if (bfSortTitleLiteral != null) {
-            bfSortTitleLiteral = normalizeTitle(bfSortTitleLiteral);
+            bfSortTitleLiteral = normalize(bfSortTitleLiteral);
             sortTitleString = bfSortTitleLiteral.getLexicalForm();
             // Reverse the strings because StringUtils.difference() returns
             // the remainder of the second string, starting from where they
@@ -144,7 +138,8 @@ public final class TitleUtils {
             
             // Look for a match to one of the specified non-sort strings
             for (String string : NON_SORT_STRINGS) {
-                if (mainTitleString.startsWith(string)) {                    
+                if (mainTitleString.startsWith(string)) {
+                    
                     LOGGER.debug("Found match of main title \"" 
                             + mainTitleString + "\" to non-sort string \""
                             + string + "\"");
@@ -198,7 +193,7 @@ public final class TitleUtils {
     static Resource createSimpleTitle(
             Literal titleValue, String localNamespace) {
 
-        titleValue = normalizeTitle(titleValue);
+        titleValue = normalize(titleValue);
         
         Resource title = createTitle(titleValue, localNamespace, false);
             
@@ -219,36 +214,35 @@ public final class TitleUtils {
     /*
      * Creates a TitleElement based on a Bibframe property.
      */
-    static Resource createTitleElement(Ld4lType titleElementType, 
-            String titleElementString, String titleElementLanguage, 
-            String localNamespace, boolean normalize) {
+    static Resource createTitleElement(Ld4lType type, String label, 
+            String language, String localNamespace, boolean normalize) {
         
+        // TODO OK if language is null?
         Literal titleElement = ResourceFactory.createLangLiteral(
-                titleElementString, titleElementLanguage);
-        return createTitleElement(titleElementType, titleElement, 
+                label, language);
+        return createTitleElement(type, titleElement, 
                 localNamespace, normalize);
     }
     
     /*
      * Creates a TitleElement based on a Bibframe property.
      */ 
-    static Resource createTitleElement(Ld4lType titleElementType,
-            Literal titleElementValue, String localNamespace, 
-            boolean normalize) {
+    static Resource createTitleElement(Ld4lType type, Literal literal,
+             String localNamespace, boolean normalize) {
 
         Model model = ModelFactory.createDefaultModel();
         
         // If the literal was not already normalized in a previous step, 
         // normalize it now.
         if (normalize) {
-            titleElementValue = normalizeTitle(titleElementValue);
+            literal = normalize(literal);
         }
         
         // Create the TitleElement                                                                                                                                                   
         Resource titleElement = 
                 model.createResource(RdfProcessor.mintUri(localNamespace));
-        model.add(titleElement, RDF.type, titleElementType.type());
-        model.add(titleElement, RDFS.label, titleElementValue);
+        model.add(titleElement, RDF.type, type.type());
+        model.add(titleElement, RDFS.label, literal);
 
         return titleElement;                  
     }
@@ -288,7 +282,7 @@ public final class TitleUtils {
         // Normalize the title string value if caller has passed in an
         // unnormalized string.
         if (normalize) {
-            titleValue = normalizeTitle(titleValue);
+            titleValue = normalize(titleValue);
         }
         
         // Create the Title 
@@ -323,17 +317,17 @@ public final class TitleUtils {
         return nonSortElement;
     }
     
-    static Literal normalizeTitle(Literal title) {
+    static Literal normalize(Literal title) {
         
         String language = title.getLanguage();
         String text = title.getLexicalForm();
-        String normalizedText = normalizeTitle(text);
+        String normalizedText = normalize(text);
         Literal normalizedTitle = 
                 ResourceFactory.createLangLiteral(normalizedText, language);
         return normalizedTitle;
     }
 
-    static String normalizeTitle(String title) {
+    static String normalize(String title) {
         /*
          * Remove final period, final spaces, final ellipsis
          * Final ellipsis occurs in rare cases when the bf:label contains title 

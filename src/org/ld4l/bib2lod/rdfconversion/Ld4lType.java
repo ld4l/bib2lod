@@ -92,6 +92,7 @@ public enum Ld4lType {
     OCLC_IDENTIFIER("OclcIdentifier"),
     ORGANIZATION(OntNamespace.FOAF, "Organization"),
     PART_NAME_TITLE_ELEMENT(OntNamespace.MADSRDF, "PartNameElement"),
+    PART_NUMBER_TITLE_ELEMENT(OntNamespace.MADSRDF, "PartNumberElement"),
     PERFORMER_CONTRIBUTION("PerformerContribution", "Performer"),
     PERSON(OntNamespace.FOAF, "Person"),
     PLACE(OntNamespace.PROV, "Location"),
