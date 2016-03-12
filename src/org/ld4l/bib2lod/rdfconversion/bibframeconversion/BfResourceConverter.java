@@ -112,8 +112,8 @@ public class BfResourceConverter {
         Model resourceSubModel =  qexec.execConstruct();
         qexec.close();
         
-        RdfProcessor.printModel(resourceSubModel, 
-                "Submodel for resource " + resource.getURI());
+//        RdfProcessor.printModel(resourceSubModel, 
+//                "Submodel for resource " + resource.getURI());
         
         return resourceSubModel;    
     }

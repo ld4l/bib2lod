@@ -46,7 +46,8 @@ public class BfResourceUriGenerator {
    
     // Subclasses that may generate URI outside the local namespace should
     // override this method. Otherwise, they need only override getUniqueKey().
-    // For example, BfTopicUriGenerator assigns FAST URIs.
+    // For example, BfTopicUriGenerator assigns full FAST URIS, not just 
+    // local names.
     public String getUniqueUri(Resource resource) {     
         this.resource = getResourceWithSubModel(resource);
         String uniqueLocalName = getUniqueLocalName();
@@ -149,7 +150,7 @@ public class BfResourceUriGenerator {
          */
     }
     
-    private final String getUniqueLocalName() {
+    protected final String getUniqueLocalName() {
         String uniqueKey = getUniqueKey();
         LOGGER.debug("Created unique key " + uniqueKey + " for resource "
                 + resource.getURI());
@@ -195,7 +196,7 @@ public class BfResourceUriGenerator {
         return bfLabel;
     }
     
-    private String getHashCode(String key) {
+    protected String getHashCode(String key) {
         // long hash64 = Crc64.checksum(key);
         // long hash64 = Crc64Mod.checksum(key);
         // See https://en.wikipedia.org/wiki/MurmurHash on various MurmurHash

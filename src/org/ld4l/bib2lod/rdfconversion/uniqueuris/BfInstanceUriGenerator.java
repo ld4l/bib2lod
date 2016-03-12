@@ -76,7 +76,7 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
         
         String key = null;
         
-        RdfProcessor.printModel(resource.getModel(), "Instance submodel;");
+        // RdfProcessor.printModel(resource.getModel(), "Instance submodel:");
         
         LOGGER.debug("Instance query: " + SPARQL);
         QueryExecution qexec = 

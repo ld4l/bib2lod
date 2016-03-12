@@ -290,6 +290,9 @@ public class UriGenerator extends RdfProcessor {
         String tempLocalName = "n" + bnode.getId().toString();
         
         // LOGGER.debug("Got bnode id " + localname);
+        // Don't use a randomly-generated temporary local name, else we can't
+        // use the uniqueUris map to find previously processed resource and
+        // reuse that URI.
         String tempUri = localNamespace + tempLocalName;
 
         bnode = ResourceUtils.renameResource(bnode, tempUri);
