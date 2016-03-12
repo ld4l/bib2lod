@@ -8,9 +8,11 @@ import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
@@ -39,6 +41,12 @@ public class BfTopicConverter extends BfAuthorityConverter {
         FAST_PROPERTY_MAP.put(
                 BfProperty.BF_LABEL, Ld4lProperty.PREFERRED_LABEL);
     }
+    
+    private static final Map<BfProperty, Ld4lProperty> PROPERTY_MAP = 
+            new HashMap<BfProperty, Ld4lProperty>();
+    static {
+        PROPERTY_MAP.put(BfProperty.BF_LABEL, Ld4lProperty.PREFERRED_LABEL);
+    }
 
     public BfTopicConverter(String localNamespace) {
         super(localNamespace);
@@ -62,7 +70,31 @@ public class BfTopicConverter extends BfAuthorityConverter {
             return BfProperty.propertyMap(FAST_PROPERTY_MAP);
         }
 
-        return super.getPropertyMap();     
+        // WRONG - alters map returned by BfProperty.propertyMap()
+        // Map<Property, Property> PROPERTY_MAP = BfProperty.propertyMap();      
+        // PROPERTY_MAP.putAll(getPropertyMap());
+        Map<Property, Property> map = new HashMap<Property, Property>();
+        
+        // Get default mapping from Bibframe to LD4L properties
+        map.putAll(BfProperty.propertyMap());
+        
+        // These properties have a conversion for Topics different from the
+        // superclass (BfAuthorityConverter).
+        map.putAll(
+                BfProperty.propertyMap(PROPERTY_MAP));
+        
+        return map;          
+    }
+    
+    @Override 
+    protected Map<Resource, Resource> getTypeMap() {
+        
+        if (isFastHeading()) {
+            // Return empty map - no type assertions for FAST topics
+            return new HashMap<Resource, Resource>();
+        }
+        
+        return super.getTypeMap();
     }
     
     private boolean isFastHeading() {
