@@ -166,18 +166,6 @@ public class BfResourceConverter {
         return outputModel;  
     }   
 
-
-    
-    /*
-     * Resources to remove are expressed as a list of properties, because it is
-     * easiest to identify the objects of those properties and remove all the
-     * statements it occurs in either as subject or object. 
-     */
-    // Currently not used. Assumes access to original input model.
-//    protected List<Property> getResourcesToRemove() {
-//        return new ArrayList<Property>();
-//    }
-      
     protected Map<Resource, Resource> getTypeMap() {
         
         // WRONG - alters map returned by BfType.typeMap()
