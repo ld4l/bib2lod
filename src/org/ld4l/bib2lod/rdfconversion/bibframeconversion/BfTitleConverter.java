@@ -10,6 +10,7 @@ import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
+import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -141,61 +142,15 @@ public class BfTitleConverter extends BfResourceConverter {
         
         // Look for a nonSortElement, either from a bf:title language 
         // "x-bf-sort", or by matching the NON_SORT_STRINGS.              
-        String nonSortLabel = null;
         String sortTitleLabel = getSortTitleLabel(bibResource);
-        if (sortTitleLabel != null) {
-            sortTitleLabel = TitleUtils.normalize(sortTitleLabel);
-            
-            // Get the difference between the sort title label and the
-            // main title label. The difference becomes the NonSortElement
-            // label and the sort title label becomes the main title label.
-            // Example: Original main title label (copy of title label): 
-            // "A Tree Grows in Brooklyn".
-            // Sort title: "Tree Grows in Brooklyn". =>
-            // Main title element:  "Tree Grows in Brooklyn".
-            // Non sort element: "A".
-
-            // Reverse the strings because StringUtils.difference() returns
-            // the remainder of the second string, starting from where they
-            // differ.
-            String reverseSortTitleString = 
-                    StringUtils.reverse(sortTitleLabel);
-            LOGGER.debug("Reverse sort title: \"" 
-                    + reverseSortTitleString + "\"");
-            String reverseMainTitleString = 
-                    StringUtils.reverse(mainTitleLabel);
-            LOGGER.debug("reverse main title: \"" 
-                    + reverseMainTitleString + "\"");
-            LOGGER.debug("Found sort title: \"" + sortTitleLabel + "\"");
-            String difference = 
-                    StringUtils.difference(
-                            reverseSortTitleString, reverseMainTitleString);
-            if (! difference.isEmpty()) {
-                nonSortLabel = StringUtils.reverse(difference);
-                LOGGER.debug("Found non sort string: \"" 
-                        + nonSortLabel + "\"");
-                mainTitleLabel = sortTitleLabel;
-                LOGGER.debug("Found main title string: \"" 
-                        + mainTitleLabel + "\"");   
-            }
-                      
-        } else {
-            
-            // Look for a match to one of the specified non-sort strings
-            for (String string : TitleUtils.getNonSortStrings()) {
-                if (mainTitleLabel.startsWith(string)) {
-                    
-                    LOGGER.debug("Found match of main title \"" 
-                            + mainTitleLabel + "\" to non-sort string \""
-                            + string + "\"");
-                    mainTitleLabel = StringUtils.difference(
-                            string, mainTitleLabel);
-                    nonSortLabel = string.trim();
-                    break;                            
-                }
-            }
-        }
-
+        
+        Map<String, String> labels = TitleUtils.getNonSortAndMainTitleLabels(
+                sortTitleLabel, mainTitleLabel);
+                
+        // Unpack the labels
+        String nonSortLabel = labels.get("nonSortLabel");
+        mainTitleLabel = labels.get("mainTitleLabel");       
+        
         // Add the elements to the model
         List<Resource> titleElements = new ArrayList<Resource>();
 
@@ -294,19 +249,19 @@ public class BfTitleConverter extends BfResourceConverter {
     // Add the normalized label to the Title
     private Literal getNormalizedLabel() {
   
-        Literal labelLiteral = subject.getProperty(
-                BfProperty.BF_LABEL.property()).getLiteral();   
-        
-        if (labelLiteral == null) {
+        Statement stmt = subject.getProperty(BfProperty.BF_LABEL.property());
+
+        if (stmt == null) {
             return null;
         }
+        
+        Literal literal = stmt.getLiteral();
  
         // Get new label literal with normalized string
-        String label = 
-                TitleUtils.normalize(labelLiteral.getLexicalForm());
-
+        String label = TitleUtils.normalize(literal.getLexicalForm());
+                
         Literal normalizedLiteral = ResourceFactory.createLangLiteral(
-                label, labelLiteral.getLanguage());
+                label, literal.getLanguage());
         outputModel.add(
                 subject, Ld4lProperty.LABEL.property(), normalizedLiteral);
 

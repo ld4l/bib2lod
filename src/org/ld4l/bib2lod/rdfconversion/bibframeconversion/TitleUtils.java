@@ -1,7 +1,9 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Literal;
@@ -85,84 +87,46 @@ public final class TitleUtils {
         }
 
         bfTitleLiteral = normalize(bfTitleLiteral);
-        String titleLabelString = bfTitleLiteral.getLexicalForm();
-        LOGGER.debug("title label: \"" + titleLabelString + "\"");
-        String titleLabelLanguage = bfTitleLiteral.getLanguage();
+        String titleLabel = bfTitleLiteral.getLexicalForm();
+        LOGGER.debug("title label: \"" + titleLabel + "\"");
+        String titleLanguage = bfTitleLiteral.getLanguage();
         
         Resource title = createTitle(bfTitleLiteral, localNamespace, false);
         Model titleModel = title.getModel();
         titleModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
 
-        String mainTitleString = titleLabelString;
+        String mainTitleLabel = titleLabel;
         
         /*
          * Create a NonSortTitleElement if it exists, either as a bf:title
          * object with language "x-bf-sort", or by matching one of the 
          * NON_SORT_STRINGS.
          */
-        // TODO Combine with code in BfTitleConverter - they're doing the
-        // same thing
-        String sortTitleString = null;
-        String nonSortString = null;
-        
         // If there's a sort title object of bf:title
+        String sortTitleLabel = null;
         if (bfSortTitleLiteral != null) {
-            bfSortTitleLiteral = normalize(bfSortTitleLiteral);
-            sortTitleString = bfSortTitleLiteral.getLexicalForm();
-            // Reverse the strings because StringUtils.difference() returns
-            // the remainder of the second string, starting from where they
-            // differ.
-            String reverseSortTitleString = 
-                    StringUtils.reverse(sortTitleString);
-            LOGGER.debug("Reverse sort title: \"" 
-                    + reverseSortTitleString + "\"");
-            String reverseMainTitleString = 
-                    StringUtils.reverse(mainTitleString);
-            LOGGER.debug("reverse main title: \"" 
-                    + reverseMainTitleString + "\"");
-            LOGGER.debug("Found sort title: \"" + sortTitleString + "\"");
-            String difference = 
-                    StringUtils.difference(
-                            reverseSortTitleString, reverseMainTitleString);
-            if (! difference.isEmpty()) {
-                nonSortString = StringUtils.reverse(difference);
-                LOGGER.debug("Found non sort string: \"" 
-                        + nonSortString + "\"");
-                mainTitleString = sortTitleString;
-                LOGGER.debug("Found main title string: \"" 
-                        + mainTitleString + "\"");
-    
-            }
-                  
-        } else {
-            
-            // Look for a match to one of the specified non-sort strings
-            for (String string : NON_SORT_STRINGS) {
-                if (mainTitleString.startsWith(string)) {
-                    
-                    LOGGER.debug("Found match of main title \"" 
-                            + mainTitleString + "\" to non-sort string \""
-                            + string + "\"");
-                    mainTitleString = StringUtils.difference(
-                            string, mainTitleString);
-                    nonSortString = string.trim();
-                    break;                            
-                }
-            }
+            sortTitleLabel = bfSortTitleLiteral.getLexicalForm();
         }
+
+        Map<String, String> labels = 
+                getNonSortAndMainTitleLabels(sortTitleLabel, mainTitleLabel);
+        
+        // Unpack the labels
+        String nonSortLabel = labels.get("nonSortLabel");
+        mainTitleLabel = labels.get("mainTitleLabel");
  
         // Create the MainTitleElement
-        LOGGER.debug("Main title string: \"" + mainTitleString + "\"");
+        LOGGER.debug("Main title string: \"" + mainTitleLabel + "\"");
         Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleString,  
-                titleLabelLanguage, localNamespace, false);       
+                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel,  
+                titleLanguage, localNamespace, false);       
         title = addTitleElement(title, mainTitleElement);
         
         // Create the NonSortTitleElement
-        if (nonSortString != null) {
+        if (nonSortLabel != null) {
             Resource nonSortElement = 
                     createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-                    nonSortString, titleLabelLanguage, localNamespace, false);
+                    nonSortLabel, titleLanguage, localNamespace, false);
             nonSortElement.addProperty(
                     Ld4lProperty.PRECEDES.property(), mainTitleElement);
             title = addTitleElement(title, nonSortElement);           
@@ -171,6 +135,76 @@ public final class TitleUtils {
         return titleModel;
     }
     
+    static Map<String, String> getNonSortAndMainTitleLabels(
+            String sortTitleLabel, String mainTitleLabel) {
+
+        String nonSortLabel = null;
+        
+        if (sortTitleLabel != null) {
+            sortTitleLabel = normalize(sortTitleLabel);
+            
+            // Get the difference between the sort title label and the
+            // main title label. The difference becomes the NonSortElement
+            // label and the sort title label becomes the main title label.
+            // Example: Original main title label (copy of title label): 
+            // "A Tree Grows in Brooklyn".
+            // Sort title: "Tree Grows in Brooklyn". =>
+            // Main title element:  "Tree Grows in Brooklyn".
+            // Non sort element: "A".
+            
+            // Reverse the strings because StringUtils.difference() returns
+            // the remainder of the second string, starting from where they
+            // differ.
+            String reverseSortTitleString = 
+                    StringUtils.reverse(sortTitleLabel);
+            LOGGER.debug("Reverse sort title: \"" 
+                    + reverseSortTitleString + "\"");
+            String reverseMainTitleString = 
+                    StringUtils.reverse(mainTitleLabel);
+            LOGGER.debug("reverse main title: \"" 
+                    + reverseMainTitleString + "\"");
+            LOGGER.debug("Found sort title: \"" + sortTitleLabel + "\"");
+            String difference = 
+                    StringUtils.difference(
+                            reverseSortTitleString, reverseMainTitleString);
+            if (! difference.isEmpty()) {
+                nonSortLabel = StringUtils.reverse(difference);
+                LOGGER.debug("Found non sort string: \"" 
+                        + nonSortLabel + "\"");
+                mainTitleLabel = sortTitleLabel;
+                LOGGER.debug("Found main title string: \"" 
+                        + mainTitleLabel + "\"");
+    
+            }
+                  
+        } else {
+            
+            // Look for a match to one of the specified non-sort strings
+            for (String string : NON_SORT_STRINGS) {
+                if (mainTitleLabel.startsWith(string)) {
+                    
+                    LOGGER.debug("Found match of main title \"" 
+                            + mainTitleLabel + "\" to non-sort string \""
+                            + string + "\"");
+                    mainTitleLabel = StringUtils.difference(
+                            string, mainTitleLabel);
+                    nonSortLabel = string;
+                    break;                            
+                }
+            }
+        }
+
+        if (nonSortLabel != null) {
+            nonSortLabel = nonSortLabel.trim();           
+        }
+        
+        Map<String, String> labels = new HashMap<String, String>();
+        labels.put("nonSortLabel", nonSortLabel);
+        labels.put("mainTitleLabel", mainTitleLabel);
+        
+        return labels;
+        
+    }
     private static Resource addTitleElement(
             Resource title, Resource titleElement) {
         
