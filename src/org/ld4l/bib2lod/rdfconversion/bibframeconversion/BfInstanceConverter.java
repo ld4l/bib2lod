@@ -21,6 +21,7 @@ import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lIndividual;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfInstanceConverter extends BfResourceConverter {
@@ -57,6 +58,12 @@ public class BfInstanceConverter extends BfResourceConverter {
         PROVIDER_PROPERTIES.add(BfProperty.BF_PRODUCTION);
         PROVIDER_PROPERTIES.add(BfProperty.BF_PROVIDER);
         PROVIDER_PROPERTIES.add(BfProperty.BF_PUBLICATION);
+    }
+    
+    private static final List<BfProperty> PROPERTIES_TO_REMOVE = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_REMOVE.add(BfProperty.BF_SYSTEM_NUMBER);
     }
     
     public BfInstanceConverter(String localNamespace) {
@@ -124,6 +131,11 @@ public class BfInstanceConverter extends BfResourceConverter {
                         LOGGER.debug("Adding " + subject.getURI() 
                                 + " owl:sameAs " + uri);
                         outputModel.add(subject, OWL.sameAs, identifier);
+                        createWorldCatIdentifier(identifier);                       
+                    } else {
+                        outputModel.add( 
+                                subject, Ld4lProperty.IDENTIFIED_BY.property(), 
+                                identifier);
                     }
                 }
                 
@@ -218,5 +230,46 @@ public class BfInstanceConverter extends BfResourceConverter {
                 Ld4lIndividual.SOURCE_STATUS_TRANSCRIBED.individual());
         
         return title;      
+    }
+    
+    private void createWorldCatIdentifier(Resource worldCat) {
+        
+        // Add an identifier object with the WorldCat id as its value.
+        // This is wanted in addition to the owl:sameAs assertion from the 
+        // instance to the WorldCat URI, in order to have easy access to the
+        // identifier string value.
+        Resource identifier = outputModel.createResource(
+                RdfProcessor.mintUri(localNamespace));
+        outputModel.add(subject, Ld4lProperty.IDENTIFIED_BY.property(), 
+                identifier);
+        outputModel.add(identifier, RDF.type, 
+                Ld4lType.OCLC_IDENTIFIER.type());
+        
+        // Jena doesn't recognize localname starting with digit, so we need to
+        // parse it ourselves.
+        // String id = worldCat.getLocalName();
+        String id = worldCat.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
+        outputModel.add(identifier, RDF.value, id);
+        
+    }
+    
+    protected Map<Property, Property> getPropertyMap() {
+        
+        // WRONG - alters map returned by BfProperty.propertyMap()
+        // Map<Property, Property> propertyMap = BfProperty.propertyMap();      
+        // propertyMap.putAll(getPropertyMap());
+        Map<Property, Property> propertyMap = new HashMap<Property, Property>();
+        
+        // Get default mapping from Bibframe to LD4L properties
+        propertyMap.putAll(BfProperty.propertyMap());
+        
+        // The :instance bf:systemNumber :id statement should be removed when
+        // :id is a WorldCat id, but retained otherwise. The easiest way to do
+        // this is to take care of the property here, and not let it go through
+        // default handling in super.convert(), where the object is not
+        // inspected.
+        propertyMap.remove(BfProperty.BF_SYSTEM_NUMBER.property());
+        
+        return propertyMap;
     }
 }

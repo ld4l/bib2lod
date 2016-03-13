@@ -1,9 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -12,20 +10,15 @@ import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
-import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
-import org.apache.jena.vocabulary.OWL;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
-import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfIdentifierConverter extends BfResourceConverter {
 
@@ -84,16 +77,16 @@ public class BfIdentifierConverter extends BfResourceConverter {
                 Ld4lType.VIDEO_RECORDING_NUMBER);
     }
     
-    private static final List<BfProperty> BF_IDENTIFIER_PROPS =
-            new ArrayList<BfProperty>();
-    static {
-        BF_IDENTIFIER_PROPS.addAll(PROPERTY_TO_TYPE.keySet());
-        BF_IDENTIFIER_PROPS.add(BfProperty.BF_IDENTIFIER);
-        BF_IDENTIFIER_PROPS.add(BfProperty.BF_SYSTEM_NUMBER);
-    }
-    
-    private static final List<Property> IDENTIFIER_PROPS = 
-            BfProperty.properties(BF_IDENTIFIER_PROPS);
+//    private static final List<BfProperty> BF_IDENTIFIER_PROPS =
+//            new ArrayList<BfProperty>();
+//    static {
+//        BF_IDENTIFIER_PROPS.addAll(PROPERTY_TO_TYPE.keySet());
+//        BF_IDENTIFIER_PROPS.add(BfProperty.BF_IDENTIFIER);
+//        BF_IDENTIFIER_PROPS.add(BfProperty.BF_SYSTEM_NUMBER);
+//    }
+//    
+//    private static final List<Property> IDENTIFIER_PROPS = 
+//            BfProperty.properties(BF_IDENTIFIER_PROPS);
     
     private static final SortedMap<String, Ld4lType> IDENTIFIER_PREFIXES = 
 
@@ -121,43 +114,20 @@ public class BfIdentifierConverter extends BfResourceConverter {
     private Resource relatedResource;
     private Property linkingProperty;
     
-    // Submodel needs to get ?s bf:subject ?o; ?o systemNumber ?id
-    // where ?id a fast id. Then add a sameas from ?o to ?id
-    // See email from Steven re meetings. Same for any other non-Topic
-    // subject? check on how to determine whether it's a fast id
-    // see whether it's always bf:systemNumber that relates the resource
-    // to the fast identifier
-    // Other implementation options: 
-    // 1. Handle only in madsrdf authority converter. Then don't have to do 
-    // twice, once in meeting and once in authority. Then ordering is crucial - 
-    // must do meeting first. In general, it probably works to  handle all 
-    // "primary" types before "secondary" ones. But it's possible we'd get into
-    // ordering paradoxes if we rely on ordering. But then the authority has to
-    // remove from the output model.
-    // 2. Give converters access to input model and remove statements so they
-    // don't get reprocessed. Kind of messy. And still have to rely on ordering
-    // to make sure we get the removal before the other type is processed.
-    // For now, do original design - just handle twice. If there are many such
-    // cases, we can re-consider.
 
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);
     }
 
-    public static List<Property> getIdentifierProps() {
-        return IDENTIFIER_PROPS;
-    }
+//    public static List<Property> getIdentifierProps() {
+//        return IDENTIFIER_PROPS;
+//    }
     
     @Override
     protected Model convert() {
 
         init();
 
-        if (isWorldcatUri(subject)) {
-            createWorldcatIdentifier();
-            return outputModel;
-        }
-            
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
 
@@ -166,7 +136,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
         getIdentifierType(idValues);
 
         LOGGER.debug("Identifier: " + subject.getURI());
-        RdfProcessor.printModel(outputModel, Level.DEBUG);
+        // RdfProcessor.printModel(outputModel, Level.DEBUG);
         
         return outputModel;
     }
@@ -255,37 +225,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
         
         outputModel.add(subject, RDF.type, identifierType.type());  
-        
-        // From string value "(OCoLC)449860683" create 
-        // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
-        if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER) && 
-                value != null) {
-            Resource worldcatInstance = outputModel.createResource(
-                    Vocabulary.WORLDCAT.uri() + value);
-            outputModel.add(relatedResource, OWL.sameAs, worldcatInstance);
-        }   
 
-    }
-    
-    private void createWorldcatIdentifier() {
-        
-        // Add an identifier object with the Worldcat id as its value.
-        Resource identifier = outputModel.createResource(
-                RdfProcessor.mintUri(localNamespace));
-        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), 
-                identifier);
-        outputModel.add(identifier, RDF.type, 
-                Ld4lType.OCLC_IDENTIFIER.type());
-        
-        // Jena doesn't recognize localname starting with digit, so we need to
-        // parse it ourselves.
-        // outputModel.add(identifier, RDF.value, subject.getLocalName());
-        String id = subject.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
-        outputModel.add(identifier, RDF.value, id);
-        
-        // Also add an owl:sameAs assertion from the instance to the Worldcat
-        // URI.
-        outputModel.add(relatedResource, OWL.sameAs, subject);
     }
 
     private Ld4lType getIdentifierTypeFromIdentifierValue(
@@ -361,25 +301,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
            
         return identifierType;        
-    }
-    
-    private boolean isWorldcatUri(Resource resource) {
-        // Jena doesn't recognize the namespace when the localname starts with
-        // a digit.
-        // if (resource.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
-        return resource.getURI().startsWith(Vocabulary.WORLDCAT.uri());
-    }
-    
-    protected String getFastUri(String identifierValue) {
-        String fastValue = null;
-        
-        // if value starts with a fast prefix, strip off and return fast
-        // uri. else return null
-        
-        // see how this works with meetings. Should be the same for all
-        // non-topics as subjects.
-        
-        return fastValue;
     }
     
 
