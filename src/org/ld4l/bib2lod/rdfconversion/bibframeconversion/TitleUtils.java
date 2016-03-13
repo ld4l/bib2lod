@@ -228,19 +228,40 @@ public final class TitleUtils {
             Literal titleValue, String localNamespace) {
 
         titleValue = normalize(titleValue);
+        String language = titleValue.getLanguage();
         
         Resource title = createTitle(titleValue, localNamespace, false);
-            
-        // TODO *** Analyze the Title value for a NonSortElement, using the
-        // NON_SORT_STRINGS. See convertBfTitleDataProp.
+
+        String mainTitleLabel = titleValue.getLexicalForm();
+        
+        Map<String, String> labels = 
+                getNonSortAndMainTitleLabels(null, mainTitleLabel);
+        
+        // Unpack the labels
+        String nonSortLabel = labels.get("nonSortLabel");
+        mainTitleLabel = labels.get("mainTitleLabel");
 
         // Create the MainTitleElement
         Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, titleValue, localNamespace, 
-                false);
-        
+                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel, language,  
+                localNamespace, false);
+ 
         // Attach the MainTitleElement to the Title
         title = addTitleElement(title, mainTitleElement);
+        
+        if (nonSortLabel != null) {
+            Resource nonSortElement = 
+                    createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
+                    nonSortLabel, language, localNamespace, false);
+            nonSortElement.addProperty(
+                    Ld4lProperty.PRECEDES.property(), mainTitleElement);
+            title = addTitleElement(title, nonSortElement);
+
+        }
+        
+
+        
+
 
         return title;
     }
@@ -282,24 +303,6 @@ public final class TitleUtils {
     }
 
     
-    // Used in two cases: (1) processing the Work/Instance bf:title sort title.
-    // (2) processing the Title entity when the Work/Instance has a bf:title
-    // sort title.
-    private static String getSortTitle(Resource bibResource) {
-
-      StmtIterator stmts = 
-              bibResource.listProperties(BfProperty.BF_TITLE.property());
-      while (stmts.hasNext()) {
-          Literal title = stmts.next().getLiteral();
-          if (isSortTitle(title)) {
-              return title.getLexicalForm();
-          }
-      }
-      
-      return null;
-    }
-    
-    
     /**
      * Return true iff the title literal is a sort title.
      * @param title
@@ -327,28 +330,6 @@ public final class TitleUtils {
         title.addProperty(RDFS.label, titleValue);
         
         return title;
-    }
-
-    // TODO Call from convertBfTitleDataProp()
-    private Resource createNonSortTitleElement(String titleString, 
-            String titleLanguage, Resource title, Model model) {
-        
-        Resource nonSortElement = null;
-        
-        // Create non-sort element from initial definite/indefinite article
-        for (String nonSortString : NON_SORT_STRINGS) {
-            
-            if (titleString.startsWith(nonSortString)) {
-                
-//                nonSortElement = 
-//                        createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-//                                nonSortString, titleLanguage, title, model);
-      
-                break;                 
-            } 
-        }
-        
-        return nonSortElement;
     }
     
     static Literal normalize(Literal title) {
