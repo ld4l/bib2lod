@@ -6,21 +6,13 @@ import java.time.Instant;
 import java.util.Set;
 
 import org.apache.commons.io.FileUtils;
-import org.apache.jena.ontology.OntDocumentManager;
-import org.apache.jena.ontology.OntModel;
-import org.apache.jena.ontology.OntModelSpec;
-import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BibframeConverter;
-import org.ld4l.bib2lod.rdfconversion.BnodeConverter;
-import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfCleaner;
-import org.ld4l.bib2lod.rdfconversion.ResourceDeduper;
-import org.ld4l.bib2lod.rdfconversion.TypeSplitter;
+import org.ld4l.bib2lod.rdfconversion.UriGenerator;
 import org.ld4l.bib2lod.util.Bib2LodStringUtils;
 import org.ld4l.bib2lod.util.TimerUtils;
-
 
 
 public class ProcessController {
@@ -35,8 +27,8 @@ public class ProcessController {
     
     boolean erase;
     
-    private OntModel bfOntModelInf;
-    // private OntModel ld4lInf;
+    // private OntModel bfOntModel;
+    // private OntModel ld4lOntModel;
     
     public ProcessController(String localNamespace, String inputDir, 
             String outputDir, boolean erase) {
@@ -51,33 +43,30 @@ public class ProcessController {
         // loadOntModels();
     }
     
-    // TODO So far these are not used. Why aren't we using this instead of the
-    // enums for ontology types and properties? Might be a more streamlined
-    // and clearer solution.
-    private void loadOntModels() {
 
-        OntDocumentManager mgr = new OntDocumentManager();
-        OntModelSpec spec = 
-                new OntModelSpec(OntModelSpec.OWL_MEM_MICRO_RULE_INF);
-        spec.setDocumentManager(mgr);
-     
-        bfOntModelInf = ModelFactory.createOntologyModel(spec);
-        // TODO Figure out how to avoid hard-coding the ontology URI here. It
-        // would be nice to iterate through the files in the rdf directory and
-        // read them in, but we need to retain a reference to the ontology.
-        bfOntModelInf.read(OntNamespace.BIBFRAME.uri());
-              
-    }
+//    private void loadOntModels() {
+//
+//        bfOntModel = ModelFactory.createOntologyModel();
+//        try {
+//            bfOntModel.read(OntNamespace.BIBFRAME.uri());
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }                     
+//    }
+
     
     public String processAll(Set<Action> selectedActions) {
 
+//        if (bfOntModel.isEmpty()) {
+//            return null;
+//        }
+        
         Instant start = Instant.now();
         int fileCount = new File(this.inputDir).listFiles().length;
-        String inputFiles = fileCount + " input " 
-                + Bib2LodStringUtils.simplePlural("file", fileCount);
-        LOGGER.info("Start converting " + inputFiles + " in " + this.inputDir 
-                + ".");           
-   
+        LOGGER.info("Start converting " 
+                + Bib2LodStringUtils.count(fileCount, "input file") 
+                + " in " + this.inputDir + "."); 
+                          
         // As we move from one process to another, the output directory becomes
         // the input directory of the next process, and a new output directory
         // for the new process is created.
@@ -94,31 +83,11 @@ public class ProcessController {
         }
      
         if (selectedActions.contains(Action.DEDUPE_RESOURCES)) {
-
-            // Resource deduping requires some prior processing steps.
-            
-            // This is now an independent action, so is handled above.
-            // outputDir = new RdfCleaner(
-            //        localNamespace, outputDir, mainOutputDir).process();
                              
-            /* Required since bnode ids are not guaranteed to be unique across
-             * input files, so Jena may create duplicate ids across files when
-             * reading into and writing out models. 
-             * NB Not including in RdfCleaner as a string replacement, since
-             * rdf/xml input doesn't contain explicit bnodes.
-             */
-            outputDir = new BnodeConverter(
-                    localNamespace, newInputDir, mainOutputDir).process(); 
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
-            
-            // Strategy for handling deduping of large amounts of data by 
-            // reading only partial data (split by type) into memory.
-            outputDir = new TypeSplitter(newInputDir, mainOutputDir).process();
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
-
-            outputDir = new ResourceDeduper(
-                    newInputDir, mainOutputDir).process();
-            newInputDir = deleteLastInputDir(newInputDir, outputDir);
+            outputDir = new UriGenerator(localNamespace, 
+                    newInputDir, mainOutputDir).process(); 
+                    
+            newInputDir = deleteLastInputDir(newInputDir, outputDir);            
         }
         
         if (selectedActions.contains(Action.CONVERT_BIBFRAME)) {
@@ -126,54 +95,13 @@ public class ProcessController {
             outputDir = new BibframeConverter(localNamespace, newInputDir, 
                     mainOutputDir).process();
             newInputDir = deleteLastInputDir(newInputDir, outputDir);
-
         }
             
-        /* Previous approach where processors were called by looping through
-         * Action values. Switch to calling processors by name in order to
-         * express dependencies. Dependencies could be automated by defining
-         * them in the Action enum, but for now this is unnecessarily 
-         * complex. 
-         *
-        // Loop on defined Actions rather than selected Actions to ensure 
-        // correct order.
-        for (Action a : Action.values()) {
-            Class<?> c = a.processorClass();
-            if (selectedActions.contains(a)) {
-                Processor processor;
-                Constructor<?> constructor; 
-                try {
-                    constructor = c.getConstructor(
-                            OntModel.class, String.class, String.class, 
-                            String.class);
-                    processor = (Processor) constructor.newInstance(
-                            bfOntModelInf,localNamespace, newInputDir, 
-                            mainOutputDir);
-                } catch (NoSuchMethodException e) {
-                    try {
-                        constructor = c.getConstructor(String.class, 
-                                String.class, String.class);
-                        processor = (Processor) constructor.newInstance(
-                                localNamespace, newInputDir, mainOutputDir);          
-                    } catch (Exception e1) {
-                        e1.printStackTrace();
-                        return null;
-                    }
-                } catch (Exception e) {
-                    e.printStackTrace();
-                    return null;
-                }
-                outputDir = processor.process();
-                newInputDir = outputDir;              
-            }
-        }
-        */
-
-        LOGGER.info("END CONVERSION! Total duration to convert " + inputFiles 
+        LOGGER.info("END CONVERSION! Total duration to convert " 
+                + Bib2LodStringUtils.count(fileCount, "input file") 
                 + ": " + TimerUtils.formatMillis(start, Instant.now())
                 + ". Results in " + outputDir + ".");
         return outputDir;
- 
     }
     
     private String deleteLastInputDir(String lastInputDir, String newInputDir) {

@@ -1,9 +1,7 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
-import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import java.util.SortedMap;
 import java.util.TreeMap;
@@ -14,16 +12,13 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
-import org.apache.jena.vocabulary.OWL;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
-import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
-import org.ld4l.bib2lod.rdfconversion.Vocabulary;
 
 public class BfIdentifierConverter extends BfResourceConverter {
 
@@ -82,16 +77,16 @@ public class BfIdentifierConverter extends BfResourceConverter {
                 Ld4lType.VIDEO_RECORDING_NUMBER);
     }
     
-    private static final List<BfProperty> BF_IDENTIFIER_PROPS =
-            new ArrayList<BfProperty>();
-    static {
-        BF_IDENTIFIER_PROPS.addAll(PROPERTY_TO_TYPE.keySet());
-        BF_IDENTIFIER_PROPS.add(BfProperty.BF_IDENTIFIER);
-        BF_IDENTIFIER_PROPS.add(BfProperty.BF_SYSTEM_NUMBER);
-    }
-    
-    private static final List<Property> IDENTIFIER_PROPS = 
-            BfProperty.properties(BF_IDENTIFIER_PROPS);
+//    private static final List<BfProperty> BF_IDENTIFIER_PROPS =
+//            new ArrayList<BfProperty>();
+//    static {
+//        BF_IDENTIFIER_PROPS.addAll(PROPERTY_TO_TYPE.keySet());
+//        BF_IDENTIFIER_PROPS.add(BfProperty.BF_IDENTIFIER);
+//        BF_IDENTIFIER_PROPS.add(BfProperty.BF_SYSTEM_NUMBER);
+//    }
+//    
+//    private static final List<Property> IDENTIFIER_PROPS = 
+//            BfProperty.properties(BF_IDENTIFIER_PROPS);
     
     private static final SortedMap<String, Ld4lType> IDENTIFIER_PREFIXES = 
 
@@ -116,35 +111,52 @@ public class BfIdentifierConverter extends BfResourceConverter {
         IDENTIFIER_PREFIXES.put("ocn", Ld4lType.OCLC_IDENTIFIER);
     }
     
-
-    public BfIdentifierConverter(String localNamespace, Statement statement) {
-        super(localNamespace, statement);
-    }
-
-    public static List<Property> getIdentifierProps() {
-        return IDENTIFIER_PROPS;
-    }
+    private Resource relatedResource;
+    private Property linkingProperty;
     
-    protected Model convertModel() {
 
-        Resource relatedResource = linkingStatement.getSubject();
+    public BfIdentifierConverter(String localNamespace) {
+        super(localNamespace);
+    }
 
-        if (isWorldcatUri(subject)) {
-            createWorldcatIdentifier(relatedResource);
-            return outputModel;
-        }
-            
+//    public static List<Property> getIdentifierProps() {
+//        return IDENTIFIER_PROPS;
+//    }
+    
+    @Override
+    protected Model convert() {
+
+        init();
+
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
 
         String[] idValues = getIdentifierValue();
 
-        getIdentifierType(relatedResource, idValues);
+        getIdentifierType(idValues);
 
         LOGGER.debug("Identifier: " + subject.getURI());
-        RdfProcessor.printModel(outputModel, Level.DEBUG);
+        // RdfProcessor.printModel(outputModel, Level.DEBUG);
+        
         return outputModel;
     }
+    
+    private void init() {
+
+        StmtIterator stmts = 
+                subject.getModel().listStatements(null, null, subject);
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.next();
+            relatedResource = stmt.getSubject();
+            linkingProperty = stmt.getPredicate();
+        }
+    }
+    
+    
+//    @Override
+//    protected ParameterizedSparqlString getResourceSubModelPss() {
+//        // Probably can use BfResourceConverter query
+//    }
 
     private String[] getIdentifierValue() {
 
@@ -182,16 +194,15 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         return new String[] { prefix, idValue };       
     }
- 
     
-    private void getIdentifierType(Resource relatedResource, String[] idValues) {
+    private void getIdentifierType(String[] idValues) {
         
         String prefix = idValues[0];
         String value = idValues[1];
         
         Ld4lType identifierType = null;
         
-        identifierType = getIdentifierTypeFromPredicate(relatedResource);
+        identifierType = getIdentifierTypeFromPredicate();
         
         // Note that the Bibframe converter may redundantly specify type with 
         // both a predicate and a scheme:
@@ -207,53 +218,22 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
   
         // We may want to assign the supertype in any case, to simplify the
-        // queries used to build the search index, since there's no reasoner to
+        // query used to build the search index, since there's no reasoner to
         // infer the supertype.
         if (identifierType == null) {
             identifierType = Ld4lType.IDENTIFIER;
         }
         
-        outputModel.add(subject, RDF.type, identifierType.ontClass());  
-        
-        // From string value "(OCoLC)449860683" create 
-        // :instance owl:sameAs <http://www.worldcat.org/oclc/449860683>
-        if (identifierType.equals(Ld4lType.OCLC_IDENTIFIER) && 
-                value != null) {
-            Resource worldcatInstance = outputModel.createResource(
-                    Vocabulary.WORLDCAT.uri() + value);
-            outputModel.add(relatedResource, OWL.sameAs, worldcatInstance);
-        }   
+        outputModel.add(subject, RDF.type, identifierType.type());  
 
     }
 
-    
-    private void createWorldcatIdentifier(Resource relatedResource) {
-        
-        // Add an identifier object with the Worldcat id as its value.
-        Resource identifier = outputModel.createResource(
-                RdfProcessor.mintUri(localNamespace));
-        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(), 
-                identifier);
-        outputModel.add(identifier, RDF.type, 
-                Ld4lType.OCLC_IDENTIFIER.ontClass());
-        
-        // Jena doesn't recognize localname starting with digit, so we need to
-        // parse it ourselves.
-        // outputModel.add(identifier, RDF.value, subject.getLocalName());
-        String id = subject.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
-        outputModel.add(identifier, RDF.value, id);
-        
-        // Also add an owl:sameAs assertion from the instance to the Worldcat
-        // URI.
-        outputModel.add(relatedResource, OWL.sameAs, subject);
-    }
-
-    
     private Ld4lType getIdentifierTypeFromIdentifierValue(
             String prefix, String idValue) {   
             
         Ld4lType identifierType = null;
-        
+ 
+        // TODO - REDO!
         if (idValue != null) {
             
             if (prefix != null) {               
@@ -261,10 +241,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
             
             // If no subtype has been identified, and the value is all digits,
             // assume a local ILS identifer.
-            // TODO Check if this is true for Harvard and Stanford
+            // TODO **** Check if this is true for Harvard and Stanford
             } else if (idValue.matches("^\\d+$")
                     // Not sure if this condition is required
-                    && linkingStatement.getPredicate().equals(
+                    && linkingProperty.equals(
                             BfProperty.BF_SYSTEM_NUMBER.property())) {
 
                 identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
@@ -303,18 +283,16 @@ public class BfIdentifierConverter extends BfResourceConverter {
         return identifierType;
     }
 
-    private Ld4lType getIdentifierTypeFromPredicate(Resource relatedResource) {
+    private Ld4lType getIdentifierTypeFromPredicate() {
             
         Ld4lType identifierType = null;
-            
-        Property predicate = linkingStatement.getPredicate();
-        
-        BfProperty bfProp = BfProperty.get(predicate);
+ 
+        BfProperty bfProp = BfProperty.get(linkingProperty);
                     
         if (bfProp == null) {
             // This would be an oversight; log for review.
             LOGGER.warn("No handling defined for property " 
-                    + predicate.getURI() + " linking " 
+                    + linkingProperty.getURI() + " linking " 
                     + relatedResource.getURI() + " to its identifier "
                     + subject.getURI() + ".");   
             
@@ -323,13 +301,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
            
         return identifierType;        
-    }
-    
-    private boolean isWorldcatUri(Resource resource) {
-        // Jena doesn't recognize the namespace when the localname starts with
-        // a digit.
-        // if (resource.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
-        return resource.getURI().startsWith(Vocabulary.WORLDCAT.uri());
     }
     
 

@@ -97,18 +97,15 @@ public class RdfCleaner extends RdfProcessor {
         // unexpectedly. Time to sort is miniscule (0.008 seconds on 34,540 
         // files).
         Arrays.sort(inputFiles);
-        LOGGER.info("Sorted " + totalFileCount + " " + 
-                Bib2LodStringUtils.simplePlural("file", totalFileCount) + ". "
-                        + TimerUtils.getDuration(processStart));                
-
+//        LOGGER.info("Sorted " + Bib2LodStringUtils.count(totalFileCount, "file") 
+//                + ". Duration: " + TimerUtils.getDuration(processStart) + "."); 
+                                       
         int fileCount = 0;
-        int timerFileCount = 0;
-        Instant fileStart = Instant.now();
-        
         for ( File file : inputFiles ) {
-
-            fileCount++;
-            timerFileCount++;    
+            
+            Instant fileStartTime = Instant.now();
+            fileCount++;  
+            
             String filename = file.getName();
 
             // Skip directories and empty files (Jena chokes when reading an 
@@ -124,42 +121,24 @@ public class RdfCleaner extends RdfProcessor {
                 continue;
             }
                         
-//            LOGGER.info("Start RDF cleanup in file " + filename
-            LOGGER.info("Cleaning up RDF in file " + filename
+            LOGGER.info("Start RDF cleanup in file " + filename 
                     + " (file " + fileCount + " of " + totalFileCount  
                     + " input "
-                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
+                    + Bib2LodStringUtils.count(totalFileCount, "file")
                     + ").");
             
             replaceLinesInFile(file, outputDir); 
             
-//            LOGGER.info("End RDF cleanup in file " + filename
-//                    + " (file " + fileCount + " of " + totalFileCount  
-//                    + " input "
-//                    + Bib2LodStringUtils.simplePlural("file", totalFileCount)
-//                    + ").");
-            
-            if (timerFileCount == TimerUtils.NUM_FILES_TO_TIME) {
-                // TODO Define TIMER logging level between info and debug
-                LOGGER.trace("Cleaned RDF in " + timerFileCount + " " 
-                        + Bib2LodStringUtils.simplePlural(
-                                "file", timerFileCount)
-                        + ". " + TimerUtils.getDuration(fileStart));
-                timerFileCount = 0;
-                fileStart = Instant.now();   
-            }
+            LOGGER.info("End RDF cleanup in file " + filename + " (file "
+                    + fileCount + " of " 
+                    + Bib2LodStringUtils.count(totalFileCount, " input file")                    
+                    + "). Duration: " + TimerUtils.getDuration(fileStartTime)
+                    + ".");
         }
         
-        if (timerFileCount > 0) {
-            // TODO Define TIMER logging level between info and debug
-            LOGGER.trace("Cleaned RDF in " + timerFileCount + " "
-                    + Bib2LodStringUtils.simplePlural("file", timerFileCount)
-                    + ". " + TimerUtils.getDuration(fileStart));    
-        }   
-        
-        LOGGER.info("END RDF cleanup in all " + totalFileCount + " input "                
-                + Bib2LodStringUtils.simplePlural("file", totalFileCount)
-                + ". " + TimerUtils.getDuration(processStart));
+        LOGGER.info("END RDF cleanup in total of "                
+                + Bib2LodStringUtils.count(totalFileCount, "input file")
+                + ". Duration: " + TimerUtils.getDuration(processStart) + ".");
         
         return outputDir;
     }

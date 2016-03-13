@@ -6,7 +6,6 @@ import java.io.FileOutputStream;
 import java.util.UUID;
 
 import org.apache.commons.io.FilenameUtils;
-import org.apache.jena.ontology.OntModel;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
@@ -44,15 +43,15 @@ public abstract class RdfProcessor extends Processor {
     protected static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
             
     protected final String localNamespace;    
-    protected OntModel bfOntModelInf; 
+    // protected OntModel bfOntModel; 
 
        
-    public RdfProcessor(OntModel bfOntModelInf, String localNamespace,  
-            String inputDir, String mainOutputDir) {
-
-        this(localNamespace, inputDir, mainOutputDir);      
-        this.bfOntModelInf = bfOntModelInf;  
-    }
+//    public RdfProcessor(OntModel bfOntModel, String localNamespace,  
+//            String inputDir, String mainOutputDir) {
+//
+//        this(localNamespace, inputDir, mainOutputDir);      
+//        this.bfOntModel = bfOntModel;  
+//    }
     
     /**
      * Constructor for processors that don't use the loaded OntModel(s).
@@ -174,15 +173,17 @@ public abstract class RdfProcessor extends Processor {
         if (msg != null) {
             LOGGER.log(level, msg);
         }
+        int stmtCount = 0;
         StmtIterator statements = model.listStatements();   
         while (statements.hasNext()) {
+            stmtCount++;
             Statement statement = statements.nextStatement();
             // NB The level must be enabled for this class,  not the calling
             // class.
             // TODO Programmatically set LOGGER level to level, then set back
             // to previous level. Complicated because log4j2 doesn't have a
             // Logger.setLevel() method like log4j. 
-            LOGGER.log(level, statement.toString());
+            LOGGER.log(level, stmtCount + ". " + statement.toString());
         }     
     }
     
@@ -190,11 +191,23 @@ public abstract class RdfProcessor extends Processor {
         printModel(model, level, null);
     }
     
+    public static void printModel(Model model) {
+        printModel(model, Level.DEBUG, null);
+    }
+    
+    public static void printModel(Model model, String msg) {
+        printModel(model, Level.DEBUG, msg);
+    }
+    
     public static String mintUri(String namespace) {    
+        return namespace + mintLocalName();
+    }
+    
+    public static String mintLocalName() {
         // NB A digit is not a legal initial character of a local name in 
         // RDF/XML; see http://www.w3.org/TR/xml11/#NT-NameStartChar, so 
         // prefix a character to the UUID.
-        return namespace + "n" + UUID.randomUUID().toString();
+        return "n" + UUID.randomUUID().toString();
     }
 
 }

@@ -1,5 +1,6 @@
 package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
@@ -13,11 +14,11 @@ import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
-import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
@@ -34,30 +35,34 @@ public class BfPersonConverter extends BfAuthorityConverter {
             // -dddd
             Pattern.compile("^(.*?)(?:\\s*)(\\d{4})?(?:-)?(\\d{4})?\\.?$");
 
-    public BfPersonConverter(BfType bfType, String localNamespace) {
-        super(bfType, localNamespace);
+    private static final List<BfProperty> PROPERTIES_TO_RETRACT = 
+            new ArrayList<BfProperty>();
+    static {
+        PROPERTIES_TO_RETRACT.add(BfProperty.BF_LABEL);
+    }
+    
+    public BfPersonConverter(String localNamespace) {
+        super(localNamespace);
     }
     
     @Override 
-    protected Model convertModel() {
+    protected Model convert() {
         
         // Must do before the iteration on model statements, since it requires
         // modification of the label as well.
         convertPersonSubject();
         
-        List<Statement> statements = inputModel.listStatements().toList();     
+        StmtIterator statements = subject.getModel().listStatements();     
         
-        for (Statement statement : statements) {           
-            Property predicate = statement.getPredicate();
-            
+        while (statements.hasNext()) {
+            Statement statement = statements.nextStatement();
+            Property predicate = statement.getPredicate();           
             if (predicate.equals(BfProperty.BF_LABEL.property())) {
-                convertBfLabel(statement);
-            
+                convertBfLabel(statement);           
             } 
-
         }
         
-        return super.convertModel();
+        return super.convert();
     }
 
     /** 
@@ -73,7 +78,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
         String label = labelLiteral.getLexicalForm();
         String language = labelLiteral.getLanguage();
         parseLabel(label, language);
-        retractions.add(statement);
+        //retractions.add(statement);
     }
     
     private void parseLabel(String label, String language) {
@@ -92,18 +97,20 @@ public class BfPersonConverter extends BfAuthorityConverter {
     
     private void convertPersonSubject() {
         
-        List<Statement> statements = inputModel.listStatements(
-                null, BfProperty.BF_SUBJECT.property(), subject).toList();
-       for (Statement stmt : statements) {
-            Resource work = stmt.getSubject();
-            List<Statement> labelStmts = 
-                    subject.listProperties(BfProperty.BF_LABEL.property()).toList();
-            for (Statement labelStmt : labelStmts) {
-                convertPersonSubjectLabel(labelStmt, work);
+        StmtIterator statements = subject.getModel().listStatements(
+                null, BfProperty.BF_SUBJECT.property(), subject);
+       
+       while (statements.hasNext()) {
+           
+            Resource work = statements.nextStatement().getSubject();
+            StmtIterator labelStmts = 
+                    subject.listProperties(BfProperty.BF_LABEL.property());
+            while (labelStmts.hasNext()) {
+                convertPersonSubjectLabel(labelStmts.nextStatement(), work);
             }
             
         }
-        applyRetractions();
+        //applyRetractions();
     }
     
     private void convertPersonSubjectLabel(
@@ -139,7 +146,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
                 outputModel.add(work, Ld4lProperty.HAS_SUBJECT.property(),
                         newSubject);
                 outputModel.add(
-                        newSubject, RDF.type, Ld4lType.TOPIC.ontClass());
+                        newSubject, RDF.type, Ld4lType.TOPIC.type());
                 outputModel.add(newSubject, 
                         Ld4lProperty.PREFERRED_LABEL.property(), literal);
             }
@@ -148,7 +155,7 @@ public class BfPersonConverter extends BfAuthorityConverter {
                
         // TODO handle fast uri - need to call Identifier converter
                 
-        retractions.add(labelStatement);
+        //retractions.add(labelStatement);
     }
     
     /**
@@ -181,5 +188,13 @@ public class BfPersonConverter extends BfAuthorityConverter {
         return props;   
     }
     
-
+    protected Map<Property, Property> getPropertyMap() {
+        
+        Map<Property, Property> map = super.getPropertyMap();
+        
+        // These properties are removed rather than converted.
+        map.keySet().removeAll(BfProperty.properties(PROPERTIES_TO_RETRACT));
+        
+        return map;
+    }
 }

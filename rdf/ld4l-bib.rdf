@@ -14,7 +14,6 @@
     <!ENTITY dc "http://purl.org/dc/elements/1.1/" >
     <!ENTITY vivo "http://vivoweb.org/ontology/core#" >
     <!ENTITY xsd "http://www.w3.org/2001/XMLSchema#" >
-    <!ENTITY rdau "http://rdaregistry.info/Elements/u/" >
     <!ENTITY skos "http://www.w3.org/2004/02/skos/core#" >
     <!ENTITY rdfs "http://www.w3.org/2000/01/rdf-schema#" >
     <!ENTITY rdf "http://www.w3.org/1999/02/22-rdf-syntax-ns#" >
@@ -35,7 +34,6 @@
      xmlns:dcterms="http://purl.org/dc/terms/"
      xmlns:rdfs="http://www.w3.org/2000/01/rdf-schema#"
      xmlns:oa="http://www.w3.org/ns/oa#"
-     xmlns:rdau="http://rdaregistry.info/Elements/u/"
      xmlns:owl="http://www.w3.org/2002/07/owl#"
      xmlns:xsd="http://www.w3.org/2001/XMLSchema#"
      xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
@@ -424,6 +422,16 @@
         <rdfs:domain rdf:resource="http://bib.ld4l.org/ontology/Work"/>
     </owl:ObjectProperty>
     
+    <!-- http://bib.ld4l.org/ontology/contributedTo -->
+    
+    <owl:ObjectProperty rdf:about="http://bib.ld4l.org/ontology/contributedTo">
+        <rdfs:label xml:lang="en">contributed to</rdfs:label>
+        <rdfs:comment xml:lang="en">A contribution to a work.</rdfs:comment>
+        <rdfs:range rdf:resource="http://bib.ld4l.org/ontology/Work"/>
+        <rdfs:domain rdf:resource="http://bib.ld4l.org/ontology/Contribution"/>
+        <owl:inverseOf rdf:resource="http://bib.ld4l.org/ontology/hasContribution"/>
+    </owl:ObjectProperty>
+    
 
 
     <!-- http://bib.ld4l.org/ontology/hasCoverArt -->
@@ -668,7 +676,15 @@
         <rdfs:range rdf:resource="http://bib.ld4l.org/ontology/Provision"/>
     </owl:ObjectProperty>
     
-
+    <!-- http://bib.ld4l.org/ontology/madeAvailable -->
+    
+    <owl:ObjectProperty rdf:about="http://bib.ld4l.org/ontology/madeAvailable">
+        <rdfs:label xml:lang="en">made available</rdfs:label>
+        <rdfs:comment xml:lang="en">This provision made the instance available through activity such as publishing, distribution, manufacture, etc.</rdfs:comment>
+        <rdfs:domain rdf:resource="http://bib.ld4l.org/ontology/Provision"/>
+        <rdfs:range rdf:resource="http://bib.ld4l.org/ontology/Instance"/>
+        <owl:inverseOf rdf:resource="http://bib.ld4l.org/ontology/hasProvision"/>
+    </owl:ObjectProperty>
 
     <!-- http://bib.ld4l.org/ontology/hasReceipt -->
 
@@ -1379,45 +1395,6 @@
     </owl:ObjectProperty>
     
 
-
-    <!-- http://rdaregistry.info/Elements/u/P60398 -->
-
-    <owl:ObjectProperty rdf:about="&rdau;P60398">
-        <rdfs:label xml:lang="en">has contributor</rdfs:label>
-        <skos:scopeNote xml:lang="en">Contributors include editors, translators, arrangers of music, performers, etc.</skos:scopeNote>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://rdaregistry.info/Elements/u/P60447 -->
-
-    <owl:ObjectProperty rdf:about="&rdau;P60447">
-        <rdfs:label xml:lang="en">has creator</rdfs:label>
-        <rdfs:comment xml:lang="en">Relates a resource to an agent responsible for the creation of a resource.</rdfs:comment>
-        <owl:inverseOf rdf:resource="&rdau;P60672"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://rdaregistry.info/Elements/u/P60626 -->
-
-    <owl:ObjectProperty rdf:about="&rdau;P60626">
-        <rdfs:label xml:lang="en">is contributor of</rdfs:label>
-        <rdfs:comment xml:lang="en">Relates an agent contributing to an expression to the resource.</rdfs:comment>
-        <owl:inverseOf rdf:resource="&rdau;P60398"/>
-    </owl:ObjectProperty>
-    
-
-
-    <!-- http://rdaregistry.info/Elements/u/P60672 -->
-
-    <owl:ObjectProperty rdf:about="&rdau;P60672">
-        <rdfs:label xml:lang="en">is creator of</rdfs:label>
-        <rdfs:comment xml:lang="en">Relates an agent responsible for the creation of a resource to the resource.</rdfs:comment>
-    </owl:ObjectProperty>
-    
-
-
     <!-- http://schema.org/audience -->
 
     <owl:ObjectProperty rdf:about="http://schema.org/audience">
@@ -1875,7 +1852,16 @@
         <rdfs:subPropertyOf rdf:resource="http://bib.ld4l.org/ontology/note"/>
     </owl:DatatypeProperty>
     
-
+    <!-- http://bib.ld4l.org/ontology/legacy/titleType -->
+    
+    <owl:DatatypeProperty rdf:about="http://bib.ld4l.org/ontology/legacy/titleType">
+        <rdfs:label xml:lang="en-us">title type</rdfs:label>
+        <rdfs:comment xml:lang="en-us">Variant title type.</rdfs:comment>
+        <skos:editorialNote>The Bibframe rdfs:comment on this property is: "Type of title variation, e.g., acronym, cover, spine." These sorts of variants should be handled with subtypes of the Title class. However, in reality the data shows many arbitrary strings that cannot be captured in a class hierarchy, or would require parsing to place them into the class hierarchy, so for the time being they are retained as legacy values.</skos:editorialNote>
+        <skos:example>"Title in pinyin on p. 4 of cover." Should be converted to a CoverTitle, but requires string parsing, and even so would be lossy.</skos:example>
+        <skos:example>"Title also in English, June 1935- :"</skos:example>
+        <rdfs:range rdf:resource="&rdfs;Literal"/>
+    </owl:DatatypeProperty>
 
     <!-- http://bib.ld4l.org/ontology/legacy/awardNote -->
 
@@ -3590,9 +3576,11 @@
         <owl:disjointWith rdf:resource="&madsrdf;NonSortElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;PartNameElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;PartNumberElement"/>
         <skos:scopeNote>The MainTitleElement follows (ld4l:follows) a NonSortElement and precedes (ld4l:precedes) any SubTitleElements and PartNumberElements.</skos:scopeNote>
         <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
         <rdfs:comment xml:lang="en">The main portion of a title.</rdfs:comment>
+        <skos:example>"inland lakes of Wisconsin" in "The inland lakes of Wisconsin. The plankton. I. Its quantity and chemical composition"</skos:example>
         <skos:example xml:lang="en">Title &quot;A Tree Grows in Brooklyn&quot; has NonSortElement with rdfs:label &quot;A &quot; and MainTitleElement with rdfs:label &quot;Tree Grows in Brooklyn&quot;.</skos:example>
     </owl:Class>
     
@@ -3605,9 +3593,11 @@
         <rdfs:subClassOf rdf:resource="&madsrdf;TitleElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;PartNameElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
-        <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
+        <owl:disjointWith rdf:resource="&madsrdf;PartNumberElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;MainTitleElement"/>
         <skos:scopeNote>The NonSortElement is linked to the MainTitleElement via ld4l:precedes.</skos:scopeNote>
         <rdfs:comment xml:lang="en">The initial portion of a title that is removed for sorting.</rdfs:comment>
+        <skos:example>"The" in "The inland lakes of Wisconsin. The plankton. I. Its quantity and chemical composition"</skos:example>
     </owl:Class>
     
 
@@ -3618,15 +3608,24 @@
         <rdfs:label rdf:datatype="&xsd;string">Part name element</rdfs:label>
         <rdfs:subClassOf rdf:resource="&madsrdf;TitleElement"/>
         <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
-        <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
-        <skos:example>III</skos:example>
-        <skos:editorialNote>We do not use madsrdf:PartNumberElement, since so frequently this is not an integer but a string, as in the example.</skos:editorialNote>
-        <skos:scopeNote>A title may have more than one part name element, in which case they are ordered by ld4l:precedes and ld4l:follows. They are also order with respect to any subtitles; the usual case is that all part name elements would follow all subtitles.</skos:scopeNote>
-        <skos:example>Fourth Edition</skos:example>
-        <rdfs:comment xml:lang="en">The portion of a title indicating that it is a part of another work or sequence of works.</rdfs:comment>
-        <skos:example>Volume 2</skos:example>
+        <owl:disjointWith rdf:resource="&madsrdf;PartNumberElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;NonSortElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;MainTitleElement"/>
+        <skos:example>"Its quantity and chemical composition" in "The inland lakes of Wisconsin. The plankton. I. Its quantity and chemical composition"</skos:example>
+        <rdfs:comment xml:lang="en">The part name portion of a title indicating that it is a part of another work or sequence of works.</rdfs:comment>
     </owl:Class>
     
+
+    <owl:Class rdf:about="http://www.loc.gov/mads/rdf/v1#PartNumberElement">
+        <rdfs:label rdf:datatype="http://www.w3.org/2001/XMLSchema#string">Part number element</rdfs:label>
+        <rdfs:subClassOf rdf:resource="&madsrdf;TitleElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;NonSortElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;PartNameElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;SubTitleElement"/>
+        <owl:disjointWith rdf:resource="&madsrdf;MainTitleElement"/>
+        <skos:example>"I" in "The inland lakes of Wisconsin. The plankton. I. Its quantity and chemical composition"</skos:example>
+        <rdfs:comment xml:lang="en">The numeric or semi-numeric portion of a title indicating that it is a part of another work or sequence of works.</rdfs:comment>
+    </owl:Class>
 
 
     <!-- http://www.loc.gov/mads/rdf/v1#RWO -->
@@ -3640,9 +3639,9 @@
     <owl:Class rdf:about="&madsrdf;SubTitleElement">
         <rdfs:label rdf:datatype="&xsd;string">Subtitle element</rdfs:label>
         <rdfs:subClassOf rdf:resource="&madsrdf;TitleElement"/>
-        <skos:editorialNote>Since TitleElements are not re-used, but apply only to a single resource, we can correctly assert disjointness with the other TitleElement types</skos:editorialNote>
         <skos:scopeNote>A title may have more than one subtitle, in which case they are ordered by ld4l:precedes and ld4l:follows. A SubTitleElement is ordered by ld4l:precedes with respect to a following PartNameElement, and by ld4l:follows with respect to the MainTitleElement.</skos:scopeNote>
         <rdfs:comment xml:lang="en">The subtitle portion of a title.</rdfs:comment>
+        <skos:example>"The plankton" in "The inland lakes of Wisconsin. The plankton. I. Its quantity and chemical composition"</skos:example>
     </owl:Class>
     
 

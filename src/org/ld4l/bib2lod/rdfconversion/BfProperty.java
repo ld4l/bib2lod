@@ -19,18 +19,32 @@ import org.apache.logging.log4j.Logger;
  */
 public enum BfProperty {
     
+    // CAUTION: Ld4l property mappings should NOT always be included. Some need
+    // special treatment from either the object or subject end, but if there's
+    // also a default conversion that will get included when processing the
+    // resource on the opposite side. Include the default mapping only where
+    // there is no special processing of the property required.
+    
+    // TODO Nice-to-have: add instance variable Ld4lType, where Bibframe
+    // properties are mapped to LD4L types. Currently these mappings are 
+    // contained in individual converters.
+    
+    BF_ABBREVIATED_TITLE("abbreviatedTitle"),
     BF_ANNOTATES("annotates", Ld4lProperty.HAS_TARGET),
     BF_ANNOTATION_ASSERTED_BY("annotationAssertedBy", 
             Ld4lProperty.ANNOTATED_BY),
-    BF_ANNOTATION_BODY("annotationBody", Ld4lProperty.HAS_BODY),
+    BF_ANNOTATION_BODY("annotationBody"),
     BF_ASSERTION_DATE("assertionDate", Ld4lProperty.ANNOTATED_AT),
     BF_ANNOTATION_SOURCE("annotationSource", Ld4lProperty.HAS_CREATOR),
     BF_AUTHORITY_SOURCE("authoritySource"),
     BF_AUTHORIZED_ACCESS_POINT("authorizedAccessPoint"),
     BF_BARCODE("barcode", Ld4lProperty.BARCODE),
     BF_CHANGE_DATE("changeDate"),
-    BF_CONTRIBUTOR("contributor", Ld4lProperty.HAS_CONTRIBUTION),
-    BF_CREATOR("creator", Ld4lProperty.HAS_CONTRIBUTION),
+    // DON'T map to Ld4lProperty.HAS_CONTRIBUTION here, else object will be
+    // the original agent rather than the new ld4l:Contribution entity. This is
+    // handled in BfWorkConverter.
+    BF_CONTRIBUTOR("contributor"),
+    BF_CREATOR("creator"),
     // LD4L uses the derivedFrom predicate to relate Titles to Titles and
     // Works to Works, but the Bibframe property is used to relate a Work or 
     // Instance to a marcxml record, so should be removed.
@@ -39,7 +53,8 @@ public enum BfProperty {
     BF_DESCRIPTION_MODIFIER("descriptionModifier"),
     BF_DESCRIPTION_SOURCE("descriptionSource"),
     BF_DIMENSIONS("dimensions", Ld4lProperty.DIMENSIONS),
-    BF_DISTRIBUTION("distribution", Ld4lProperty.HAS_PROVISION),
+    BF_DISTRIBUTION("distribution"),
+    BF_EVENT_DATE("eventDate", Ld4lProperty.DATE),
     BF_EVENT_PLACE("eventPlace", Ld4lProperty.HAS_LOCATION),
     BF_EXPRESSION_OF("expressionOf", Ld4lProperty.IS_EXPRESSION_OF),
     BF_EXTENT("extent", Ld4lProperty.EXTENT),
@@ -62,47 +77,55 @@ public enum BfProperty {
     BF_INSTANCE_OF("instanceOf", Ld4lProperty.IS_INSTANCE_OF),
     BF_INSTANCE_TITLE("instanceTitle", Ld4lProperty.HAS_TITLE),
     BF_ITEM_ID("itemId", Ld4lProperty.IDENTIFIED_BY),
+    BF_KEY_TITLE("keyTitle"),
     BF_LABEL("label", Ld4lProperty.LABEL),
-    BF_LANGUAGE("language", Ld4lProperty.HAS_LANGUAGE),
-    BF_LANGUAGE_OF_PART("languageOfPart", Ld4lProperty.LABEL), 
+    BF_LANGUAGE("language"),
+    BF_LANGUAGE_OF_PART("languageOfPart"), 
     BF_LANGUAGE_OF_PART_URI("languageOfPartUri"),
-    BF_MANUFACTURE("manufacture", Ld4lProperty.HAS_PROVISION),
+    BF_MANUFACTURE("manufacture"),
     BF_MODE_OF_ISSUANCE("modeOfIssuance"),
     BF_ORIGINAL_VERSION("originalVersion", Ld4lProperty.HAS_ORIGINAL_VERSION),
+    BF_PART_NUMBER("partNumber"),
     BF_PART_OF("partOf", Ld4lProperty.IS_PART_OF),
+    BF_PART_TITLE("partTitle"),
     BF_PRECEDED_BY("precededBy", Ld4lProperty.FOLLOWS),
-    BF_PRODUCTION("production", Ld4lProperty.HAS_PROVISION),
-    BF_PROVIDER("provider", Ld4lProperty.HAS_PROVISION),
+    BF_PRODUCTION("production"),
+    BF_PROVIDER("provider"),
     BF_PROVIDER_DATE("providerDate", Ld4lProperty.DATE),
     BF_PROVIDER_NAME("providerName", Ld4lProperty.HAS_AGENT),
     BF_PROVIDER_PLACE("providerPlace", Ld4lProperty.AT_LOCATION),
     BF_PROVIDER_ROLE("providerRole", Ld4lProperty.LEGACY_PROVIDER_ROLE),
     BF_PROVIDER_STATEMENT("providerStatement", 
             Ld4lProperty.LEGACY_PROVIDER_STATEMENT),
-    BF_PUBLICATION("publication", Ld4lProperty.HAS_PROVISION),
+    BF_PUBLICATION("publication"),
     BF_RELATED_INSTANCE("relatedInstance", Ld4lProperty.RELATED),
     BF_RELATED_WORK("relatedWork", Ld4lProperty.RELATED),    
     BF_RELATOR("relator", Ld4lProperty.HAS_CONTRIBUTION),
     BF_REPRODUCTION("reproduction", Ld4lProperty.HAS_REPRODUCTION),
     BF_RESOURCE_PART("resourcePart"),
-    BF_REVIEW("review", Ld4lProperty.HAS_BODY),
+    BF_REVIEW("review", Ld4lProperty.HAS_ANNOTATION_BODY),
     BF_REVIEW_OF("reviewOf", Ld4lProperty.HAS_TARGET),
-    BF_SHELF_MARK("shelfMark", Ld4lProperty.HAS_SHELF_MARK),
-    BF_SHELF_MARK_DDC("shelfMarkDdc", Ld4lProperty.HAS_SHELF_MARK),
-    BF_SHELF_MARK_LCC("shelfMarkLcc", Ld4lProperty.HAS_SHELF_MARK),
-    BF_SHELF_MARK_NLM("shelfMarkNlm", Ld4lProperty.HAS_SHELF_MARK),
+    // Don't include Ld4lProperty.HAS_SHELF_MARK here, since they need to be
+    // handled differently in BfHeldItemConverter.
+    BF_SHELF_MARK("shelfMark"),
+    BF_SHELF_MARK_DDC("shelfMarkDdc"),
+    BF_SHELF_MARK_LCC("shelfMarkLcc"),
+    BF_SHELF_MARK_NLM("shelfMarkNlm"),
     BF_SHELF_MARK_SCHEME("shelfMarkScheme"),
-    BF_SHELF_MARK_UDC("shelfMarkUdc", Ld4lProperty.HAS_SHELF_MARK),
+    BF_SHELF_MARK_UDC("shelfMarkUdc"),
     BF_SUBJECT("subject", Ld4lProperty.HAS_SUBJECT),
     BF_SUBTITLE("subtitle"),
     BF_SUCCEEDED_BY("succeededBy", Ld4lProperty.PRECEDES),    
-    BF_SUMMARY("review", Ld4lProperty.HAS_BODY),
-    BF_SUMMARY_OF("reviewOf", Ld4lProperty.HAS_TARGET),
+    BF_SUMMARY("summary", Ld4lProperty.HAS_ANNOTATION_BODY),
+    BF_SUMMARY_OF("summaryOf", Ld4lProperty.HAS_TARGET),
     BF_SUPPLEMENTARY_CONTENT_NOTE("supplementaryContentNote", 
             Ld4lProperty.LEGACY_SUPPLEMENTARY_CONTENT_NOTE),
-    BF_TITLE("title", Ld4lProperty.HAS_TITLE),
+    BF_TITLE("title"), 
     BF_TITLE_STATEMENT("titleStatement"),
-    BF_TITLE_VALUE("titleValue", Ld4lProperty.LABEL),
+    BF_TITLE_TYPE("titleType", Ld4lProperty.LEGACY_TITLE_TYPE),
+    BF_TITLE_VARIATION("titleVariation", Ld4lProperty.HAS_TITLE),
+    BF_TITLE_VARIATION_DATE("titleVariationDate", Ld4lProperty.DATE),
+    BF_TITLE_VALUE("titleValue"), //, Ld4lProperty.LABEL),
     BF_TRANSLATION("translation", Ld4lProperty.TRANSLATED_AS),
     BF_TRANSLATION_OF("translationOf", Ld4lProperty.TRANSLATES),
     BF_WORK_TITLE("workTitle", Ld4lProperty.HAS_TITLE),
@@ -113,20 +136,17 @@ public enum BfProperty {
             "isMemberOfMADSScheme", 
             Ld4lProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME),
 
-    // Add others as appropriate
-    RELATORS_AUTHOR(
-            OntNamespace.RELATORS, "aut", Ld4lProperty.HAS_CONTRIBUTION), 
-    RELATORS_COMPOSER(
-            OntNamespace.RELATORS, "cmp", Ld4lProperty.HAS_CONTRIBUTION),  
-    RELATORS_CONDUCTOR(
-            OntNamespace.RELATORS, "cnd", Ld4lProperty.HAS_CONTRIBUTION),  
-    RELATORS_EDITOR(
-            OntNamespace.RELATORS, "edt", Ld4lProperty.HAS_CONTRIBUTION),  
-    RELATORS_NARRATOR(
-            OntNamespace.RELATORS, "nrt", Ld4lProperty.HAS_CONTRIBUTION),  
-    RELATORS_PERFORMER(
-            OntNamespace.RELATORS, "prf", Ld4lProperty.HAS_CONTRIBUTION), 
-    
+    // Add others as appropriate.
+    // DON'T map to Ld4lProperty.HAS_CONTRIBUTION here, else object will be
+    // the original agent rather than the new ld4l:Contribution entity. This is
+    // handled in BfWorkConverter.
+    RELATORS_AUTHOR(OntNamespace.RELATORS, "aut"),             
+    RELATORS_COMPOSER(OntNamespace.RELATORS, "cmp"),              
+    RELATORS_CONDUCTOR(OntNamespace.RELATORS, "cnd"),              
+    RELATORS_EDITOR(OntNamespace.RELATORS, "edt"),              
+    RELATORS_NARRATOR(OntNamespace.RELATORS, "nrt"),              
+    RELATORS_PERFORMER(OntNamespace.RELATORS, "prf"),
+                 
     // Subproperties of bf:identifier
     BF_ANSI("ansi"),
     BF_CODEN("coden"),
@@ -301,8 +321,7 @@ public enum BfProperty {
             properties.add(bfProp.property);
         }
         
-        return properties;
-        
+        return properties;        
     }
    
 }
