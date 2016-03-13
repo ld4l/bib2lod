@@ -29,18 +29,19 @@ public class BfLanguageConverter extends BfResourceConverter {
                     // Not dealing with bf:resourcePart for now. See notes
                     // below.
                     // + "?resPart "
-                    + "WHERE { "
+                    + "WHERE { { "
                     + "?work " + BfProperty.BF_LANGUAGE.sparqlUri() 
                     + " ?lang . "
-                    + "OPTIONAL { ?lang " 
+                    + "?lang " 
                     + BfProperty.BF_LANGUAGE_OF_PART_URI.sparqlUri() + " "
-                    + "?langResource . } "
-                    + "OPTIONAL { "
+                    + "?langResource .  "
+                    + "} UNION { "
+                    + "?work " + BfProperty.BF_LANGUAGE.sparqlUri() 
+                    + " ?lang . "
                     + "?lang " 
                     + BfProperty.BF_LANGUAGE_OF_PART.sparqlUri() + " "
-                    + "?langLit . } "                   
-                    // + "} OPTIONAL { ?lang bf:resourcePart ?resPart } "
-                    + "}");
+                    + "?langLit . "                   
+                    + "} } ");
     
     
     public BfLanguageConverter(String localNamespace) {
