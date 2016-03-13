@@ -5,12 +5,10 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.Property;
-import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.ResIterator;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
@@ -150,69 +148,57 @@ public class BfTitleConverter extends BfResourceConverter {
         // Unpack the labels
         String nonSortLabel = labels.get("nonSortLabel");
         mainTitleLabel = labels.get("mainTitleLabel");       
-        
-        // Add the elements to the model
-        List<Resource> titleElements = new ArrayList<Resource>();
+       
 
         // Order is critical here, so we get the right order in the 
         // titleElements list, for precedence assignments.
         if (nonSortLabel != null) {
-            titleElements.add(createTitleElement(
-                Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortLabel, titleElements));
-        }
-        
-        titleElements.add(createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel, titleElements)); 
-             
-        titleElements.add(
-                createTitleElement(BfProperty.BF_SUBTITLE, titleElements));
+            createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortLabel); 
+                                  
+        }       
+        createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel);                                
+        createTitleElements(BfProperty.BF_SUBTITLE);
+        createTitleElements(BfProperty.BF_PART_NUMBER);        
+        createTitleElements(BfProperty.BF_PART_TITLE);
 
-        titleElements.add(
-                createTitleElement(BfProperty.BF_PART_NUMBER, titleElements));
-        
-        titleElements.add(
-                createTitleElement(BfProperty.BF_PART_TITLE, titleElements));
-
-        addPrecedenceRelations(titleElements);
+        // addPrecedenceRelations(titleElements);
   
     }
-    
+
+/* 
+ * We can't reliably create precedence relations when there are multiple
+ * elements of a single type. Example: Cornell bib 2717:
+    <http://draft.ld4l.org/cornell/2717title5> <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Title> . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/label> "The history and rudiments of architecture; embracing, I The orders of architecture; II Architectural styles of various countries; III The nature and principles of design in architecture; and IV An accurate and complete glossary of architectural terms ... Ed. by John Bullock." . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/titleValue> "The history and rudiments of architecture;" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/subtitle> "embracing" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partNumber> "I" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partNumber> "II" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partNumber> "III" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partNumber> "IV" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partTitle> "The orders of architecture;" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partTitle> "Architectural styles of various countries;" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partTitle> "The nature and principles of design in architecture; and" . 
+        <http://draft.ld4l.org/cornell/2717title5> <http://bibframe.org/vocab/partTitle> "An accurate and complete glossary of architectural terms ..." . 
+
+ * We do not have enough information in the Bibframe to order the part numbers 
+ * and names correctly. Is this data in the MARC?
+ * 
     private void addPrecedenceRelations(List<Resource> titleElements) {
   
         int last = (titleElements.size()) - 1;
         for (Resource titleElement : titleElements) {
-            if (titleElement != null) {
-                int index = titleElements.indexOf(titleElement);
-                if (index < last) {
-                    outputModel.add(
-                            titleElement, Ld4lProperty.PRECEDES.property(),
-                            titleElements.get(index + 1));                        
-                }
+            int index = titleElements.indexOf(titleElement);
+            if (index < last) {
+                outputModel.add(
+                        titleElement, Ld4lProperty.PRECEDES.property(),
+                        titleElements.get(index + 1));                        
             }
+
         }         
     }
+ */
     
-    private Resource createTitleElement(Ld4lType type, String label, 
-            List<Resource> titleElements) {
-        
-        // Create the TitleElement
-        Resource titleElement = TitleUtils.createTitleElement(type, 
-                label, null, localNamespace, true);
-        
-        // Add the TitleElement statements to the output model
-        Model model = titleElement.getModel();
-        outputModel.add(model);
-        model.close();
-        
-        // Attach the TitleElement to the Title
-        outputModel.add(
-                subject, Ld4lProperty.HAS_PART.property(), titleElement);
-        
-        // Add the TitleElement to the list of elements
-        titleElements.add(titleElement);
-        
-        return titleElement;
-    }
 
     private String getSortTitleLabel(Resource bibResource) {
         
@@ -273,30 +259,40 @@ public class BfTitleConverter extends BfResourceConverter {
     // to parameterize the title and the model. There the title is a local 
     // resource, here it is the subject instance variable. There the model is 
     // the subject's model, but here it is the output model.
-    private Resource createTitleElement(BfProperty titleProp, 
-            List<Resource> titleElements) {
+    private void createTitleElements(BfProperty titleProp) { 
+
+        // Get the Ld4lType to create
+        Ld4lType type = 
+                TITLE_ELEMENT_PROP_TO_TYPE.get(titleProp);
         
-        Resource titleElement = null;
+        StmtIterator stmts = subject.listProperties(titleProp.property());
+        while (stmts.hasNext()) {
+            Statement stmt = stmts.nextStatement();
 
-        // Find a statement using DatatypeProperty titelProp
-        Statement statement = 
-                subject.getProperty(titleProp.property());
-
-        // Get the String object of the statement
-        if (statement != null) {
-            String label = statement.getString();
-
-            // Find the LD4L type to create
-            Ld4lType type = 
-                    TITLE_ELEMENT_PROP_TO_TYPE.get(titleProp);
-            
-            titleElement = 
-                    createTitleElement(type, label, titleElements);           
-        }
+            String label = stmt.getString();
+  
+            createTitleElement(type, label);           
+        }        
+    }
+    
+    private Resource createTitleElement(Ld4lType type, String label) {
+        
+        // Create the TitleElement
+        Resource titleElement = TitleUtils.createTitleElement(type, 
+                label, null, localNamespace, true);
+        
+        // Add the TitleElement statements to the output model
+        Model model = titleElement.getModel();
+        outputModel.add(model);
+        model.close();
+        
+        // Attach the TitleElement to the Title
+        outputModel.add(
+                subject, Ld4lProperty.HAS_PART.property(), titleElement);
         
         return titleElement;
     }
-    
+
     
     private String createMainTitleLabel(Literal titleLabelLiteral) {
                
