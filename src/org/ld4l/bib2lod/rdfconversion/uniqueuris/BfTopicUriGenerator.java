@@ -13,12 +13,12 @@ import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
+import org.ld4l.bib2lod.util.NacoNormalizer;
 
 // TODO Will need to treat topics differently - URI should come from schemes
 // like FAST. Will not just need to send back a key.
@@ -231,8 +231,10 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             Resource madsScheme = soln.getResource("madsScheme");
-            Literal authLabel = soln.getLiteral("madsAuthLabel");
-            key = madsScheme.getURI() + "+" + authLabel.getLexicalForm();
+            Literal literal = soln.getLiteral("madsAuthLabel");
+            String authLabel = 
+                    NacoNormalizer.normalize(literal.getLexicalForm());
+            key = madsScheme.getURI() + "+" + authLabel;
             LOGGER.debug("Got unique key from MADS scheme and " 
                     + "MADS authoritativeLabel: " + key);
         }
@@ -258,8 +260,10 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
         while (results.hasNext()) {
             QuerySolution soln = results.next();
             Resource type = soln.getResource("type");
-            Literal authAccessPoint = soln.getLiteral("authAccessPoint");
-            key = type.getURI() + "+" + authAccessPoint.getLexicalForm();
+            Literal literal = soln.getLiteral("authAccessPoint");
+            String authAccessPoint = 
+                    NacoNormalizer.normalize(literal.getLexicalForm());
+            key = type.getURI() + "+" + authAccessPoint;
             LOGGER.debug("Got unique key from specialized Topic type and "
                     + "bf:authorizedAccessPoint: " + key);
         }

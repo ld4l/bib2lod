@@ -2,51 +2,97 @@ package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
 import java.util.List;
 
+import org.apache.jena.query.ParameterizedSparqlString;
+import org.apache.jena.query.Query;
+import org.apache.jena.query.QueryExecution;
+import org.apache.jena.query.QueryExecutionFactory;
+import org.apache.jena.query.QuerySolution;
+import org.apache.jena.query.ResultSet;
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.RDFNode;
+import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
 public class MadsAuthorityUriGenerator extends BfResourceUriGenerator {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(MadsAuthorityUriGenerator.class);
+
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o1 . "
+                    + "} WHERE {  "  
+                    + "?resource ?p1 ?o1 . "
+                    + "} ");
     
+    private ParameterizedSparqlString MADS_AUTHORITY_PSS = 
+            new ParameterizedSparqlString(
+                    "SELECT ?authLabel ?madsScheme WHERE { "
+                    + "?auth a " + BfType.MADSRDF_AUTHORITY.sparqlUri() + " . "
+                    + "?auth " 
+                    + BfProperty.MADSRDF_AUTHORITATIVE_LABEL.sparqlUri() + " "
+                    + "?authLabel . "
+                    + "?auth "
+                    + BfProperty.MADSRDF_IS_MEMBER_OF_MADS_SCHEME.sparqlUri()
+                    + " ?madsScheme . }");
+                    
     public MadsAuthorityUriGenerator(String localNamespace) {
         super(localNamespace);
+    }
+    
+    @Override
+    protected ParameterizedSparqlString getResourceSubModelPss() {
+        return RESOURCE_SUBMODEL_PSS;
     }
 
     @Override
     protected String getUniqueKey() {
         
-        String authoritativeLabel = null;
-
-        List<Statement> statements = resource.listProperties(
-                BfProperty.MADSRDF_AUTHORITATIVE_LABEL.property()).toList();
-
-        for (Statement statement : statements) {
-            RDFNode object = statement.getObject();
-            if (object.isLiteral()) {
-                Literal literal = object.asLiteral();
-                authoritativeLabel = literal.getLexicalForm();
-                break;
-            }
-        }
-    
-        // Prefix an additional string to the label, else the local name of 
-        // the Authority will collide with that of the related resource, since
-        // generally the madsrdf:authorizedLabel of the Authority and the
-        // bf:authorizedAccessPoint of the related resource are identical.
-        // *** TODO Are there other blank nodes that also need to be 
-        // distinguished from the related resources?
-        authoritativeLabel = "authority "  
-                + NacoNormalizer.normalize(authoritativeLabel);
-        LOGGER.debug("Got authoritativeLabel key " + authoritativeLabel
-                + " for resource " + resource.getURI());
+        String key = getUniqueKeyFromAuthLabelAndScheme();
         
-        return authoritativeLabel;
+        if (key == null) {
+            LOGGER.debug("Getting unique key from superclass");
+            key = super.getUniqueKey();
+        }
+        
+        return key;
+    }
+    
+    private String getUniqueKeyFromAuthLabelAndScheme() {
+        
+        String key = null;
+        
+        MADS_AUTHORITY_PSS.setIri("auth", resource.getURI());   
+        Query query = MADS_AUTHORITY_PSS.asQuery();
+        // LOGGER.debug(query.toString());
+        
+        QueryExecution qexec = QueryExecutionFactory.create(
+                query, resource.getModel());
+        ResultSet results = qexec.execSelect();
+        
+        // There should be exactly one result.
+        while (results.hasNext()) {
+            QuerySolution soln = results.next();
+            Resource madsScheme = soln.getResource("madsScheme");
+            Literal literal = soln.getLiteral("authLabel");
+            String authLabel = 
+                    NacoNormalizer.normalize(literal.getLexicalForm());
+            // Combining the scheme with the authoritativeLabel will distinguish
+            // the mads:Authority URI from the related bf:Authority URI, which 
+            // gets the unique key only from the authoritativeLabel.
+            // TODO Should the scheme also be factored in to the bf:Authority
+            // key? If so, just add an arbitrary extra string to the 
+            // mads:Authority key so that it gets a  different local name.
+            key = madsScheme.getURI() + "+" + authLabel;
+            LOGGER.debug("Got unique key for MADS Authority from MADS scheme " 
+                    + "and MADS authoritativeLabel: " + key);
+        }
+
+        return key;
     }
 }

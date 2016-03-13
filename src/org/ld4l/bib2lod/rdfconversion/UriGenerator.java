@@ -47,23 +47,31 @@ public class UriGenerator extends RdfProcessor {
     private static final Map<BfType, Class<?>> URI_GENERATORS_BY_TYPE =
             new HashMap<BfType, Class<?>>();
     static {
+        // Types that use BfResourceUriGenerator fall into two categories:
+        // (1) They are unique resources, such as Providers and Titles, 
+        // that are not reused. (2) BfResourceUriGenerator is a placeholder
+        // until code for the specific type can be written.
         URI_GENERATORS_BY_TYPE.put(BfType.BF_ANNOTATION, 
-                BfAnnotationUriGenerator.class); 
+                // BfAnnotationUriGenerator.class); 
+                BfResourceUriGenerator.class);
         
         URI_GENERATORS_BY_TYPE.put(BfType.BF_AUTHORITY,
                 BfAuthorityUriGenerator.class);
 
         URI_GENERATORS_BY_TYPE.put(BfType.BF_CATEGORY, 
-                BfCategoryUriGenerator.class);
+                // BfCategoryUriGenerator.class);
+                BfResourceUriGenerator.class);
         
         URI_GENERATORS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
-                BfClassificationUriGenerator.class);
+                // BfClassificationUriGenerator.class);
+                BfResourceUriGenerator.class);
         
         URI_GENERATORS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
                 BfHeldItemUriGenerator.class);
        
         URI_GENERATORS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
-                BfIdentifierUriGenerator.class);
+                // BfIdentifierUriGenerator.class);
+                BfResourceUriGenerator.class);
         
         URI_GENERATORS_BY_TYPE.put(
                 BfType.BF_INSTANCE, BfInstanceUriGenerator.class);
@@ -71,7 +79,9 @@ public class UriGenerator extends RdfProcessor {
         URI_GENERATORS_BY_TYPE.put(
                 BfType.BF_RESOURCE, BfResourceUriGenerator.class);
         
-        URI_GENERATORS_BY_TYPE.put(BfType.BF_TITLE, BfTitleUriGenerator.class);
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_TITLE, 
+                // BfTitleUriGenerator.class);
+                BfResourceUriGenerator.class);
         
         URI_GENERATORS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicUriGenerator.class);
 
