@@ -85,54 +85,11 @@ public final class TitleUtils {
         if (bfTitleLiteral == null) {
             return null;
         }
+        
+        Resource title = createSimpleTitle(bibResource, bfTitleLiteral, 
+                bfSortTitleLiteral, localNamespace);
 
-        bfTitleLiteral = normalize(bfTitleLiteral);
-        String titleLabel = bfTitleLiteral.getLexicalForm();
-        LOGGER.debug("title label: \"" + titleLabel + "\"");
-        String titleLanguage = bfTitleLiteral.getLanguage();
-        
-        Resource title = createTitle(bfTitleLiteral, localNamespace, false);
-        Model titleModel = title.getModel();
-        titleModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
-
-        String mainTitleLabel = titleLabel;
-        
-        /*
-         * Create a NonSortTitleElement if it exists, either as a bf:title
-         * object with language "x-bf-sort", or by matching one of the 
-         * NON_SORT_STRINGS.
-         */
-        // If there's a sort title object of bf:title
-        String sortTitleLabel = null;
-        if (bfSortTitleLiteral != null) {
-            sortTitleLabel = bfSortTitleLiteral.getLexicalForm();
-        }
-
-        Map<String, String> labels = 
-                getNonSortAndMainTitleLabels(sortTitleLabel, mainTitleLabel);
-        
-        // Unpack the labels
-        String nonSortLabel = labels.get("nonSortLabel");
-        mainTitleLabel = labels.get("mainTitleLabel");
- 
-        // Create the MainTitleElement
-        LOGGER.debug("Main title string: \"" + mainTitleLabel + "\"");
-        Resource mainTitleElement = createTitleElement(
-                Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel,  
-                titleLanguage, localNamespace, false);       
-        title = addTitleElement(title, mainTitleElement);
-        
-        // Create the NonSortTitleElement
-        if (nonSortLabel != null) {
-            Resource nonSortElement = 
-                    createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, 
-                    nonSortLabel, titleLanguage, localNamespace, false);
-            nonSortElement.addProperty(
-                    Ld4lProperty.PRECEDES.property(), mainTitleElement);
-            title = addTitleElement(title, nonSortElement);           
-        }
- 
-        return titleModel;
+        return title.getModel();
     }
     
     static Map<String, String> getNonSortAndMainTitleLabels(
@@ -221,21 +178,30 @@ public final class TitleUtils {
     }
 
     /*
-     * This method creates the simplest complete title: there are no title
-     * elements other than the required MainTitleElement that all Titles have.
+     * This method creates a title from a title DatatypeProperty (bf:title and
+     * bf:titleStatement). This is the simplest title, with only a main title
+     * element and possibly a non-sort element.
      */
-    static Resource createSimpleTitle(
-            Literal titleValue, String localNamespace) {
+    static Resource createSimpleTitle(Resource bibResource,
+            Literal titleLiteral, Literal sortTitleLiteral, 
+            String localNamespace) {
 
-        titleValue = normalize(titleValue);
-        String language = titleValue.getLanguage();
+        titleLiteral = normalize(titleLiteral);
+        String language = titleLiteral.getLanguage();
         
-        Resource title = createTitle(titleValue, localNamespace, false);
-
-        String mainTitleLabel = titleValue.getLexicalForm();
+        Resource title = createTitle(titleLiteral, localNamespace, false);
+        Model titleModel = title.getModel();
+        titleModel.add(bibResource, Ld4lProperty.HAS_TITLE.property(), title);
+        
+        String mainTitleLabel = titleLiteral.getLexicalForm();
+        
+        String sortTitleLabel = null;
+        if (sortTitleLiteral != null) {
+            sortTitleLabel = sortTitleLiteral.getLexicalForm();
+        }
         
         Map<String, String> labels = 
-                getNonSortAndMainTitleLabels(null, mainTitleLabel);
+                getNonSortAndMainTitleLabels(sortTitleLabel, mainTitleLabel);
         
         // Unpack the labels
         String nonSortLabel = labels.get("nonSortLabel");
@@ -258,10 +224,6 @@ public final class TitleUtils {
             title = addTitleElement(title, nonSortElement);
 
         }
-        
-
-        
-
 
         return title;
     }

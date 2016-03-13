@@ -148,15 +148,22 @@ public class BfTitleConverter extends BfResourceConverter {
         // Unpack the labels
         String nonSortLabel = labels.get("nonSortLabel");
         mainTitleLabel = labels.get("mainTitleLabel");       
-       
 
-        // Order is critical here, so we get the right order in the 
-        // titleElements list, for precedence assignments.
+        Resource mainTitleElement = 
+                createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel); 
+        
         if (nonSortLabel != null) {
-            createTitleElement(Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortLabel); 
-                                  
+            Resource sortTitleElement = createTitleElement(
+                    Ld4lType.NON_SORT_TITLE_ELEMENT, nonSortLabel); 
+            // This is the only case where we can reliably add a precedence
+            // relationship. There can be multiple subtitles, part
+            // numbers, and part name elements, and the Bibframe RDF does not
+            // indicate how to order them. One would have to compare to the
+            // title label.
+            outputModel.add(sortTitleElement, Ld4lProperty.PRECEDES.property(),
+                    mainTitleElement);
         }       
-        createTitleElement(Ld4lType.MAIN_TITLE_ELEMENT, mainTitleLabel);                                
+         
         createTitleElements(BfProperty.BF_SUBTITLE);
         createTitleElements(BfProperty.BF_PART_NUMBER);        
         createTitleElements(BfProperty.BF_PART_TITLE);

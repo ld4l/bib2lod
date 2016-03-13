@@ -211,20 +211,16 @@ public class BfInstanceConverter extends BfResourceConverter {
         Resource title = createTranscribedTitle(value);
         Model titleModel = title.getModel();
         outputModel.add(titleModel);
-        outputModel.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
+        //outputModel.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
     }
 
     /*
      * Only an Instance may have a TranscribedTitle.
      */
-    private Resource createTranscribedTitle(Literal titleValue) {
+    private Resource createTranscribedTitle(Literal titleLiteral) {
                     
-        // TODO For now we ignore the question of whether the titleStatement 
-        // value should be parsed into NonSortTitleElement and MainTitleElement.
-        // This should be handled generally in TitleUtils.createTitle().
-        
-        Resource title = 
-                TitleUtils.createSimpleTitle(titleValue, localNamespace);
+        Resource title = TitleUtils.createSimpleTitle(
+                subject, titleLiteral, null, localNamespace);
         
         title.addProperty(Ld4lProperty.HAS_SOURCE_STATUS.property(), 
                 Ld4lIndividual.SOURCE_STATUS_TRANSCRIBED.individual());
