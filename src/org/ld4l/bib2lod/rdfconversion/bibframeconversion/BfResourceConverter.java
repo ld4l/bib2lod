@@ -22,7 +22,6 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfResourceConverter {
 
@@ -166,6 +165,8 @@ public class BfResourceConverter {
         return outputModel;  
     }   
 
+    // Subclasses may override for non-default mappings or to remove types
+    // that shouldn't be asserted.
     protected Map<Resource, Resource> getTypeMap() {
         
         // WRONG - alters map returned by BfType.typeMap()
