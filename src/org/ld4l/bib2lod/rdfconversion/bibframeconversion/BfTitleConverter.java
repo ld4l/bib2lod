@@ -122,11 +122,14 @@ public class BfTitleConverter extends BfResourceConverter {
         // If we do it here, can we skip super.convert() altogether?
     }
    
-
-    // TODO Break this up into smaller methods
     private void addTitleElements(Resource bibResource) {
         
         Literal labelLiteral = getNormalizedLabel();
+        
+        // A Title with no label is an anomaly, but does exist
+        if (labelLiteral == null) {
+            return;
+        }
 
         // Create any TitleElements and add them to the model
         // TODO For now we ignore multiple subtitles for a title. Not sure if

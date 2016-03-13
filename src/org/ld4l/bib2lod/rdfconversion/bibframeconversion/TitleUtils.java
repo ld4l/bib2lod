@@ -81,7 +81,19 @@ public final class TitleUtils {
                 bfTitleLiteral = literal;
             }
         }
-
+        
+        LOGGER.debug("bibResource: " + bibResource.getURI());
+        if (LOGGER.isDebugEnabled()) {                
+            if (bfTitleLiteral != null) {
+            LOGGER.debug("bfTitleLiteral: " 
+                    + bfTitleLiteral.getLexicalForm());
+            }              
+            if (bfSortTitleLiteral != null) {
+            LOGGER.debug("bfSortTitleLiteral: " 
+                    + bfSortTitleLiteral.getLexicalForm());
+            }
+        }
+        
         if (bfTitleLiteral == null) {
             return null;
         }
@@ -95,6 +107,7 @@ public final class TitleUtils {
     static Map<String, String> getNonSortAndMainTitleLabels(
             String sortTitleLabel, String mainTitleLabel) {
 
+        LOGGER.debug("mainTitleLabel: " + mainTitleLabel);
         String nonSortLabel = null;
         
         if (sortTitleLabel != null) {
@@ -135,7 +148,7 @@ public final class TitleUtils {
             }
                   
         } else {
-            
+            LOGGER.debug("mainTitleLabel: " + mainTitleLabel);
             // Look for a match to one of the specified non-sort strings
             for (String string : NON_SORT_STRINGS) {
                 if (mainTitleLabel.startsWith(string)) {
@@ -289,7 +302,7 @@ public final class TitleUtils {
         Resource title = model.createResource(
                 RdfProcessor.mintUri(localNamespace));
         title.addProperty(RDF.type, Ld4lType.TITLE.type());
-        title.addProperty(RDFS.label, titleValue);
+        title.addProperty(RDFS.label, titleValue.getLexicalForm());
         
         return title;
     }

@@ -110,6 +110,9 @@ public class BfWorkConverter extends BfResourceConverter {
                     // object, so it must be processed from the 
                     // Work/Instance side as well as with the Title (in the 
                     // latter case, because it contains the sort title).
+                    LOGGER.debug("Calling TitleUtils.convertBfTitleDataProp "
+                            + "for subject " + subject.getURI() + " " 
+                            + "Statement: " + statement.toString());                          
                     Model titleModel = TitleUtils.convertBfTitleDataProp(
                             subject, localNamespace);
                     if (titleModel != null) {
