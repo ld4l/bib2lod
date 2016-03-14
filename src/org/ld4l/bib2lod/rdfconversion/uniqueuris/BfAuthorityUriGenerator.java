@@ -72,6 +72,10 @@ public class BfAuthorityUriGenerator extends BfResourceUriGenerator {
             key = getKeyFromBfLabel();
         }
         
+        if (key == null) {
+            key = super.getUniqueKey();
+        }
+        
         return key;
     }
 

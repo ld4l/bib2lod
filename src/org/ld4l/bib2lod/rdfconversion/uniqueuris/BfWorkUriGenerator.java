@@ -41,7 +41,7 @@ public class BfWorkUriGenerator extends BfResourceUriGenerator {
         
         // Final fallback to existing local name
         if (key == null) {
-            key = resource.getLocalName();
+            key = super.getUniqueKey();
         }
         
         return key;

@@ -299,10 +299,7 @@ public class UriGenerator extends RdfProcessor {
         // use the uniqueUris map to find previously processed resource and
         // reuse that URI.
         String tempUri = localNamespace + tempLocalName;
-
         bnode = ResourceUtils.renameResource(bnode, tempUri);
-        // LOGGER.debug("Renamed blank node " + tempLocalName + " to " 
-        //       + bnode.getURI());
         // LOGGER.debug(resource.isURIResource() ? 
         //       "Resource is now a URI resource" : 
         //       "Resource is still a blank node");

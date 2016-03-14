@@ -50,6 +50,7 @@ public class BfResourceUriGenerator {
     // local names.
     public String getUniqueUri(Resource resource) {     
         this.resource = getResourceWithSubModel(resource);
+        LOGGER.debug("Getting unique URI for resource: " + resource);
         String uniqueLocalName = getUniqueLocalName();
         return localNamespace + uniqueLocalName;
     }
@@ -77,10 +78,11 @@ public class BfResourceUriGenerator {
         pss.setIri("resource", resource.getURI());
         
         Query query = pss.asQuery();
-        LOGGER.debug(query.toString());
+        // LOGGER.debug(query.toString());
         QueryExecution qexec = QueryExecutionFactory.create(
                 query, resource.getModel());
         Model resourceSubModel =  qexec.execConstruct();
+        LOGGER.debug("resourceSubModel: " + resourceSubModel.toString());
         qexec.close();
         
 //        RdfProcessor.printModel(resourceSubModel, 
@@ -204,6 +206,7 @@ public class BfResourceUriGenerator {
         // http://blog.reverberate.org/2012/01/state-of-hash-functions-2012.html
         // for improved algorithms.There are variants of Murmur Hash optimized 
         // for a 64-bit architecture. 
+        LOGGER.debug("Key: " + key);
         long hash64 = MurmurHash.hash64(key);
         return Long.toHexString(hash64);        
     }
