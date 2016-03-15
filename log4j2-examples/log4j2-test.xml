@@ -54,8 +54,6 @@
         <Logger name="org.ld4l.bib2lod.Bib2Lod" additivity="false" level="info">
             <AppenderRef ref="Console"/>
         </Logger>
-        -->
-        <!--
         <Logger name="org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfBibResourceConverter" additivity="false" level="debug">
             <AppenderRef ref="Console"/>
         </Logger>

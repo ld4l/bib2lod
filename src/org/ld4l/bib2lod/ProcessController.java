@@ -25,13 +25,14 @@ public class ProcessController {
     private String inputDir;
     private String mainOutputDir;
     
-    boolean erase;
+    private boolean erase;
+    private boolean addPrereqs;
     
     // private OntModel bfOntModel;
     // private OntModel ld4lOntModel;
     
     public ProcessController(String localNamespace, String inputDir, 
-            String outputDir, boolean erase) {
+            String outputDir, boolean erase, boolean addPrereqs) {
         
         this.localNamespace = localNamespace;
         
@@ -39,6 +40,7 @@ public class ProcessController {
         this.mainOutputDir = outputDir;
         
         this.erase = erase;
+        this.addPrereqs = addPrereqs;
         
         // loadOntModels();
     }

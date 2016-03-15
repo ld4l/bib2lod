@@ -48,6 +48,8 @@ public class Bib2Lod {
         }
         
         boolean erase = ! cmd.hasOption("no_erase");
+        
+        boolean addPrereqs = ! cmd.hasOption("no_prereqs");
 
         // Process commandline arguments and exit if any are invalid.
         String namespace = cmd.getOptionValue("namespace");
@@ -55,7 +57,8 @@ public class Bib2Lod {
             return;
         }
      
-        Set<Action> actions = getValidActions(cmd.getOptionValues("action"));
+        Set<Action> actions = getValidActions(cmd.getOptionValues("action"), 
+                addPrereqs);
         if (actions == null) {
             LOGGER.debug("No valid actions specified. Exiting.");
             return;
@@ -77,19 +80,22 @@ public class Bib2Lod {
         LOGGER.info("Local namespace: " + namespace);
         LOGGER.info("Input directory: " + absInputDir);
         LOGGER.info("Output directory: " + absTopLevelOutputDir);
+        LOGGER.info("Add prerequisite actions: " + addPrereqs);               
         if (LOGGER.isInfoEnabled()) {
             List<String> actionLabels = new ArrayList<String>();
             for (Action a : actions) {
                 actionLabels.add(a.label());
             }
-            LOGGER.info("Actions to be executed, including prerequisites: " 
-                    + actionLabels.toString());
+            String info = addPrereqs ? "Actions to be executed, including "
+                    + "prerequisites: " : "Actions to be executed: ";
+            LOGGER.info(info + actionLabels.toString());
         }
         LOGGER.info("Delete intermediate output directories: " + erase);
 
+
         
         ProcessController processController = new ProcessController(namespace, 
-                absInputDir, absTopLevelOutputDir, erase); 
+                absInputDir, absTopLevelOutputDir, erase, addPrereqs); 
         String absFinalOutputDir = processController.processAll(actions);
         if (absFinalOutputDir == null) {
             LOGGER.error("Processing failed.");
@@ -103,7 +109,8 @@ public class Bib2Lod {
      * @param actions
      * @return
      */
-    private static Set<Action> getValidActions(String[] selectedActions) {
+    private static Set<Action> getValidActions(String[] selectedActions,
+            boolean addPrereqs) {
 
         EnumSet<Action> actions = EnumSet.noneOf(Action.class);
         
@@ -120,18 +127,21 @@ public class Bib2Lod {
         
         // Add prerequisites of each requested action.
         // Clone actions to prevent modifying inside the loop
-        EnumSet<Action> allActions = actions.clone();
-        for (Action action : actions) {
-            boolean addedNewActions = 
-                    allActions.addAll(action.recursivePrereqs());
-            if (LOGGER.isTraceEnabled() && addedNewActions) {
-                LOGGER.trace("Added prerequisites to requested action " 
-                        + action.label());
-            }    
+        if (addPrereqs) {
+            EnumSet<Action> allActions = actions.clone();
+            for (Action action : actions) {
+                boolean addedNewActions = 
+                        allActions.addAll(action.recursivePrereqs());
+                if (LOGGER.isTraceEnabled() && addedNewActions) {
+                    LOGGER.trace("Added prerequisites to requested action " 
+                            + action.label());
+                }   
+            }
+            return allActions;
+            
+        } else {
+            return actions;
         }
-        
-        return allActions;
-
     }
     
     /**
@@ -305,7 +315,22 @@ public class Bib2Lod {
                 .hasArg(false)
                 .desc("Keep intermediate output. Default is to erase.")
                 .build());
-                       
+        
+        options.addOption(Option.builder("np")
+                .longOpt("no_prereqs")
+                .required(false)
+                .hasArg(false)
+                .desc("Do not add prerequisite actions to those specified. " 
+                        + "Allows restarting at intermediate processing "
+                        + "stages. Default is to add prereqs. This option "
+                        + "should be used ONLY when intermediate output is "
+                        + "used as input; it cannot be used to sidestep "
+                        + "processing steps altogether, since some later steps "
+                        + "assume the application of earlier ones. All "
+                        + "subsequent steps must be specified on the "
+                        + "commandline.")
+                .build());
+        
         options.addOption(Option.builder("o")
                 .longOpt("outdir")
                 .required()
