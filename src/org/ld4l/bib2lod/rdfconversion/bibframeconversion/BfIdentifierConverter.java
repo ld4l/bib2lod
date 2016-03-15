@@ -294,7 +294,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             LOGGER.warn("No handling defined for property " 
                     + linkingProperty.getURI() + " linking " 
                     + relatedResource.getURI() + " to its identifier "
-                    + subject.getURI() + ".");   
+                    + subject.getURI() + ". Deleting statement.");   
             
         } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
             identifierType = PROPERTY_TO_TYPE.get(bfProp);                
