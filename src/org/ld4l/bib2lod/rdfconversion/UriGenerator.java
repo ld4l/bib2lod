@@ -172,6 +172,8 @@ public class UriGenerator extends RdfProcessor {
             LOGGER.info("End unique URI generation in file " + filename
                     + " (file " + fileCount + " of " 
                     + Bib2LodStringUtils.count(totalFileCount, "input file")
+                    + " = " 
+                    + TimerUtils.percent(fileCount, totalFileCount) + "%). "
                     + "). Duration: " 
                     + TimerUtils.getDuration(fileStartTime) + ".");
         }   

@@ -187,7 +187,7 @@ public class BibframeConverter extends RdfProcessor {
 
         LOGGER.info("Start Bibframe RDF conversion of file "                
                 + filename + " (file " + fileCount + " of " 
-                + Bib2LodStringUtils.count(totalFileCount, "input file")
+                + Bib2LodStringUtils.count(totalFileCount, "input file") 
                 + ").");
 
         Instant fileStart = Instant.now();
@@ -215,7 +215,9 @@ public class BibframeConverter extends RdfProcessor {
         
         LOGGER.info("End Bibframe RDF conversion of file " + filename 
                 + " (file " + fileCount + " of " 
-                + Bib2LodStringUtils.count(totalFileCount, "input file") + "). "
+                + Bib2LodStringUtils.count(totalFileCount, "input file") 
+                + " = " 
+                + TimerUtils.percent(fileCount, totalFileCount) + "%). "
                 + "Converted "
                 + Bib2LodStringUtils.count(inputModel.size(), "triple") + " "
                 + "with "

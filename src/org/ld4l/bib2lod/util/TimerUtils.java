@@ -61,5 +61,9 @@ public final class TimerUtils {
     public static String getDuration(Instant start) {
         return formatMillis(start, Instant.now());
     }
+    
+    public static int percent(int n, int total) {
+        return (n * 100)/total;
+    }
   
 }
