@@ -128,6 +128,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
         init();
 
+        if (relatedResource == null) {
+            return outputModel;
+        }
+        
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
 

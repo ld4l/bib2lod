@@ -78,6 +78,12 @@ public class BfTitleConverter extends BfResourceConverter {
         
         Resource bibResource = getRelatedBibResource();
         
+        // Title with no related bib resource (anomalous but found in Cornell 
+        // data).
+        if (bibResource == null) {
+            return outputModel;
+        }
+        
         addTitleSubType(bibResource);
         addTitleElements(bibResource);
         
@@ -98,11 +104,12 @@ public class BfTitleConverter extends BfResourceConverter {
             // There can be only one
             bibResource = resources.nextResource();
         }
+      
         return bibResource;    
     }
     
     private void addTitleSubType(Resource bibResource) {
-
+        
         Model model = subject.getModel();
 
         StmtIterator stmts = model.listStatements(bibResource, null, subject);
@@ -126,7 +133,7 @@ public class BfTitleConverter extends BfResourceConverter {
         
         Literal labelLiteral = getNormalizedLabel();
         
-        // A Title with no label is an anomaly, but does exist
+        // Title with no label; anomalous, but exists.
         if (labelLiteral == null) {
             return;
         }
@@ -213,6 +220,7 @@ public class BfTitleConverter extends BfResourceConverter {
     private String getSortTitleLabel(Resource bibResource) {
         
         String label = null;
+
         StmtIterator stmts = 
                 bibResource.listProperties(BfProperty.BF_TITLE.property());
         while (stmts.hasNext()) {
