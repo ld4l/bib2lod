@@ -123,19 +123,24 @@ public class BfInstanceConverter extends BfResourceConverter {
                 
                 // Add owl:sameAs to a WorldCat URI
                 if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
-                    Resource identifier = object.asResource();
-                    String uri = identifier.getURI();
-                    // Can't use identifier.getNameSpace() because Jena doesn't
-                    // recognize namespace when localname starts with a digit.
-                    if (uri.startsWith(Vocabulary.WORLDCAT.uri())) {
-                        LOGGER.debug("Adding " + subject.getURI() 
-                                + " owl:sameAs " + uri);
-                        outputModel.add(subject, OWL.sameAs, identifier);
-                        createWorldCatIdentifier(identifier);                       
-                    } else {
-                        outputModel.add( 
-                                subject, Ld4lProperty.IDENTIFIED_BY.property(), 
-                                identifier);
+                    // Harvard contains some cases where bf:systemNumber has a
+                    // literal object.
+                    if (object.isResource()) {
+                        Resource identifier = object.asResource();
+                        String uri = identifier.getURI();
+                        // Can't use identifier.getNameSpace() because Jena 
+                        // doesn'trecognize namespace when localname starts with 
+                        // a digit.
+                        if (uri.startsWith(Vocabulary.WORLDCAT.uri())) {
+                            LOGGER.debug("Adding " + subject.getURI() 
+                                    + " owl:sameAs " + uri);
+                            outputModel.add(subject, OWL.sameAs, identifier);
+                            createWorldCatIdentifier(identifier);                       
+                        } else {
+                            outputModel.add(subject,  
+                                    Ld4lProperty.IDENTIFIED_BY.property(), 
+                                    identifier);
+                        }
                     }
                 }
                 
