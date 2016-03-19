@@ -1,6 +1,8 @@
 package org.ld4l.bib2lod.rdfconversion.uniqueuris;
 
-import org.apache.commons.lang3.StringUtils;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
@@ -129,20 +131,24 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
     // If the local identifier was stored only in the 001 field, and not in the
     // 035 field, then the only way to capture the local identifier is from the
     // original URI, before it gets changed to a unique URI in UriGenerator.
-    public static Statement getLocalIdentifier(
-            Resource subject, String localNamespace) {
-       
+    public Statement getLocalIdentifier(Resource instance, String newUri) {
+
         String alphaPrefix = RdfProcessor.getLocalNameAlphaPrefix();
         
         // Remove the alpha prefix that has been added to the local name.
-        String localName = subject.getLocalName().replaceFirst(alphaPrefix, "");
-
-        String localIdentifier = 
-                localName.substring(0, localName.indexOf("instance"));
-        LOGGER.debug("Local identifier: " + localIdentifier);
-        
-        return ResourceFactory.createStatement(subject, 
-                BfProperty.BF_LOCAL.property(), 
-                ResourceFactory.createPlainLiteral(localIdentifier));
+        String localName = 
+                instance.getLocalName().replaceFirst(alphaPrefix, "");
+        Matcher matcher = Pattern.compile("\\d+").matcher(localName);
+        if (matcher.find()) {
+            String localIdentifier = matcher.group();
+            LOGGER.debug("Local identifier: " + localIdentifier);
+            return ResourceFactory.createStatement(
+                    ResourceFactory.createResource(newUri), 
+                    BfProperty.BF_LOCAL.property(), 
+                    ResourceFactory.createPlainLiteral(localIdentifier));
+        } else {
+            return null;
+        }
     }
+    
 }

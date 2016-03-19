@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
@@ -72,23 +73,11 @@ public class BfInstanceConverter extends BfResourceConverter {
     
     @Override 
     protected Model convert() {
-        
+
         LOGGER.debug("Converting instance " + subject.getURI());
 
-        // Get the associated Work
-        Statement instanceOf = 
-                subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
-        // Probably can't be null
-        Resource relatedWork = 
-                instanceOf != null ? instanceOf.getResource() : null;
-                               
-        // Get any associated Items
-        List<Statement> hasHolding = subject.getModel().listStatements(
-                null, BfProperty.BF_HOLDING_FOR.property(), subject).toList();
-        // Assign relatedItem only if there's just one. Otherwise, we don't
-        // know which Item the transformations should apply to.
-        Resource relatedItem = hasHolding.size() == 1 ? 
-                hasHolding.get(0).getSubject() : null;
+        Resource relatedWork = getRelatedWork();        
+        Resource relatedItem = getRelatedItem();
 
         StmtIterator stmts = subject.getModel().listStatements();
  
@@ -101,79 +90,59 @@ public class BfInstanceConverter extends BfResourceConverter {
     
             if (predicate.equals(RDF.type)) {
                 
-                if (moveTypeToRelatedResource(
-                        object.asResource(), relatedWork, WORK_TYPE_MAP)) {
+                convertType(object.asResource(), 
+                        relatedWork, relatedItem);
                 
-                } else if (moveTypeToRelatedResource(
-                        object.asResource(), relatedItem, ITEM_TYPE_MAP)) {
-                    
-                } // else default conversions handled in super.convert()
-              
             } else {
-                
-                BfProperty bfProp = BfProperty.get(predicate);
-                
-                if (bfProp == null) {
-                    // Log for review, to make sure nothing has escaped.
-                    LOGGER.debug("No handling defined for property " 
-                            + predicate.getURI()
-                            + "; deleting statement.");
-                    continue;
-                }
-                
-                // Add owl:sameAs to a WorldCat URI
-                if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
-                    // Harvard contains some cases where bf:systemNumber has a
-                    // literal object.
-                    if (object.isResource()) {
-                        Resource identifier = object.asResource();
-                        String uri = identifier.getURI();
-                        // Can't use identifier.getNameSpace() because Jena 
-                        // doesn'trecognize namespace when localname starts with 
-                        // a digit.
-                        if (uri.startsWith(Vocabulary.WORLDCAT.uri())) {
-                            LOGGER.debug("Adding " + subject.getURI() 
-                                    + " owl:sameAs " + uri);
-                            outputModel.add(subject, OWL.sameAs, identifier);
-                            createWorldCatIdentifier(identifier);                       
-                        } else {
-                            outputModel.add(subject,  
-                                    Ld4lProperty.IDENTIFIED_BY.property(), 
-                                    identifier);
-                        }
-                    }
-                }
-                
-                // Only Instances have bf:titleStatement assertions
-                if (bfProp.equals(BfProperty.BF_TITLE_STATEMENT)) {
-                    convertBfTitleStatement(object.asLiteral());            
-                
-                } else if (bfProp.equals(BfProperty.BF_TITLE)) {
-                    // If there are two bf:title statements, they are converted
-                    // together in BfTitleConverter.convertBfTitleProp(), so
-                    // don't reprocess the second one.
-                    if (!bfTitlePropDone) {
-                        // A resource may have only bf:title and no Title 
-                        // object, so it must be processed from the 
-                        // Work/Instance side as well as with the Title (in the 
-                        // latter case, because it contains the sort title).
-                        LOGGER.debug("Calling TitleUtils.convertBfTitleDataProp"
-                                + " for subject " + subject.getURI() + " " 
-                                + "Statement: " + statement.toString());    
-                        Model titleModel = 
-                                TitleUtils.convertBfTitleDataProp(subject,
-                                localNamespace);
-                        if (titleModel != null) {
-                            outputModel.add(titleModel);
-                            titleModel.close();
-                        }
-                        bfTitlePropDone = true;
-                    }
-                }                                       
-            }          
-        }
-        
+                bfTitlePropDone = 
+                        convertProperty(predicate, object,  bfTitlePropDone);
+            }
+        }            
         return super.convert();
+    }
+
+    private Resource getRelatedWork() {
+
+        Resource relatedWork = null;
+        
+        Statement instanceOf = 
+                subject.getProperty(BfProperty.BF_INSTANCE_OF.property());
+        // Probably can't be null
+        if (instanceOf != null) {
+           relatedWork = instanceOf.getResource(); 
+        }
+                
+        return relatedWork;
+    }
+    
+    private Resource getRelatedItem() {
+        
+        Resource relatedItem = null;
+
+        // Get any associated Items
+        List<Statement> hasHolding = subject.getModel().listStatements(
+                null, BfProperty.BF_HOLDING_FOR.property(), subject).toList();
+        
+        // Assign relatedItem only if there's just one. Otherwise, we don't
+        // know which Item the type should apply to.
+        if (hasHolding.size() == 1) {
+            relatedItem = hasHolding.get(0).getSubject();
+        }
+
+        return relatedItem;
+    }
+    
+    private void convertType(Resource object, 
+            Resource relatedWork, Resource relatedItem) {
+
+        if (moveTypeToRelatedResource(
+                object.asResource(), relatedWork, WORK_TYPE_MAP)) {
+        
+        } else if (moveTypeToRelatedResource(
+                object.asResource(), relatedItem, ITEM_TYPE_MAP)) {
+            
+        } // else default type conversions handled in super.convert()
+        
     }
 
     private boolean moveTypeToRelatedResource(Resource type, 
@@ -184,30 +153,81 @@ public class BfInstanceConverter extends BfResourceConverter {
                 outputModel.add(
                         relatedResource, RDF.type, typeMap.get(type));
                 return true;
-            }
-            
+            }        
         }
-        return false;        
+        return false;                
+    }
+
+    private boolean convertProperty(
+            Property predicate, RDFNode object, boolean bfTitlePropDone) {
         
+        BfProperty bfProp = BfProperty.get(predicate);
+        
+        if (bfProp == null) {
+            // Log for review, to make sure nothing has escaped.
+            LOGGER.debug("No handling defined for property " 
+                    + predicate.getURI()
+                    + "; deleting statement.");
+            return bfTitlePropDone;
+        }
+
+        if (BfIdentifierConverter.getIdentifierProps().contains(bfProp)
+                && object.isLiteral()) {
+            
+            convertIdentifierLiteral(bfProp, object.asLiteral());
+
+        } else if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
+
+            convertSystemNumber(object);
+
+        // Only Instances have bf:titleStatement assertions
+        } else if (bfProp.equals(BfProperty.BF_TITLE_STATEMENT)) {
+            convertBfTitleStatement(object.asLiteral());            
+
+        } else if (bfProp.equals(BfProperty.BF_TITLE)) {
+            
+            // If there are two bf:title statements, they are converted
+            // together in BfTitleConverter.convertBfTitleProp(), so
+            // don't reprocess the second one.
+            if (!bfTitlePropDone) {
+                convertBfTitle(object.asLiteral());
+                bfTitlePropDone = true;
+            }   
+        }  
+        
+        return bfTitlePropDone;
+    }         
+   
+    private void convertIdentifierLiteral(BfProperty bfProp, Literal value) {
+        Model model = BfIdentifierConverter.convertIdentifierLiteral(subject,
+                bfProp, value);
+        outputModel.add(model);
+        model.close();                
     }
     
-//    private void convertProvider(Statement statement) {
-//        
-//        BfResourceConverter converter = 
-//                new BfProviderConverter(this.localNamespace);
-//     
-//        // Identify the provider resource and build its associated model (i.e.,
-//        // statements in which it is the subject or object).
-//        Resource resource = statement.getResource();
-//        Model providerModel = getResourceSubModel(resource);
-//        Resource provider = providerModel.createResource(resource.getURI());
-//                      
-//        // Add BfProviderConverter model to this converter's outputModel model,
-//        // so they get added to the BibframeConverter output model.
-//        Model convert = converter.convert(provider);
-//		outputModel.add(convert);
-//		convert.close();
-//    }
+    private void convertSystemNumber(RDFNode object) {
+ 
+        // Harvard contains some cases where bf:systemNumber has a
+        // literal object. These have been handled earlier in 
+        // convertIdentifierLiteral().
+        if (object.isResource()) {
+            
+            Resource identifier = object.asResource();
+
+            // Add owl:sameAs to a WorldCat URI
+            if (identifier.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+                LOGGER.debug("Adding " + subject.getURI() 
+                        + " owl:sameAs " + identifier.getURI());
+                outputModel.add(subject, OWL.sameAs, identifier);
+                createWorldCatIdentifier(identifier);   
+                
+            } else {
+                outputModel.add(subject,  
+                        Ld4lProperty.IDENTIFIED_BY.property(), 
+                        identifier);
+            }
+        }        
+    }
     
     /*
      * bf:titleStatement is used only with an Instance, and indicates a 
@@ -221,7 +241,19 @@ public class BfInstanceConverter extends BfResourceConverter {
         outputModel.add(titleModel);
         //outputModel.add(subject, Ld4lProperty.HAS_TITLE.property(), title);
     }
+    
+    // Convert bf:title statement
+    private void convertBfTitle(Literal value) {
 
+        Model titleModel = 
+                TitleUtils.convertBfTitleDataProp(subject, localNamespace);  
+                               
+        if (titleModel != null) {
+            outputModel.add(titleModel);
+            titleModel.close();
+        }               
+    }
+ 
     /*
      * Only an Instance may have a TranscribedTitle.
      */
@@ -276,4 +308,5 @@ public class BfInstanceConverter extends BfResourceConverter {
         
         return propertyMap;
     }
+    
 }

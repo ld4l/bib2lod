@@ -11,6 +11,7 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -85,8 +86,7 @@ public class UriGenerator extends RdfProcessor {
         URI_GENERATORS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
                 MadsAuthorityUriGenerator.class);       
     }
-    
-    
+
     public UriGenerator(String localNamespace, String inputDir, 
             String mainOutputDir) {           
         super(localNamespace, inputDir, mainOutputDir);
@@ -197,9 +197,7 @@ public class UriGenerator extends RdfProcessor {
 
         List<Statement> statements = inputModel.listStatements().toList();
         for (Statement statement : statements) {
-            Statement newStatement = generateUniqueUris(
-                    statement, uniqueUris, outputModel);                    
-            outputModel.add(newStatement);
+            generateUniqueUris(statement, uniqueUris, outputModel);
         }  
         
         inputModel.close();
@@ -207,20 +205,24 @@ public class UriGenerator extends RdfProcessor {
         return outputModel;
     }
 
-    private Statement generateUniqueUris(Statement statement,  
+    private void generateUniqueUris(Statement statement,  
             Map<String, String> uniqueUris, Model outputModel) { 
 
         Resource subject = statement.getSubject();
-        Resource newSubject = getUniqueUri(
-                subject, uniqueUris, outputModel);
+        String newSubjectUri = getUniqueUri(subject, uniqueUris, outputModel);
+        Resource newSubject = outputModel.createResource(newSubjectUri);
         
         RDFNode object = statement.getObject();
-        RDFNode newObject = object.isLiteral() ? object :
-                getUniqueUri(object.asResource(), uniqueUris, outputModel); 
-                                                    
-        // Model.createStatement() may reuse an existing statement rather than
-        // creating a new one.
-        return outputModel.createStatement(
+        RDFNode newObject;
+        if (object.isLiteral()) {
+            newObject = object;
+        } else {
+            String newObjectUri = 
+                    getUniqueUri(object.asResource(), uniqueUris, outputModel);
+            newObject = outputModel.createResource(newObjectUri);
+        }
+                                           
+        outputModel.add(
                 newSubject, statement.getPredicate(), newObject);
     }
 
@@ -228,7 +230,7 @@ public class UriGenerator extends RdfProcessor {
      * The URI returned by this method serves to dedupe the same resource 
      * across records in a catalog, based on type-specific identifying data.
      */
-    private Resource getUniqueUri(Resource resource, 
+    private String getUniqueUri(Resource resource, 
             Map<String, String> uniqueUris, Model outputModel) {
 
         // Assign a temporary URI to a blank node, so that remaining processing
@@ -248,7 +250,7 @@ public class UriGenerator extends RdfProcessor {
             
         } else if (! resource.getNameSpace().equals(localNamespace)) {
             // Don't modify URIs in an external namespace
-            return resource;
+            return resource.getURI();
         }
         
         String uri = resource.getURI();
@@ -263,27 +265,48 @@ public class UriGenerator extends RdfProcessor {
 
         } else {
             // Otherwise, compute a new value.
-            uniqueUri = getNewUniqueUri(resource);
+            uniqueUri = getNewUniqueUri(resource, outputModel);
             LOGGER.debug("Generated new unique URI " + uniqueUri 
-                    + " for resource " + resource.getURI());
+                    + " for resource " + uri);
 
             // Add to the map so the value can be reused for other resources in
             // the same record without having to recompute.
             uniqueUris.put(uri, uniqueUri);
         }
               
-        // Model.createResource() may reuse an existing resource rather than
-        // creating a new one.
-        return outputModel.createResource(uniqueUri);
+        return uniqueUri;
         
     }
  
-    private String getNewUniqueUri(Resource resource) {
+    private String getNewUniqueUri(Resource resource, Model outputModel) {
         
-        BfResourceUriGenerator uriGenerator = getUriGeneratorByType(
-                resource, localNamespace);
+        BfResourceUriGenerator uriGenerator = getUriGeneratorByType(resource);
         
-        return uriGenerator.getUniqueUri(resource);
+//        LOGGER.debug("Got uriGenerator " + uriGenerator.getClass().getName()
+//                + " for resource " + resource.getURI());
+               
+        String uniqueUri = uriGenerator.getUniqueUri(resource);
+        
+        // SIDE EFFECT
+        // For instances, we need to get the local identifier, which the
+        // LC converter embeds in the URI, before the URI is changed. Some
+        // catalogs (Cornell) record this identifier in both 001 and 035, 
+        // while others (Harvard, Stanford) only record it in 001. The
+        // LC converter captures only the 035 value in triples, but it 
+        // uses the 001 value in minting URIs.
+        // NB Do this AFTER getting the unique URI.
+        if (uriGenerator instanceof BfInstanceUriGenerator) {
+            Statement localIdentifierStmt = 
+                    ((BfInstanceUriGenerator) uriGenerator)
+                    .getLocalIdentifier(resource, uniqueUri);
+            if (localIdentifierStmt != null) {
+                LOGGER.debug("Adding new local identifier statement to model: "
+                        + localIdentifierStmt.toString());
+                outputModel.add(localIdentifierStmt);             
+            }
+        }
+        
+        return uniqueUri;
     }
 
     /* 
@@ -309,9 +332,8 @@ public class UriGenerator extends RdfProcessor {
         return bnode;
     }
 
-    private BfResourceUriGenerator getUriGeneratorByType(
-            Resource resource, String localNamespace) {
-
+    private BfResourceUriGenerator getUriGeneratorByType(Resource resource) {
+            
         // Get the BfTypes for this resource
         List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
         List<BfType> types = new ArrayList<BfType>();

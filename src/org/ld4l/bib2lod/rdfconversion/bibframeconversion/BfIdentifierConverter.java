@@ -3,14 +3,18 @@ package org.ld4l.bib2lod.rdfconversion.bibframeconversion;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
 import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
+import org.apache.jena.rdf.model.Literal;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
@@ -19,6 +23,7 @@ import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfIdentifierConverter extends BfResourceConverter {
 
@@ -118,10 +123,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);
     }
-
-//    public static List<Property> getIdentifierProps() {
-//        return IDENTIFIER_PROPS;
-//    }
     
     @Override
     protected Model convert() {
@@ -137,7 +138,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
         String[] idValues = getIdentifierValue();
 
-        getIdentifierType(idValues);
+        // TODO - move to where it's used
+        addIdentifierType(idValues);
 
         LOGGER.debug("Identifier: " + subject.getURI());
         // RdfProcessor.printModel(outputModel, Level.DEBUG);
@@ -155,13 +157,115 @@ public class BfIdentifierConverter extends BfResourceConverter {
             linkingProperty = stmt.getPredicate();
         }
     }
-    
-    
-//    @Override
-//    protected ParameterizedSparqlString getResourceSubModelPss() {
-//        // Probably can use BfResourceConverter query
-//    }
 
+    private void addIdentifierType(String[] idValues) {
+        
+        String prefix = idValues[0];
+        String value = idValues[1];
+        
+        Ld4lType identifierType = null;
+        
+        identifierType = getIdentifierTypeFromPredicate();
+        
+        // Note that the Bibframe converter may redundantly specify type with 
+        // both a predicate and a scheme:
+        // <http://draft.ld4l.org/cornell/102063instance16> <http://bibframe.org/vocab/lccn> _:bnode47102063 .
+        // _:bnode47102063 <http://bibframe.org/vocab/identifierScheme> <http://id.loc.gov/vocabulary/identifiers/lccn> . 
+        if (identifierType == null) {
+            identifierType = getIdentifierTypeFromScheme();
+        }
+        
+        if (identifierType == null) {
+            identifierType = 
+                    getIdentifierTypeFromLiteralValue(prefix, value);                       
+        }
+  
+        // We may want to assign the supertype in any case, to simplify the
+        // query used to build the search index, since there's no reasoner to
+        // infer it.
+        if (identifierType == null) {
+            identifierType = Ld4lType.IDENTIFIER;
+        }
+        
+        outputModel.add(subject, RDF.type, identifierType.type());  
+
+    }
+
+    private Ld4lType getIdentifierTypeFromPredicate() {
+        
+        Ld4lType identifierType = null;
+ 
+        BfProperty bfProp = BfProperty.get(linkingProperty);
+                    
+        if (bfProp == null) {
+            // This would be an oversight; log for review.
+            LOGGER.warn("No handling defined for property " 
+                    + linkingProperty.getURI() + " linking " 
+                    + relatedResource.getURI() + " to its identifier "
+                    + subject.getURI() + ". Deleting statement.");   
+            
+        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
+        }
+           
+        return identifierType;        
+    }
+
+    private Ld4lType getIdentifierTypeFromScheme() {
+        
+        Ld4lType identifierType = null;
+        String schemeValue = null;
+        
+        Statement schemeStmt = subject.getProperty(
+                BfProperty.BF_IDENTIFIER_SCHEME.property());
+        if (schemeStmt != null) {
+            RDFNode scheme = schemeStmt.getObject();
+            
+            // Cornell, Harvard
+            if (scheme.isResource()) {
+                schemeValue = scheme.asResource().getLocalName();
+                
+            // Stanford
+            } else if (scheme.isLiteral()) {
+                schemeValue = scheme.asLiteral().getLexicalForm();
+            }
+            
+            if (! schemeValue.equals("systemNumber")) {
+                schemeValue = StringUtils.capitalize(schemeValue);
+                // Returns null if there's no corresponding type
+                identifierType = Ld4lType.getByLocalName(schemeValue);            
+            } 
+        }
+        
+        return identifierType;
+    }
+
+    private Ld4lType getIdentifierTypeFromLiteralValue(
+            String prefix, String idValue) {   
+            
+        Ld4lType identifierType = null;
+ 
+        // TODO - REDO!
+        if (idValue != null) {
+            
+            if (prefix != null) {               
+                identifierType = IDENTIFIER_PREFIXES.get(prefix);
+            
+            // If no subtype has been identified, and the value is all digits,
+            // assume a local ILS identifer.
+            // TODO **** Check if this is true for Harvard and Stanford
+            } else if (idValue.matches("^\\d+$")
+                    // Not sure if this condition is required
+                    && linkingProperty.equals(
+                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+
+                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+            }
+        }
+        
+        return identifierType;
+    }
+    
     private String[] getIdentifierValue() {
 
         // E.g., (OCoLC)234567, ocm234567
@@ -198,114 +302,30 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         return new String[] { prefix, idValue };       
     }
-    
-    private void getIdentifierType(String[] idValues) {
-        
-        String prefix = idValues[0];
-        String value = idValues[1];
-        
-        Ld4lType identifierType = null;
-        
-        identifierType = getIdentifierTypeFromPredicate();
-        
-        // Note that the Bibframe converter may redundantly specify type with 
-        // both a predicate and a scheme:
-        // <http://draft.ld4l.org/cornell/102063instance16> <http://bibframe.org/vocab/lccn> _:bnode47102063 .
-        // _:bnode47102063 <http://bibframe.org/vocab/identifierScheme> <http://id.loc.gov/vocabulary/identifiers/lccn> . 
-        if (identifierType == null) {
-            identifierType = getIdentifierTypeFromIdentifierScheme();
-        }
-        
-        if (identifierType == null) {
-            identifierType = 
-                    getIdentifierTypeFromIdentifierValue(prefix, value);                       
-        }
-  
-        // We may want to assign the supertype in any case, to simplify the
-        // query used to build the search index, since there's no reasoner to
-        // infer the supertype.
-        if (identifierType == null) {
-            identifierType = Ld4lType.IDENTIFIER;
-        }
-        
-        outputModel.add(subject, RDF.type, identifierType.type());  
 
-    }
-
-    private Ld4lType getIdentifierTypeFromIdentifierValue(
-            String prefix, String idValue) {   
-            
-        Ld4lType identifierType = null;
- 
-        // TODO - REDO!
-        if (idValue != null) {
-            
-            if (prefix != null) {               
-                identifierType = IDENTIFIER_PREFIXES.get(prefix);
-            
-            // If no subtype has been identified, and the value is all digits,
-            // assume a local ILS identifer.
-            // TODO **** Check if this is true for Harvard and Stanford
-            } else if (idValue.matches("^\\d+$")
-                    // Not sure if this condition is required
-                    && linkingProperty.equals(
-                            BfProperty.BF_SYSTEM_NUMBER.property())) {
-
-                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
-            }
+    protected static Model convertIdentifierLiteral(Resource instance,
+            BfProperty identifierProp, Literal value) {
+        
+        Model model = ModelFactory.createDefaultModel();
+                                                                                  
+        Ld4lType identifierType = 
+                PROPERTY_TO_TYPE.get(identifierProp);
+        
+        if (identifierType != null) {
+            String namespace = instance.getNameSpace();
+            Resource identifier = ResourceFactory.createResource(
+                    RdfProcessor.mintUri(namespace));
+            model.add(instance, Ld4lProperty.IDENTIFIED_BY.property(), 
+                    identifier);
+            model.add(identifier, RDF.type, identifierType.type());
+            model.add(identifier, RDF.value, value);
         }
         
-        return identifierType;
-    }
-
-    private Ld4lType getIdentifierTypeFromIdentifierScheme() {
-        
-        Ld4lType identifierType = null;
-        String schemeValue = null;
-        
-        Statement schemeStmt = subject.getProperty(
-                BfProperty.BF_IDENTIFIER_SCHEME.property());
-        if (schemeStmt != null) {
-            RDFNode scheme = schemeStmt.getObject();
-            
-            // Cornell, Harvard
-            if (scheme.isResource()) {
-                schemeValue = scheme.asResource().getLocalName();
-                
-            // Stanford
-            } else if (scheme.isLiteral()) {
-                schemeValue = scheme.asLiteral().getLexicalForm();
-            }
-            
-            if (! schemeValue.equals("systemNumber")) {
-                schemeValue = StringUtils.capitalize(schemeValue);
-                // Returns null if there's no corresponding type
-                identifierType = Ld4lType.getByLocalName(schemeValue);            
-            } 
-        }
-        
-        return identifierType;
-    }
-
-    private Ld4lType getIdentifierTypeFromPredicate() {
-            
-        Ld4lType identifierType = null;
- 
-        BfProperty bfProp = BfProperty.get(linkingProperty);
-                    
-        if (bfProp == null) {
-            // This would be an oversight; log for review.
-            LOGGER.warn("No handling defined for property " 
-                    + linkingProperty.getURI() + " linking " 
-                    + relatedResource.getURI() + " to its identifier "
-                    + subject.getURI() + ". Deleting statement.");   
-            
-        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
-        }
-           
-        return identifierType;        
+        return model;       
     }
     
-
+    protected static Set<BfProperty> getIdentifierProps() {
+        return PROPERTY_TO_TYPE.keySet();
+    }
+    
 }
