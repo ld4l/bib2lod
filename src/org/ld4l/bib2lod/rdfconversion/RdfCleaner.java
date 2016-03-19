@@ -34,38 +34,38 @@ public class RdfCleaner extends RdfProcessor {
     private static final Pattern URI_RDFXML = 
             Pattern.compile("(?<==\")http://[^\"]+(?=\")");
     
-    private static final Pattern URI = 
-            /*
-             * Matches:
-             * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
-             * <http://id.loc.gov/vocabulary/geographicAreas/f-tz---\>
-             * <http://id.loc.gov/authorities/classification/TN"69>
-             * "http://id.loc.gov/authorities/classification/TN&#34;69"
-             * 
-             * Does not match:
-             * "http://id.loc.gov/vocabulary/subjectSchemes/fast" . 
-             * 
-             * Does not break: 
-             * <http://id.loc.gov/authorities/classification/TN"69> at the "
-             * 
-             * Does not match:
-             * http://www.organic-europe.net"
-             * The quote is the close of a quoted string literal value
-             * 
-             * Does not match: 
-             * http://www.organic-europe.net / Stefanie Graf and Helga Willer
-             * Part of a string literal value
-             */
-            
-            Pattern.compile(                   
-                    // Bracketed URI (nt, ttl, json): no internal closing 
-                    // brackets
-                    "(?<=<)http://[^>]+(?=>)" 
-                    // Quoted URI (rdfxml): no internal quotes 
-                    // Require quotes on both ends, otherwise the quote is the
-                    // opening or closing of a quoted string.
-                    + "|(?<=\")http://[^\"]+(?=\")"
-                    );
+//    private static final Pattern URI = 
+//            /*
+//             * Matches:
+//             * <http://id.loc.gov/vocabulary/organizations/*cleveland st univ lib*>
+//             * <http://id.loc.gov/vocabulary/geographicAreas/f-tz---\>
+//             * <http://id.loc.gov/authorities/classification/TN"69>
+//             * "http://id.loc.gov/authorities/classification/TN&#34;69"
+//             * 
+//             * Does not match:
+//             * "http://id.loc.gov/vocabulary/subjectSchemes/fast" . 
+//             * 
+//             * Does not break: 
+//             * <http://id.loc.gov/authorities/classification/TN"69> at the "
+//             * 
+//             * Does not match:
+//             * http://www.organic-europe.net"
+//             * The quote is the close of a quoted string literal value
+//             * 
+//             * Does not match: 
+//             * http://www.organic-europe.net / Stefanie Graf and Helga Willer
+//             * Part of a string literal value
+//             */
+//            
+//            Pattern.compile(                   
+//                    // Bracketed URI (nt, ttl, json): no internal closing 
+//                    // brackets
+//                    "(?<=<)http://[^>]+(?=>)" 
+//                    // Quoted URI (rdfxml): no internal quotes 
+//                    // Require quotes on both ends, otherwise the quote is the
+//                    // opening or closing of a quoted string.
+//                    + "|(?<=\")http://[^\"]+(?=\")"
+//                    );
     
 //    private static final Pattern DEC_CODE_PATTERN = 
 //            Pattern.compile("&#(\\d+);");
@@ -443,6 +443,8 @@ public class RdfCleaner extends RdfProcessor {
      */
     protected String fixLocalNames(String line) {
         
+        String alphaPrefix = RdfProcessor.getLocalNameAlphaPrefix();
+        
         StringBuilder sb = new StringBuilder(line);
         LOGGER.debug(line);
         Matcher m = BAD_LOCALNAME.matcher(sb);
@@ -454,11 +456,12 @@ public class RdfCleaner extends RdfProcessor {
         }
         while (m.find(matchPointer)) {
             LOGGER.debug("Match: " + m.group(1) + " " + m.group(2));
-            sb.replace(m.start(), m.end(), m.group(1) + "n" + m.group(2));
+            sb.replace(m.start(), m.end(),
+                     m.group(1) + alphaPrefix + m.group(2));
             matchPointer = m.end() + 1;
         }     
         LOGGER.debug("Returning from fixLocalNames(): " + sb.toString());
         return sb.toString();     
     } 
-    
+
 }

@@ -14,6 +14,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
 import org.ld4l.bib2lod.util.NacoNormalizer;
 
@@ -44,7 +45,7 @@ public class BfResourceUriGenerator {
         this.localNamespace = localNamespace;
     }
    
-    // Subclasses that may generate URI outside the local namespace should
+    // Subclasses that may generate URIs outside the local namespace should
     // override this method. Otherwise, they need only override getUniqueKey().
     // For example, BfTopicUriGenerator assigns full FAST URIS, not just 
     // local names.
@@ -156,7 +157,7 @@ public class BfResourceUriGenerator {
         String uniqueKey = getUniqueKey();
         LOGGER.debug("Created unique key " + uniqueKey + " for resource "
                 + resource.getURI());
-        return "n" + getHashCode(uniqueKey);
+        return RdfProcessor.getLocalNameAlphaPrefix() + getHashCode(uniqueKey);
     }
  
     // Subclasses should call super.getUniqueKey() if they have failed to 

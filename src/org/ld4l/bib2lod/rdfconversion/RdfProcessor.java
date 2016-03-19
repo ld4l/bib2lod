@@ -41,6 +41,7 @@ public abstract class RdfProcessor extends Processor {
      * 3. Same format as input
      */
     protected static final Format RDF_OUTPUT_FORMAT = Format.NTRIPLES;
+    private static String LOCAL_NAME_ALPHA_PREFIX = "n";
             
     protected final String localNamespace;    
     // protected OntModel bfOntModel; 
@@ -207,7 +208,11 @@ public abstract class RdfProcessor extends Processor {
         // NB A digit is not a legal initial character of a local name in 
         // RDF/XML; see http://www.w3.org/TR/xml11/#NT-NameStartChar, so 
         // prefix a character to the UUID.
-        return "n" + UUID.randomUUID().toString();
+        return LOCAL_NAME_ALPHA_PREFIX + UUID.randomUUID().toString();
+    }
+    
+    public static String getLocalNameAlphaPrefix() {
+        return LOCAL_NAME_ALPHA_PREFIX;
     }
 
 }
