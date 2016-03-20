@@ -20,6 +20,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.rdfconversion.Vocabulary;
+import org.ld4l.bib2lod.rdfconversion.bibframeconversion.BfIdentifierConverter;
 
 public class BfInstanceUriGenerator extends BfResourceUriGenerator {
 
@@ -150,20 +151,15 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
         
         if (matcher.find()) {
             String localIdentifierValue = matcher.group();
-            LOGGER.debug("Local identifier: " + localIdentifierValue);
-            Resource localIdentifier = ResourceFactory.createResource(
-                    RdfProcessor.mintUri(instance.getNameSpace()));
             LOGGER.debug("Adding new local identifier with value " 
                     + localIdentifierValue + " for resource "
                     + newUri);
-            model.add(
-                    ResourceFactory.createResource(newUri), 
-                    BfProperty.BF_LOCAL.property(), 
-                    localIdentifier);
-            model.add(localIdentifier, 
-                    BfProperty.BF_IDENTIFIER_VALUE.property(), 
-                    localIdentifierValue);
-            model.add(localIdentifier, RDF.type, BfType.BF_IDENTIFIER.type());
+            Resource newInstance = ResourceFactory.createResource(newUri);
+            return BfIdentifierConverter.createIdentifier(
+                    newInstance, BfProperty.BF_LOCAL.property(),
+                    BfProperty.BF_IDENTIFIER_VALUE.property(),
+                    localIdentifierValue, 
+                    BfType.BF_IDENTIFIER.type());
         }
 
         return model;

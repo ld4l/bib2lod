@@ -10,10 +10,12 @@ import java.util.TreeMap;
 import org.apache.commons.lang3.StringUtils;
 import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
+import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
@@ -23,6 +25,7 @@ import org.ld4l.bib2lod.rdfconversion.BfProperty;
 import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
+import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfIdentifierConverter extends BfResourceConverter {
 
@@ -376,6 +379,28 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
     protected static Set<BfProperty> getIdentifierProps() {
         return PROPERTY_TO_TYPE.keySet();
+    }
+    
+    public static Model createIdentifier(
+            Resource resource, Property resourceProperty,
+            Property valueProperty, String value, Resource type) {
+        
+        Model model = ModelFactory.createDefaultModel();
+        
+        // Create the new identifier
+        Resource identifier = ResourceFactory.createResource(
+                RdfProcessor.mintUri(resource.getNameSpace()));
+        
+        // Link the identifier to the resource
+        model.add(resource, resourceProperty, identifier);
+   
+        // Assign the identifier value
+        model.add(identifier, valueProperty,value);
+         
+        // Assign the identifier type
+        model.add(identifier, RDF.type, type);
+        
+        return model;
     }
 
 }

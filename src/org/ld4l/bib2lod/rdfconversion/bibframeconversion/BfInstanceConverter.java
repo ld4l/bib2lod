@@ -194,10 +194,7 @@ public class BfInstanceConverter extends BfResourceConverter {
     }         
     
     private void convertSystemNumber(RDFNode object) {
- 
-        // Harvard has some literal values for bf:systemNumber. These will be
-        // dropped. Later could create a generic identifier with the value, 
-        // but it's not important now.
+
         if (object.isResource()) {
             
             Resource identifier = object.asResource();
@@ -214,7 +211,25 @@ public class BfInstanceConverter extends BfResourceConverter {
                 // arrive there.
                 createWorldCatIdentifier(identifier);   
             }
-        }        
+            
+        }  else {
+            // Harvard has some literal values for bf:systemNumber.
+            String value = object.asLiteral().getLexicalForm();
+            createIdentifier(value);
+        }
+    }
+    
+    private void createIdentifier(String value) {
+        
+        Model model = BfIdentifierConverter.createIdentifier(
+                subject,
+                Ld4lProperty.IDENTIFIED_BY.property(),
+                RDF.value,
+                value,
+                Ld4lType.IDENTIFIER.type());
+        
+        outputModel.add(model);
+        model.close();
     }
     
     /*
@@ -262,18 +277,22 @@ public class BfInstanceConverter extends BfResourceConverter {
         // This is wanted in addition to the owl:sameAs assertion from the 
         // instance to the WorldCat URI, in order to have easy access to the
         // identifier string value.
-        Resource identifier = outputModel.createResource(
-                RdfProcessor.mintUri(localNamespace));
-        outputModel.add(subject, Ld4lProperty.IDENTIFIED_BY.property(), 
-                identifier);
-        outputModel.add(identifier, RDF.type, 
-                Ld4lType.OCLC_IDENTIFIER.type());
         
         // Jena doesn't recognize localname starting with digit, so we need to
         // parse it ourselves.
         // String id = worldCat.getLocalName();
-        String id = worldCat.getURI().replaceAll(Vocabulary.WORLDCAT.uri(), "");
-        outputModel.add(identifier, RDF.value, id);
+        String value = worldCat.getURI().replaceAll(
+                Vocabulary.WORLDCAT.uri(), "");
+        
+        Model identifierModel = BfIdentifierConverter.createIdentifier(
+                subject, 
+                Ld4lProperty.IDENTIFIED_BY.property(),
+                RDF.value, 
+                value, 
+                Ld4lType.OCLC_IDENTIFIER.type());
+                
+        outputModel.add(identifierModel);
+        identifierModel.close();
         
     }
     
