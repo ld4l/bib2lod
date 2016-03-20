@@ -234,33 +234,25 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(subject, RDF.type, identifierType.type());  
     }
 
-    private Ld4lType getIdentifierTypeFromValue(String[] idValues) {   
-            
+    private Ld4lType getIdentifierTypeFromPredicate() {
+        
         Ld4lType identifierType = null;
-        
-        String typePrefix = idValues[0];
-        String value = idValues[1];
-        
-        // TODO - Get rid of this statement when we handle LocalIlsIdentifier
-        // from UriGenerator
-        if (value != null) {
+ 
+        BfProperty bfProp = BfProperty.get(linkingProperty);
+                    
+        if (bfProp == null) {
+            // This would be an oversight; log for review.
+            LOGGER.warn("No handling defined for property " 
+                    + linkingProperty.getURI() + " linking " 
+                    + relatedResource.getURI() + " to its identifier "
+                    + subject.getURI() + ". Deleting statement.");   
             
-            if (typePrefix != null) {               
-                identifierType = IDENTIFIER_PREFIXES.get(typePrefix);
+        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
             
-            // If no subtype has been identified, and the value is all digits,
-            // assume a local ILS identifer.
-            // TODO **** Check if this is true for Harvard and Stanford
-            } else if (value.matches("^\\d+$")
-                    // Not sure if this condition is required
-                    && linkingProperty.equals(
-                            BfProperty.BF_SYSTEM_NUMBER.property())) {
-
-                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
-            }
+            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
         }
-        
-        return identifierType;
+           
+        return identifierType;        
     }
 
     private Ld4lType getIdentifierTypeFromScheme() {
@@ -291,27 +283,36 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         return identifierType;
     }
-
-    private Ld4lType getIdentifierTypeFromPredicate() {
+    
+    private Ld4lType getIdentifierTypeFromValue(String[] idValues) {   
             
         Ld4lType identifierType = null;
- 
-        BfProperty bfProp = BfProperty.get(linkingProperty);
-                    
-        if (bfProp == null) {
-            // This would be an oversight; log for review.
-            LOGGER.warn("No handling defined for property " 
-                    + linkingProperty.getURI() + " linking " 
-                    + relatedResource.getURI() + " to its identifier "
-                    + subject.getURI() + ". Deleting statement.");   
+        
+        String typePrefix = idValues[0];
+        String value = idValues[1];
+        
+        // TODO - Get rid of this statement when we handle LocalIlsIdentifier
+        // from UriGenerator
+        if (value != null) {
             
-        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
+            if (typePrefix != null) {               
+                identifierType = IDENTIFIER_PREFIXES.get(typePrefix);
+            
+            // If no subtype has been identified, and the value is all digits,
+            // assume a local ILS identifer.
+            // TODO **** Check if this is true for Harvard and Stanford
+            } else if (value.matches("^\\d+$")
+                    // Not sure if this condition is required
+                    && linkingProperty.equals(
+                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+
+                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+            }
         }
-           
-        return identifierType;        
-    } 
-    
+        
+        return identifierType;
+    }
+
     protected static Model convertIdentifierLiteral(Resource instance,
             BfProperty identifierProp, Literal value) {
         
