@@ -167,24 +167,5 @@ public class BfWorkConverter extends BfResourceConverter {
         // TODO Is there any data in the Bibframe RDF that would allow 
         // assignment of vivo:rank to the Contributions?
     }
-    
-//    private void convertAnnotation(Statement statement) {
-//        
-//        BfResourceConverter converter = 
-//                new BfAnnotationConverter(localNamespace);
-//
-//        // Identify the annotation resource and build its associated model 
-//        // (i.e., statements in which it is the subject or object).
-//        Resource annotation = statement.getSubject();
-//        Model annotationModel = getResourceSubModel(annotation);
-//        Resource newAnnotation = 
-//                annotationModel.createResource(annotation.getURI());
-//                        
-//        // Add BfAnnotationConverter model to this converter's outputModel 
-//        // model, so they get added to the BibframeConverter output model.
-//        Model convertedModel = converter.convert(newAnnotation);
-//		outputModel.add(convertedModel);
-//		convertedModel.close();
-//    }
-    
+
 }
