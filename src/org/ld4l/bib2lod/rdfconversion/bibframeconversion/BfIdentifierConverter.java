@@ -154,7 +154,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             return outputModel;
         }
 
-        String[] idValues = getIdentifierValue();
+        String[] idValues = parseIdentifierValue();
 
         if (isDuplicateLocalIdentifier(idValues)) {
             return outputModel;
@@ -179,6 +179,45 @@ public class BfIdentifierConverter extends BfResourceConverter {
             relatedResource = stmt.getSubject();
             linkingProperty = stmt.getPredicate();
         }
+    }
+
+    private String[] parseIdentifierValue() {
+
+        // E.g., values like (OCoLC)234567, ocm234567 are split into a prefix  
+        // value. The value is assigned as the rdf:value of the Identifier. The
+        // prefix is used to determine the type.
+        // There are values with prefixes where the type is currently unknown, 
+        // such as (NIC) and (CStRLIN). The entire string is kept as the value,
+        // but eventually they should be split into prefix and value.
+        String typePrefix = null;
+        String value = null; 
+        
+        Statement identifierValueStmt = 
+                subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
+
+        if (identifierValueStmt != null) {
+            
+            RDFNode object = identifierValueStmt.getObject();
+            
+            // Object should always be a literal.
+            if (object.isLiteral()) {
+                
+                value = object.asLiteral().getLexicalForm();
+
+                // Parse the id value into prefix and value, if possible.
+                for (Map.Entry<String, Ld4lType> entry : 
+                        IDENTIFIER_PREFIXES.entrySet()) {
+                    String key = entry.getKey();
+                    if (value.startsWith(key)) {
+                        typePrefix = key;
+                        value = value.substring(key.length());                                                                 
+                        break; 
+                    }                    
+                }
+            }       
+        }
+        
+        return new String[] { typePrefix, value };       
     }
     
     private boolean isDuplicateLocalIdentifier(String[] idValues) {
@@ -228,44 +267,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
 
     }
     
-    private String[] getIdentifierValue() {
 
-        // E.g., values like (OCoLC)234567, ocm234567 are split into a prefix  
-        // value. The value is assigned as the rdf:value of the Identifier. The
-        // prefix is used to determine the type.
-        // There are values with prefixes where the type is currently unknown, 
-        // such as (NIC) and (CStRLIN). The entire string is kept as the value,
-        // but eventually they should be split into prefix and value.
-        String typePrefix = null;
-        String value = null; 
-        
-        Statement identifierValueStmt = 
-                subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
-
-        if (identifierValueStmt != null) {
-            
-            RDFNode object = identifierValueStmt.getObject();
-            
-            // Object should always be a literal.
-            if (object.isLiteral()) {
-                
-                value = object.asLiteral().getLexicalForm();
-
-                // Parse the id value into prefix and value, if possible.
-                for (Map.Entry<String, Ld4lType> entry : 
-                        IDENTIFIER_PREFIXES.entrySet()) {
-                    String key = entry.getKey();
-                    if (value.startsWith(key)) {
-                        typePrefix = key;
-                        value = value.substring(key.length());                                                                 
-                        break; 
-                    }                    
-                }
-            }       
-        }
-        
-        return new String[] { typePrefix, value };       
-    }
     
     private void addIdentifierType(String[] idValues) {
         
