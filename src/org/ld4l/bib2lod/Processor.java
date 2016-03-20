@@ -114,5 +114,10 @@ public abstract class Processor {
         }
         return outputDir;
     }
+    
+    public static String getCatalog(String localNamespace) {
+        String[] elements = localNamespace.split("/");
+        return elements[elements.length-1];
+    }
 
 }
