@@ -56,6 +56,7 @@ public enum Ld4lType {
     ISBN13("Isbn13"),
     ISMN("Ismn"),
     ISO("Iso"),
+    ISRC("Isrc"),
     ISSN("Issn"),
     ISSNL("IssnL"),
     ISSUE_NUMBER("IssueNumber"),
