@@ -173,7 +173,7 @@ public class BfInstanceConverter extends BfResourceConverter {
 
         if (BfIdentifierConverter.getIdentifierProps().contains(bfProp)
                 && object.isLiteral()) {
-            
+            // TODO *** Make sure this handles literal value of bf:systemNumber.
             convertIdentifierLiteral(bfProp, object.asLiteral());
 
         } else if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
@@ -210,12 +210,15 @@ public class BfInstanceConverter extends BfResourceConverter {
         // Harvard contains some cases where bf:systemNumber has a
         // literal object. These have been handled earlier in 
         // convertIdentifierLiteral().
+        // TODO **** Make sure this is true.
         if (object.isResource()) {
             
             Resource identifier = object.asResource();
 
             // Add owl:sameAs to a WorldCat URI
-            if (identifier.getNameSpace().equals(Vocabulary.WORLDCAT.uri())) {
+            // WorldCat local names start with a digit, so can't use Jena
+            // Resource.getNameSpace().
+            if (identifier.getURI().startsWith(Vocabulary.WORLDCAT.uri())) {
                 LOGGER.debug("Adding " + subject.getURI() 
                         + " owl:sameAs " + identifier.getURI());
                 outputModel.add(subject, OWL.sameAs, identifier);

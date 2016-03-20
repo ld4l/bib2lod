@@ -106,8 +106,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
             
     static {
         // Not sure what types these prefixes represent. Add when known.
-        //        IDENTIFIER_PREFIXES.put("CStRLIN", );
-        //        IDENTIFIER_PREFIXES.put("NIC", );        
+        //        IDENTIFIER_PREFIXES.put("(CStRLIN)", );
+        //        IDENTIFIER_PREFIXES.put("(NIC)", );        
         IDENTIFIER_PREFIXES.put("(OCoLC)", Ld4lType.OCLC_IDENTIFIER);
         IDENTIFIER_PREFIXES.put("(OCoLC-I)", Ld4lType.OCLC_IDENTIFIER);
         IDENTIFIER_PREFIXES.put("(OCoLC-M)", Ld4lType.OCLC_IDENTIFIER);
@@ -123,6 +123,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);
     }
+
     
     @Override
     protected Model convert() {
@@ -136,9 +137,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
         outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
                 subject);
 
-        String[] idValues = getIdentifierValue();
+        String[] idValues = addIdentifierValue();
 
-        // TODO - move to where it's used
         addIdentifierType(idValues);
 
         LOGGER.debug("Identifier: " + subject.getURI());
@@ -157,11 +157,55 @@ public class BfIdentifierConverter extends BfResourceConverter {
             linkingProperty = stmt.getPredicate();
         }
     }
+    
+    
+//    @Override
+//    protected ParameterizedSparqlString getResourceSubModelPss() {
+//        // Probably can use BfResourceConverter query
+//    }
 
-    private void addIdentifierType(String[] idValues) {
+    private String[] addIdentifierValue() {
+
+        // E.g., values like (OCoLC)234567, ocm234567 are split into a prefix  
+        // value. The value is assigned as the rdf:value of the Identifier. The
+        // prefix is used to determine the type.
+        // There are values with prefixes where the type is currently unknown, 
+        // such as (NIC) and (CStRLIN). The entire string is kept as the value,
+        // but eventually they should be split into prefix and value.
+        String typePrefix = null;
+        String value = null; 
         
-        String prefix = idValues[0];
-        String value = idValues[1];
+        Statement identifierValueStmt = 
+                subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
+
+        if (identifierValueStmt != null) {
+            
+            RDFNode object = identifierValueStmt.getObject();
+            
+            // Object should always be a literal.
+            if (object.isLiteral()) {
+                
+                value = object.asLiteral().getLexicalForm();
+
+                // Parse the id value into prefix and value, if possible.
+                for (Map.Entry<String, Ld4lType> entry : 
+                        IDENTIFIER_PREFIXES.entrySet()) {
+                    String key = entry.getKey();
+                    if (value.startsWith(key)) {
+                        typePrefix = key;
+                        value = value.substring(key.length());                                                                 
+                        break; 
+                    }                    
+                }
+                
+                outputModel.add(subject, RDF.value, value);
+            }       
+        }
+        
+        return new String[] { typePrefix, value };       
+    }
+    
+    private void addIdentifierType(String[] idValues) {
         
         Ld4lType identifierType = null;
         
@@ -177,7 +221,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
         
         if (identifierType == null) {
             identifierType = 
-                    getIdentifierTypeFromLiteralValue(prefix, value);                       
+                    getIdentifierTypeFromValue(idValues);                       
         }
   
         // We may want to assign the supertype in any case, to simplify the
@@ -188,27 +232,35 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
         
         outputModel.add(subject, RDF.type, identifierType.type());  
-
     }
 
-    private Ld4lType getIdentifierTypeFromPredicate() {
-        
-        Ld4lType identifierType = null;
- 
-        BfProperty bfProp = BfProperty.get(linkingProperty);
-                    
-        if (bfProp == null) {
-            // This would be an oversight; log for review.
-            LOGGER.warn("No handling defined for property " 
-                    + linkingProperty.getURI() + " linking " 
-                    + relatedResource.getURI() + " to its identifier "
-                    + subject.getURI() + ". Deleting statement.");   
+    private Ld4lType getIdentifierTypeFromValue(String[] idValues) {   
             
-        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
-            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
+        Ld4lType identifierType = null;
+        
+        String typePrefix = idValues[0];
+        String value = idValues[1];
+        
+        // TODO - Get rid of this statement when we handle LocalIlsIdentifier
+        // from UriGenerator
+        if (value != null) {
+            
+            if (typePrefix != null) {               
+                identifierType = IDENTIFIER_PREFIXES.get(typePrefix);
+            
+            // If no subtype has been identified, and the value is all digits,
+            // assume a local ILS identifer.
+            // TODO **** Check if this is true for Harvard and Stanford
+            } else if (value.matches("^\\d+$")
+                    // Not sure if this condition is required
+                    && linkingProperty.equals(
+                            BfProperty.BF_SYSTEM_NUMBER.property())) {
+
+                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
+            }
         }
-           
-        return identifierType;        
+        
+        return identifierType;
     }
 
     private Ld4lType getIdentifierTypeFromScheme() {
@@ -240,69 +292,26 @@ public class BfIdentifierConverter extends BfResourceConverter {
         return identifierType;
     }
 
-    private Ld4lType getIdentifierTypeFromLiteralValue(
-            String prefix, String idValue) {   
+    private Ld4lType getIdentifierTypeFromPredicate() {
             
         Ld4lType identifierType = null;
  
-        // TODO - REDO!
-        if (idValue != null) {
+        BfProperty bfProp = BfProperty.get(linkingProperty);
+                    
+        if (bfProp == null) {
+            // This would be an oversight; log for review.
+            LOGGER.warn("No handling defined for property " 
+                    + linkingProperty.getURI() + " linking " 
+                    + relatedResource.getURI() + " to its identifier "
+                    + subject.getURI() + ". Deleting statement.");   
             
-            if (prefix != null) {               
-                identifierType = IDENTIFIER_PREFIXES.get(prefix);
-            
-            // If no subtype has been identified, and the value is all digits,
-            // assume a local ILS identifer.
-            // TODO **** Check if this is true for Harvard and Stanford
-            } else if (idValue.matches("^\\d+$")
-                    // Not sure if this condition is required
-                    && linkingProperty.equals(
-                            BfProperty.BF_SYSTEM_NUMBER.property())) {
-
-                identifierType = Ld4lType.LOCAL_ILS_IDENTIFIER;
-            }
+        } else if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {
+            identifierType = PROPERTY_TO_TYPE.get(bfProp);                
         }
-        
-        return identifierType;
-    }
+           
+        return identifierType;        
+    } 
     
-    private String[] getIdentifierValue() {
-
-        // E.g., (OCoLC)234567, ocm234567
-        String prefix = null;
-        String idValue = null; 
-        
-        Statement identifierValueStmt = 
-                subject.getProperty(BfProperty.BF_IDENTIFIER_VALUE.property());
-
-        if (identifierValueStmt != null) {
-            
-            RDFNode object = identifierValueStmt.getObject();
-            
-            // If object is a Resource, pass it through unmodified
-            // TODO Check to make sure this happens
-            if (object.isLiteral()) {
-                
-                idValue = object.asLiteral().getLexicalForm();
-
-                // Parse the id value into prefix and value, if possible.
-                for (Map.Entry<String, Ld4lType> entry : 
-                        IDENTIFIER_PREFIXES.entrySet()) {
-                    String key = entry.getKey();
-                    if (idValue.startsWith(key)) {
-                        prefix = key;
-                        idValue = idValue.substring(key.length());                                                                 
-                        break; 
-                    }                    
-                }
-                
-                outputModel.add(subject, RDF.value, idValue);
-            }       
-        }
-        
-        return new String[] { prefix, idValue };       
-    }
-
     protected static Model convertIdentifierLiteral(Resource instance,
             BfProperty identifierProp, Literal value) {
         
@@ -327,5 +336,5 @@ public class BfIdentifierConverter extends BfResourceConverter {
     protected static Set<BfProperty> getIdentifierProps() {
         return PROPERTY_TO_TYPE.keySet();
     }
-    
+
 }

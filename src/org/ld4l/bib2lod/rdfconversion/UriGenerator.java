@@ -11,7 +11,6 @@ import java.util.Map;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.jena.rdf.model.Model;
 import org.apache.jena.rdf.model.ModelFactory;
-import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
@@ -281,10 +280,7 @@ public class UriGenerator extends RdfProcessor {
     private String getNewUniqueUri(Resource resource, Model outputModel) {
         
         BfResourceUriGenerator uriGenerator = getUriGeneratorByType(resource);
-        
-//        LOGGER.debug("Got uriGenerator " + uriGenerator.getClass().getName()
-//                + " for resource " + resource.getURI());
-               
+
         String uniqueUri = uriGenerator.getUniqueUri(resource);
         
         // SIDE EFFECT
@@ -295,16 +291,16 @@ public class UriGenerator extends RdfProcessor {
         // LC converter captures only the 035 value in triples, but it 
         // uses the 001 value in minting URIs.
         // NB Do this AFTER getting the unique URI.
-        if (uriGenerator instanceof BfInstanceUriGenerator) {
-            Statement localIdentifierStmt = 
-                    ((BfInstanceUriGenerator) uriGenerator)
-                    .getLocalIdentifier(resource, uniqueUri);
-            if (localIdentifierStmt != null) {
-                LOGGER.debug("Adding new local identifier statement to model: "
-                        + localIdentifierStmt.toString());
-                outputModel.add(localIdentifierStmt);             
-            }
-        }
+//        if (uriGenerator instanceof BfInstanceUriGenerator) {
+//            Statement localIdentifierStmt = 
+//                    ((BfInstanceUriGenerator) uriGenerator)
+//                    .getLocalIdentifier(resource, uniqueUri);
+//            if (localIdentifierStmt != null) {
+//                LOGGER.debug("Adding new local identifier statement to model: "
+//                        + localIdentifierStmt.toString());
+//                outputModel.add(localIdentifierStmt);             
+//            }
+//        }
         
         return uniqueUri;
     }
