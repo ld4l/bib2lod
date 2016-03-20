@@ -171,7 +171,7 @@ public class BfInstanceConverter extends BfResourceConverter {
             return bfTitlePropDone;
         }
 
-        if (BfIdentifierConverter.getIdentifierProps().contains(bfProp)
+        if (IdentifierUtils.getIdentifierProps().contains(bfProp)
                 && object.isLiteral()) {
             // TODO *** Make sure this handles literal value of bf:systemNumber.
             convertIdentifierLiteral(bfProp, object.asLiteral());
@@ -199,7 +199,7 @@ public class BfInstanceConverter extends BfResourceConverter {
     }         
    
     private void convertIdentifierLiteral(BfProperty bfProp, Literal value) {
-        Model model = BfIdentifierConverter.convertIdentifierLiteral(subject,
+        Model model = IdentifierUtils.convertIdentifierLiteral(subject,
                 bfProp, value);
         outputModel.add(model);
         model.close();                
