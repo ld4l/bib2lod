@@ -199,7 +199,7 @@ public enum BfProperty {
     BF_STOCK_NUMBER("stockNumber"),
     BF_STRN("strn"),
     BF_STUDY_NUMBER("studyNumber"),
-    BF_SYSTEM_NUMBER("systemNumber", Ld4lProperty.IDENTIFIED_BY),
+    BF_SYSTEM_NUMBER("systemNumber"),
     BF_UPC("upc"),
     BF_URI("uri", Ld4lProperty.OWL_SAME_AS), 
     BF_URN("urn", Ld4lProperty.OWL_SAME_AS), 

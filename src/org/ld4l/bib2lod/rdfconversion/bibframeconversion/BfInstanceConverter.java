@@ -195,10 +195,9 @@ public class BfInstanceConverter extends BfResourceConverter {
     
     private void convertSystemNumber(RDFNode object) {
  
-        // Harvard contains some cases where bf:systemNumber has a
-        // literal object. These have been handled earlier in 
-        // convertIdentifierLiteral().
-        // TODO **** Make sure this is true.
+        // Harvard has some literal values for bf:systemNumber. These will be
+        // dropped. Later could create a generic identifier with the value, 
+        // but it's not important now.
         if (object.isResource()) {
             
             Resource identifier = object.asResource();
@@ -211,11 +210,6 @@ public class BfInstanceConverter extends BfResourceConverter {
                         + " owl:sameAs " + identifier.getURI());
                 outputModel.add(subject, OWL.sameAs, identifier);
                 createWorldCatIdentifier(identifier);   
-                
-            } else {
-                outputModel.add(subject,  
-                        Ld4lProperty.IDENTIFIED_BY.property(), 
-                        identifier);
             }
         }        
     }
