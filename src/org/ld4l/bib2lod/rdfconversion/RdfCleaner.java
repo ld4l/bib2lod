@@ -134,7 +134,7 @@ public class RdfCleaner extends RdfProcessor {
                     + Bib2LodStringUtils.count(totalFileCount, " input file")  
                     + " = " 
                     + TimerUtils.percent(fileCount, totalFileCount) + "%). "
-                    + "). Duration: " + TimerUtils.getDuration(fileStartTime)
+                    + "Duration: " + TimerUtils.getDuration(fileStartTime)
                     + ".");
         }
         

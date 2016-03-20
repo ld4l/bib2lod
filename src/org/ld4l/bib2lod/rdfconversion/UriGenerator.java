@@ -173,7 +173,7 @@ public class UriGenerator extends RdfProcessor {
                     + Bib2LodStringUtils.count(totalFileCount, "input file")
                     + " = " 
                     + TimerUtils.percent(fileCount, totalFileCount) + "%). "
-                    + "). Duration: " 
+                    + "Duration: " 
                     + TimerUtils.getDuration(fileStartTime) + ".");
         }   
        
