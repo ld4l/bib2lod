@@ -156,12 +156,31 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
 
         String[] idValues = parseIdentifierValue();
+        String prefix = idValues[0];
+        String value = idValues[1];
 
-        if (isDuplicateLocalIdentifier(idValues)) {
+        if (isDuplicateLocalIdentifier(prefix, value)) {
             return outputModel;
         }
         
-        outputModel.add(subject, RDF.value, idValues[1]);
+        if (value != null) {
+            outputModel.add(subject, RDF.value, value);
+        } else {
+            /* Presumably anomalous. See Cornell 14708:
+                <http://draft.ld4l.org/cornell/n14708> <http://bibframe.org/vocab/issnL> _:bnode1748individual14620 . 
+                _:bnode1748individual14620 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Identifier> . 
+                _:bnode1748individual14620 <http://bibframe.org/vocab/identifierScheme> <http://id.loc.gov/vocabulary/identifiers/issnL> . 
+             * versus correct:
+                <http://draft.ld4l.org/cornell/n14708> <http://bibframe.org/vocab/issnL> _:bnode1751individual14620 . 
+                _:bnode1751individual14620 <http://www.w3.org/1999/02/22-rdf-syntax-ns#type> <http://bibframe.org/vocab/Identifier> . 
+                _:bnode1751individual14620 <http://bibframe.org/vocab/identifierScheme> <http://id.loc.gov/vocabulary/identifiers/issnL> . 
+                _:bnode1751individual14620 <http://bibframe.org/vocab/identifierValue> "0888-7896" . 
+             * Let the identifier be created anyway.
+             */
+            LOGGER.debug("Found null identifier value for identifier " 
+                    + subject.getURI() + " and resource "
+                    + relatedResource.getURI());           
+        }
         
         addIdentifierType(idValues);
 
@@ -218,10 +237,15 @@ public class BfIdentifierConverter extends BfResourceConverter {
             }       
         }
         
+        // TODO - Consider making this a Map, so caller doesn't have to know the
+        // order of the strings in the array. (But still has to know the keys, 
+        // so maybe no real benefit.) The array is easier to work with in this 
+        // context.
         return new String[] { typePrefix, value };       
     }
     
-    private boolean isDuplicateLocalIdentifier(String[] idValues) {
+    private boolean isDuplicateLocalIdentifier(
+            String thisPrefix, String thisValue) {
  
         // Hack: This is only relevant for Cornell records, which stores the 
         // local identifier in the 035 field which gets picked up by the LC
@@ -233,10 +257,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             return false;
         }
         
-        String subjectPrefix = idValues[0];
-        String subjectValue = idValues[1];
-        
-        if (subjectPrefix != null) {
+        if (thisPrefix != null) {
             return false;
         }
         
@@ -269,7 +290,7 @@ public class BfIdentifierConverter extends BfResourceConverter {
             
             String identifierValue = 
                     valueObject.asLiteral().getLexicalForm();
-            if (identifierValue.equals(subjectValue)) {
+            if (identifierValue.equals(thisValue)) {
                 return true;
             }
         }
