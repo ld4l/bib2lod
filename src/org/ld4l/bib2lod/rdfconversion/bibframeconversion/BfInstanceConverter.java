@@ -209,6 +209,9 @@ public class BfInstanceConverter extends BfResourceConverter {
                 LOGGER.debug("Adding " + subject.getURI() 
                         + " owl:sameAs " + identifier.getURI());
                 outputModel.add(subject, OWL.sameAs, identifier);
+                // This can't be handled in BfIdentifierConverter, because the
+                // identifier is not typed bf:Identifier, so it will never
+                // arrive there.
                 createWorldCatIdentifier(identifier);   
             }
         }        
