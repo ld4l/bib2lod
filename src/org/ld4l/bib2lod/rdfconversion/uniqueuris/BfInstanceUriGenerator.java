@@ -8,10 +8,12 @@ import org.apache.jena.query.QueryExecution;
 import org.apache.jena.query.QueryExecutionFactory;
 import org.apache.jena.query.QuerySolution;
 import org.apache.jena.query.ResultSet;
+import org.apache.jena.rdf.model.Model;
+import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.ResourceFactory;
-import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
@@ -131,24 +133,40 @@ public class BfInstanceUriGenerator extends BfResourceUriGenerator {
     // If the local identifier was stored only in the 001 field, and not in the
     // 035 field, then the only way to capture the local identifier is from the
     // original URI, before it gets changed to a unique URI in UriGenerator.
-    public Statement getLocalIdentifier(Resource instance, String newUri) {
+    public Model getLocalIdentifier(Resource instance, String newUri) {
 
+        Model model = ModelFactory.createDefaultModel();
+        
         String alphaPrefix = RdfProcessor.getLocalNameAlphaPrefix();
         
         // Remove the alpha prefix that has been added to the local name.
         String localName = 
                 instance.getLocalName().replaceFirst(alphaPrefix, "");
+        
+        // Get the initial digit string from the original local name. Removes
+        // the hyphen and following characters (Harvard), and "instanceN" 
+        // (Cornell, Stanford).
         Matcher matcher = Pattern.compile("\\d+").matcher(localName);
+        
         if (matcher.find()) {
-            String localIdentifier = matcher.group();
-            LOGGER.debug("Local identifier: " + localIdentifier);
-            return ResourceFactory.createStatement(
+            String localIdentifierValue = matcher.group();
+            LOGGER.debug("Local identifier: " + localIdentifierValue);
+            Resource localIdentifier = ResourceFactory.createResource(
+                    RdfProcessor.mintUri(instance.getNameSpace()));
+            LOGGER.debug("Adding new local identifier with value " 
+                    + localIdentifierValue + " for resource "
+                    + newUri);
+            model.add(
                     ResourceFactory.createResource(newUri), 
                     BfProperty.BF_LOCAL.property(), 
-                    ResourceFactory.createPlainLiteral(localIdentifier));
-        } else {
-            return null;
+                    localIdentifier);
+            model.add(localIdentifier, 
+                    BfProperty.BF_IDENTIFIER_VALUE.property(), 
+                    localIdentifierValue);
+            model.add(localIdentifier, RDF.type, BfType.BF_IDENTIFIER.type());
         }
+
+        return model;
     }
     
 }

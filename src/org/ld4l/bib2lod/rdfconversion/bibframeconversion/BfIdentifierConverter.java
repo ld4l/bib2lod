@@ -8,28 +8,83 @@ import java.util.SortedMap;
 import java.util.TreeMap;
 
 import org.apache.commons.lang3.StringUtils;
-import org.apache.jena.rdf.model.Literal;
+import org.apache.jena.query.ParameterizedSparqlString;
 import org.apache.jena.rdf.model.Model;
-import org.apache.jena.rdf.model.ModelFactory;
+import org.apache.jena.rdf.model.NodeIterator;
 import org.apache.jena.rdf.model.Property;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
-import org.apache.jena.rdf.model.ResourceFactory;
 import org.apache.jena.rdf.model.Statement;
 import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.Ld4lProperty;
 import org.ld4l.bib2lod.rdfconversion.Ld4lType;
-import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 
 public class BfIdentifierConverter extends BfResourceConverter {
 
     private static final Logger LOGGER = 
             LogManager.getLogger(BfIdentifierConverter.class);
     
+    private static final Map<BfProperty, Ld4lType> PROPERTY_TO_TYPE = 
+            new HashMap<BfProperty, Ld4lType>();
+    static {
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ANSI, Ld4lType.ANSI);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_CODEN, Ld4lType.CODEN);             
+        PROPERTY_TO_TYPE.put(BfProperty.BF_DISSERTATION_IDENTIFIER,                
+                Ld4lType.DISSERTATION_IDENTIFIER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_DOI, Ld4lType.DOI);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_EAN, Ld4lType.EAN);              
+        PROPERTY_TO_TYPE.put(BfProperty.BF_FINGERPRINT, Ld4lType.FINGERPRINT);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_HDL, Ld4lType.HDL); 
+        // We don't want to apply this automatically, because if we don't find
+        // a specific type from the predicate, we go on to look for it in the
+        // identifier scheme and value.
+        // PROPERTY_TO_TYPE.put(BfProperty.BF_IDENTIFIER, Ld4lType.IDENTIFIER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISAN, Ld4lType.ISAN);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISBN, Ld4lType.ISBN);                     
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISBN10, Ld4lType.ISBN10);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISBN13, Ld4lType.ISBN13);               
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISMN, Ld4lType.ISMN);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISO, Ld4lType.ISO);    
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISRC, Ld4lType.ISRC);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISSN, Ld4lType.ISSN);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISSNL, Ld4lType.ISSNL);               
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISSUE_NUMBER, Ld4lType.ISSUE_NUMBER);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_ISTC, Ld4lType.ISTC);              
+        PROPERTY_TO_TYPE.put( BfProperty.BF_ISWC, Ld4lType.ISWC);                   
+        PROPERTY_TO_TYPE.put(BfProperty.BF_LC_OVERSEAS_ACQ, 
+                Ld4lType.LC_OVERSEAS_ACQ_NUMBER);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_LCCN, Ld4lType.LCCN);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_LEGAL_DEPOSIT, 
+                Ld4lType.LEGAL_DEPOSIT_NUMBER);               
+        PROPERTY_TO_TYPE.put(BfProperty.BF_LOCAL, 
+                Ld4lType.LOCAL_ILS_IDENTIFIER);               
+        PROPERTY_TO_TYPE.put(BfProperty.BF_MATRIX_NUMBER, 
+                Ld4lType.MATRIX_NUMBER);                
+        PROPERTY_TO_TYPE.put(BfProperty.BF_MUSIC_PLATE, 
+                Ld4lType.MUSIC_PLATE_NUMBER);               
+        PROPERTY_TO_TYPE.put(BfProperty.BF_MUSIC_PUBLISHER_NUMBER, 
+                Ld4lType.MUSIC_PUBLISHER_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_NBAN, Ld4lType.NBAN);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_NBN, Ld4lType.NBN);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_POSTAL_REGISTRATION, 
+                Ld4lType.POSTAL_REGISTRATION_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_PUBLISHER_NUMBER, 
+                Ld4lType.PUBLISHER_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_REPORT_NUMBER, 
+                Ld4lType.TECHNICAL_REPORT_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_SICI, Ld4lType.SICI);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_STOCK_NUMBER, Ld4lType.STOCK_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_STRN, Ld4lType.STRN);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_STUDY_NUMBER, Ld4lType.STUDY_NUMBER);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_UPC, Ld4lType.UPC);
+        PROPERTY_TO_TYPE.put(BfProperty.BF_VIDEORECORDING_NUMBER, 
+                Ld4lType.VIDEO_RECORDING_NUMBER);
+    }
     
     private static final SortedMap<String, Ld4lType> IDENTIFIER_PREFIXES = 
 
@@ -53,16 +108,40 @@ public class BfIdentifierConverter extends BfResourceConverter {
         IDENTIFIER_PREFIXES.put("ocm", Ld4lType.OCLC_IDENTIFIER);
         IDENTIFIER_PREFIXES.put("ocn", Ld4lType.OCLC_IDENTIFIER);
     }
-    
+
+    private static ParameterizedSparqlString RESOURCE_SUBMODEL_PSS = 
+            new ParameterizedSparqlString(
+                    "CONSTRUCT { ?resource ?p1 ?o . "
+                    + "?s ?p2 ?resource . "         
+                    + "?s ?local ?id . "
+                    + "?id ?ip ?io . "
+                    + "} WHERE {  { "                                                      
+                    + "?resource ?p1 ?o . "
+                    + "} UNION { "
+                    + "?s ?p2 ?resource . "
+                    + " OPTIONAL { "
+                    + "?s ?local ?id . "
+                    + "?id ?ip ?io . " 
+                    + "FILTER (?local = " + BfProperty.BF_LOCAL.sparqlUri() 
+                    + ") "
+                    + "FILTER EXISTS { ?s a " 
+                    + BfType.BF_INSTANCE.sparqlUri() + " } "
+                    + "} "  // end OPTIONAL
+                    + "} } ");
+
     private Resource relatedResource;
     private Property linkingProperty;
     
-
     public BfIdentifierConverter(String localNamespace) {
         super(localNamespace);
     }
-
     
+    @Override 
+    protected ParameterizedSparqlString getResourceSubModelPss() {
+        LOGGER.debug(RESOURCE_SUBMODEL_PSS.toString());
+        return RESOURCE_SUBMODEL_PSS;
+    }
+  
     @Override
     protected Model convert() {
 
@@ -71,16 +150,19 @@ public class BfIdentifierConverter extends BfResourceConverter {
         if (relatedResource == null) {
             return outputModel;
         }
+
+        String[] idValues = getIdentifierValue();
+
+        if (isDuplicateLocalIdentifier(idValues)) {
+            return outputModel;
+        }
         
-        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
-                subject);
-
-        String[] idValues = addIdentifierValue();
-
+        outputModel.add(subject, RDF.value, idValues[1]);
+        
         addIdentifierType(idValues);
 
-        LOGGER.debug("Identifier: " + subject.getURI());
-        // RdfProcessor.printModel(outputModel, Level.DEBUG);
+        outputModel.add(relatedResource, Ld4lProperty.IDENTIFIED_BY.property(),
+                subject);
         
         return outputModel;
     }
@@ -96,13 +178,54 @@ public class BfIdentifierConverter extends BfResourceConverter {
         }
     }
     
-    
-//    @Override
-//    protected ParameterizedSparqlString getResourceSubModelPss() {
-//        // Probably can use BfResourceConverter query
-//    }
+    private boolean isDuplicateLocalIdentifier(String[] idValues) {
+ 
+        String subjectPrefix = idValues[0];
+        String subjectValue = idValues[1];
+        
+        if (subjectPrefix != null) {
+            return false;
+        }
+        
+        Model model = subject.getModel();
+        NodeIterator nodes = model.listObjectsOfProperty(
+                relatedResource, BfProperty.BF_LOCAL.property());
+        
+        while (nodes.hasNext()) {
+            RDFNode node = nodes.nextNode();
+            if (!node.isResource()) {
+                return false;
+            }
 
-    private String[] addIdentifierValue() {
+            Resource identifier = node.asResource();
+            if (identifier.equals(subject)) {
+                return false;
+            }
+            
+            Statement valueStmt = identifier.getProperty(
+                BfProperty.BF_IDENTIFIER_VALUE.property());
+            if (valueStmt == null) {
+                return false;
+            }
+            
+            RDFNode valueObject = valueStmt.getObject();
+            
+            if (! valueObject.isLiteral()) {
+                return false;
+            }
+            
+            String identifierValue = 
+                    valueObject.asLiteral().getLexicalForm();
+            if (identifierValue.equals(subjectValue)) {
+                return true;
+            }
+        }
+        
+        return false;
+
+    }
+    
+    private String[] getIdentifierValue() {
 
         // E.g., values like (OCoLC)234567, ocm234567 are split into a prefix  
         // value. The value is assigned as the rdf:value of the Identifier. The
@@ -135,8 +258,6 @@ public class BfIdentifierConverter extends BfResourceConverter {
                         break; 
                     }                    
                 }
-                
-                outputModel.add(subject, RDF.value, value);
             }       
         }
         
@@ -185,14 +306,10 @@ public class BfIdentifierConverter extends BfResourceConverter {
                     + relatedResource.getURI() + " to its identifier "
                     + subject.getURI() + ". Deleting statement.");   
             
-        } else {
-            
-           Map<BfProperty, Ld4lType> propertyToType = 
-                   IdentifierUtils.getPropertyToTypeMap();
+        } else {           
            
-           if (propertyToType.keySet().contains(bfProp)) {
-            
-               identifierType = propertyToType.get(bfProp);  
+           if (PROPERTY_TO_TYPE.keySet().contains(bfProp)) {            
+               identifierType = PROPERTY_TO_TYPE.get(bfProp);  
            }
         }
            
@@ -257,8 +374,8 @@ public class BfIdentifierConverter extends BfResourceConverter {
         return identifierType;
     }
 
-
-    
-
+    protected static Set<BfProperty> getIdentifierProps() {
+        return PROPERTY_TO_TYPE.keySet();
+    }
 
 }

@@ -72,8 +72,10 @@ public enum BfProperty {
     BF_HAS_AUTHORITY("hasAuthority", Ld4lProperty.IDENTIFIED_BY_AUTHORITY),
     BF_HAS_EXPRESSION("hasExpression", Ld4lProperty.HAS_EXPRESSION),
     BF_HAS_PART("hasPart", Ld4lProperty.HAS_PART),
-    BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR),
-    BF_IDENTIFIER("identifier", Ld4lProperty.IDENTIFIED_BY),
+    BF_HOLDING_FOR("holdingFor", Ld4lProperty.IS_HOLDING_FOR), 
+    // Don't apply across the board; handled in BfIdentifierConverter.
+    // BF_IDENTIFIER("identifier", Ld4lProperty.IDENTIFIED_BY),
+    BF_IDENTIFIER("identifier"),
     BF_IDENTIFIER_SCHEME("identifierScheme"),
     // Should not apply across-the-board; handled in BfIdentifierConverter.
     // BF_IDENTIFIER_VALUE("identifierValue", Ld4lProperty.VALUE),

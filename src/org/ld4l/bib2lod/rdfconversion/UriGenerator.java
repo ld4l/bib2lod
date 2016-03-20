@@ -290,17 +290,16 @@ public class UriGenerator extends RdfProcessor {
         // while others (Harvard, Stanford) only record it in 001. The
         // LC converter captures only the 035 value in triples, but it 
         // uses the 001 value in minting URIs.
-        // NB Do this AFTER getting the unique URI.
-//        if (uriGenerator instanceof BfInstanceUriGenerator) {
-//            Statement localIdentifierStmt = 
-//                    ((BfInstanceUriGenerator) uriGenerator)
-//                    .getLocalIdentifier(resource, uniqueUri);
-//            if (localIdentifierStmt != null) {
-//                LOGGER.debug("Adding new local identifier statement to model: "
-//                        + localIdentifierStmt.toString());
-//                outputModel.add(localIdentifierStmt);             
-//            }
-//        }
+        // NB Do this AFTER getting the unique URI, so the instance in the new
+        // model has the new URI.
+        if (uriGenerator instanceof BfInstanceUriGenerator) {
+            Model model = ((BfInstanceUriGenerator) uriGenerator)   
+                    // Could use uriGenerator.resource rather than passing 
+                    // resource - doesn't the generator still have the resource?
+                    .getLocalIdentifier(resource, uniqueUri);
+            outputModel.add(model); 
+            model.close();
+        }
         
         return uniqueUri;
     }

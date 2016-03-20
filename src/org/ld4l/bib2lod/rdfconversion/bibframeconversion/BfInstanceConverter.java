@@ -171,12 +171,7 @@ public class BfInstanceConverter extends BfResourceConverter {
             return bfTitlePropDone;
         }
 
-        if (IdentifierUtils.getIdentifierProps().contains(bfProp)
-                && object.isLiteral()) {
-            // TODO *** Make sure this handles literal value of bf:systemNumber.
-            convertIdentifierLiteral(bfProp, object.asLiteral());
-
-        } else if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
+        if (bfProp.equals(BfProperty.BF_SYSTEM_NUMBER)) {
 
             convertSystemNumber(object);
 
@@ -197,13 +192,6 @@ public class BfInstanceConverter extends BfResourceConverter {
         
         return bfTitlePropDone;
     }         
-   
-    private void convertIdentifierLiteral(BfProperty bfProp, Literal value) {
-        Model model = IdentifierUtils.convertIdentifierLiteral(subject,
-                bfProp, value);
-        outputModel.add(model);
-        model.close();                
-    }
     
     private void convertSystemNumber(RDFNode object) {
  
