@@ -228,7 +228,7 @@ public class BfTitleConverter extends BfResourceConverter {
         while (stmts.hasNext()) {
             Statement stmt = stmts.nextStatement();
             String language = stmt.getLanguage();
-            if (language != null && language.equals("x-bf-hash")) {
+            if (language != null && language.equals("x-bf-sort")) {
                 label = stmt.getString();
                 break;
             }
