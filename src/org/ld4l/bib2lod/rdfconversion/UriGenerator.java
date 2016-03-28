@@ -279,6 +279,18 @@ public class UriGenerator extends RdfProcessor {
  
     private String getNewUniqueUri(Resource resource, Model outputModel) {
         
+        // **** Fix for URI collision bug across types:
+        // Call a method here that returns the type needed to select the
+        // uri generator - getTypeForGenerator(resource)   
+        // Send that type to getUriGeneratorByType(type) - or do it here - all
+        /// we will need then is a map; since the if statement goes into 
+        // getTypeForGenerator()
+        // Pass the type into getUniqueUri(resource, type)
+        // getUniqueUri() must prepend the type to the unique local name, the
+        // same as we do now with "authority". In fact, we won't need to 
+        // use "authority" explicitly, it will just be the same as the others.
+        // Keep instance URIs the same for now, so that usage data still works.
+        
         BfResourceUriGenerator uriGenerator = getUriGeneratorByType(resource);
 
         String uniqueUri = uriGenerator.getUniqueUri(resource);

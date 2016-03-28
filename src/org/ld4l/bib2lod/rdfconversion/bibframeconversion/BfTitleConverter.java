@@ -132,6 +132,10 @@ public class BfTitleConverter extends BfResourceConverter {
         Literal labelLiteral = getNormalizedLabel();
         
         // Title with no label; anomalous, but exists.
+        // **** This is wrong; there can be titles with a titleValue but no
+        // label. If labelLiteral is null, look for a titleValue. Or maybe
+        // look for the titleValue first. Anyway, get the title value from
+        // whichever one is available.
         if (labelLiteral == null) {
             return;
         }
