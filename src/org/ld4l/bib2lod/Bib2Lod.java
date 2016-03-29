@@ -276,7 +276,7 @@ public class Bib2Lod {
                 .hasArg()
                 .desc("Processing action. Valid actions: " 
                         + StringUtils.join(VALID_ACTIONS, ", ") + ". Can be "
-                        + "invoked more than once to specify multiple actions.")
+                        + "included more than once to specify multiple actions.")
                 .argName("action")
                 .build());
         
