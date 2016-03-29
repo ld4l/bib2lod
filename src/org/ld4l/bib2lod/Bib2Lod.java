@@ -276,7 +276,7 @@ public class Bib2Lod {
                 .hasArg()
                 .desc("Processing action. Valid actions: " 
                         + StringUtils.join(VALID_ACTIONS, ", ") + ". Can be "
-                        + "included more than once to specify multiple actions.")
+                        + "invoked more than once to specify multiple actions.")
                 .argName("action")
                 .build());
         
@@ -306,7 +306,7 @@ public class Bib2Lod {
                 .required()
                 .hasArg()
                 .argName("local_namespace")
-                .desc("Local HTTP namespace for minting and deduping URIs.")
+                .desc("Local HTTP namespace for minting URIs.")
                 .build()); 
 
         options.addOption(Option.builder("ne")
