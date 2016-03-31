@@ -81,9 +81,6 @@ public class MadsAuthorityUriGenerator extends BfResourceUriGenerator {
             // Combining the scheme with the authoritativeLabel will distinguish
             // the mads:Authority URI from the related bf:Authority URI, which 
             // gets the unique key only from the authoritativeLabel.
-            // TODO Should the scheme also be factored in to the bf:Authority
-            // key? If so, just add an arbitrary extra string to the 
-            // mads:Authority key so that it gets a  different local name.
             key = madsScheme.getURI() + "+" + authLabel;
             LOGGER.debug("Got unique key for MADS Authority from MADS scheme " 
                     + "and MADS authoritativeLabel: " + key);

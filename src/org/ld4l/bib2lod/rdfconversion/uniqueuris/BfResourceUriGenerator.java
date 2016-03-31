@@ -13,6 +13,7 @@ import org.apache.jena.rdf.model.Statement;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.ld4l.bib2lod.rdfconversion.BfProperty;
+import org.ld4l.bib2lod.rdfconversion.BfType;
 import org.ld4l.bib2lod.rdfconversion.OntNamespace;
 import org.ld4l.bib2lod.rdfconversion.RdfProcessor;
 import org.ld4l.bib2lod.util.MurmurHash;
@@ -40,6 +41,7 @@ public class BfResourceUriGenerator {
 
     protected final String localNamespace;
     protected Resource resource;
+    protected BfType bfType;
 
     public BfResourceUriGenerator(String localNamespace) {
         this.localNamespace = localNamespace;
@@ -49,11 +51,16 @@ public class BfResourceUriGenerator {
     // override this method. Otherwise, they need only override getUniqueKey().
     // For example, BfTopicUriGenerator assigns full FAST URIS, not just 
     // local names.
-    public String getUniqueUri(Resource resource) {     
-        this.resource = getResourceWithSubModel(resource);
+    public String getUniqueUri(Resource resource, BfType bfType) {   
+        init(resource, bfType);
         LOGGER.debug("Getting unique URI for resource: " + resource);
         String uniqueLocalName = getUniqueLocalName();
         return localNamespace + uniqueLocalName;
+    }
+    
+    protected void init(Resource resource, BfType bfType) {
+        this.bfType = bfType;
+        this.resource = getResourceWithSubModel(resource);        
     }
     
     protected Resource getResourceWithSubModel(Resource resource) {
@@ -154,10 +161,21 @@ public class BfResourceUriGenerator {
     }
     
     protected final String getUniqueLocalName() {
-        String uniqueKey = getUniqueKey();
+        // Prepend the type name to the unique key to prevent collisions of,
+        // e.g., a Person with an Organization; a Work with an Agent or Agent
+        // subtype, or Location. The latter can happen with related works, 
+        // since they have no hashable authorizedAccessPoint. Often they have
+        // only a title, which can collide with entities of other types; e.g,
+        // a Work named "Japan" and a Place named "Japan"; a Work named "Mark
+        // Twain" and a Person named "Mark Twain."
+        String uniqueKey = bfType.name() + getUniqueKey();
         LOGGER.debug("Created unique key " + uniqueKey + " for resource "
                 + resource.getURI());
-        return RdfProcessor.getLocalNameAlphaPrefix() + getHashCode(uniqueKey);
+        String hashedKey = getHashCode(uniqueKey);
+        LOGGER.debug("Hashed key: " + hashedKey);
+        String localName = RdfProcessor.getLocalNameAlphaPrefix() + hashedKey;
+        LOGGER.debug("Unique local name: " + localName);
+        return localName;
     }
  
     // Subclasses should call super.getUniqueKey() if they have failed to 

@@ -108,9 +108,9 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
     }
     
     @Override
-    public String getUniqueUri(Resource originalResource) {
+    public String getUniqueUri(Resource originalResource, BfType bfType) {
         
-        this.resource = getResourceWithSubModel(originalResource);
+        init(originalResource, bfType);
 
         String uri = getUriFromExternalIdentifier();
 
@@ -122,8 +122,8 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
         }
         
         // super.getUniqueLocalName() takes care of the hashing. This 
-        // class overrides super.getUniqueKey which gets the content to be
-        // hashed.
+        // class overrides super.getUniqueLocalName(), which retrieves the 
+        // content to be hashed from getUniqueKey().
         String localName = getUniqueLocalName();
         uri = localNamespace + localName;
 
