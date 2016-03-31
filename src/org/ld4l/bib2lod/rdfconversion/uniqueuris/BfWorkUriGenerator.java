@@ -23,23 +23,18 @@ public class BfWorkUriGenerator extends BfResourceUriGenerator {
     @Override
     protected String getUniqueKey() {
         
-        // All Cornell works and most Stanford and Harvard works have 
+        // All Cornell works and most Stanford and Harvard works have hashable
         // bf:authorizedAccessPoint
-        String key = getKeyFromAuthorizedAccessPoint();
-        
-        // If no bf:authorizedAccessPoint, they usually have a bf:title
-        if (key == null) {
-            key = getKeyFromTitle();
-        }
-        
-        // TODO Do we ever need to use the bf:Title object and its properties?
-        
-        // Fall back to bf:label
-        if (key == null) {
-            key = getKeyFromBfLabel();
-        }
-        
-        // Final fallback to existing local name
+        String key = getKeyFromHashableAuthorizedAccessPoint();
+
+        // Fall back to existing local name. It is not safe to use non-hashable
+        // bf:authorizedAccessPoint, or bf:title or bf:label. That is, these are 
+        // not sufficiently rich to uniquely identify a Work, and we would
+        // reconcile URIs without enough data.
+        // Some Works have madsrdf:authoritativeLabels, which may be sufficient
+        // for unique identification, but according to the MADS ontology these
+        // should only be assigned to madsrdf:Authority, so presumably a 
+        // converter error that shouldn't be relied on.
         if (key == null) {
             key = super.getUniqueKey();
         }
@@ -47,10 +42,8 @@ public class BfWorkUriGenerator extends BfResourceUriGenerator {
         return key;
     }
     
-    private String getKeyFromAuthorizedAccessPoint() {
+    private String getKeyFromHashableAuthorizedAccessPoint() {
 
-        String key = null;
-        
         List<Statement> statements = resource.listProperties(
                 BfProperty.BF_AUTHORIZED_ACCESS_POINT.property()).toList();
         
@@ -58,38 +51,19 @@ public class BfWorkUriGenerator extends BfResourceUriGenerator {
             RDFNode object = s.getObject();
             if (object.isLiteral()) {
                 Literal literal = object.asLiteral();
-                key = literal.getLexicalForm();
+                String key = literal.getLexicalForm();
                 String lang = literal.getLanguage();
                 if (lang.equals("x-bf-hash")) {
                     LOGGER.debug("Got authAccessPoint key " + key
                             + " for resource " + resource.getURI());
+                    // No need to look further, and no need to normalize. 
+                    // NB related works do not have this value.
+                    return key;
                 }
-                // No need to look further, and no need to normalize. 
-                // In fact, in a large data sample there are no Works without
-                // an authorizedAccessPoint value with lang 'x-bf-hash'.
-                return key;
             } 
         }
                    
-        return NacoNormalizer.normalize(key);        
+        return null;     
     }
-    
-    private String getKeyFromTitle() {
-        
-        String key = null;
 
-        List<Statement> statements = resource.listProperties(
-                BfProperty.BF_TITLE.property()).toList();
-        
-        for (Statement s : statements) {
-            RDFNode object = s.getObject();
-            if (object.isLiteral()) {
-                Literal literal = object.asLiteral();
-                key = literal.getLexicalForm();
-                break;
-            } 
-        }
-                   
-        return NacoNormalizer.normalize(key); 
-    }
 }
