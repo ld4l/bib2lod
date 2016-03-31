@@ -5,7 +5,6 @@ import java.time.Instant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,88 +39,51 @@ public class UriGenerator extends RdfProcessor {
     private static Map<BfType, BfResourceUriGenerator> uriGenerators =
             new HashMap<BfType, BfResourceUriGenerator>();
     
-    private static final Map<BfType, Class<?>> TYPES_TO_URI_GENERATORS =
-            // Order is sometimes crucial; e.g., Topics are Authorities, but
-            // must be sent to the BfTopicUriGenerator. A Person is an Agent
-            // and an Authority, but should be sent to BfAuthorityConverter 
-            // with type Person. Everything is a Resource, but even where the
-            // entity gets sent to BfResourceConverter, it must be sent as a 
-            // more specific type. Where ordering is not critical, we order 
-            // roughly by frequency.
-            new LinkedHashMap<BfType, Class<?>>();
+    private static final Map<BfType, Class<?>> URI_GENERATORS_BY_TYPE =
+            new HashMap<BfType, Class<?>>();
     static {
-        
         // Types that use BfResourceUriGenerator fall into two categories:
         // (1) They are unique resources, such as Providers and Titles, 
         // that are not reused. (2) BfResourceUriGenerator is a placeholder
         // until code for the specific type can be written.
-        TYPES_TO_URI_GENERATORS.put(
-                BfType.BF_INSTANCE, BfInstanceUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_WORK,  BfWorkUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_HELD_ITEM, 
-                BfHeldItemUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_TITLE, 
-                // BfTitleUriGenerator.class);
-                BfResourceUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_TOPIC, BfTopicUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_PERSON,
-                BfAuthorityUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_ORGANIZATION,
-                BfAuthorityUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_FAMILY,
-                BfAuthorityUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_IDENTIFIER, 
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_ANNOTATION, 
+                // BfAnnotationUriGenerator.class); 
                 BfResourceUriGenerator.class);
         
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_JURISDICTION,
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_AUTHORITY,
                 BfAuthorityUriGenerator.class);
 
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_MEETING,
-                BfAuthorityUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(
-                BfType.BF_PLACE, BfResourceUriGenerator.class);
-
-        TYPES_TO_URI_GENERATORS.put(
-                BfType.BF_TEMPORAL, BfResourceUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_AGENT,
-                BfAuthorityUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_AUTHORITY,
-                BfAuthorityUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.MADSRDF_AUTHORITY, 
-                MadsAuthorityUriGenerator.class); 
-
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_EVENT, 
-                BfResourceUriGenerator.class);
- 
-        TYPES_TO_URI_GENERATORS.put(
-                BfType.BF_LANGUAGE, BfResourceUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_ANNOTATION, 
-                BfResourceUriGenerator.class);
-        
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_CATEGORY, 
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_CATEGORY, 
                 // BfCategoryUriGenerator.class);
                 BfResourceUriGenerator.class);
         
-        TYPES_TO_URI_GENERATORS.put(BfType.BF_CLASSIFICATION, 
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_CLASSIFICATION, 
                 // BfClassificationUriGenerator.class);
                 BfResourceUriGenerator.class);
         
-        TYPES_TO_URI_GENERATORS.put(
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_HELD_ITEM, 
+                BfHeldItemUriGenerator.class);
+       
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_IDENTIFIER, 
+                // BfIdentifierUriGenerator.class);
+                BfResourceUriGenerator.class);
+        
+        URI_GENERATORS_BY_TYPE.put(
+                BfType.BF_INSTANCE, BfInstanceUriGenerator.class);
+
+        URI_GENERATORS_BY_TYPE.put(
                 BfType.BF_RESOURCE, BfResourceUriGenerator.class);
- 
+        
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_TITLE, 
+                // BfTitleUriGenerator.class);
+                BfResourceUriGenerator.class);
+        
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_TOPIC, BfTopicUriGenerator.class);
+
+        URI_GENERATORS_BY_TYPE.put(BfType.BF_WORK,  BfWorkUriGenerator.class);
+        
+        URI_GENERATORS_BY_TYPE.put(BfType.MADSRDF_AUTHORITY, 
+                MadsAuthorityUriGenerator.class);       
     }
 
     public UriGenerator(String localNamespace, String inputDir, 
@@ -136,7 +98,7 @@ public class UriGenerator extends RdfProcessor {
                 new HashMap<Class<?>, BfResourceUriGenerator>();
         
         for (Map.Entry<BfType, Class<?>> entry : 
-                TYPES_TO_URI_GENERATORS.entrySet()) {
+                URI_GENERATORS_BY_TYPE.entrySet()) {
             
             BfType bfType = entry.getKey();
             Class<?> generatorClass = entry.getValue();
@@ -328,11 +290,10 @@ public class UriGenerator extends RdfProcessor {
         // same as we do now with "authority". In fact, we won't need to 
         // use "authority" explicitly, it will just be the same as the others.
         // Keep instance URIs the same for now, so that usage data still works.
-        BfType bfType = getTypeForGenerator(resource);
         
-        BfResourceUriGenerator uriGenerator = uriGenerators.get(bfType);
+        BfResourceUriGenerator uriGenerator = getUriGeneratorByType(resource);
 
-        String uniqueUri = uriGenerator.getUniqueUri(resource, bfType);
+        String uniqueUri = uriGenerator.getUniqueUri(resource);
         
         // SIDE EFFECT
         // For instances, we need to get the local identifier, which the
@@ -345,6 +306,8 @@ public class UriGenerator extends RdfProcessor {
         // model has the new URI.
         if (uriGenerator instanceof BfInstanceUriGenerator) {
             Model model = ((BfInstanceUriGenerator) uriGenerator)   
+                    // Could use uriGenerator.resource rather than passing 
+                    // resource - doesn't the generator still have the resource?
                     .getLocalIdentifier(resource, uniqueUri);
             outputModel.add(model); 
             model.close();
@@ -376,31 +339,45 @@ public class UriGenerator extends RdfProcessor {
         return bnode;
     }
 
-    // Get the type of the entity that is used to determine the URI generator
-    // type.
-    private BfType getTypeForGenerator(Resource resource) {
-
+    private BfResourceUriGenerator getUriGeneratorByType(Resource resource) {
+            
         // Get the BfTypes for this resource
         List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
         List<BfType> types = new ArrayList<BfType>();
-        
-        if (types.isEmpty()) {
-            return BfType.BF_RESOURCE;          
-        }
-        
         for (Statement stmt : typeStmts) {
             Resource type = stmt.getResource();
             types.add(BF_TYPES_FOR_ONT_CLASSES.get(type));
         }
         
-        for ( BfType bfType : TYPES_TO_URI_GENERATORS.keySet()) {
-            if (types.contains(bfType)) {
-                return bfType;
-            }
+        BfResourceUriGenerator uriGenerator;
+
+        if (types.contains(BfType.BF_TOPIC)) {
+            uriGenerator = uriGenerators.get(BfType.BF_TOPIC);
+        } else if (BfType.isAuthority(types)) {  
+            uriGenerator = uriGenerators.get(BfType.BF_AUTHORITY);
+        } else if (types.contains(BfType.BF_HELD_ITEM)) {
+            uriGenerator = uriGenerators.get(BfType.BF_HELD_ITEM);
+        } else if (types.contains(BfType.BF_INSTANCE)) {
+            uriGenerator = uriGenerators.get(BfType.BF_INSTANCE);
+        } else if (types.contains(BfType.BF_WORK)) {
+            uriGenerator = uriGenerators.get(BfType.BF_WORK);
+        } else if (types.contains(BfType.BF_IDENTIFIER)) {
+            uriGenerator = uriGenerators.get(BfType.BF_IDENTIFIER);
+        } else if (types.contains(BfType.BF_ANNOTATION)) {
+            uriGenerator = uriGenerators.get(BfType.BF_ANNOTATION);
+        } else if (types.contains(BfType.MADSRDF_AUTHORITY)) {
+            uriGenerator = uriGenerators.get(BfType.MADSRDF_AUTHORITY);
+        } else if (types.contains(BfType.BF_CLASSIFICATION)) {
+            uriGenerator = uriGenerators.get(BfType.BF_CLASSIFICATION);
+        } else if (types.contains(BfType.BF_TITLE)) {
+            uriGenerator = uriGenerators.get(BfType.BF_TITLE);          
+        } else if (types.contains(BfType.BF_CATEGORY)) {
+            uriGenerator = uriGenerators.get(BfType.BF_CATEGORY); 
+        } else {
+            uriGenerator = uriGenerators.get(BfType.BF_RESOURCE);
         }
         
-        return BfType.BF_RESOURCE;      
-        
+        return uriGenerator; 
     }
 
 }
