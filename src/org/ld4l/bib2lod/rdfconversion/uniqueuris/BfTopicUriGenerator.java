@@ -121,9 +121,8 @@ public class BfTopicUriGenerator extends BfResourceUriGenerator {
             return uri;
         }
         
-        // super.getUniqueLocalName() takes care of the hashing. This 
-        // class overrides super.getUniqueLocalName(), which retrieves the 
-        // content to be hashed from getUniqueKey().
+        // super.getUniqueLocalName() takes care of the hashing, and also adds
+        // the type name to prevent URI clashes across types.
         String localName = getUniqueLocalName();
         uri = localNamespace + localName;
 
