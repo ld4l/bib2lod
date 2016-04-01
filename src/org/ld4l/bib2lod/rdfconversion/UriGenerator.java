@@ -15,6 +15,7 @@ import org.apache.jena.rdf.model.ModelFactory;
 import org.apache.jena.rdf.model.RDFNode;
 import org.apache.jena.rdf.model.Resource;
 import org.apache.jena.rdf.model.Statement;
+import org.apache.jena.rdf.model.StmtIterator;
 import org.apache.jena.util.ResourceUtils;
 import org.apache.jena.vocabulary.RDF;
 import org.apache.logging.log4j.LogManager;
@@ -370,18 +371,19 @@ public class UriGenerator extends RdfProcessor {
     private BfType getTypeForGenerator(Resource resource) {
 
         // Get the BfTypes for this resource
-        List<Statement> typeStmts = resource.listProperties(RDF.type).toList();
+        StmtIterator typeStmts = resource.listProperties(RDF.type);
+        
+        if (!typeStmts.hasNext()) {
+            return BfType.BF_RESOURCE;
+        }
+
         List<BfType> types = new ArrayList<BfType>();
         
-        if (types.isEmpty()) {
-            return BfType.BF_RESOURCE;          
-        }
-        
-        for (Statement stmt : typeStmts) {
-            Resource type = stmt.getResource();
+        while (typeStmts.hasNext()) {
+            Resource type = typeStmts.nextStatement().getResource();
             types.add(BF_TYPES_FOR_ONT_CLASSES.get(type));
         }
-        
+                
         for ( BfType bfType : TYPES_TO_URI_GENERATORS.keySet()) {
             if (types.contains(bfType)) {
                 return bfType;
