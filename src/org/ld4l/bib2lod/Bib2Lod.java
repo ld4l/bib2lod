@@ -215,6 +215,7 @@ public class Bib2Lod {
 
         String[] schemes = {"http"};
         UrlValidator urlValidator = new UrlValidator(schemes);
+        // Caution: doesn't accept URLs beginning with "http://localhost:8080"
         if (!urlValidator.isValid(namespace)) {
             LOGGER.fatal("Valid HTTP namespace required.");
             return false;
