@@ -131,11 +131,7 @@ public class BfTitleConverter extends BfResourceConverter {
         
         Literal labelLiteral = getNormalizedLabel();
         
-        // Title with no label; anomalous, but exists.
-        // **** This is wrong; there can be titles with a titleValue but no
-        // label. If labelLiteral is null, look for a titleValue. Or maybe
-        // look for the titleValue first. Anyway, get the title value from
-        // whichever one is available.
+        // Title with no label or titleValue. Not sure if it exists.
         if (labelLiteral == null) {
             return;
         }
@@ -255,8 +251,14 @@ public class BfTitleConverter extends BfResourceConverter {
     // Add the normalized label to the Title
     private Literal getNormalizedLabel() {
   
-        Statement stmt = subject.getProperty(BfProperty.BF_LABEL.property());
+        Statement stmt = null;
+        
+        stmt = subject.getProperty(BfProperty.BF_LABEL.property());
 
+        if (stmt == null) {
+            stmt = subject.getProperty(BfProperty.BF_TITLE_VALUE.property());
+        }
+        
         if (stmt == null) {
             return null;
         }
