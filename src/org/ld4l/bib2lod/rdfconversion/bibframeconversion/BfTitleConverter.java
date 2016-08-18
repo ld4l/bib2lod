@@ -172,6 +172,8 @@ public class BfTitleConverter extends BfResourceConverter {
                     mainTitleElement);
         }       
          
+        // Should be ordered after the MainTitleElement, even if we can't tell
+        // the order of part number and part name
         createTitleElements(BfProperty.BF_SUBTITLE);
         createTitleElements(BfProperty.BF_PART_NUMBER);        
         createTitleElements(BfProperty.BF_PART_TITLE);
@@ -198,6 +200,9 @@ public class BfTitleConverter extends BfResourceConverter {
 
  * We do not have enough information in the Bibframe to order the part numbers 
  * and names correctly. Is this data in the MARC?
+ * 
+ * OR do it when parsing and removing the elements from the main title - we 
+ * know the order then.
  * 
     private void addPrecedenceRelations(List<Resource> titleElements) {
   
